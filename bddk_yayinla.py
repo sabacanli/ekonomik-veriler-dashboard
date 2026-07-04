@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent
 SRC = ROOT / "bddk veri çekme"
 DST = ROOT / "bddk_data"
-KEEP = 6  # her para biriminden repoda tutulacak en güncel dosya sayısı
+KEEP = 1  # her para biriminden repoda tutulacak en güncel dosya sayısı (son hafta)
 
 
 def latest(pattern, n):
