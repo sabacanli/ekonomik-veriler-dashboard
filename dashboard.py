@@ -690,6 +690,7 @@ with st.sidebar:
         "enflasyon": "TÜFE Enflasyon",
         "kredi": "Kredi Faizleri",
         "mevduat": "Mevduat Faizleri",
+        "butce": "Bütçe Dengesi",
     }
 
     selected = st.radio(
@@ -733,6 +734,23 @@ def _km_update_bar(fetch_script, data_file, key):
             )
         else:
             st.warning("Henüz veri çekilmemiş. Yandaki butona tıklayın.")
+
+
+def _try_publish(rel_paths, message):
+    """Verilen dosyaları commit + push etmeyi dener.
+    Yerelde (git kimliği + keychain) çalışır → bulut güncellenir.
+    Bulutta (push yetkisi yok) sessizce başarısız olur → sadece oturum içi yenileme."""
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+    try:
+        subprocess.run(["git", "add", *rel_paths], cwd=str(BASE_DIR),
+                       capture_output=True, timeout=30, env=env)
+        subprocess.run(["git", "commit", "-m", message], cwd=str(BASE_DIR),
+                       capture_output=True, timeout=30, env=env)
+        p = subprocess.run(["git", "push", "origin", "main"], cwd=str(BASE_DIR),
+                           capture_output=True, timeout=90, env=env)
+        return p.returncode == 0
+    except Exception:
+        return False
 
 
 # ══════════════════════════════════════════════════════════
@@ -4108,3 +4126,152 @@ elif selected == "mevduat":
     get_download_button(str(data_file), "📥 Kredi & Mevduat Verisi (.xlsx)")
     st.markdown("**Kaynak:** TCMB EVDS  ·  Akım = yeni açılan mevduat faizi (haftalık), "
                 "Stok = mevcut mevduat faizi (aylık)  ·  Seriler `kredi ve mevduat verileri.xlsx`'ten okunur.")
+
+
+# ══════════════════════════════════════════════════════════
+# BÜTÇE DENGESİ (Merkezi Yönetim)
+# ══════════════════════════════════════════════════════════
+
+elif selected == "butce":
+    st.markdown('<div class="main-header">Merkezi Yönetim Bütçe Dengesi</div>', unsafe_allow_html=True)
+
+    butce_dir = BASE_DIR / "butce"
+    fetch_script = butce_dir / "butce_fetch.py"
+    data_file = butce_dir / "butce.xlsx"
+
+    col_u1, col_u2 = st.columns([1.4, 4])
+    with col_u1:
+        if st.button("🔄 Güncelle (yerel + bulut)", key="butce_update", use_container_width=True):
+            if run_script(str(fetch_script), timeout_sec=120):
+                st.cache_data.clear()
+                if _try_publish(["butce/butce.xlsx"], "Butce verisi guncellendi (otomatik yayin)"):
+                    st.success("Güncellendi ve buluta yayınlandı ✓")
+                else:
+                    st.info("Yerel veri güncellendi. (Buluta yayın yalnızca yerel bilgisayardan yapılır.)")
+    with col_u2:
+        if data_file.exists():
+            st.markdown(f'<div class="update-info">Son güncelleme: {get_file_mod_time(data_file)}</div>',
+                        unsafe_allow_html=True)
+        else:
+            st.warning("Henüz veri çekilmemiş. Güncelle'ye tıklayın.")
+
+    if not data_file.exists():
+        st.stop()
+
+    @st.cache_data
+    def load_butce(path):
+        d = pd.read_excel(path, sheet_name="Aylik")
+        d["tarih"] = pd.to_datetime(d["tarih"], errors="coerce")
+        return d.dropna(subset=["tarih"]).sort_values("tarih").reset_index(drop=True)
+
+    b = load_butce(str(data_file))
+    if b.empty:
+        st.warning("Veri boş.")
+        st.stop()
+
+    AY = {1: "Ocak", 2: "Şubat", 3: "Mart", 4: "Nisan", 5: "Mayıs", 6: "Haziran",
+          7: "Temmuz", 8: "Ağustos", 9: "Eylül", 10: "Ekim", 11: "Kasım", 12: "Aralık"}
+    AY_KISA = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]
+    last = b.iloc[-1]
+    cy, cm = int(last["yil"]), int(last["ay"])
+    son_label = f"{AY[cm]} {cy}"
+
+    # Milyon TL -> Milyar TL, Türkçe 1 ondalık
+    def _mr(v):
+        return "—" if pd.isna(v) else f"{v/1000:,.1f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+    ytd_now = b[(b["yil"] == cy) & (b["ay"] <= cm)]["denge"].sum()
+    ytd_prev = b[(b["yil"] == cy - 1) & (b["ay"] <= cm)]["denge"].sum()
+
+    _yon = "açık" if last["denge"] < 0 else "fazla"
+    st.info(
+        f"🏛️ **{son_label}** ayında merkezi yönetim bütçesi **{_mr(abs(last['denge']))} milyar TL {_yon}** verdi "
+        f"(gelir {_mr(last['gelir'])}, gider {_mr(last['gider'])} milyar TL). "
+        f"Faiz dışı denge **{_mr(last['faiz_disi_denge'])} milyar TL**, faiz gideri {_mr(last['faiz_gideri'])} milyar TL. "
+        f"Yılbaşından beri kümülatif bütçe açığı **{_mr(abs(ytd_now))} milyar TL** — "
+        f"geçen yıl aynı dönemde {_mr(abs(ytd_prev))} milyar TL idi."
+    )
+
+    st.markdown(f"#### {son_label} (Milyar TL)")
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        st.metric("Bütçe Dengesi", _mr(last["denge"]), help="Gelir − Gider. Negatif = açık.")
+    with k2:
+        st.metric("Gelirler", _mr(last["gelir"]))
+    with k3:
+        st.metric("Giderler", _mr(last["gider"]))
+    with k4:
+        st.metric("Faiz Dışı Denge", _mr(last["faiz_disi_denge"]), help="Faiz gideri hariç bütçe dengesi.")
+
+    yr = st.slider("Başlangıç yılı", int(b["yil"].min()), cy, max(int(b["yil"].min()), cy - 6), key="butce_yr")
+    bp = b[b["yil"] >= yr].copy()
+
+    # Aylık bütçe dengesi
+    st.subheader("Aylık Bütçe Dengesi (Milyar TL)")
+    bp["denge_mia"] = bp["denge"] / 1000
+    bp["durum"] = bp["denge_mia"].apply(lambda v: "Fazla" if v >= 0 else "Açık")
+    figd = px.bar(bp, x="tarih", y="denge_mia", color="durum",
+                  color_discrete_map={"Açık": "#FF5A5F", "Fazla": "#26C281"},
+                  labels={"tarih": "", "denge_mia": "Milyar TL", "durum": ""})
+    figd.update_traces(hovertemplate="%{x|%m.%Y}<br>%{y:.1f} milyar TL<extra></extra>")
+    figd.update_layout(height=380, separators=",.", legend_title_text="")
+    styled_chart(figd)
+
+    # Yılbaşından beri kümülatif denge (yıl karşılaştırması)
+    st.subheader("Yılbaşından Beri Kümülatif Bütçe Dengesi (Milyar TL)")
+    _yrs = sorted([int(y) for y in b["yil"].unique() if y >= cy - 4])
+    crows = []
+    for y in _yrs:
+        yd = b[b["yil"] == y].sort_values("ay")
+        cum = (yd["denge"].cumsum() / 1000).tolist()
+        for a, c in zip(yd["ay"].tolist(), cum):
+            crows.append({"Ay": int(a), "Yıl": str(y), "Kümülatif": c})
+    cdf = pd.DataFrame(crows)
+    figc = px.line(cdf, x="Ay", y="Kümülatif", color="Yıl", markers=True,
+                   labels={"Kümülatif": "Milyar TL"})
+    figc.update_traces(hovertemplate="%{y:.1f} milyar TL<extra></extra>")
+    figc.update_layout(height=380, separators=",.", legend_title_text="")
+    figc.update_xaxes(tickmode="array", tickvals=list(range(1, 13)), ticktext=AY_KISA)
+    styled_chart(figc)
+
+    # Gelir vs Gider
+    st.subheader("Gelir vs Gider (Aylık, Milyar TL)")
+    gg = bp[["tarih", "gelir", "gider"]].copy()
+    gg["Gelir"] = gg["gelir"] / 1000
+    gg["Gider"] = gg["gider"] / 1000
+    glong = gg[["tarih", "Gelir", "Gider"]].melt("tarih", var_name="Kalem", value_name="Milyar TL")
+    figg = px.line(glong, x="tarih", y="Milyar TL", color="Kalem",
+                   color_discrete_map={"Gelir": "#26C281", "Gider": "#FF9E1B"}, labels={"tarih": ""})
+    figg.update_traces(hovertemplate="%{x|%m.%Y}<br>%{y:.1f}<extra></extra>")
+    figg.update_layout(height=340, separators=",.", legend_title_text="")
+    styled_chart(figg)
+
+    # Vergi kompozisyonu
+    if "dolaysiz_vergi" in b.columns and "dolayli_vergi" in b.columns:
+        st.subheader("Vergi Gelirleri Kompozisyonu (Aylık, Milyar TL)")
+        vg = bp[["tarih", "dolaysiz_vergi", "dolayli_vergi"]].copy()
+        vg["Dolaysız Vergiler"] = vg["dolaysiz_vergi"] / 1000
+        vg["Dolaylı Vergiler"] = vg["dolayli_vergi"] / 1000
+        vlong = vg[["tarih", "Dolaysız Vergiler", "Dolaylı Vergiler"]].melt("tarih", var_name="Tür", value_name="Milyar TL")
+        figv = px.area(vlong, x="tarih", y="Milyar TL", color="Tür",
+                       color_discrete_map={"Dolaysız Vergiler": "#4C9AFF", "Dolaylı Vergiler": "#B98AFF"},
+                       labels={"tarih": ""})
+        figv.update_layout(height=320, separators=",.", legend_title_text="")
+        styled_chart(figv)
+
+    # Yıllık özet
+    with st.expander("📋 Yıllık Özet (Milyar TL) — cari yıl kümülatiftir", expanded=False):
+        yt = b.groupby("yil").agg(
+            Gelir=("gelir", "sum"), Gider=("gider", "sum"), Denge=("denge", "sum"),
+            FaizDisi=("faiz_disi_denge", "sum"), Faiz=("faiz_gideri", "sum"),
+        ).reset_index().sort_values("yil", ascending=False)
+        disp = yt.copy()
+        for c in ["Gelir", "Gider", "Denge", "FaizDisi", "Faiz"]:
+            disp[c] = disp[c].apply(_mr)
+        disp["yil"] = disp["yil"].astype(int).astype(str)
+        disp.columns = ["Yıl", "Gelir", "Gider", "Bütçe Dengesi", "Faiz Dışı Denge", "Faiz Gideri"]
+        st.dataframe(disp, hide_index=True, use_container_width=True)
+
+    get_download_button(str(data_file), "📥 Bütçe Verisi (.xlsx)")
+    st.markdown("**Kaynak:** HMB Kamu Finansmanı İstatistikleri → Merkezi Yönetim Bütçe Dengesi ve Finansmanı  ·  "
+                "Birim: Milyon TL (grafiklerde Milyar TL)  ·  Aylık, 2006→bugün.")

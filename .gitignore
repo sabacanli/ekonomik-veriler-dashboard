@@ -21,6 +21,9 @@ ENV/
 # Tarih damgalı yedekler (yeniden üretilebilir)
 cari acik/cari_acik_2*.xlsx
 
+# HMB bütçe ham indirmesi (yeniden üretilebilir; butce.xlsx yeterli)
+butce/butce_kaynak.xls
+
 # BDDK ayrı bir Git projesi + Selenium tabanlı (bulutta çalışmaz) — deploy'a girmez
 bddk veri çekme/
 
