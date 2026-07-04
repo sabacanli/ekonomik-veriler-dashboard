@@ -2997,65 +2997,62 @@ elif selected == "tcmb_alim":
 elif selected == "bddk":
     st.markdown('<div class="main-header">BDDK Bankacılık Verileri</div>', unsafe_allow_html=True)
 
-    bddk_dir = BASE_DIR / "bddk veri çekme"
-    script_tl = bddk_dir / "enhanced_manual_scraper.py"
-    script_usd = bddk_dir / "enhanced_manual_scraperUSD.py"
+    scraper_dir = BASE_DIR / "bddk veri çekme"     # yerel scraper klasörü (Selenium)
+    published_dir = BASE_DIR / "bddk_data"          # buluta yayınlanan kopya (repoda)
+    script_tl = scraper_dir / "enhanced_manual_scraper.py"
+    script_usd = scraper_dir / "enhanced_manual_scraperUSD.py"
+    publish_script = BASE_DIR / "bddk_yayinla.py"
+    is_local = script_tl.exists()                   # scraper varsa yerel sürümdeyiz
 
-    # BDDK veri çekme, tarayıcı otomasyonu (Selenium + Chrome) gerektirir; bu bulut
-    # sürümünde çalışmaz. Scraper dosyaları yoksa (bulut deploy'u) bilgilendirip dur.
-    if not script_tl.exists():
-        st.info(
-            "ℹ️ **BDDK modülü yalnızca yerel sürümde kullanılabilir.**\n\n"
-            "BDDK verileri, BDDK'nın interaktif bülten aracından **tarayıcı otomasyonu "
-            "(Selenium + Chrome)** ile çekiliyor. Streamlit Cloud'da tarayıcı bulunmadığından "
-            "bu işlem bulutta çalışmaz. Diğer tüm modüller (TCMB, Hazine, Cari Açık, Net Rezerv, "
-            "Enflasyon, Kredi, Mevduat) bulutta tam çalışır."
-        )
-        st.stop()
+    # Görüntü kaynağı: yerelde tam scraper klasörü, bulutta yayınlanan snapshot
+    source_dir = scraper_dir if is_local else published_dir
 
     def load_bddk_files():
+        if not source_dir.exists():
+            return []
         return sorted(
-            list(bddk_dir.glob("bddk_*.xlsx")) + list(bddk_dir.glob("bddk_*.xls")),
+            list(source_dir.glob("bddk_*.xlsx")) + list(source_dir.glob("bddk_*.xls")),
             key=lambda x: x.stat().st_mtime, reverse=True,
         )
 
-    st.info(f"BDDK gelişmiş bülteninden haftalık bankacılık sektörü verilerini Excel olarak indirin. "
-            f"Veriler TL ve USD bazında çekilebilir."
-            f"\n\n**Klasör:** `{bddk_dir}`")
-
-    # Güncelleme butonları
-    col_b1, col_b2, col_b3, col_b4 = st.columns([1, 1, 1, 2])
-    with col_b1:
-        run_tl = st.button("🔄 TL Verilerini Çek", key="bddk_tl", use_container_width=True)
-    with col_b2:
-        run_usd = st.button("🔄 USD Verilerini Çek", key="bddk_usd", use_container_width=True)
-    with col_b3:
-        if st.button("📂 Klasörü Aç", key="bddk_open_folder", use_container_width=True):
-            try:
-                subprocess.run(["open", str(bddk_dir)])
-                st.toast("Klasör Finder'da açıldı", icon="📂")
-            except Exception as e:
-                st.error(f"Açılamadı: {e}")
-    with col_b4:
-        st.caption("Selenium + Chrome gerektirir. `pip install --upgrade selenium`")
-
-    # Script çalıştırma + sonuç bildirimi
     new_file_path = None
-    if run_tl or run_usd:
-        files_before = set(f.name for f in load_bddk_files())
-        script_path = str(script_tl) if run_tl else str(script_usd)
-        if run_script(script_path, timeout_sec=600):
-            st.cache_data.clear()
-            files_after = load_bddk_files()
-            new_files = [f for f in files_after if f.name not in files_before]
-            if new_files:
-                new_file_path = new_files[0]
-                st.success(
-                    f"✅ Yeni dosya oluşturuldu: **{new_file_path.name}**\n\n"
-                    f"📂 Konum: `{new_file_path}`"
-                )
 
-    # Mevcut Excel dosyaları (her zaman güncel)
+    if is_local:
+        st.info("BDDK gelişmiş bülteninden haftalık bankacılık verilerini çekin (TL/USD). "
+                "Çektikten sonra **☁️ Buluta Yayınla** ile iş arkadaşlarınızın bulut sürümünde de görünür olur.")
+        col_b1, col_b2, col_b3, col_b4 = st.columns(4)
+        with col_b1:
+            run_tl = st.button("🔄 TL Çek", key="bddk_tl", use_container_width=True)
+        with col_b2:
+            run_usd = st.button("🔄 USD Çek", key="bddk_usd", use_container_width=True)
+        with col_b3:
+            publish = st.button("☁️ Buluta Yayınla", key="bddk_publish", use_container_width=True)
+        with col_b4:
+            if st.button("📂 Klasörü Aç", key="bddk_open_folder", use_container_width=True):
+                try:
+                    subprocess.run(["open", str(scraper_dir)])
+                    st.toast("Klasör açıldı", icon="📂")
+                except Exception as e:
+                    st.error(f"Açılamadı: {e}")
+
+        if run_tl or run_usd:
+            files_before = set(f.name for f in load_bddk_files())
+            if run_script(str(script_tl) if run_tl else str(script_usd), timeout_sec=600):
+                st.cache_data.clear()
+                new_files = [f for f in load_bddk_files() if f.name not in files_before]
+                if new_files:
+                    new_file_path = new_files[0]
+                    st.success(f"✅ Yeni dosya oluşturuldu: **{new_file_path.name}**")
+
+        if publish:
+            if run_script(str(publish_script), timeout_sec=180):
+                st.cache_data.clear()
+                st.success("☁️ Buluta yayınlandı! Bulut sürümü birkaç dakika içinde güncellenecek.")
+    else:
+        st.info("Haftalık BDDK bankacılık verileri (TL/USD). Veriler yerelde çekilip buraya yayınlanır; "
+                "aşağıda en güncel kopya listelenir.")
+
+    # Mevcut Excel dosyaları
     bddk_files = load_bddk_files()
 
     if bddk_files:
