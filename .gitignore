@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Sanal ortamlar (asla repoya girmemeli)
+.venv/
+venv/
+env/
+ENV/
+
+# Streamlit gerçek secrets (API anahtarları) — buluta UI'dan girilir
+.streamlit/secrets.toml
+
+# Excel geçici kilit dosyaları
+~$*.xls*
+
+# Loglar
+*.log
+
+# Tarih damgalı yedekler (yeniden üretilebilir)
+cari acik/cari_acik_2*.xlsx
+
+# BDDK ayrı bir Git projesi + Selenium tabanlı (bulutta çalışmaz) — deploy'a girmez
+bddk veri çekme/
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
