@@ -28,16 +28,12 @@ OUTPUT_DIR = Path(__file__).parent / "output"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 SERIES = {
-    # Yurt Ici Yerlesikler
+    # Yurt Ici Yerlesikler — yalnizca Hisse Senedi + DIBS (Kesin Alim)
     "TP.MKNETHAR.M7":  "Yurt Ici Hisse",
     "TP.MKNETHAR.M8":  "Yurt Ici DIBS",
-    "TP.MKNETHAR.M23": "Yurt Ici Gen.Yon.",
-    "TP.MKNETHAR.M25": "Yurt Ici Banka",
-    # Yurt Disi Yerlesikler
+    # Yurt Disi Yerlesikler — yalnizca Hisse Senedi + DIBS (Kesin Alim)
     "TP.MKNETHAR.M1":  "Yurt Disi Hisse",
     "TP.MKNETHAR.M2":  "Yurt Disi DIBS",
-    "TP.MKNETHAR.M16": "Yurt Disi Gen.Yon.",
-    "TP.MKNETHAR.M18": "Yurt Disi Banka",
 }
 
 plt.rcParams["font.family"] = "sans-serif"
@@ -47,26 +43,43 @@ plt.rcParams["axes.unicode_minus"] = False
 # ── Veri Cekme ──────────────────────────────────────────────
 
 def fetch_all_series(start: str = "01-01-2010") -> dict[str, pd.DataFrame]:
+    """EVDS3 API'sinden requests ile çeker. (Eskiden 'tcmb' paketi kullanılıyordu
+    ama asılı kalabiliyordu; artık tüm seriler tek istekte, timeout'lu çekiliyor.)"""
+    import requests
+    key = os.environ.get("TCMB_API_KEY") or os.environ.get("EVDS_API_KEY", "")
     end = datetime.now().strftime("%d-%m-%Y")
+    url = (f"https://evds3.tcmb.gov.tr/igmevdsms-dis/series={'-'.join(SERIES.keys())}"
+           f"&startDate={start}&endDate={end}&type=json")
+    headers = {"key": key, "User-Agent": "Mozilla/5.0", "Accept": "application/json"}
     all_data = {}
+    try:
+        r = requests.get(url, headers=headers, timeout=45)
+        r.raise_for_status()
+        items = r.json().get("items", [])
+    except Exception as e:
+        print(f"  EVDS HATA: {e}")
+        return all_data
     for code, name in SERIES.items():
-        print(f"  {name} ({code})...", end=" ")
-        try:
-            df = tcmb.read(code, start=start, end=end)
-            if df.empty:
-                print("bos")
+        k = code.replace(".", "_")
+        rows = []
+        for it in items:
+            v = it.get(k)
+            if v in (None, ""):
                 continue
-            col = df.columns[0]
-            df = df.rename(columns={col: "value"})
-            df.index.name = "date"
-            df = df.reset_index()
-            df["date"] = pd.to_datetime(df["date"])
-            df = df.dropna(subset=["value"]).sort_values("date").reset_index(drop=True)
-            df["change"] = df["value"].diff()
-            all_data[code] = df
-            print(f"{len(df)} satir")
-        except Exception as e:
-            print(f"HATA: {e}")
+            t = pd.to_datetime(it.get("Tarih"), format="%d-%m-%Y", errors="coerce")
+            if pd.notna(t):
+                try:
+                    rows.append((t, float(str(v).replace(",", "."))))
+                except (ValueError, TypeError):
+                    pass
+        if not rows:
+            print(f"  {name}: bos")
+            continue
+        df = (pd.DataFrame(rows, columns=["date", "value"])
+              .drop_duplicates("date").sort_values("date").reset_index(drop=True))
+        df["change"] = df["value"].diff()
+        all_data[code] = df
+        print(f"  {name}: {len(df)} satir")
     return all_data
 
 
@@ -207,8 +220,8 @@ def make_cumulative_ts(all_data: dict[str, pd.DataFrame]):
     Yurt Ici ve Yurt Disi ayri ayri 2 grafik.
     """
     groups = {
-        "Yurt Disi": ["TP.MKNETHAR.M1", "TP.MKNETHAR.M2", "TP.MKNETHAR.M16", "TP.MKNETHAR.M18"],
-        "Yurt Ici":  ["TP.MKNETHAR.M7", "TP.MKNETHAR.M8", "TP.MKNETHAR.M23", "TP.MKNETHAR.M25"],
+        "Yurt Disi": ["TP.MKNETHAR.M1", "TP.MKNETHAR.M2"],
+        "Yurt Ici":  ["TP.MKNETHAR.M7", "TP.MKNETHAR.M8"],
     }
 
     for group_name, codes in groups.items():
