@@ -100,7 +100,7 @@ def make_recent_table(all_data: dict[str, pd.DataFrame], n_weeks: int = 5):
                 date_cols.append(d)
             if name not in rows:
                 rows[name] = {}
-            rows[name][d] = row["change"]
+            rows[name][d] = row["value"]  # net degisim degil, EVDS Duzey (seviye)
 
     if not rows:
         return
@@ -125,12 +125,8 @@ def make_recent_table(all_data: dict[str, pd.DataFrame], n_weeks: int = 5):
                 row_colors.append("#FFFFFF")
             else:
                 row_vals.append(f"{val:,.0f}")
-                if val > 0:
-                    row_colors.append("#C8E6C9")  # yesil
-                elif val < 0:
-                    row_colors.append("#FFCDD2")  # kirmizi
-                else:
-                    row_colors.append("#FFFFFF")
+                # Seviye tablosu: negatif pozisyon kirmizi, digerleri notr
+                row_colors.append("#FFCDD2" if val < 0 else "#FFFFFF")
         cell_text.append(row_vals)
         cell_colors.append(row_colors)
 
@@ -153,7 +149,7 @@ def make_recent_table(all_data: dict[str, pd.DataFrame], n_weeks: int = 5):
     for i in range(len(tbl.index)):
         table[i + 1, -1].set_text_props(fontweight="bold")
 
-    ax.set_title(f"Son {n_weeks} Hafta Net Degisim (Milyon USD)", fontsize=13, fontweight="bold", pad=20)
+    ax.set_title(f"Son {n_weeks} Hafta Duzey / Seviye - EVDS (Milyon USD)", fontsize=13, fontweight="bold", pad=20)
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "tablo_son_haftalar.png", dpi=150, bbox_inches="tight")
     plt.close()

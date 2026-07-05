@@ -1063,8 +1063,8 @@ elif selected == "tcmb_stok":
 
     # Tab 1: Son hafta tablosu
     with tab1:
-        st.subheader("Son 5 Hafta Net Değişim (Milyon USD)")
-        show_image_with_download(str(tablo_path), "Son 5 Hafta Net Değişim Tablosu")
+        st.subheader("Son 5 Hafta Düzey / Seviye — EVDS (Milyon USD)")
+        show_image_with_download(str(tablo_path), "Son 5 Hafta Düzey Tablosu")
 
     # Tab 2: Histogram
     with tab2:
