@@ -769,8 +769,11 @@ if selected == "ana_sayfa":
     _HOME_AY = {1: "Ocak", 2: "Şubat", 3: "Mart", 4: "Nisan", 5: "Mayıs", 6: "Haziran",
                 7: "Temmuz", 8: "Ağustos", 9: "Eylül", 10: "Ekim", 11: "Kasım", 12: "Aralık"}
 
-    def _ht(v, d=1):
-        return "—" if pd.isna(v) else f"{v:,.{d}f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+    def _ht(v, d=1, sign=False):
+        if pd.isna(v):
+            return "—"
+        fmt = f"{{:+,.{d}f}}" if sign else f"{{:,.{d}f}}"
+        return fmt.format(v).replace(",", "\x00").replace(".", ",").replace("\x00", ".")
 
     @st.cache_data
     def home_summaries(_bust):
@@ -830,14 +833,18 @@ if selected == "ana_sayfa":
         try:
             import glob as _g
             csvs = sorted(_g.glob(str(BASE_DIR / "tcmb haftalık stok" / "output" / "raw_Yurt_*.csv")))
-            tot, ld = 0.0, None
+            tot, prev, ld = 0.0, 0.0, None
             for cc in csvs:
                 d = pd.read_csv(cc)
                 if len(d):
                     tot += float(d.iloc[-1]["value"]); ld = ld or d.iloc[-1]["date"]
+                    if len(d) >= 2:
+                        prev += float(d.iloc[-2]["value"])
             if csvs:
+                _chg = (tot - prev) / 1000
                 out.append(("📊 TCMB Haftalık Stok",
-                    f"{ld} itibarıyla yabancı yerleşiklerin menkul kıymet stoku toplam <b>{_ht(tot/1000)} milyar USD</b>."))
+                    f"{ld} itibarıyla yabancı yerleşiklerin menkul kıymet stoku toplam <b>{_ht(tot/1000)} milyar USD</b> "
+                    f"— haftalık değişim <b>{_ht(_chg, 1, sign=True)} milyar USD</b>."))
         except Exception:
             pass
         return out
