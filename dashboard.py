@@ -906,9 +906,8 @@ elif selected == "tcmb_stok":
             return None
         summary_parts = []
         last_date = None
-        yd_total = 0
-        yi_total = 0
-        yd_frames, yi_frames = [], []  # dönemsel hesap için tarih-hizalı seviye serileri
+        yd_total = yi_total = 0.0
+        yd_chg = yi_chg = 0.0
         for csv_path in csvs:
             df = pd.read_csv(csv_path)
             if df.empty:
@@ -922,74 +921,27 @@ elif selected == "tcmb_stok":
                 yd_total += last_val
             else:
                 yi_total += last_val
-            # Dönemsel seri (tarih indeksli stok seviyesi)
-            _s = df[["date", "value"]].copy()
-            _s["date"] = pd.to_datetime(_s["date"], errors="coerce")
-            _s = _s.dropna(subset=["date"]).set_index("date")["value"]
-            (yd_frames if is_yd else yi_frames).append(_s)
-            # Haftalık değişim
+            # Haftalık değişim (seviye farkı)
             if len(df) >= 2:
-                prev_val = df.iloc[-2]["value"]
-                change = last_val - prev_val
-                pct = (change / abs(prev_val) * 100) if prev_val != 0 else 0
+                change = last_val - df.iloc[-2]["value"]
+                if is_yd:
+                    yd_chg += change
+                else:
+                    yi_chg += change
                 clean_name = (fname.replace("raw_", "")
                               .replace("Yurt_Disi", "Yurt Dışı")
                               .replace("Yurt_Ici", "Yurt İçi")
                               .replace("_", " - "))
-                summary_parts.append(f"{clean_name}: {last_val:,.0f} Milyon USD (haftalık: {change:+,.0f}, %{pct:+.1f})")
+                summary_parts.append(f"{clean_name}: {last_val:,.0f} Milyon USD (haftalık {change:+,.0f})")
         genel = yd_total + yi_total
+        genel_chg = yd_chg + yi_chg
 
-        # ── Dönemsel net değişim (value = stok seviyesi; değişim = uç seviyelerin farkı) ──
-        def _level_series(frames):
-            if not frames:
-                return None
-            return pd.concat(frames, axis=1).sort_index().sum(axis=1)
-
-        def _period(s):
-            """Stok seviyesi serisinden: yılbaşından beri, geçen yıl aynı dönem,
-            geçen yıl tüm yıl net değişimlerini ve ilgili seviyeleri çıkarır."""
-            if s is None or s.dropna().empty:
-                return None
-            s = s.dropna()
-            latest_dt = s.index[-1]
-            cy = int(latest_dt.year)
-
-            def last_of_year(y):
-                sub = s[s.index.year == y]
-                return float(sub.iloc[-1]) if len(sub) else None
-
-            end_p = last_of_year(cy - 1)    # geçen yıl sonu (= bu yılın başı)
-            end_pp = last_of_year(cy - 2)   # iki yıl önce sonu
-            # Geçen yıl, takvimsel olarak bugüne en yakın hafta
-            subp = s[s.index.year == cy - 1]
-            same_lvl = same_dt = None
-            if len(subp):
-                target = pd.Timestamp(year=cy - 1, month=latest_dt.month, day=latest_dt.day)
-                nearest = subp.index[(subp.index - target).map(lambda x: abs(x.days)).argmin()]
-                same_dt, same_lvl = nearest, float(subp.loc[nearest])
-            cur = float(s.iloc[-1])
-            return {
-                "cur_year": cy,
-                "latest": cur,
-                "prev_end": end_p,
-                "prevprev_end": end_pp,
-                "ytd": (cur - end_p) if end_p is not None else None,
-                "prev_full": (end_p - end_pp) if (end_p is not None and end_pp is not None) else None,
-                "same_lvl": same_lvl,
-                "same_dt": same_dt.strftime("%d.%m.%Y") if same_dt is not None else None,
-                "same_chg": (same_lvl - end_pp) if (same_lvl is not None and end_pp is not None) else None,
-            }
-
-        period = {
-            "genel": _period(_level_series(yd_frames + yi_frames)),
-            "yi": _period(_level_series(yi_frames)),
-            "yd": _period(_level_series(yd_frames)),
-        }
-
-        header = (f"TCMB haftalık menkul kıymet stoku {last_date} itibarıyla toplam {genel:,.0f} milyon USD'dir. "
-                  f"Yurt içi yerleşikler: {yi_total:,.0f} Milyon USD, Yurt dışı yerleşikler: {yd_total:,.0f} Milyon USD.")
+        header = (f"TCMB haftalık menkul kıymet stoku {last_date} itibarıyla toplam "
+                  f"{genel:,.0f} milyon USD (haftalık değişim {genel_chg:+,.0f} milyon USD). "
+                  f"Yurt içi: {yi_total:,.0f}, Yurt dışı: {yd_total:,.0f} milyon USD.")
         return {"header": header, "details": summary_parts, "last_date": last_date,
-                "yd_total": yd_total, "yi_total": yi_total, "genel": genel, "period": period}
+                "yd_total": yd_total, "yi_total": yi_total, "genel": genel,
+                "genel_chg": genel_chg, "yi_chg": yi_chg, "yd_chg": yd_chg}
 
     # Cache key: güncel raw_ CSV dosyalarının en son değişiklik zamanı.
     # (Eski "Yurt_*.csv" kullanılırsa mtime hiç değişmez ve özet hep eski kalır.)
@@ -1000,54 +952,15 @@ elif selected == "tcmb_stok":
         st.info(f"📋 **Özet:** {stok_ozet['header']}")
         cm1, cm2, cm3 = st.columns(3)
         with cm1:
-            st.metric("Genel Toplam (Milyon USD)", f"{stok_ozet['genel']:,.0f}")
+            st.metric("Genel Toplam (Milyon USD)", f"{stok_ozet['genel']:,.0f}",
+                      f"{stok_ozet['genel_chg']:+,.0f}")
         with cm2:
-            st.metric("Yurt İçi (Milyon USD)", f"{stok_ozet['yi_total']:,.0f}")
+            st.metric("Yurt İçi (Milyon USD)", f"{stok_ozet['yi_total']:,.0f}",
+                      f"{stok_ozet['yi_chg']:+,.0f}")
         with cm3:
-            st.metric("Yurt Dışı (Milyon USD)", f"{stok_ozet['yd_total']:,.0f}")
-
-        # ── Dönemsel Net Değişim Karşılaştırması ──
-        _per = (stok_ozet.get("period") or {}).get("genel")
-        if _per and _per.get("ytd") is not None:
-            cy = _per["cur_year"]
-            st.markdown(f"**📅 Dönemsel Net Değişim — Genel Toplam (Milyon USD)**")
-            pc1, pc2, pc3 = st.columns(3)
-            with pc1:
-                st.metric(
-                    f"{cy} Yılbaşından Beri",
-                    f"{_per['latest']:,.0f}",
-                    f"{_per['ytd']:+,.0f}",
-                    help=f"{cy-1} sonu {_per['prev_end']:,.0f} → bugün {_per['latest']:,.0f} "
-                         f"(yılbaşından beri net değişim).",
-                )
-            with pc2:
-                if _per.get("same_chg") is not None:
-                    st.metric(
-                        f"{cy-1} Aynı Dönem",
-                        f"{_per['same_lvl']:,.0f}",
-                        f"{_per['same_chg']:+,.0f}",
-                        help=f"Geçen yıl {_per['same_dt']} itibarıyla stok seviyesi "
-                             f"ve o güne kadarki yılbaşından net değişim "
-                             f"({cy} ile aynı dönem).",
-                    )
-            with pc3:
-                if _per.get("prev_full") is not None:
-                    st.metric(
-                        f"{cy-1} Tüm Yıl",
-                        f"{_per['prev_end']:,.0f}",
-                        f"{_per['prev_full']:+,.0f}",
-                        help=f"{cy-2} sonu {_per['prevprev_end']:,.0f} → {cy-1} sonu "
-                             f"{_per['prev_end']:,.0f} ({cy-1} tüm yıl net değişim).",
-                    )
-            # Yurt İçi / Yurt Dışı dönemsel kırılım
-            _yi, _yd = stok_ozet["period"].get("yi"), stok_ozet["period"].get("yd")
-            if _yd and _yd.get("ytd") is not None and _yi and _yi.get("ytd") is not None:
-                st.caption(
-                    f"**Yurt Dışı** — {cy} yılbaşından beri **{_yd['ytd']:+,.0f}**, "
-                    f"{cy-1} aynı dönem {_yd['same_chg']:+,.0f}, {cy-1} tüm yıl {_yd['prev_full']:+,.0f}  ·  "
-                    f"**Yurt İçi** — {cy} yılbaşından beri **{_yi['ytd']:+,.0f}**, "
-                    f"{cy-1} aynı dönem {_yi['same_chg']:+,.0f}, {cy-1} tüm yıl {_yi['prev_full']:+,.0f}"
-                )
+            st.metric("Yurt Dışı (Milyon USD)", f"{stok_ozet['yd_total']:,.0f}",
+                      f"{stok_ozet['yd_chg']:+,.0f}")
+        st.caption("Δ = son haftaya göre değişim (Milyon USD)")
 
         with st.expander("📊 Kalem Bazlı Haftalık Değişimler", expanded=False):
             for d in stok_ozet["details"]:
