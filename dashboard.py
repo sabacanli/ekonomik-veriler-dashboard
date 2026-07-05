@@ -765,83 +765,100 @@ if selected == "ana_sayfa":
         TCMB, Hazine ve BDDK verilerini analiz edin, raporlar oluşturun.</div>
     </div>""", unsafe_allow_html=True)
 
-    # Stats
-    tcmb_stok_dir = BASE_DIR / "tcmb haftalık stok" / "output"
-    csv_files = list(tcmb_stok_dir.glob("raw_*.csv")) if tcmb_stok_dir.exists() else []
+    # ── Modül bazlı güncel analiz kartları (canlı, veriden üretilir) ──
+    _HOME_AY = {1: "Ocak", 2: "Şubat", 3: "Mart", 4: "Nisan", 5: "Mayıs", 6: "Haziran",
+                7: "Temmuz", 8: "Ağustos", 9: "Eylül", 10: "Ekim", 11: "Kasım", 12: "Aralık"}
 
-    hazine_file = BASE_DIR / "hazine ihale " / "hazine_ihale_verileri.xlsx"
-    hazine_rows = 0
-    if hazine_file.exists():
+    def _ht(v, d=1):
+        return "—" if pd.isna(v) else f"{v:,.{d}f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+    @st.cache_data
+    def home_summaries(_bust):
+        out = []
         try:
-            df_h = pd.read_excel(hazine_file, nrows=5000)
-            hazine_rows = len(df_h)
+            g = pd.read_excel(BASE_DIR / "enflasyon" / "enflasyon.xlsx", sheet_name="Genel")
+            g["tarih"] = pd.to_datetime(g["tarih"]); L = g.iloc[-1]
+            out.append(("📈 TÜFE Enflasyon",
+                f"{_HOME_AY[L['tarih'].month]} {L['tarih'].year} itibarıyla yıllık enflasyon "
+                f"<b>%{_ht(L['yillik'], 2)}</b>, aylık <b>%{_ht(L['aylik'], 2)}</b>; "
+                f"yılbaşından beri %{_ht(L['ytd'], 2)}."))
         except Exception:
             pass
-
-    tcmb_alim_file = BASE_DIR / "tcmb dogrudan alım" / "tcmb_dogrudan_alim.xlsx"
-    tcmb_alim_rows = 0
-    if tcmb_alim_file.exists():
         try:
-            df_t = pd.read_excel(tcmb_alim_file, nrows=5000)
-            tcmb_alim_rows = len(df_t)
+            b = pd.read_excel(BASE_DIR / "butce" / "butce.xlsx", sheet_name="Aylik")
+            b["tarih"] = pd.to_datetime(b["tarih"]); b = b.sort_values("tarih"); L = b.iloc[-1]
+            cy, cm = int(L["yil"]), int(L["ay"])
+            ytd = b[(b.yil == cy) & (b.ay <= cm)]["denge"].sum()
+            yon = "açık" if L["denge"] < 0 else "fazla"
+            out.append(("🏛️ Bütçe Dengesi",
+                f"{_HOME_AY[cm]} {cy} ayında merkezi yönetim bütçesi <b>{_ht(abs(L['denge'])/1000)} milyar TL {yon}</b> verdi; "
+                f"yılbaşından beri kümülatif açık <b>{_ht(abs(ytd)/1000)} milyar TL</b>."))
         except Exception:
             pass
+        try:
+            r = pd.read_excel(BASE_DIR / "net rezerv" / "net_rezerv.xlsx")
+            r["tarih"] = pd.to_datetime(r["tarih"]); L = r.iloc[-1]
+            out.append(("💵 TCMB Net Rezerv",
+                f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla net rezerv (swap hariç) <b>{_ht(L['net_rezerv_swap_haric']/1000)} milyar USD</b>, "
+                f"brüt dış varlıklar {_ht(L['dis_varliklar']/1000)} milyar USD."))
+        except Exception:
+            pass
+        try:
+            c = pd.read_excel(BASE_DIR / "cari acik" / "cari_acik_son.xlsx")
+            col = [x for x in c.columns if "Cari" in str(x)][0]
+            L = c.iloc[-1]
+            out.append(("🌍 Cari Denge",
+                f"Son dönem ({L['Tarih']}) cari işlemler dengesi <b>{_ht(L[col], 0)} milyon USD</b>."))
+        except Exception:
+            pass
+        try:
+            ka = pd.read_excel(BASE_DIR / "kredi mevduat" / "kredi_mevduat.xlsx", sheet_name="Kredi_Akim")
+            ka["tarih"] = pd.to_datetime(ka["tarih"]); L = ka.iloc[-1]
+            out.append(("🏦 Kredi Faizleri",
+                f"Yeni kredi faizleri ({L['tarih'].strftime('%d.%m.%Y')}): İhtiyaç <b>%{_ht(L.get('İhtiyaç Kredisi'), 2)}</b>, "
+                f"Konut %{_ht(L.get('Konut Kredisi'), 2)}, Ticari %{_ht(L.get('Ticari Krediler'), 2)}."))
+        except Exception:
+            pass
+        try:
+            ma = pd.read_excel(BASE_DIR / "kredi mevduat" / "kredi_mevduat.xlsx", sheet_name="Mevduat_Akim")
+            ma["tarih"] = pd.to_datetime(ma["tarih"]); L = ma.iloc[-1]
+            out.append(("💰 Mevduat Faizleri",
+                f"TL mevduat faizi toplam <b>%{_ht(L.get('Toplam'), 2)}</b>; 3 ay %{_ht(L.get('3 Aya Kadar Vadeli'), 2)}, "
+                f"1 yıl %{_ht(L.get('1 Yıla Kadar Vadeli'), 2)} ({L['tarih'].strftime('%d.%m.%Y')})."))
+        except Exception:
+            pass
+        try:
+            import glob as _g
+            csvs = sorted(_g.glob(str(BASE_DIR / "tcmb haftalık stok" / "output" / "raw_Yurt_*.csv")))
+            tot, ld = 0.0, None
+            for cc in csvs:
+                d = pd.read_csv(cc)
+                if len(d):
+                    tot += float(d.iloc[-1]["value"]); ld = ld or d.iloc[-1]["date"]
+            if csvs:
+                out.append(("📊 TCMB Haftalık Stok",
+                    f"{ld} itibarıyla yabancı yerleşiklerin menkul kıymet stoku toplam <b>{_ht(tot/1000)} milyar USD</b>."))
+        except Exception:
+            pass
+        return out
 
-    bddk_dir = BASE_DIR / "bddk veri çekme"
-    bddk_files = (list(bddk_dir.glob("bddk_*.xlsx")) + list(bddk_dir.glob("bddk_*.xls"))) if bddk_dir.exists() else []
+    _paths = [BASE_DIR / "enflasyon" / "enflasyon.xlsx", BASE_DIR / "butce" / "butce.xlsx",
+              BASE_DIR / "net rezerv" / "net_rezerv.xlsx", BASE_DIR / "kredi mevduat" / "kredi_mevduat.xlsx",
+              BASE_DIR / "cari acik" / "cari_acik_son.xlsx"]
+    _bust = "|".join(str(int(p.stat().st_mtime)) for p in _paths if p.exists())
+    cards = home_summaries(_bust)
 
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.markdown(f"""<div class="stat-card">
-            <div class="stat-value">{len(csv_files)}</div>
-            <div class="stat-label">TCMB Stok Serileri</div>
-        </div>""", unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"""<div class="stat-card">
-            <div class="stat-value">{hazine_rows:,}</div>
-            <div class="stat-label">Hazine İhale Kayıtları</div>
-        </div>""", unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"""<div class="stat-card">
-            <div class="stat-value">{tcmb_alim_rows:,}</div>
-            <div class="stat-label">TCMB Doğrudan Alım</div>
-        </div>""", unsafe_allow_html=True)
-    with col4:
-        st.markdown(f"""<div class="stat-card">
-            <div class="stat-value">{len(bddk_files)}</div>
-            <div class="stat-label">BDDK Excel Dosyası</div>
-        </div>""", unsafe_allow_html=True)
-
-    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
-
-    # Module cards
-    col_a, col_b = st.columns(2)
-
-    with col_a:
-        st.markdown("""<div class="module-card">
-            <div class="module-title">TCMB Haftalık Menkul Kıymet Stokları</div>
-            <div class="module-desc">Yurt içi/dışı yerleşiklerin menkul kıymet portföy değişimleri.
-            Haftalık net değişim tabloları, histogramlar ve kümülatif grafikler.</div>
-        </div>""", unsafe_allow_html=True)
-
-        st.markdown("""<div class="module-card">
-            <div class="module-title">TCMB Doğrudan Alım İşlemleri</div>
-            <div class="module-desc">Açık piyasa işlemleri kapsamında TCMB'nin ihale ile
-            gerçekleştirdiği doğrudan alım verileri ve analizleri.</div>
-        </div>""", unsafe_allow_html=True)
-
-    with col_b:
-        st.markdown("""<div class="module-card">
-            <div class="module-title">Hazine İhale Verileri</div>
-            <div class="module-desc">Devlet iç borçlanma senetleri ihale sonuçları.
-            Senet türü, vade, faiz oranı ve satış kanal analizleri.</div>
-        </div>""", unsafe_allow_html=True)
-
-        st.markdown("""<div class="module-card">
-            <div class="module-title">BDDK Bankacılık Verileri</div>
-            <div class="module-desc">BDDK gelişmiş bülteninden haftalık bankacılık sektörü
-            verileri: Krediler, mevduat, menkul kıymet portföyü.</div>
-        </div>""", unsafe_allow_html=True)
+    st.markdown("#### Güncel Görünüm")
+    if cards:
+        cols = st.columns(2)
+        for i, (title, sent) in enumerate(cards):
+            with cols[i % 2]:
+                st.markdown(f"""<div class="module-card">
+                    <div class="module-title">{title}</div>
+                    <div class="module-desc">{sent}</div>
+                </div>""", unsafe_allow_html=True)
+    else:
+        st.info("Analizler için soldaki modüllerden verileri güncelleyin.")
 
 
 # ══════════════════════════════════════════════════════════
