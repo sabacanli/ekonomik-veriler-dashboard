@@ -28,12 +28,12 @@ OUTPUT_DIR = Path(__file__).parent / "output"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 SERIES = {
-    # Yurt Ici Yerlesikler — yalnizca Hisse Senedi + DIBS (Kesin Alim)
-    "TP.MKNETHAR.M7":  "Yurt Ici Hisse",
-    "TP.MKNETHAR.M8":  "Yurt Ici DIBS",
-    # Yurt Disi Yerlesikler — yalnizca Hisse Senedi + DIBS (Kesin Alim)
-    "TP.MKNETHAR.M1":  "Yurt Disi Hisse",
-    "TP.MKNETHAR.M2":  "Yurt Disi DIBS",
+    # HEPSI YURT DISI YERLESIKLER'in Turkiye menkul kiymet yatirimidir.
+    # M1/M2 = STOK (Duzey/portfoy seviyesi), M7/M8 = HAFTALIK NET DEGISIM (akim).
+    "TP.MKNETHAR.M1":  "Hisse Stok",
+    "TP.MKNETHAR.M2":  "DIBS Stok",
+    "TP.MKNETHAR.M7":  "Hisse Degisim",
+    "TP.MKNETHAR.M8":  "DIBS Degisim",
 }
 
 plt.rcParams["font.family"] = "sans-serif"
@@ -149,7 +149,7 @@ def make_recent_table(all_data: dict[str, pd.DataFrame], n_weeks: int = 5):
     for i in range(len(tbl.index)):
         table[i + 1, -1].set_text_props(fontweight="bold")
 
-    ax.set_title(f"Son {n_weeks} Hafta Duzey / Seviye - EVDS (Milyon USD)", fontsize=13, fontweight="bold", pad=20)
+    ax.set_title(f"Yurt Disi Yerlesikler - Son {n_weeks} Hafta Stok ve Haftalik Net Akim (Milyon USD)", fontsize=12, fontweight="bold", pad=20)
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "tablo_son_haftalar.png", dpi=150, bbox_inches="tight")
     plt.close()
@@ -159,48 +159,35 @@ def make_recent_table(all_data: dict[str, pd.DataFrame], n_weeks: int = 5):
 # ── 2) Haftalik Net Degisim Histogrami ──────────────────────
 
 def make_histogram(all_data: dict[str, pd.DataFrame], n_weeks: int = 20):
-    """Son n hafta haftalik net degisim bar chart."""
-
-    # Son n haftayi al - en son tarihi referans al
-    ref_dates = []
-    for code, df in all_data.items():
-        ref_dates.extend(df["date"].tail(n_weeks).tolist())
-    if not ref_dates:
-        return
-
-    # Tum serilerin son n haftasini birlestir
+    """Son n hafta haftalik NET AKIM (yurt disi yerlesiklerin Hisse & DIBS'e girisi).
+    M7/M8 serilerinin 'value' degeri zaten haftalik net akimdir."""
+    akim = {"TP.MKNETHAR.M7": "Hisse", "TP.MKNETHAR.M8": "DİBS"}
     frames = []
-    for code, df in all_data.items():
-        recent = df.tail(n_weeks).copy()
-        recent["series"] = SERIES[code]
-        frames.append(recent)
-
+    for code, lbl in akim.items():
+        if code in all_data:
+            r = all_data[code].tail(n_weeks).copy()
+            r["enstruman"] = lbl
+            frames.append(r[["date", "value", "enstruman"]])
+    if not frames:
+        return
     combined = pd.concat(frames, ignore_index=True)
-
-    # Yurt Ici ve Yurt Disi toplam
-    combined["group"] = combined["series"].apply(lambda x: "Yurt Ici" if "Ici" in x else "Yurt Disi")
-    pivot = combined.groupby(["date", "group"])["change"].sum().unstack(fill_value=0)
+    pivot = combined.pivot_table(index="date", columns="enstruman", values="value", fill_value=0).sort_index()
 
     fig, ax = plt.subplots(figsize=(14, 6))
-    dates = pivot.index
-    x = range(len(dates))
-    width = 0.35
-
-    if "Yurt Disi" in pivot.columns:
-        bars1 = ax.bar([i - width/2 for i in x], pivot["Yurt Disi"], width,
-                       label="Yurt Disi Toplam", color="#1976D2", alpha=0.85)
-    if "Yurt Ici" in pivot.columns:
-        bars2 = ax.bar([i + width/2 for i in x], pivot["Yurt Ici"], width,
-                       label="Yurt Ici Toplam", color="#FF8F00", alpha=0.85)
-
+    x = range(len(pivot.index))
+    width = 0.38
+    if "Hisse" in pivot.columns:
+        ax.bar([i - width / 2 for i in x], pivot["Hisse"], width, label="Hisse Senedi", color="#4CAF50", alpha=0.85)
+    if "DİBS" in pivot.columns:
+        ax.bar([i + width / 2 for i in x], pivot["DİBS"], width, label="DİBS", color="#1976D2", alpha=0.85)
     ax.axhline(y=0, color="black", linewidth=0.8)
     ax.set_xticks(list(x))
-    ax.set_xticklabels([d.strftime("%d/%m") for d in dates], rotation=45, ha="right", fontsize=9)
-    ax.set_ylabel("Net Degisim (Milyon USD)", fontsize=11)
-    ax.set_title("Haftalik Net Degisim - Yurt Ici vs Yurt Disi Toplam", fontsize=13, fontweight="bold")
+    ax.set_xticklabels([d.strftime("%d/%m") for d in pivot.index], rotation=45, ha="right", fontsize=9)
+    ax.set_ylabel("Net Akim (Milyon USD)", fontsize=11)
+    ax.set_title("Yurt Disi Yerlesikler - Haftalik Net Akim (Milyon USD)", fontsize=13, fontweight="bold")
     ax.legend(fontsize=10)
     ax.grid(axis="y", alpha=0.3)
-    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"{x:,.0f}"))
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "histogram_haftalik.png", dpi=150, bbox_inches="tight")
     plt.close()
@@ -211,13 +198,12 @@ def make_histogram(all_data: dict[str, pd.DataFrame], n_weeks: int = 20):
 
 def make_cumulative_ts(all_data: dict[str, pd.DataFrame]):
     """
-    Her seri icin: yil basinda 0'dan baslayan kumulatif degisim.
-    2024, 2025, 2026 ayri cizgiler + diger yillar ortalama.
-    Yurt Ici ve Yurt Disi ayri ayri 2 grafik.
+    Yalnizca STOK serileri (Hisse Stok, DIBS Stok) icin: yil basindan
+    kumulatif seviye degisimi. 2024/2025/2026 + diger yillar ort.
+    (Degisim/akim serileri M7/M8 zaten haftalik akim oldugu icin kumulatif alinmaz.)
     """
     groups = {
-        "Yurt Disi": ["TP.MKNETHAR.M1", "TP.MKNETHAR.M2"],
-        "Yurt Ici":  ["TP.MKNETHAR.M7", "TP.MKNETHAR.M8"],
+        "Stok": ["TP.MKNETHAR.M1", "TP.MKNETHAR.M2"],
     }
 
     for group_name, codes in groups.items():

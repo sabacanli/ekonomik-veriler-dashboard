@@ -831,20 +831,26 @@ if selected == "ana_sayfa":
         except Exception:
             pass
         try:
-            import glob as _g
-            csvs = sorted(_g.glob(str(BASE_DIR / "tcmb haftalık stok" / "output" / "raw_Yurt_*.csv")))
-            tot, prev, ld = 0.0, 0.0, None
-            for cc in csvs:
-                d = pd.read_csv(cc)
-                if len(d):
-                    tot += float(d.iloc[-1]["value"]); ld = ld or d.iloc[-1]["date"]
-                    if len(d) >= 2:
-                        prev += float(d.iloc[-2]["value"])
-            if csvs:
-                _chg = (tot - prev) / 1000
-                out.append(("📊 TCMB Haftalık Stok",
-                    f"{ld} itibarıyla yabancı yerleşiklerin menkul kıymet stoku toplam <b>{_ht(tot/1000)} milyar USD</b> "
-                    f"— haftalık değişim <b>{_ht(_chg, 1, sign=True)} milyar USD</b>."))
+            _td = BASE_DIR / "tcmb haftalık stok" / "output"
+
+            def _lv(n):
+                fp = _td / f"raw_{n}.csv"
+                if not fp.exists():
+                    return None, None
+                d = pd.read_csv(fp)
+                return (float(d.iloc[-1]["value"]), d.iloc[-1]["date"]) if len(d) else (None, None)
+
+            _hs, _ld = _lv("Hisse_Stok")
+            _ds, _ = _lv("DIBS_Stok")
+            _hd, _ = _lv("Hisse_Degisim")
+            _dd, _ = _lv("DIBS_Degisim")
+            if _hs is not None or _ds is not None:
+                _stok = (_hs or 0) + (_ds or 0)
+                _akim = (_hd or 0) + (_dd or 0)
+                out.append(("📊 Yabancı Menkul Kıymet Yatırımı",
+                    f"{_ld} itibarıyla yurt dışı yerleşiklerin Türkiye menkul kıymet stoku "
+                    f"<b>{_ht(_stok/1000)} milyar USD</b> (Hisse {_ht(_hs/1000)}, DİBS {_ht(_ds/1000)} milyar) "
+                    f"— bu hafta net akım <b>{_ht(_akim, 0, sign=True)} milyon USD</b>."))
         except Exception:
             pass
         return out
@@ -894,77 +900,59 @@ elif selected == "tcmb_stok":
                 st.cache_data.clear()
 
     # ── Otomatik Özet Bilgisi ──
+    # Tüm veriler YURT DIŞI yerleşiklerin Türkiye menkul kıymet yatırımıdır.
+    # raw_Hisse_Stok / raw_DIBS_Stok = STOK (portföy düzeyi),
+    # raw_Hisse_Degisim / raw_DIBS_Degisim = haftalık net akım.
     @st.cache_data
     def build_tcmb_stok_summary(out_dir, cache_key):
-        """CSV verilerinden özet istatistik oluştur.
-        cache_key: CSV dosyalarının en son değişiklik zamanı (cache invalidation için)."""
-        import glob
-        # Güncel veri "raw_Yurt_*.csv" dosyalarında (tcmb_data.py bunları yazar).
-        # Eski "Yurt_*.csv" şeması artık güncellenmiyor; o yüzden raw_ okunur.
-        csvs = sorted(glob.glob(str(Path(out_dir) / "raw_Yurt_*.csv")))
-        if not csvs:
+        def _last(name):
+            fp = Path(out_dir) / f"raw_{name}.csv"
+            if not fp.exists():
+                return None, None
+            d = pd.read_csv(fp)
+            if d.empty:
+                return None, None
+            return float(d.iloc[-1]["value"]), d.iloc[-1]["date"]
+
+        hisse_stok, dt1 = _last("Hisse_Stok")
+        dibs_stok, dt2 = _last("DIBS_Stok")
+        hisse_deg, _ = _last("Hisse_Degisim")
+        dibs_deg, _ = _last("DIBS_Degisim")
+        if hisse_stok is None and dibs_stok is None:
             return None
-        summary_parts = []
-        last_date = None
-        yd_total = yi_total = 0.0
-        yd_chg = yi_chg = 0.0
-        for csv_path in csvs:
-            df = pd.read_csv(csv_path)
-            if df.empty:
-                continue
-            fname = Path(csv_path).stem
-            last_val = df.iloc[-1]["value"]
-            if last_date is None:
-                last_date = df.iloc[-1]["date"]
-            is_yd = "Yurt_Disi" in fname
-            if is_yd:
-                yd_total += last_val
-            else:
-                yi_total += last_val
-            # Haftalık değişim (seviye farkı)
-            if len(df) >= 2:
-                change = last_val - df.iloc[-2]["value"]
-                if is_yd:
-                    yd_chg += change
-                else:
-                    yi_chg += change
-                clean_name = (fname.replace("raw_", "")
-                              .replace("Yurt_Disi", "Yurt Dışı")
-                              .replace("Yurt_Ici", "Yurt İçi")
-                              .replace("_", " - "))
-                summary_parts.append(f"{clean_name}: {last_val:,.0f} Milyon USD (haftalık {change:+,.0f})")
-        genel = yd_total + yi_total
-        genel_chg = yd_chg + yi_chg
+        hisse_stok = hisse_stok or 0.0
+        dibs_stok = dibs_stok or 0.0
+        hisse_deg = hisse_deg or 0.0
+        dibs_deg = dibs_deg or 0.0
+        stok = hisse_stok + dibs_stok
+        akim = hisse_deg + dibs_deg
+        last_date = dt1 or dt2
+        yon = "giriş" if akim >= 0 else "çıkış"
+        header = (f"Yurt dışı yerleşiklerin Türkiye menkul kıymet stoku {last_date} itibarıyla toplam "
+                  f"**{stok:,.0f} milyon USD** (Hisse {hisse_stok:,.0f}, DİBS {dibs_stok:,.0f} milyon USD). "
+                  f"Bu hafta net **{akim:+,.0f} milyon USD {yon}** "
+                  f"(Hisse {hisse_deg:+,.0f}, DİBS {dibs_deg:+,.0f} milyon USD).")
+        return {"header": header, "last_date": last_date, "stok": stok,
+                "hisse_stok": hisse_stok, "dibs_stok": dibs_stok,
+                "akim": akim, "hisse_deg": hisse_deg, "dibs_deg": dibs_deg}
 
-        header = (f"TCMB haftalık menkul kıymet stoku {last_date} itibarıyla toplam "
-                  f"{genel:,.0f} milyon USD (haftalık değişim {genel_chg:+,.0f} milyon USD). "
-                  f"Yurt içi: {yi_total:,.0f}, Yurt dışı: {yd_total:,.0f} milyon USD.")
-        return {"header": header, "details": summary_parts, "last_date": last_date,
-                "yd_total": yd_total, "yi_total": yi_total, "genel": genel,
-                "genel_chg": genel_chg, "yi_chg": yi_chg, "yd_chg": yd_chg}
-
-    # Cache key: güncel raw_ CSV dosyalarının en son değişiklik zamanı.
-    # (Eski "Yurt_*.csv" kullanılırsa mtime hiç değişmez ve özet hep eski kalır.)
-    csv_paths = list(output_dir.glob("raw_Yurt_*.csv"))
+    csv_paths = list(output_dir.glob("raw_*.csv"))
     _cache_key = max((p.stat().st_mtime for p in csv_paths), default=0)
     stok_ozet = build_tcmb_stok_summary(str(output_dir), _cache_key)
     if stok_ozet:
         st.info(f"📋 **Özet:** {stok_ozet['header']}")
+        st.caption("Tüm veriler **yurt dışı yerleşiklerin** Türkiye hisse senedi ve DİBS yatırımıdır (Kaynak: TCMB EVDS).")
         cm1, cm2, cm3 = st.columns(3)
         with cm1:
-            st.metric("Genel Toplam (Milyon USD)", f"{stok_ozet['genel']:,.0f}",
-                      f"{stok_ozet['genel_chg']:+,.0f}")
+            st.metric("Toplam Stok (Milyon USD)", f"{stok_ozet['stok']:,.0f}",
+                      f"{stok_ozet['akim']:+,.0f}")
         with cm2:
-            st.metric("Yurt İçi (Milyon USD)", f"{stok_ozet['yi_total']:,.0f}",
-                      f"{stok_ozet['yi_chg']:+,.0f}")
+            st.metric("Hisse Senedi Stok", f"{stok_ozet['hisse_stok']:,.0f}",
+                      f"{stok_ozet['hisse_deg']:+,.0f}")
         with cm3:
-            st.metric("Yurt Dışı (Milyon USD)", f"{stok_ozet['yd_total']:,.0f}",
-                      f"{stok_ozet['yd_chg']:+,.0f}")
-        st.caption("Δ = son haftaya göre değişim (Milyon USD)")
-
-        with st.expander("📊 Kalem Bazlı Haftalık Değişimler", expanded=False):
-            for d in stok_ozet["details"]:
-                st.markdown(f"- {d}")
+            st.metric("DİBS Stok", f"{stok_ozet['dibs_stok']:,.0f}",
+                      f"{stok_ozet['dibs_deg']:+,.0f}")
+        st.caption("Δ = bu haftaki net akım (Milyon USD)")
 
     # Sekmeler
     tab1, tab2, tab3, tab4 = st.tabs([
@@ -976,49 +964,25 @@ elif selected == "tcmb_stok":
 
     # Tab 1: Son hafta tablosu
     with tab1:
-        st.subheader("Son 5 Hafta Düzey / Seviye — EVDS (Milyon USD)")
-        show_image_with_download(str(tablo_path), "Son 5 Hafta Düzey Tablosu")
+        st.subheader("Son 5 Hafta — Stok ve Haftalık Net Akım (Milyon USD)")
+        show_image_with_download(str(tablo_path), "Son 5 Hafta Tablosu")
 
     # Tab 2: Histogram
     with tab2:
-        st.subheader("Haftalık Net Değişim - Yurt İçi vs Yurt Dışı")
+        st.subheader("Haftalık Net Akım — Hisse & DİBS (Milyon USD)")
         hist_path = output_dir / "histogram_haftalik.png"
-        show_image_with_download(str(hist_path), "Haftalık Net Değişim Histogramı")
+        show_image_with_download(str(hist_path), "Haftalık Net Akım Histogramı")
 
-    # Tab 3: Kümülatif grafikler
+    # Tab 3: Kümülatif grafikler (yalnızca stok serileri)
     with tab3:
-        st.subheader("Yıl Başından Kümülatif Değişim")
-
-        group_choice = st.radio(
-            "Grup Seçin",
-            ["Yurt İçi", "Yurt Dışı"],
-            horizontal=True,
-            key="cum_group",
-        )
-
-        if group_choice == "Yurt İçi":
-            series_map = {
-                "Hisse Senedi": "kumulatif_Yurt_Ici_Hisse.png",
-                "DİBS (Kesin Alım)": "kumulatif_Yurt_Ici_DIBS.png",
-                "Genel Yönetim İhraçları": "kumulatif_Yurt_Ici_GenYon.png",
-                "Banka İhraçları": "kumulatif_Yurt_Ici_Banka.png",
-            }
-        else:
-            series_map = {
-                "Hisse Senedi": "kumulatif_Yurt_Disi_Hisse.png",
-                "DİBS (Kesin Alım)": "kumulatif_Yurt_Disi_DIBS.png",
-                "Genel Yönetim İhraçları": "kumulatif_Yurt_Disi_GenYon.png",
-                "Banka İhraçları": "kumulatif_Yurt_Disi_Banka.png",
-            }
-
-        selected_series = st.selectbox(
-            "Seri Seçin", list(series_map.keys()), key="cum_series"
-        )
+        st.subheader("Yıl Başından Kümülatif Stok Değişimi")
+        series_map = {
+            "Hisse Senedi Stok": "kumulatif_Hisse_Stok.png",
+            "DİBS Stok": "kumulatif_DIBS_Stok.png",
+        }
+        selected_series = st.selectbox("Seri Seçin", list(series_map.keys()), key="cum_series")
         img_file = output_dir / series_map[selected_series]
-        show_image_with_download(
-            str(img_file),
-            f"{group_choice} - {selected_series} Kümülatif Değişim",
-        )
+        show_image_with_download(str(img_file), f"{selected_series} — Yıl Başından Kümülatif Değişim")
 
     # Tab 4: Ham Veriler
     with tab4:
