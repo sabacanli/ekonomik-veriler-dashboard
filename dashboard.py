@@ -691,6 +691,7 @@ with st.sidebar:
         "kredi": "Kredi Faizleri",
         "mevduat": "Mevduat Faizleri",
         "butce": "Bütçe Dengesi",
+        "nakit": "Hazine Nakit Gerçekleşmeleri",
     }
 
     selected = st.radio(
@@ -799,6 +800,18 @@ if selected == "ana_sayfa":
         except Exception:
             pass
         try:
+            nk = pd.read_excel(BASE_DIR / "hazine nakit" / "nakit.xlsx", sheet_name="Aylik")
+            nk["tarih"] = pd.to_datetime(nk["tarih"]); nk = nk.sort_values("tarih"); L = nk.iloc[-1]
+            cy, cm = int(L["yil"]), int(L["ay"])
+            ytd = nk[(nk.yil == cy) & (nk.ay <= cm)]["nakit_denge"].sum()
+            yon = "açık" if L["nakit_denge"] < 0 else "fazla"
+            yon2 = "açık" if ytd < 0 else "fazla"
+            out.append(("🪙 Hazine Nakit Gerçekleşmeleri",
+                f"{_HOME_AY[cm]} {cy} ayında Hazine nakit dengesi <b>{_ht(abs(L['nakit_denge'])/1000)} milyar TL {yon}</b> verdi; "
+                f"yılbaşından beri kümülatif {yon2} <b>{_ht(abs(ytd)/1000)} milyar TL</b>."))
+        except Exception:
+            pass
+        try:
             r = pd.read_excel(BASE_DIR / "net rezerv" / "net_rezerv.xlsx")
             r["tarih"] = pd.to_datetime(r["tarih"]); L = r.iloc[-1]
             out.append(("💵 TCMB Net Rezerv",
@@ -856,6 +869,7 @@ if selected == "ana_sayfa":
         return out
 
     _paths = [BASE_DIR / "enflasyon" / "enflasyon.xlsx", BASE_DIR / "butce" / "butce.xlsx",
+              BASE_DIR / "hazine nakit" / "nakit.xlsx",
               BASE_DIR / "net rezerv" / "net_rezerv.xlsx", BASE_DIR / "kredi mevduat" / "kredi_mevduat.xlsx",
               BASE_DIR / "cari acik" / "cari_acik_son.xlsx"]
     _bust = "|".join(str(int(p.stat().st_mtime)) for p in _paths if p.exists())
@@ -4176,3 +4190,158 @@ elif selected == "butce":
     get_download_button(str(data_file), "📥 Bütçe Verisi (.xlsx)")
     st.markdown("**Kaynak:** HMB Kamu Finansmanı İstatistikleri → Merkezi Yönetim Bütçe Dengesi ve Finansmanı  ·  "
                 "Birim: Milyon TL (grafiklerde Milyar TL)  ·  Aylık, 2006→bugün.")
+
+
+# ══════════════════════════════════════════════════════════
+# HAZİNE NAKİT GERÇEKLEŞMELERİ
+# ══════════════════════════════════════════════════════════
+
+elif selected == "nakit":
+    st.markdown('<div class="main-header">Hazine Nakit Gerçekleşmeleri</div>', unsafe_allow_html=True)
+
+    nakit_dir = BASE_DIR / "hazine nakit"
+    fetch_script = nakit_dir / "nakit_fetch.py"
+    data_file = nakit_dir / "nakit.xlsx"
+
+    col_u1, col_u2 = st.columns([1.4, 4])
+    with col_u1:
+        if st.button("🔄 Güncelle (yerel + bulut)", key="nakit_update", use_container_width=True):
+            if run_script(str(fetch_script), timeout_sec=120):
+                st.cache_data.clear()
+                if _try_publish(["hazine nakit/nakit.xlsx"], "Hazine nakit verisi guncellendi (otomatik yayin)"):
+                    st.success("Güncellendi ve buluta yayınlandı ✓")
+                else:
+                    st.info("Yerel veri güncellendi. (Buluta yayın yalnızca yerel bilgisayardan yapılır.)")
+    with col_u2:
+        if data_file.exists():
+            st.markdown(f'<div class="update-info">Son güncelleme: {get_file_mod_time(data_file)}</div>',
+                        unsafe_allow_html=True)
+        else:
+            st.warning("Henüz veri çekilmemiş. Güncelle'ye tıklayın.")
+
+    if not data_file.exists():
+        st.stop()
+
+    @st.cache_data
+    def load_nakit(path):
+        d = pd.read_excel(path, sheet_name="Aylik")
+        d["tarih"] = pd.to_datetime(d["tarih"], errors="coerce")
+        return d.dropna(subset=["tarih"]).sort_values("tarih").reset_index(drop=True)
+
+    n = load_nakit(str(data_file))
+    if n.empty:
+        st.warning("Veri boş.")
+        st.stop()
+
+    AY = {1: "Ocak", 2: "Şubat", 3: "Mart", 4: "Nisan", 5: "Mayıs", 6: "Haziran",
+          7: "Temmuz", 8: "Ağustos", 9: "Eylül", 10: "Ekim", 11: "Kasım", 12: "Aralık"}
+    AY_KISA = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]
+    last = n.iloc[-1]
+    cy, cm = int(last["yil"]), int(last["ay"])
+    son_label = f"{AY[cm]} {cy}"
+
+    # Milyon TL -> Milyar TL, Türkçe 1 ondalık
+    def _mr(v):
+        return "—" if pd.isna(v) else f"{v/1000:,.1f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+    ytd_now = n[(n["yil"] == cy) & (n["ay"] <= cm)]["nakit_denge"].sum()
+    ytd_prev = n[(n["yil"] == cy - 1) & (n["ay"] <= cm)]["nakit_denge"].sum()
+
+    _yon = "açık" if last["nakit_denge"] < 0 else "fazla"
+    _yon_ytd = "açığı" if ytd_now < 0 else "fazlası"
+    _yon_ytd_prev = "açık" if ytd_prev < 0 else "fazla"
+    st.info(
+        f"🪙 **{son_label}** ayında Hazine nakit dengesi **{_mr(abs(last['nakit_denge']))} milyar TL {_yon}** verdi "
+        f"(gelir {_mr(last['gelir'])}, gider {_mr(last['gider'])} milyar TL). "
+        f"Faiz dışı denge **{_mr(last['faiz_disi_denge'])} milyar TL**, faiz ödemesi {_mr(last['faiz_odemesi'])} milyar TL. "
+        f"Yılbaşından beri kümülatif nakit {_yon_ytd} **{_mr(abs(ytd_now))} milyar TL** — "
+        f"geçen yıl aynı dönemde {_mr(abs(ytd_prev))} milyar TL {_yon_ytd_prev} idi."
+    )
+
+    st.markdown(f"#### {son_label} (Milyar TL)")
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        st.metric("Nakit Dengesi", _mr(last["nakit_denge"]),
+                  help="Gelirler + Özelleştirme/Fon − Giderler. Negatif = nakit açığı.")
+    with k2:
+        st.metric("Gelirler", _mr(last["gelir"]))
+    with k3:
+        st.metric("Giderler", _mr(last["gider"]))
+    with k4:
+        st.metric("Faiz Dışı Denge", _mr(last["faiz_disi_denge"]), help="Faiz ödemeleri hariç nakit denge.")
+
+    yr = st.slider("Başlangıç yılı", int(n["yil"].min()), cy, max(int(n["yil"].min()), cy - 6), key="nakit_yr")
+    npf = n[n["yil"] >= yr].copy()
+
+    # Aylık nakit dengesi
+    st.subheader("Aylık Nakit Dengesi (Milyar TL)")
+    npf["denge_mia"] = npf["nakit_denge"] / 1000
+    npf["durum"] = npf["denge_mia"].apply(lambda v: "Fazla" if v >= 0 else "Açık")
+    figd = px.bar(npf, x="tarih", y="denge_mia", color="durum",
+                  color_discrete_map={"Açık": "#FF5A5F", "Fazla": "#26C281"},
+                  labels={"tarih": "", "denge_mia": "Milyar TL", "durum": ""})
+    figd.update_traces(hovertemplate="%{x|%m.%Y}<br>%{y:.1f} milyar TL<extra></extra>")
+    figd.update_layout(height=380, separators=",.", legend_title_text="")
+    styled_chart(figd)
+
+    # Yılbaşından beri kümülatif nakit dengesi (yıl karşılaştırması)
+    st.subheader("Yılbaşından Beri Kümülatif Nakit Dengesi (Milyar TL)")
+    _yrs = sorted([int(y) for y in n["yil"].unique() if y >= cy - 4])
+    crows = []
+    for y in _yrs:
+        yd = n[n["yil"] == y].sort_values("ay")
+        cum = (yd["nakit_denge"].cumsum() / 1000).tolist()
+        for a, c in zip(yd["ay"].tolist(), cum):
+            crows.append({"Ay": int(a), "Yıl": str(y), "Kümülatif": c})
+    cdf = pd.DataFrame(crows)
+    figc = px.line(cdf, x="Ay", y="Kümülatif", color="Yıl", markers=True,
+                   labels={"Kümülatif": "Milyar TL"})
+    figc.update_traces(hovertemplate="%{y:.1f} milyar TL<extra></extra>")
+    figc.update_layout(height=380, separators=",.", legend_title_text="")
+    figc.update_xaxes(tickmode="array", tickvals=list(range(1, 13)), ticktext=AY_KISA)
+    styled_chart(figc)
+
+    # Nakit Gelir vs Gider
+    st.subheader("Nakit Gelir vs Gider (Aylık, Milyar TL)")
+    gg = npf[["tarih", "gelir", "gider"]].copy()
+    gg["Gelir"] = gg["gelir"] / 1000
+    gg["Gider"] = gg["gider"] / 1000
+    glong = gg[["tarih", "Gelir", "Gider"]].melt("tarih", var_name="Kalem", value_name="Milyar TL")
+    figg = px.line(glong, x="tarih", y="Milyar TL", color="Kalem",
+                   color_discrete_map={"Gelir": "#26C281", "Gider": "#FF9E1B"}, labels={"tarih": ""})
+    figg.update_traces(hovertemplate="%{x|%m.%Y}<br>%{y:.1f}<extra></extra>")
+    figg.update_layout(height=340, separators=",.", legend_title_text="")
+    styled_chart(figg)
+
+    # Finansman — İç vs Dış Borçlanma (Net)
+    if "ic_borclanma_net" in n.columns and "dis_borclanma_net" in n.columns:
+        st.subheader("Finansman — Net Borçlanma (Aylık, Milyar TL)")
+        fn = npf[["tarih", "ic_borclanma_net", "dis_borclanma_net"]].copy()
+        fn["İç Borçlanma (Net)"] = fn["ic_borclanma_net"] / 1000
+        fn["Dış Borçlanma (Net)"] = fn["dis_borclanma_net"] / 1000
+        flong = fn[["tarih", "İç Borçlanma (Net)", "Dış Borçlanma (Net)"]].melt(
+            "tarih", var_name="Tür", value_name="Milyar TL")
+        figf = px.bar(flong, x="tarih", y="Milyar TL", color="Tür", barmode="group",
+                      color_discrete_map={"İç Borçlanma (Net)": "#4C9AFF", "Dış Borçlanma (Net)": "#B98AFF"},
+                      labels={"tarih": ""})
+        figf.update_traces(hovertemplate="%{x|%m.%Y}<br>%{y:.1f} milyar TL<extra></extra>")
+        figf.update_layout(height=340, separators=",.", legend_title_text="")
+        styled_chart(figf)
+
+    # Yıllık özet
+    with st.expander("📋 Yıllık Özet (Milyar TL) — cari yıl kümülatiftir", expanded=False):
+        yt = n.groupby("yil").agg(
+            Gelir=("gelir", "sum"), Gider=("gider", "sum"), NakitDenge=("nakit_denge", "sum"),
+            FaizDisi=("faiz_disi_denge", "sum"), Faiz=("faiz_odemesi", "sum"),
+            NetBorclanma=("borclanma_net", "sum"),
+        ).reset_index().sort_values("yil", ascending=False)
+        disp = yt.copy()
+        for c in ["Gelir", "Gider", "NakitDenge", "FaizDisi", "Faiz", "NetBorclanma"]:
+            disp[c] = disp[c].apply(_mr)
+        disp["yil"] = disp["yil"].astype(int).astype(str)
+        disp.columns = ["Yıl", "Gelir", "Gider", "Nakit Dengesi", "Faiz Dışı Denge", "Faiz Ödemesi", "Net Borçlanma"]
+        st.dataframe(disp, hide_index=True, use_container_width=True)
+
+    get_download_button(str(data_file), "📥 Hazine Nakit Verisi (.xlsx)")
+    st.markdown("**Kaynak:** HMB Kamu Finansmanı İstatistikleri → Hazine Nakit Gerçekleşmeleri  ·  "
+                "Birim: Milyon TL (grafiklerde Milyar TL)  ·  Aylık, 2005→bugün.")
