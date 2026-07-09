@@ -779,70 +779,161 @@ if selected == "ana_sayfa":
     @st.cache_data
     def home_summaries(_bust):
         out = []
+        # ── 1) TÜFE Enflasyon ──
         try:
             g = pd.read_excel(BASE_DIR / "enflasyon" / "enflasyon.xlsx", sheet_name="Genel")
             g["tarih"] = pd.to_datetime(g["tarih"]); L = g.iloc[-1]
-            out.append(("📈 TÜFE Enflasyon",
-                f"{_HOME_AY[L['tarih'].month]} {L['tarih'].year} itibarıyla yıllık enflasyon "
-                f"<b>%{_ht(L['yillik'], 2)}</b>, aylık <b>%{_ht(L['aylik'], 2)}</b>; "
-                f"yılbaşından beri %{_ht(L['ytd'], 2)}."))
+            base = (f"{_HOME_AY[L['tarih'].month]} {L['tarih'].year} itibarıyla yıllık enflasyon "
+                    f"<b>%{_ht(L['yillik'], 2)}</b>, aylık <b>%{_ht(L['aylik'], 2)}</b>; "
+                    f"yılbaşından beri %{_ht(L['ytd'], 2)}.")
+            analiz = ""
+            try:
+                d_yil = float(L["yillik"] - g.iloc[-2]["yillik"])
+                yon = "geriledi" if d_yil < 0 else "yükseldi"
+                trend = "dezenflasyon sürüyor" if d_yil < 0 else "enflasyon yeniden hızlandı"
+                avg3 = float(g["aylik"].tail(3).mean())
+                analiz = (f" Yıllık oran önceki aya göre <b>{_ht(abs(d_yil), 2)} puan {yon}</b> — {trend}; "
+                          f"son 3 ayın ortalama aylık artışı %{_ht(avg3, 2)}.")
+            except Exception:
+                pass
+            out.append(("📈 TÜFE Enflasyon", base + analiz))
         except Exception:
             pass
+        # ── 2) Bütçe Dengesi ──
         try:
             b = pd.read_excel(BASE_DIR / "butce" / "butce.xlsx", sheet_name="Aylik")
             b["tarih"] = pd.to_datetime(b["tarih"]); b = b.sort_values("tarih"); L = b.iloc[-1]
             cy, cm = int(L["yil"]), int(L["ay"])
             ytd = b[(b.yil == cy) & (b.ay <= cm)]["denge"].sum()
             yon = "açık" if L["denge"] < 0 else "fazla"
-            out.append(("🏛️ Bütçe Dengesi",
-                f"{_HOME_AY[cm]} {cy} ayında merkezi yönetim bütçesi <b>{_ht(abs(L['denge'])/1000)} milyar TL {yon}</b> verdi; "
-                f"yılbaşından beri kümülatif açık <b>{_ht(abs(ytd)/1000)} milyar TL</b>."))
+            yon_ytd = "açık" if ytd < 0 else "fazla"
+            base = (f"{_HOME_AY[cm]} {cy} ayında merkezi yönetim bütçesi <b>{_ht(abs(L['denge'])/1000)} milyar TL {yon}</b> verdi; "
+                    f"yılbaşından beri kümülatif {yon_ytd} <b>{_ht(abs(ytd)/1000)} milyar TL</b>.")
+            analiz = ""
+            try:
+                ytd_prev = b[(b.yil == cy - 1) & (b.ay <= cm)]["denge"].sum()
+                if ytd_prev != 0:
+                    pct = (abs(ytd) - abs(ytd_prev)) / abs(ytd_prev) * 100
+                    yon2 = "genişledi" if abs(ytd) > abs(ytd_prev) else "daraldı"
+                    analiz = (f" Açık geçen yılın aynı dönemine ({_ht(abs(ytd_prev)/1000)} milyar TL) göre "
+                              f"<b>%{_ht(abs(pct), 0)} {yon2}</b>.")
+            except Exception:
+                pass
+            out.append(("🏛️ Bütçe Dengesi", base + analiz))
         except Exception:
             pass
+        # ── 3) Hazine Nakit Gerçekleşmeleri ──
         try:
             nk = pd.read_excel(BASE_DIR / "hazine nakit" / "nakit.xlsx", sheet_name="Aylik")
             nk["tarih"] = pd.to_datetime(nk["tarih"]); nk = nk.sort_values("tarih"); L = nk.iloc[-1]
             cy, cm = int(L["yil"]), int(L["ay"])
             ytd = nk[(nk.yil == cy) & (nk.ay <= cm)]["nakit_denge"].sum()
             yon = "açık" if L["nakit_denge"] < 0 else "fazla"
-            yon2 = "açık" if ytd < 0 else "fazla"
-            out.append(("🪙 Hazine Nakit Gerçekleşmeleri",
-                f"{_HOME_AY[cm]} {cy} ayında Hazine nakit dengesi <b>{_ht(abs(L['nakit_denge'])/1000)} milyar TL {yon}</b> verdi; "
-                f"yılbaşından beri kümülatif {yon2} <b>{_ht(abs(ytd)/1000)} milyar TL</b>."))
+            yon_ytd = "açık" if ytd < 0 else "fazla"
+            base = (f"{_HOME_AY[cm]} {cy} ayında Hazine nakit dengesi <b>{_ht(abs(L['nakit_denge'])/1000)} milyar TL {yon}</b> verdi; "
+                    f"yılbaşından beri kümülatif {yon_ytd} <b>{_ht(abs(ytd)/1000)} milyar TL</b>.")
+            analiz = ""
+            try:
+                ytd_prev = nk[(nk.yil == cy - 1) & (nk.ay <= cm)]["nakit_denge"].sum()
+                ib = nk[(nk.yil == cy) & (nk.ay <= cm)]["ic_borclanma_net"].sum()
+                if ytd_prev != 0:
+                    pct = (abs(ytd) - abs(ytd_prev)) / abs(ytd_prev) * 100
+                    yon2 = "daha yüksek" if abs(ytd) > abs(ytd_prev) else "daha düşük"
+                    analiz = (f" Bu açık geçen yılın aynı dönemine ({_ht(abs(ytd_prev)/1000)} milyar TL) göre "
+                              f"<b>%{_ht(abs(pct), 0)} {yon2}</b>; ağırlıkla iç borçlanmayla finanse edildi "
+                              f"(net {_ht(ib/1000)} milyar TL).")
+            except Exception:
+                pass
+            out.append(("🪙 Hazine Nakit Gerçekleşmeleri", base + analiz))
         except Exception:
             pass
+        # ── 4) TCMB Net Rezerv ──
         try:
             r = pd.read_excel(BASE_DIR / "net rezerv" / "net_rezerv.xlsx")
-            r["tarih"] = pd.to_datetime(r["tarih"]); L = r.iloc[-1]
-            out.append(("💵 TCMB Net Rezerv",
-                f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla net rezerv (swap hariç) <b>{_ht(L['net_rezerv_swap_haric']/1000)} milyar USD</b>, "
-                f"brüt dış varlıklar {_ht(L['dis_varliklar']/1000)} milyar USD."))
+            r["tarih"] = pd.to_datetime(r["tarih"]); r = r.sort_values("tarih"); L = r.iloc[-1]
+            base = (f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla net rezerv (swap hariç) "
+                    f"<b>{_ht(L['net_rezerv_swap_haric']/1000)} milyar USD</b>, "
+                    f"brüt dış varlıklar {_ht(L['dis_varliklar']/1000)} milyar USD.")
+            analiz = ""
+            try:
+                nrc = "net_rezerv_swap_haric"
+                cur = float(L[nrc])
+                m1 = r[r["tarih"] <= L["tarih"] - pd.Timedelta(days=30)]
+                ys = r[r["tarih"] >= pd.Timestamp(L["tarih"].year, 1, 1)]
+                if len(m1) and len(ys):
+                    d1 = (cur - float(m1.iloc[-1][nrc])) / 1000
+                    dy = (cur - float(ys.iloc[0][nrc])) / 1000
+                    w1 = "arttı" if d1 >= 0 else "azaldı"
+                    wy = "artış" if dy >= 0 else "azalış"
+                    analiz = (f" Son bir ayda <b>{_ht(abs(d1))} milyar USD {w1}</b>; "
+                              f"yıl başından beri {_ht(abs(dy))} milyar USD {wy}.")
+            except Exception:
+                pass
+            out.append(("💵 TCMB Net Rezerv", base + analiz))
         except Exception:
             pass
+        # ── 5) Cari Denge ──
         try:
             c = pd.read_excel(BASE_DIR / "cari acik" / "cari_acik_son.xlsx")
             col = [x for x in c.columns if "Cari" in str(x)][0]
             L = c.iloc[-1]
-            out.append(("🌍 Cari Denge",
-                f"Son dönem ({L['Tarih']}) cari işlemler dengesi <b>{_ht(L[col], 0)} milyon USD</b>."))
+            base = f"Son dönem ({L['Tarih']}) cari işlemler dengesi <b>{_ht(L[col], 0)} milyon USD</b>."
+            analiz = ""
+            try:
+                vals = c[col].astype(float).tolist()
+                if len(vals) >= 8:
+                    last4 = sum(vals[-4:]); prev4 = sum(vals[-8:-4])
+                    kel = "açık" if last4 < 0 else "fazla"
+                    yon2 = "genişledi" if abs(last4) > abs(prev4) else "daraldı"
+                    analiz = (f" Son dört çeyreğin (12 aylık) toplamı <b>{_ht(abs(last4)/1000)} milyar USD {kel}</b>; "
+                              f"bir yıl öncesine göre {yon2}.")
+            except Exception:
+                pass
+            out.append(("🌍 Cari Denge", base + analiz))
         except Exception:
             pass
+        # ── 6) Kredi Faizleri ──
         try:
             ka = pd.read_excel(BASE_DIR / "kredi mevduat" / "kredi_mevduat.xlsx", sheet_name="Kredi_Akim")
-            ka["tarih"] = pd.to_datetime(ka["tarih"]); L = ka.iloc[-1]
-            out.append(("🏦 Kredi Faizleri",
-                f"Yeni kredi faizleri ({L['tarih'].strftime('%d.%m.%Y')}): İhtiyaç <b>%{_ht(L.get('İhtiyaç Kredisi'), 2)}</b>, "
-                f"Konut %{_ht(L.get('Konut Kredisi'), 2)}, Ticari %{_ht(L.get('Ticari Krediler'), 2)}."))
+            ka["tarih"] = pd.to_datetime(ka["tarih"]); ka = ka.sort_values("tarih"); L = ka.iloc[-1]
+            base = (f"Yeni kredi faizleri ({L['tarih'].strftime('%d.%m.%Y')}): İhtiyaç <b>%{_ht(L.get('İhtiyaç Kredisi'), 2)}</b>, "
+                    f"Konut %{_ht(L.get('Konut Kredisi'), 2)}, Ticari %{_ht(L.get('Ticari Krediler'), 2)}.")
+            analiz = ""
+            try:
+                if len(ka) >= 5:
+                    P = ka.iloc[-5]
+                    di = float(L["İhtiyaç Kredisi"] - P["İhtiyaç Kredisi"])
+                    dk = float(L["Konut Kredisi"] - P["Konut Kredisi"])
+                    wi = "geriledi" if di < 0 else "yükseldi"
+                    wk = "yükseldi" if dk > 0 else "geriledi"
+                    analiz = (f" Son 4 haftada ihtiyaç kredisi faizi <b>{_ht(abs(di), 2)} puan {wi}</b>, "
+                              f"konut {_ht(abs(dk), 2)} puan {wk}.")
+            except Exception:
+                pass
+            out.append(("🏦 Kredi Faizleri", base + analiz))
         except Exception:
             pass
+        # ── 7) Mevduat Faizleri ──
         try:
             ma = pd.read_excel(BASE_DIR / "kredi mevduat" / "kredi_mevduat.xlsx", sheet_name="Mevduat_Akim")
-            ma["tarih"] = pd.to_datetime(ma["tarih"]); L = ma.iloc[-1]
-            out.append(("💰 Mevduat Faizleri",
-                f"TL mevduat faizi toplam <b>%{_ht(L.get('Toplam'), 2)}</b>; 3 ay %{_ht(L.get('3 Aya Kadar Vadeli'), 2)}, "
-                f"1 yıl %{_ht(L.get('1 Yıla Kadar Vadeli'), 2)} ({L['tarih'].strftime('%d.%m.%Y')})."))
+            ma["tarih"] = pd.to_datetime(ma["tarih"]); ma = ma.sort_values("tarih"); L = ma.iloc[-1]
+            base = (f"TL mevduat faizi toplam <b>%{_ht(L.get('Toplam'), 2)}</b>; 3 ay %{_ht(L.get('3 Aya Kadar Vadeli'), 2)}, "
+                    f"1 yıl %{_ht(L.get('1 Yıla Kadar Vadeli'), 2)} ({L['tarih'].strftime('%d.%m.%Y')}).")
+            analiz = ""
+            try:
+                if len(ma) >= 5:
+                    dt = float(L["Toplam"] - ma.iloc[-5]["Toplam"])
+                    if abs(dt) < 0.10:
+                        analiz = " Son 4 haftada büyük ölçüde <b>yatay</b> seyretti."
+                    else:
+                        w = "yükseldi" if dt > 0 else "geriledi"
+                        analiz = f" Son 4 haftada toplam mevduat faizi <b>{_ht(abs(dt), 2)} puan {w}</b>."
+            except Exception:
+                pass
+            out.append(("💰 Mevduat Faizleri", base + analiz))
         except Exception:
             pass
+        # ── 8) Yabancı Menkul Kıymet Yatırımı ──
         try:
             _td = BASE_DIR / "tcmb haftalık stok" / "output"
 
@@ -853,6 +944,14 @@ if selected == "ana_sayfa":
                 d = pd.read_csv(fp)
                 return (float(d.iloc[-1]["value"]), d.iloc[-1]["date"]) if len(d) else (None, None)
 
+            def _flow(n):
+                fp = _td / f"raw_{n}.csv"
+                if not fp.exists():
+                    return None
+                d = pd.read_csv(fp)
+                d["date"] = pd.to_datetime(d["date"], errors="coerce")
+                return d.dropna(subset=["date"])
+
             _hs, _ld = _lv("Hisse_Stok")
             _ds, _ = _lv("DIBS_Stok")
             _hd, _ = _lv("Hisse_Degisim")
@@ -860,10 +959,24 @@ if selected == "ana_sayfa":
             if _hs is not None or _ds is not None:
                 _stok = (_hs or 0) + (_ds or 0)
                 _akim = (_hd or 0) + (_dd or 0)
-                out.append(("📊 Yabancı Menkul Kıymet Yatırımı",
-                    f"{_ld} itibarıyla yurt dışı yerleşiklerin Türkiye menkul kıymet stoku "
-                    f"<b>{_ht(_stok/1000)} milyar USD</b> (Hisse {_ht(_hs/1000)}, DİBS {_ht(_ds/1000)} milyar) "
-                    f"— bu hafta net akım <b>{_ht(_akim, 0, sign=True)} milyon USD</b>."))
+                base = (f"{_ld} itibarıyla yurt dışı yerleşiklerin Türkiye menkul kıymet stoku "
+                        f"<b>{_ht(_stok/1000)} milyar USD</b> (Hisse {_ht(_hs/1000)}, DİBS {_ht(_ds/1000)} milyar) "
+                        f"— bu hafta net akım <b>{_ht(_akim, 0, sign=True)} milyon USD</b>.")
+                analiz = ""
+                try:
+                    fh = _flow("Hisse_Degisim"); fd = _flow("DIBS_Degisim")
+                    if fh is not None and fd is not None:
+                        s4 = float(fh["value"].tail(4).sum() + fd["value"].tail(4).sum())
+                        _yr = int(pd.to_datetime(_ld).year)
+                        yflow = float(fh[fh["date"].dt.year == _yr]["value"].sum()
+                                      + fd[fd["date"].dt.year == _yr]["value"].sum())
+                        w4 = "giriş" if s4 >= 0 else "çıkış"
+                        wy = "giriş" if yflow >= 0 else "çıkış"
+                        analiz = (f" Son 4 haftada kümülatif net <b>{_ht(abs(s4), 0)} milyon USD {w4}</b>; "
+                                  f"yılbaşından beri {_ht(abs(yflow), 0)} milyon USD {wy}.")
+                except Exception:
+                    pass
+                out.append(("📊 Yabancı Menkul Kıymet Yatırımı", base + analiz))
         except Exception:
             pass
         return out
