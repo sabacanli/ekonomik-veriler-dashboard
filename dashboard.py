@@ -692,6 +692,7 @@ with st.sidebar:
         "mevduat": "Mevduat Faizleri",
         "butce": "Bütçe Dengesi",
         "nakit": "Hazine Nakit Gerçekleşmeleri",
+        "dth": "Yabancı Para Hareketi",
     }
 
     selected = st.radio(
@@ -847,6 +848,27 @@ if selected == "ana_sayfa":
             out.append(("🪙 Hazine Nakit Gerçekleşmeleri", base + analiz))
         except Exception:
             pass
+        # ── 3b) Yabancı Para Hareketi (DTH) ──
+        try:
+            dh = pd.read_excel(BASE_DIR / "yabanci para hareketi" / "dth.xlsx", sheet_name="Haftalik")
+            dh["tarih"] = pd.to_datetime(dh["tarih"]); dh = dh.sort_values("tarih"); L = dh.iloc[-1]
+            yon = "arttı" if L["yerlesik_toplam"] >= 0 else "azaldı"
+            base = (f"{L['tarih'].strftime('%d.%m.%Y')} haftasında yerleşiklerin YP mevduatı (parite düzeltilmiş) "
+                    f"<b>{_ht(abs(L['yerlesik_toplam'])/1000, 1)} milyar USD</b> {yon} "
+                    f"(tüzel {_ht(L['tuzel_kisiler']/1000, 1, sign=True)}, gerçek {_ht(L['gercek_kisiler']/1000, 1, sign=True)} milyar).")
+            analiz = ""
+            try:
+                s4 = float(dh["yerlesik_toplam"].tail(4).sum())
+                yflow = float(dh[dh["tarih"].dt.year == int(L["tarih"].year)]["yerlesik_toplam"].sum())
+                w4 = "artış" if s4 >= 0 else "azalış"
+                wy = "artış (dolarizasyon)" if yflow >= 0 else "azalış (de-dolarizasyon)"
+                analiz = (f" Son 4 haftada kümülatif <b>{_ht(abs(s4)/1000)} milyar USD {w4}</b>; "
+                          f"yılbaşından beri {_ht(abs(yflow)/1000)} milyar USD {wy}.")
+            except Exception:
+                pass
+            out.append(("💱 Yabancı Para Hareketi", base + analiz))
+        except Exception:
+            pass
         # ── 4) TCMB Net Rezerv ──
         try:
             r = pd.read_excel(BASE_DIR / "net rezerv" / "net_rezerv.xlsx")
@@ -982,7 +1004,7 @@ if selected == "ana_sayfa":
         return out
 
     _paths = [BASE_DIR / "enflasyon" / "enflasyon.xlsx", BASE_DIR / "butce" / "butce.xlsx",
-              BASE_DIR / "hazine nakit" / "nakit.xlsx",
+              BASE_DIR / "hazine nakit" / "nakit.xlsx", BASE_DIR / "yabanci para hareketi" / "dth.xlsx",
               BASE_DIR / "net rezerv" / "net_rezerv.xlsx", BASE_DIR / "kredi mevduat" / "kredi_mevduat.xlsx",
               BASE_DIR / "cari acik" / "cari_acik_son.xlsx"]
     _bust = "|".join(str(int(p.stat().st_mtime)) for p in _paths if p.exists())
@@ -4458,3 +4480,161 @@ elif selected == "nakit":
     get_download_button(str(data_file), "📥 Hazine Nakit Verisi (.xlsx)")
     st.markdown("**Kaynak:** HMB Kamu Finansmanı İstatistikleri → Hazine Nakit Gerçekleşmeleri  ·  "
                 "Birim: Milyon TL (grafiklerde Milyar TL)  ·  Aylık, 2005→bugün.")
+
+
+# ══════════════════════════════════════════════════════════
+# YABANCI PARA HAREKETİ (DTH)
+# ══════════════════════════════════════════════════════════
+
+elif selected == "dth":
+    st.markdown('<div class="main-header">Yabancı Para Hareketi</div>', unsafe_allow_html=True)
+
+    dth_dir = BASE_DIR / "yabanci para hareketi"
+    fetch_script = dth_dir / "dth_fetch.py"
+    data_file = dth_dir / "dth.xlsx"
+
+    col_u1, col_u2 = st.columns([1.4, 4])
+    with col_u1:
+        if st.button("🔄 Güncelle (yerel + bulut)", key="dth_update", use_container_width=True):
+            if run_script(str(fetch_script), timeout_sec=120):
+                st.cache_data.clear()
+                if _try_publish(["yabanci para hareketi/dth.xlsx"], "DTH verisi guncellendi (otomatik yayin)"):
+                    st.success("Güncellendi ve buluta yayınlandı ✓")
+                else:
+                    st.info("Yerel veri güncellendi. (Buluta yayın yalnızca yerel bilgisayardan yapılır.)")
+    with col_u2:
+        if data_file.exists():
+            st.markdown(f'<div class="update-info">Son güncelleme: {get_file_mod_time(data_file)}</div>',
+                        unsafe_allow_html=True)
+        else:
+            st.warning("Henüz veri çekilmemiş. Güncelle'ye tıklayın.")
+
+    if not data_file.exists():
+        st.stop()
+
+    @st.cache_data
+    def load_dth(path):
+        d = pd.read_excel(path, sheet_name="Haftalik")
+        d["tarih"] = pd.to_datetime(d["tarih"], errors="coerce")
+        return d.dropna(subset=["tarih"]).sort_values("tarih").reset_index(drop=True)
+
+    d = load_dth(str(data_file))
+    if d.empty:
+        st.warning("Veri boş.")
+        st.stop()
+
+    L = d.iloc[-1]
+    hafta_lbl = L["tarih"].strftime("%d.%m.%Y")
+
+    # Milyon USD -> Milyar USD, işaretli, Türkçe 1 ondalık
+    def _bs(v, d_=1):
+        if pd.isna(v):
+            return "—"
+        return f"{v/1000:+,.{d_}f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+    # Mutlak değer (yön kelimesiyle birlikte kullanılır)
+    def _ba(v, d_=1):
+        if pd.isna(v):
+            return "—"
+        return f"{abs(v)/1000:,.{d_}f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+    s4 = float(d["yerlesik_toplam"].tail(4).sum())
+    ytd = float(d[d["tarih"].dt.year == int(L["tarih"].year)]["yerlesik_toplam"].sum())
+    _yon = "arttı" if L["yerlesik_toplam"] >= 0 else "azaldı"
+    _yon4 = "artış" if s4 >= 0 else "azalış"
+    _yon_ytd = "artış (dolarizasyon)" if ytd >= 0 else "azalış (de-dolarizasyon)"
+    st.info(
+        f"💱 **{hafta_lbl}** haftasında yurt içi yerleşiklerin yabancı para mevduatı "
+        f"(altın ve parite etkileri düzeltilmiş) **{_ba(L['yerlesik_toplam'])} milyar USD {_yon}**: "
+        f"tüzel kişiler **{_bs(L['tuzel_kisiler'])}**, gerçek kişiler **{_bs(L['gercek_kisiler'])} milyar USD** "
+        f"(altın {_bs(L['gk_altin'])}, döviz {_bs(L['gk_doviz'])}). "
+        f"Son 4 haftada kümülatif {_ba(s4)} milyar USD {_yon4}; "
+        f"yılbaşından beri **{_ba(ytd)} milyar USD {_yon_ytd}**."
+    )
+
+    st.markdown(f"#### {hafta_lbl} Haftası (Milyar USD)")
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        st.metric("Yerleşikler Toplam", _bs(L["yerlesik_toplam"]),
+                  help="Parite ve altın fiyat etkilerinden arındırılmış haftalık değişim.")
+    with k2:
+        st.metric("Gerçek Kişiler", _bs(L["gercek_kisiler"]))
+    with k3:
+        st.metric("Tüzel Kişiler", _bs(L["tuzel_kisiler"]))
+    with k4:
+        st.metric("Yılbaşından Beri", _bs(ytd), help="Cari yıl haftalık değişimlerin toplamı.")
+
+    hafta_n = st.slider("Gösterilecek hafta sayısı", 12, 104, 27, key="dth_hafta")
+    dp = d.tail(hafta_n).copy()
+
+    # Son bar segment etiketi (ekran görüntüsü stili)
+    def _son_bar_etiket(fig, x, comps):
+        pos = neg = 0.0
+        for v, color in comps:
+            if pd.isna(v):
+                continue
+            if v >= 0:
+                pos += v; y = pos; shift = 12
+            else:
+                neg += v; y = neg; shift = -14
+            fig.add_annotation(x=x, y=y, text=f"{v:.1f}".replace(".", ","),
+                               showarrow=False, yshift=shift,
+                               font=dict(size=13, color=color))
+
+    # 1) Gerçek Kişiler — Altın & Döviz
+    st.subheader("Gerçek Kişiler DTH Hesapları Değer Değişimi")
+    st.caption("Altın ve parite etkileri düzeltilmiş, milyar USD")
+    g1 = dp[["tarih"]].copy()
+    g1["Altın"] = dp["gk_altin"] / 1000
+    g1["Döviz"] = dp["gk_doviz"] / 1000
+    g1l = g1.melt("tarih", var_name="Kalem", value_name="Milyar USD")
+    fig1 = px.bar(g1l, x="tarih", y="Milyar USD", color="Kalem",
+                  color_discrete_map={"Altın": "#FF9E1B", "Döviz": "#26C281"}, labels={"tarih": ""})
+    fig1.update_traces(hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>%{fullData.name}</extra>")
+    fig1.update_layout(height=380, separators=",.", legend_title_text="", bargap=0.25)
+    _son_bar_etiket(fig1, L["tarih"], [(L["gk_altin"] / 1000, "#FF9E1B"), (L["gk_doviz"] / 1000, "#26C281")])
+    styled_chart(fig1)
+
+    # 2) Yerleşikler — Tüzel & Gerçek
+    st.subheader("Yerleşikler DTH Hesapları Değer Değişimi — Tüzel & Gerçek")
+    st.caption("Altın ve parite etkileri düzeltilmiş, milyar USD")
+    g2 = dp[["tarih"]].copy()
+    g2["Tüzel Kişiler"] = dp["tuzel_kisiler"] / 1000
+    g2["Gerçek Kişiler"] = dp["gercek_kisiler"] / 1000
+    g2l = g2.melt("tarih", var_name="Kalem", value_name="Milyar USD")
+    fig2 = px.bar(g2l, x="tarih", y="Milyar USD", color="Kalem",
+                  color_discrete_map={"Tüzel Kişiler": "#4FC3F7", "Gerçek Kişiler": "#E64980"}, labels={"tarih": ""})
+    fig2.update_traces(hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>%{fullData.name}</extra>")
+    fig2.update_layout(height=380, separators=",.", legend_title_text="", bargap=0.25)
+    _son_bar_etiket(fig2, L["tarih"], [(L["tuzel_kisiler"] / 1000, "#4FC3F7"), (L["gercek_kisiler"] / 1000, "#E64980")])
+    styled_chart(fig2)
+
+    # 3) Yerleşikler — Toplam
+    st.subheader("Yerleşikler DTH Hesapları Değer Değişimi — Toplam")
+    st.caption("Altın ve parite etkileri düzeltilmiş, milyar USD")
+    g3 = dp[["tarih"]].copy()
+    g3["Milyar USD"] = dp["yerlesik_toplam"] / 1000
+    fig3 = px.bar(g3, x="tarih", y="Milyar USD", labels={"tarih": ""})
+    fig3.update_traces(marker_color="#4C9AFF",
+                       hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra></extra>")
+    fig3.update_layout(height=380, separators=",.", bargap=0.25)
+    _son_bar_etiket(fig3, L["tarih"], [(L["yerlesik_toplam"] / 1000, "#4C9AFF")])
+    styled_chart(fig3)
+
+    # Detay tablo — son 8 hafta
+    with st.expander("📋 Son 8 Hafta Detay (Milyar USD)", expanded=False):
+        t8 = d.tail(8).iloc[::-1].copy()
+        disp = pd.DataFrame({
+            "Hafta": t8["tarih"].dt.strftime("%d.%m.%Y"),
+            "Toplam": t8["yerlesik_toplam"].apply(_bs),
+            "Gerçek Kişiler": t8["gercek_kisiler"].apply(_bs),
+            "Tüzel Kişiler": t8["tuzel_kisiler"].apply(_bs),
+            "GK Altın": t8["gk_altin"].apply(_bs),
+            "GK Döviz": t8["gk_doviz"].apply(_bs),
+        })
+        st.dataframe(disp, hide_index=True, use_container_width=True)
+
+    get_download_button(str(data_file), "📥 DTH Verisi (.xlsx)")
+    st.markdown("**Kaynak:** TCMB EVDS → Haftalık Para ve Banka İstatistikleri, Tablo 5 (TP.HPBITABLO5) — "
+                "parite ve kıymetli maden fiyat etkilerinden arındırılmış haftalık değişim  ·  "
+                "Birim: Milyon USD (grafiklerde Milyar USD)  ·  Haftalık, 2015→bugün.")
