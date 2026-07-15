@@ -45,11 +45,16 @@ def main():
         print(f"  kopyalandı: {f.name}")
     print(f"{len(picked)} dosya bddk_data/ klasörüne yayınlandı.")
 
+    # Statik sitenin veri paketlerini de yenile (site/data/*.json)
+    exp = subprocess.run([sys.executable, str(ROOT / "site_export.py")], cwd=ROOT)
+    if exp.returncode != 0:
+        print("UYARI: site_export.py başarısız — site verisi eski kalabilir.", file=sys.stderr)
+
     # git add + commit + push
     def git(*args, check=True):
         return subprocess.run(["git", *args], cwd=ROOT, check=check)
 
-    git("add", "bddk_data")
+    git("add", "bddk_data", "site/data")
     commit = subprocess.run(
         ["git", "commit", "-m", "BDDK verisi guncellendi (buluta yayin)"],
         cwd=ROOT,

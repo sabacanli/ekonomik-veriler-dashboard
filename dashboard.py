@@ -741,9 +741,16 @@ def _km_update_bar(fetch_script, data_file, key):
 def _try_publish(rel_paths, message):
     """Verilen dosyaları commit + push etmeyi dener.
     Yerelde (git kimliği + keychain) çalışır → bulut güncellenir.
-    Bulutta (push yetkisi yok) sessizce başarısız olur → sadece oturum içi yenileme."""
+    Bulutta (push yetkisi yok) sessizce başarısız olur → sadece oturum içi yenileme.
+    Statik sitenin veri paketleri (site/data) de aynı commit'te tazelenir."""
     env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
     try:
+        try:
+            subprocess.run([sys.executable, str(BASE_DIR / "site_export.py")],
+                           cwd=str(BASE_DIR), capture_output=True, timeout=120)
+            rel_paths = [*rel_paths, "site/data"]
+        except Exception:
+            pass
         subprocess.run(["git", "add", *rel_paths], cwd=str(BASE_DIR),
                        capture_output=True, timeout=30, env=env)
         subprocess.run(["git", "commit", "-m", message], cwd=str(BASE_DIR),
