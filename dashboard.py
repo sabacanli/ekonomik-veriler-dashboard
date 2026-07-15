@@ -988,11 +988,19 @@ if selected == "ana_sayfa":
                     hx["tarih"] = pd.to_datetime(hx["tarih"]); hx = hx.sort_values("tarih")
                     hL = hx.iloc[-1]
                     s4h = float(hx["toplam"].tail(4).sum())
-                    yflow = float(hx[hx["tarih"].dt.year == int(hL["tarih"].year)]["toplam"].sum())
-                    analiz = (f" Bu hafta toplam net yabancı hareketi (ÖST + Eurobond dahil) "
-                              f"<b>{_ht(hL['toplam']/1000, 1, sign=True)} milyar USD</b>; "
-                              f"son 4 haftada {_ht(s4h/1000, 1, sign=True)}, "
-                              f"yılbaşından beri {_ht(yflow/1000, 1, sign=True)} milyar USD.")
+                    hy = hx[hx["tarih"].dt.year == int(hL["tarih"].year)]
+                    yflow = float(hy["toplam"].sum())
+                    _isim = {"hisse": "Hisse", "dibs_kesin": "DİBS kesin", "dibs_dolayli": "DİBS dolaylı",
+                             "ost": "ÖST", "eurobond": "Eurobond"}
+                    _ycomp = {k: float(hy[k].sum()) for k in _isim}
+                    _lider = max(_ycomp, key=lambda k: _ycomp[k])
+                    _dibs_hafta = float(hL[["dibs_kesin", "dibs_dolayli"]].sum())
+                    analiz = (f" Bu hafta toplam net yabancı hareketi <b>{_ht(hL['toplam']/1000, 1, sign=True)} milyar USD</b> "
+                              f"(Hisse {_ht(hL['hisse'], 0, sign=True)}, DİBS {_ht(_dibs_hafta, 0, sign=True)}, "
+                              f"ÖST {_ht(hL['ost'], 0, sign=True)}, Eurobond {_ht(hL['eurobond'], 0, sign=True)} milyon); "
+                              f"son 4 haftada <b>{_ht(s4h/1000, 1, sign=True)} milyar USD</b>. "
+                              f"Yılbaşından beri {_ht(yflow/1000, 1, sign=True)} milyar USD giriş — en büyük katkı "
+                              f"<b>{_isim[_lider]} ({_ht(_ycomp[_lider]/1000, 1, sign=True)} milyar)</b>.")
                 except Exception:
                     try:
                         fh = _flow("Hisse_Degisim"); fd = _flow("DIBS_Degisim")
