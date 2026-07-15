@@ -11,9 +11,9 @@ const NAV = [
   { href: "mevduat.html", label: "Mevduat Faizleri" },
   { href: "butce.html", label: "Bütçe Dengesi" },
   { href: "nakit.html", label: "Hazine Nakit Gerçekleşmeleri" },
+  { href: "bddk.html", label: "BDDK Bankacılık Verileri" },
   { label: "Hazine İhale Verileri" },
   { label: "TCMB Doğrudan Alım" },
-  { label: "BDDK Bankacılık Verileri" },
 ];
 
 const C = {

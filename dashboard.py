@@ -955,6 +955,30 @@ if selected == "ana_sayfa":
             out.append(("💰 Mevduat Faizleri", base + analiz))
         except Exception:
             pass
+        # ── 7b) BDDK Bankacılık ──
+        try:
+            import bddk_analiz as _ba
+            _tlb, _usdb, _ = _ba.load_latest(BASE_DIR / "bddk_data")
+            if _tlb is not None:
+                _t1, _t2, _son, _ = _ba.hesapla(_tlb, _usdb)
+
+                def _g(rows, lbl):
+                    return next((r for r in rows if r["label"] == lbl), {})
+
+                def _pp(v):
+                    return "—" if v is None else f"{v:+.1f}%".replace(".", ",")
+
+                _kr = _g(_t1, "Toplam Krediler (TL)")
+                _mv = _g(_t2, "Toplam Mevduat (TL Cinsi)")
+                _tlm = _g(_t2, "TL Mevduat")
+                _ypm = _g(_t2, "YP Mevduat (USD)")
+                out.append(("📑 BDDK Bankacılık",
+                    f"{_son.strftime('%d.%m.%Y')} haftası: toplam krediler (TL) haftalık <b>{_pp(_kr.get('hafta'))}</b> "
+                    f"(yıllık {_pp(_kr.get('yillik'))}), toplam mevduat <b>{_pp(_mv.get('hafta'))}</b> "
+                    f"(yıllık {_pp(_mv.get('yillik'))}). TL mevduat {_pp(_tlm.get('hafta'))}, "
+                    f"YP mevduat (USD) {_pp(_ypm.get('hafta'))}."))
+        except Exception:
+            pass
         # ── 8) Yabancı Menkul Kıymet Yatırımı ──
         try:
             _td = BASE_DIR / "tcmb haftalık stok" / "output"
@@ -1023,7 +1047,8 @@ if selected == "ana_sayfa":
     _paths = [BASE_DIR / "enflasyon" / "enflasyon.xlsx", BASE_DIR / "butce" / "butce.xlsx",
               BASE_DIR / "hazine nakit" / "nakit.xlsx", BASE_DIR / "yabanci para hareketi" / "dth.xlsx",
               BASE_DIR / "net rezerv" / "net_rezerv.xlsx", BASE_DIR / "kredi mevduat" / "kredi_mevduat.xlsx",
-              BASE_DIR / "cari acik" / "cari_acik_son.xlsx"]
+              BASE_DIR / "cari acik" / "cari_acik_son.xlsx",
+              *sorted((BASE_DIR / "bddk_data").glob("bddk_*.xls*"))]
     _bust = "|".join(str(int(p.stat().st_mtime)) for p in _paths if p.exists())
     cards = home_summaries(_bust)
 
@@ -3299,39 +3324,121 @@ elif selected == "bddk":
             unsafe_allow_html=True,
         )
 
+    # ── Haftalık Analiz Tabloları (ısı haritası) ──
+    # Excel indirmeye gerek kalmadan iki özet tablo burada üretilir.
+    import bddk_analiz as _ba
+
+    @st.cache_data
+    def _bddk_tablolar(src_dir, cache_key):
+        tl_b, usd_b, kaynak = _ba.load_latest(src_dir)
+        if tl_b is None:
+            return None
+        t1, t2, son, onceki = _ba.hesapla(tl_b, usd_b)
+        return {"t1": t1, "t2": t2, "son": son.strftime("%d.%m.%Y"),
+                "onceki": onceki.strftime("%d.%m.%Y") if onceki is not None else "", "kaynak": kaynak}
+
+    _bkey = max((f.stat().st_mtime for f in bddk_files), default=0)
+    _sonuc = _bddk_tablolar(str(source_dir), _bkey) if bddk_files else None
+
+    if _sonuc:
+        def _bul(rows, lbl):
+            for r in rows:
+                if r["label"] == lbl:
+                    return r
+            return {}
+
+        def _p(v):
+            return "—" if v is None else f"{v:+.1f}%".replace(".", ",")
+
+        _kr = _bul(_sonuc["t1"], "Toplam Krediler (TL)")
+        _mv = _bul(_sonuc["t2"], "Toplam Mevduat (TL Cinsi)")
+        _mk = _bul(_sonuc["t1"], "Toplam Menkul Değerler")
+        st.info(
+            f"📋 **{_sonuc['son']}** haftası: Toplam krediler (TL) haftalık **{_p(_kr.get('hafta'))}** "
+            f"(YtD {_p(_kr.get('ytd'))}, yıllık {_p(_kr.get('yillik'))}); toplam mevduat **{_p(_mv.get('hafta'))}** "
+            f"(YtD {_p(_mv.get('ytd'))}); menkul değerler {_p(_mk.get('hafta'))}. "
+            f"Önceki hafta: {_sonuc['onceki']}."
+        )
+
+        def _tablo_goster(rows, baslik):
+            st.subheader(baslik)
+            st.caption(f"{_sonuc['son']} itibarıyla · Toplam: Milyon TL (USD satırları Milyon USD) · "
+                       "Sağ 4 kolon: banka grubu bazında haftalık değişim")
+            cols = ["Kalem", "Toplam", "Haftalık", "YtD", "Yıllık",
+                    "Kamu", "Yerli Özel", "Yabancı Özel", "Katılım"]
+            num_map = {"Haftalık": "hafta", "YtD": "ytd", "Yıllık": "yillik",
+                       "Kamu": "kamu", "Yerli Özel": "yerli",
+                       "Yabancı Özel": "yabanci", "Katılım": "katilim"}
+
+            def _fmt_top(v):
+                return "—" if v is None else f"{v:,.0f}".replace(",", ".")
+
+            def _fmt_pct(v):
+                return "—" if v is None else f"{v:.1f}%".replace(".", ",")
+
+            disp = pd.DataFrame({
+                "Kalem": [" " * 4 * r["indent"] + r["label"] for r in rows],
+                "Toplam": [_fmt_top(r["toplam"]) for r in rows],
+                **{c: [_fmt_pct(r[k]) for r in rows] for c, k in num_map.items()},
+            })[cols]
+
+            def _stil(_):
+                css = pd.DataFrame("", index=disp.index, columns=disp.columns)
+                for c, k in num_map.items():
+                    for i in disp.index:
+                        rgb = _ba.renk(rows[i][k], _ba.OLCEK[k])
+                        if rgb:
+                            css.loc[i, c] = (f"background-color: rgb{rgb}; color:#111418; "
+                                             "font-weight:600; text-align:center;")
+                for i in disp.index:
+                    if rows[i]["bold"]:
+                        css.loc[i, "Kalem"] += "font-weight:700; color:#FFD28A;"
+                        css.loc[i, "Toplam"] += "font-weight:700;"
+                return css
+
+            st.dataframe(disp.style.apply(_stil, axis=None), hide_index=True,
+                         use_container_width=True, height=len(rows) * 35 + 42)
+
+        _tablo_goster(_sonuc["t1"], "📊 Menkul Değerler · Krediler · Bankalardan Alacaklar")
+        _tablo_goster(_sonuc["t2"], "💰 Mevduat · Diğer Bilanço Kalemleri")
+        st.caption("Kaynak: BDDK Haftalık Bülten (gelişmiş) · YtD = önceki yıl sonuna göre, "
+                   "Yıllık = 52 hafta öncesine göre değişim · KMH kalemleri çekilen veri setinde yok.")
+    else:
+        st.info("Analiz tabloları için önce veri çekilmeli (yerelde 'TL Çek' + 'USD Çek').")
+
     st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-    # İndirilen dosyalar listesi
+    # İndirilen dosyalar listesi (isteğe bağlı — tablolar için indirme GEREKMEZ)
     if bddk_files:
-        st.subheader(f"İndirilen Dosyalar ({len(bddk_files)})")
-        st.caption("📥 'İndir' butonuna tıkladığınızda dosya tarayıcınızın varsayılan indirme klasörüne (genellikle `~/Downloads`) inecektir.")
+        with st.expander(f"📁 Excel Dosyaları ({len(bddk_files)}) — indirme isteğe bağlı", expanded=False):
+            st.caption("📥 'İndir' butonuna tıkladığınızda dosya tarayıcınızın varsayılan indirme klasörüne (genellikle `~/Downloads`) inecektir.")
 
-        for idx, f in enumerate(bddk_files):
-            col_d1, col_d2, col_d3 = st.columns([4, 2, 1])
-            # En yeni dosya vurgulansın
-            highlight = (new_file_path is not None and f.name == new_file_path.name)
-            new_badge = ('<span style="background:#fef3c7; color:#92400e; padding:2px 8px; '
-                         'border-radius:6px; font-size:0.7rem; font-weight:600; margin-right:8px;">YENİ</span>') if highlight else ''
-            with col_d1:
-                # TL/USD ayrımı için renk
-                tag = ""
-                if "_TL_" in f.name:
-                    tag = '<span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:600; margin-right:8px;">TL</span>'
-                elif "_USD_" in f.name:
-                    tag = '<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:600; margin-right:8px;">USD</span>'
-                size_kb = f.stat().st_size / 1024
-                st.markdown(
-                    f'{new_badge}{tag}<span style="font-family:monospace; font-size:0.85rem;">{f.name}</span> '
-                    f'<span style="color:#94a3b8; font-size:0.75rem;">({size_kb:.0f} KB)</span>',
-                    unsafe_allow_html=True,
-                )
-            with col_d2:
-                st.markdown(
-                    f'<span style="color:#64748b; font-size:0.85rem;">{get_file_mod_time(f)}</span>',
-                    unsafe_allow_html=True,
-                )
-            with col_d3:
-                get_download_button(str(f), "📥 İndir")
+            for idx, f in enumerate(bddk_files):
+                col_d1, col_d2, col_d3 = st.columns([4, 2, 1])
+                # En yeni dosya vurgulansın
+                highlight = (new_file_path is not None and f.name == new_file_path.name)
+                new_badge = ('<span style="background:#fef3c7; color:#92400e; padding:2px 8px; '
+                             'border-radius:6px; font-size:0.7rem; font-weight:600; margin-right:8px;">YENİ</span>') if highlight else ''
+                with col_d1:
+                    # TL/USD ayrımı için renk
+                    tag = ""
+                    if "_TL_" in f.name:
+                        tag = '<span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:600; margin-right:8px;">TL</span>'
+                    elif "_USD_" in f.name:
+                        tag = '<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:6px; font-size:0.7rem; font-weight:600; margin-right:8px;">USD</span>'
+                    size_kb = f.stat().st_size / 1024
+                    st.markdown(
+                        f'{new_badge}{tag}<span style="font-family:monospace; font-size:0.85rem;">{f.name}</span> '
+                        f'<span style="color:#94a3b8; font-size:0.75rem;">({size_kb:.0f} KB)</span>',
+                        unsafe_allow_html=True,
+                    )
+                with col_d2:
+                    st.markdown(
+                        f'<span style="color:#64748b; font-size:0.85rem;">{get_file_mod_time(f)}</span>',
+                        unsafe_allow_html=True,
+                    )
+                with col_d3:
+                    get_download_button(str(f), "📥 İndir")
     else:
         st.info("Henüz BDDK verisi çekilmemiş. Yukarıdaki butonlarla veri çekebilirsiniz.")
 

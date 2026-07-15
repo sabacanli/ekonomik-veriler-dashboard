@@ -397,6 +397,37 @@ def build_cari():
     })
 
 
+def build_bddk():
+    import bddk_analiz as ba
+    tl_b, usd_b, kaynak = ba.load_latest(BASE / "bddk_data")
+    if tl_b is None:
+        raise RuntimeError("bddk_data içinde TL/USD Excel yok")
+    t1, t2, son, onceki = ba.hesapla(tl_b, usd_b)
+
+    def g(rows, lbl):
+        return next((r for r in rows if r["label"] == lbl), {})
+
+    def pp(v):
+        return "—" if v is None else f"{v:+.1f}%".replace(".", ",")
+
+    kr, mv = g(t1, "Toplam Krediler (TL)"), g(t2, "Toplam Mevduat (TL Cinsi)")
+    mk = g(t1, "Toplam Menkul Değerler")
+    ozet = (f"<b>{son.strftime('%d.%m.%Y')}</b> haftası: Toplam krediler (TL) haftalık "
+            f"<b>{pp(kr.get('hafta'))}</b> (YtD {pp(kr.get('ytd'))}, yıllık {pp(kr.get('yillik'))}); "
+            f"toplam mevduat <b>{pp(mv.get('hafta'))}</b> (YtD {pp(mv.get('ytd'))}, "
+            f"yıllık {pp(mv.get('yillik'))}); menkul değerler {pp(mk.get('hafta'))}.")
+
+    dump("bddk.json", {
+        "updated": mtime(BASE / "bddk_data" / kaynak),
+        "son": son.strftime("%d.%m.%Y"),
+        "onceki": onceki.strftime("%d.%m.%Y") if onceki is not None else "",
+        "ozet_html": ozet,
+        "tablo1": t1,
+        "tablo2": t2,
+        "olcek": ba.OLCEK,
+    })
+
+
 # ──────────────────────────────────────────────────────────────
 # Ana sayfa kartları (dashboard.py home_summaries ile aynı mantık)
 # ──────────────────────────────────────────────────────────────
@@ -546,6 +577,27 @@ def build_home():
     except Exception:
         pass
     try:
+        import bddk_analiz as ba
+        tl_b, usd_b, _ = ba.load_latest(BASE / "bddk_data")
+        if tl_b is not None:
+            t1, t2, son, _ = ba.hesapla(tl_b, usd_b)
+
+            def g(rows, lbl):
+                return next((r for r in rows if r["label"] == lbl), {})
+
+            def pp(v):
+                return "—" if v is None else f"{v:+.1f}%".replace(".", ",")
+
+            kr, mv = g(t1, "Toplam Krediler (TL)"), g(t2, "Toplam Mevduat (TL Cinsi)")
+            tlm, ypm = g(t2, "TL Mevduat"), g(t2, "YP Mevduat (USD)")
+            add("📑", "BDDK Bankacılık",
+                f"{son.strftime('%d.%m.%Y')} haftası: toplam krediler (TL) haftalık <b>{pp(kr.get('hafta'))}</b> "
+                f"(yıllık {pp(kr.get('yillik'))}), toplam mevduat <b>{pp(mv.get('hafta'))}</b> "
+                f"(yıllık {pp(mv.get('yillik'))}). TL mevduat {pp(tlm.get('hafta'))}, "
+                f"YP mevduat (USD) {pp(ypm.get('hafta'))}.", "bddk.html")
+    except Exception:
+        pass
+    try:
         td = BASE / "tcmb haftalık stok" / "output"
 
         def lv(n):
@@ -598,7 +650,8 @@ def main():
                      ("dth", build_dth), ("enflasyon", build_enflasyon),
                      ("butce", build_butce), ("nakit", build_nakit),
                      ("rezerv", build_rezerv), ("kredi", build_kredi),
-                     ("mevduat", build_mevduat), ("cari", build_cari)]:
+                     ("mevduat", build_mevduat), ("cari", build_cari),
+                     ("bddk", build_bddk)]:
         try:
             fn()
             ok += 1

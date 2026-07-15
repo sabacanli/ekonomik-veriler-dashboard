@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BDDK Bankacılık Verileri — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=3">
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">BDDK Bankacılık Verileri</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet"></div>
+
+    <section class="chart-card">
+      <h3>📊 Menkul Değerler · Krediler · Bankalardan Alacaklar</h3>
+      <p class="cap" id="cap1"></p>
+      <div class="table-wrap" id="t1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>💰 Mevduat · Diğer Bilanço Kalemleri</h3>
+      <p class="cap" id="cap2"></p>
+      <div class="table-wrap" id="t2"></div>
+    </section>
+
+    <footer>Kaynak: BDDK Haftalık Bülten (gelişmiş) · Toplam: Milyon TL (USD satırları Milyon USD) ·
+      YtD = önceki yıl sonuna göre, Yıllık = 52 hafta öncesine göre değişim ·
+      Sağ 4 kolon: banka grubu bazında haftalık değişim.</footer>
+  </main>
+
+  <script src="assets/app.js?v=3"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/bddk.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+      const cap = D.son + " itibarıyla · Önceki hafta: " + D.onceki;
+      document.getElementById("cap1").textContent = cap;
+      document.getElementById("cap2").textContent = cap;
+
+      // Isı haritası rengi: kırmızı (−) → sarı (0) → yeşil (+)
+      function heat(v, olcek) {
+        if (v === null || v === undefined) return null;
+        const x = Math.max(-1, Math.min(1, v / olcek));
+        const KIR = [224, 92, 87], SAR = [238, 210, 100], YES = [80, 178, 110];
+        let a, b, t;
+        if (x < 0) { a = KIR; b = SAR; t = x + 1; } else { a = SAR; b = YES; t = x; }
+        const c = a.map((av, i) => Math.round(av + (b[i] - av) * t));
+        return "rgb(" + c.join(",") + ")";
+      }
+
+      const fTop = v => (v === null ? "—" : trNum(v, 0));
+      const fPct = v => (v === null ? "—" : trNum(v, 1) + "%");
+
+      const KOLONLAR = [["hafta", "Haftalık"], ["ytd", "YtD"], ["yillik", "Yıllık"],
+                        ["kamu", "Kamu"], ["yerli", "Yerli Özel"],
+                        ["yabanci", "Yabancı Özel"], ["katilim", "Katılım"]];
+
+      function tablo(rows) {
+        let h = '<table class="heat"><thead>';
+        h += '<tr><th></th><th colspan="4" class="grp">Sektör</th><th colspan="4" class="grp">Sektör Kırılımı (Haftalık)</th></tr>';
+        h += '<tr><th style="text-align:left">Kalem</th><th>Toplam</th>' +
+             KOLONLAR.map(k => "<th>" + k[1] + "</th>").join("") + "</tr></thead><tbody>";
+        for (const r of rows) {
+          const cls = r.bold ? ' class="sec"' : "";
+          const pad = "&nbsp;&nbsp;&nbsp;&nbsp;".repeat(r.indent);
+          h += "<tr" + cls + '><td class="lbl">' + pad + r.label + "</td>";
+          h += '<td class="num">' + fTop(r.toplam) + "</td>";
+          for (const [k] of KOLONLAR) {
+            const bg = heat(r[k], D.olcek[k]);
+            h += bg
+              ? '<td class="pct" style="background:' + bg + '">' + fPct(r[k]) + "</td>"
+              : '<td class="bos">—</td>';
+          }
+          h += "</tr>";
+        }
+        return h + "</tbody></table>";
+      }
+
+      document.getElementById("t1").innerHTML = tablo(D.tablo1);
+      document.getElementById("t2").innerHTML = tablo(D.tablo2);
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>
