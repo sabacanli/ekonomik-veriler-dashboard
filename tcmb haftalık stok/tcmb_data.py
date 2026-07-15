@@ -36,6 +36,23 @@ SERIES = {
     "TP.MKNETHAR.M8":  "DIBS Degisim",
 }
 
+# Haftalik NET YABANCI HAREKETI bilesenleri (hepsi akim, Milyon USD).
+# hareket.xlsx'e yazilir; dashboard'daki 5 grafigin kaynagi budur.
+FLOW_SERIES = {
+    "TP.MKNETHAR.M7":  "hisse",                  # 2.1.1 Hisse Senedi
+    "TP.MKNETHAR.M8":  "dibs_kesin",             # 2.1.2 DIBS (Kesin Alim)
+    "TP.MKNETHAR.M9":  "dibs_tersrepo",          # 4.1 DIBS (Ters Repo)
+    "TP.MKNETHAR.M10": "dibs_teminat",           # 4.2 DIBS (Teminat Alim)
+    "TP.MKNETHAR.M11": "dibs_odunc",             # 4.3 DIBS (Odunc Alim)
+    "TP.MKNETHAR.M12": "ost",                    # 2.1.3 Genel Yonetim Disi Borclanma Senetleri
+    "TP.MKNETHAR.M23": "euro_genel_yonetim",     # 2.2.1 Genel Yonetim Ihraclari (Eurobond)
+    "TP.MKNETHAR.M24": "euro_finansal_olmayan",  # 2.2.2 Finansal Olmayan Kurulus Ihraclari
+    "TP.MKNETHAR.M25": "euro_banka",             # 2.2.3 Banka Ihraclari
+    "TP.MKNETHAR.M26": "euro_diger_finansal",    # 2.2.4 Diger Finansal Kurulus Ihraclari
+}
+
+ALL_CODES = list(dict.fromkeys(list(SERIES) + list(FLOW_SERIES)))
+
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["axes.unicode_minus"] = False
 
@@ -48,7 +65,7 @@ def fetch_all_series(start: str = "01-01-2010") -> dict[str, pd.DataFrame]:
     import requests
     key = os.environ.get("TCMB_API_KEY") or os.environ.get("EVDS_API_KEY", "")
     end = datetime.now().strftime("%d-%m-%Y")
-    url = (f"https://evds3.tcmb.gov.tr/igmevdsms-dis/series={'-'.join(SERIES.keys())}"
+    url = (f"https://evds3.tcmb.gov.tr/igmevdsms-dis/series={'-'.join(ALL_CODES)}"
            f"&startDate={start}&endDate={end}&type=json")
     headers = {"key": key, "User-Agent": "Mozilla/5.0", "Accept": "application/json"}
     all_data = {}
@@ -59,7 +76,8 @@ def fetch_all_series(start: str = "01-01-2010") -> dict[str, pd.DataFrame]:
     except Exception as e:
         print(f"  EVDS HATA: {e}")
         return all_data
-    for code, name in SERIES.items():
+    for code in ALL_CODES:
+        name = SERIES.get(code) or FLOW_SERIES.get(code)
         k = code.replace(".", "_")
         rows = []
         for it in items:
@@ -263,6 +281,42 @@ def make_cumulative_ts(all_data: dict[str, pd.DataFrame]):
             print(f"  kumulatif_{safe}.png")
 
 
+# ── 4) Net Yabanci Hareketi (hareket.xlsx) ──────────────────
+
+def make_hareket(all_data: dict[str, pd.DataFrame]):
+    """Akim serilerini tek tabloda birlestirir ve turetilmis kolonlari ekler:
+    dibs_dolayli = ters repo + teminat + odunc
+    eurobond     = genel yonetim + finansal olmayan + banka + diger finansal
+    menkul_toplam= hisse + dibs_kesin + dibs_dolayli + ost   (Eurobond haric)
+    toplam       = menkul_toplam + eurobond
+    """
+    cols = {}
+    for code, name in FLOW_SERIES.items():
+        if code in all_data:
+            cols[name] = all_data[code].set_index("date")["value"]
+    if not cols:
+        print("  hareket: akim verisi yok")
+        return
+    h = pd.DataFrame(cols).sort_index()
+    h = h.dropna(subset=["hisse", "dibs_kesin"], how="all")
+    h["dibs_dolayli"] = h[["dibs_tersrepo", "dibs_teminat", "dibs_odunc"]].sum(axis=1, min_count=1)
+    h["eurobond"] = h[["euro_genel_yonetim", "euro_finansal_olmayan",
+                       "euro_banka", "euro_diger_finansal"]].sum(axis=1, min_count=1)
+    h["menkul_toplam"] = h[["hisse", "dibs_kesin", "dibs_dolayli", "ost"]].sum(axis=1, min_count=1)
+    h["toplam"] = h[["menkul_toplam", "eurobond"]].sum(axis=1, min_count=1)
+    out = h.reset_index().rename(columns={"date": "tarih"})
+    order = ["tarih", "hisse", "dibs_kesin", "dibs_dolayli", "ost", "eurobond",
+             "menkul_toplam", "toplam", "dibs_tersrepo", "dibs_teminat", "dibs_odunc",
+             "euro_genel_yonetim", "euro_finansal_olmayan", "euro_banka", "euro_diger_finansal"]
+    out = out[[c for c in order if c in out.columns]]
+    out.to_excel(OUTPUT_DIR / "hareket.xlsx", sheet_name="Haftalik", index=False)
+    L = out.iloc[-1]
+    print(f"  hareket.xlsx: {len(out)} hafta | son {L['tarih'].date()}")
+    print(f"    hisse={L['hisse']:,.0f}  dibs_kesin={L['dibs_kesin']:,.0f}  "
+          f"dibs_dolayli={L['dibs_dolayli']:,.0f}  ost={L['ost']:,.0f}  "
+          f"eurobond={L['eurobond']:,.0f}  TOPLAM={L['toplam']:,.0f}")
+
+
 # ── Ana Calisma ─────────────────────────────────────────────
 
 def run():
@@ -272,26 +326,32 @@ def run():
     print("=" * 60)
 
     # Veri cek
-    print("\n[1/4] Veriler cekiliyor...")
+    print("\n[1/5] Veriler cekiliyor...")
     all_data = fetch_all_series()
     if not all_data:
         print("Hic veri cekilemedi!")
         return
 
-    # Ham veri kaydet
-    for code, df in all_data.items():
-        name = SERIES[code].replace(" ", "_")
-        df.to_csv(OUTPUT_DIR / f"raw_{name}.csv", index=False)
+    # Ham veri kaydet (yalnizca cekirdek stok/akim serileri)
+    for code in SERIES:
+        if code in all_data:
+            name = SERIES[code].replace(" ", "_")
+            all_data[code].to_csv(OUTPUT_DIR / f"raw_{name}.csv", index=False)
+
+    core = {c: d for c, d in all_data.items() if c in SERIES}
 
     # Grafikler
-    print("\n[2/4] Son hafta tablosu...")
-    make_recent_table(all_data, n_weeks=5)
+    print("\n[2/5] Son hafta tablosu...")
+    make_recent_table(core, n_weeks=5)
 
-    print("\n[3/4] Histogram...")
-    make_histogram(all_data, n_weeks=20)
+    print("\n[3/5] Histogram...")
+    make_histogram(core, n_weeks=20)
 
-    print("\n[4/4] Kumulatif time series...")
-    make_cumulative_ts(all_data)
+    print("\n[4/5] Kumulatif time series...")
+    make_cumulative_ts(core)
+
+    print("\n[5/5] Net yabanci hareketi (hareket.xlsx)...")
+    make_hareket(all_data)
 
     print(f"\n{'=' * 60}")
     print(f"Tamamlandi! -> {OUTPUT_DIR}")

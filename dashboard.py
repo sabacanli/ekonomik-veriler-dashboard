@@ -980,24 +980,33 @@ if selected == "ana_sayfa":
             _dd, _ = _lv("DIBS_Degisim")
             if _hs is not None or _ds is not None:
                 _stok = (_hs or 0) + (_ds or 0)
-                _akim = (_hd or 0) + (_dd or 0)
                 base = (f"{_ld} itibarıyla yurt dışı yerleşiklerin Türkiye menkul kıymet stoku "
-                        f"<b>{_ht(_stok/1000)} milyar USD</b> (Hisse {_ht(_hs/1000)}, DİBS {_ht(_ds/1000)} milyar) "
-                        f"— bu hafta net akım <b>{_ht(_akim, 0, sign=True)} milyon USD</b>.")
+                        f"<b>{_ht(_stok/1000)} milyar USD</b> (Hisse {_ht(_hs/1000)}, DİBS {_ht(_ds/1000)} milyar).")
                 analiz = ""
                 try:
-                    fh = _flow("Hisse_Degisim"); fd = _flow("DIBS_Degisim")
-                    if fh is not None and fd is not None:
-                        s4 = float(fh["value"].tail(4).sum() + fd["value"].tail(4).sum())
-                        _yr = int(pd.to_datetime(_ld).year)
-                        yflow = float(fh[fh["date"].dt.year == _yr]["value"].sum()
-                                      + fd[fd["date"].dt.year == _yr]["value"].sum())
-                        w4 = "giriş" if s4 >= 0 else "çıkış"
-                        wy = "giriş" if yflow >= 0 else "çıkış"
-                        analiz = (f" Son 4 haftada kümülatif net <b>{_ht(abs(s4), 0)} milyon USD {w4}</b>; "
-                                  f"yılbaşından beri {_ht(abs(yflow), 0)} milyon USD {wy}.")
+                    hx = pd.read_excel(_td / "hareket.xlsx", sheet_name="Haftalik")
+                    hx["tarih"] = pd.to_datetime(hx["tarih"]); hx = hx.sort_values("tarih")
+                    hL = hx.iloc[-1]
+                    s4h = float(hx["toplam"].tail(4).sum())
+                    yflow = float(hx[hx["tarih"].dt.year == int(hL["tarih"].year)]["toplam"].sum())
+                    analiz = (f" Bu hafta toplam net yabancı hareketi (ÖST + Eurobond dahil) "
+                              f"<b>{_ht(hL['toplam']/1000, 1, sign=True)} milyar USD</b>; "
+                              f"son 4 haftada {_ht(s4h/1000, 1, sign=True)}, "
+                              f"yılbaşından beri {_ht(yflow/1000, 1, sign=True)} milyar USD.")
                 except Exception:
-                    pass
+                    try:
+                        fh = _flow("Hisse_Degisim"); fd = _flow("DIBS_Degisim")
+                        if fh is not None and fd is not None:
+                            s4 = float(fh["value"].tail(4).sum() + fd["value"].tail(4).sum())
+                            _yr = int(pd.to_datetime(_ld).year)
+                            yflow = float(fh[fh["date"].dt.year == _yr]["value"].sum()
+                                          + fd[fd["date"].dt.year == _yr]["value"].sum())
+                            w4 = "giriş" if s4 >= 0 else "çıkış"
+                            wy = "giriş" if yflow >= 0 else "çıkış"
+                            analiz = (f" Son 4 haftada kümülatif net <b>{_ht(abs(s4), 0)} milyon USD {w4}</b>; "
+                                      f"yılbaşından beri {_ht(abs(yflow), 0)} milyon USD {wy}.")
+                    except Exception:
+                        pass
                 out.append(("📊 Yabancı Menkul Kıymet Yatırımı", base + analiz))
         except Exception:
             pass
@@ -1028,7 +1037,7 @@ if selected == "ana_sayfa":
 # ══════════════════════════════════════════════════════════
 
 elif selected == "tcmb_stok":
-    st.markdown('<div class="main-header">TCMB Haftalık Menkul Kıymet Stokları</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Menkul Kıymetlerde Net Yabancı Hareketi ve Stok</div>', unsafe_allow_html=True)
 
     output_dir = BASE_DIR / "tcmb haftalık stok" / "output"
     script_path = BASE_DIR / "tcmb haftalık stok" / "tcmb_data.py"
@@ -1051,7 +1060,9 @@ elif selected == "tcmb_stok":
     # ── Otomatik Özet Bilgisi ──
     # Tüm veriler YURT DIŞI yerleşiklerin Türkiye menkul kıymet yatırımıdır.
     # raw_Hisse_Stok / raw_DIBS_Stok = STOK (portföy düzeyi),
-    # raw_Hisse_Degisim / raw_DIBS_Degisim = haftalık net akım.
+    # output/hareket.xlsx = haftalık NET YABANCI HAREKETİ bileşenleri (akım):
+    #   hisse (M7), dibs_kesin (M8), dibs_dolayli (M9+M10+M11), ost (M12),
+    #   eurobond (M23+M24+M25+M26), menkul_toplam (Eurobond hariç), toplam.
     @st.cache_data
     def build_tcmb_stok_summary(out_dir, cache_key):
         def _last(name):
@@ -1073,69 +1084,185 @@ elif selected == "tcmb_stok":
         dibs_stok = dibs_stok or 0.0
         hisse_deg = hisse_deg or 0.0
         dibs_deg = dibs_deg or 0.0
-        stok = hisse_stok + dibs_stok
-        akim = hisse_deg + dibs_deg
-        last_date = dt1 or dt2
-        yon = "giriş" if akim >= 0 else "çıkış"
-        header = (f"Yurt dışı yerleşiklerin Türkiye menkul kıymet stoku {last_date} itibarıyla toplam "
-                  f"**{stok:,.0f} milyon USD** (Hisse {hisse_stok:,.0f}, DİBS {dibs_stok:,.0f} milyon USD). "
-                  f"Bu hafta net **{akim:+,.0f} milyon USD {yon}** "
-                  f"(Hisse {hisse_deg:+,.0f}, DİBS {dibs_deg:+,.0f} milyon USD).")
-        return {"header": header, "last_date": last_date, "stok": stok,
+        return {"last_date": dt1 or dt2, "stok": hisse_stok + dibs_stok,
                 "hisse_stok": hisse_stok, "dibs_stok": dibs_stok,
-                "akim": akim, "hisse_deg": hisse_deg, "dibs_deg": dibs_deg}
+                "akim": hisse_deg + dibs_deg, "hisse_deg": hisse_deg, "dibs_deg": dibs_deg}
+
+    @st.cache_data
+    def load_hareket(path, cache_key):
+        hh = pd.read_excel(path, sheet_name="Haftalik")
+        hh["tarih"] = pd.to_datetime(hh["tarih"], errors="coerce")
+        hh = hh.dropna(subset=["tarih"]).sort_values("tarih").reset_index(drop=True)
+        hh["dibs_toplam"] = hh[["dibs_kesin", "dibs_dolayli"]].sum(axis=1, min_count=1)
+        hh["toplam_4h"] = hh["toplam"].rolling(4).sum()
+        hh["menkul_4h"] = hh["menkul_toplam"].rolling(4).sum()
+        return hh
 
     csv_paths = list(output_dir.glob("raw_*.csv"))
     _cache_key = max((p.stat().st_mtime for p in csv_paths), default=0)
     stok_ozet = build_tcmb_stok_summary(str(output_dir), _cache_key)
+
+    hareket_path = output_dir / "hareket.xlsx"
+    H = None
+    if hareket_path.exists():
+        try:
+            H = load_hareket(str(hareket_path), int(hareket_path.stat().st_mtime))
+        except Exception:
+            H = None
+
+    # Türkçe sayı biçimleri (taban birim: Milyon USD)
+    def _tr0(v):
+        return f"{v:,.0f}".replace(",", ".")
+
+    def _trs(v):
+        return f"{v:+,.0f}".replace(",", ".")
+
+    def _mia(v):
+        return f"{v/1000:+,.1f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
     if stok_ozet:
-        st.info(f"📋 **Özet:** {stok_ozet['header']}")
-        st.caption("Tüm veriler **yurt dışı yerleşiklerin** Türkiye hisse senedi ve DİBS yatırımıdır (Kaynak: TCMB EVDS).")
-        cm1, cm2, cm3 = st.columns(3)
+        ozet = (f"Yurt dışı yerleşiklerin Türkiye menkul kıymet stoku {stok_ozet['last_date']} itibarıyla toplam "
+                f"**{_tr0(stok_ozet['stok'])} milyon USD** (Hisse {_tr0(stok_ozet['hisse_stok'])}, "
+                f"DİBS {_tr0(stok_ozet['dibs_stok'])} milyon USD).")
+        if H is not None and not H.empty:
+            Lh = H.iloc[-1]
+            yon = "giriş" if Lh["toplam"] >= 0 else "çıkış"
+            ozet += (f" **{Lh['tarih'].strftime('%d.%m.%Y')}** haftasında toplam net yabancı hareketi "
+                     f"**{_mia(Lh['toplam'])} milyar USD {yon}**: Hisse {_trs(Lh['hisse'])}, "
+                     f"DİBS {_trs(Lh['dibs_toplam'])} (kesin {_trs(Lh['dibs_kesin'])}, dolaylı {_trs(Lh['dibs_dolayli'])}), "
+                     f"ÖST {_trs(Lh['ost'])}, Eurobond {_trs(Lh['eurobond'])} milyon USD. "
+                     f"Son 4 haftada kümülatif **{_mia(Lh['toplam_4h'])} milyar USD**.")
+        st.info(f"📋 **Özet:** {ozet}")
+        st.caption("Tüm veriler **yurt dışı yerleşiklerin** Türkiye menkul kıymet yatırımıdır (Kaynak: TCMB EVDS).")
+        cm1, cm2, cm3, cm4 = st.columns(4)
         with cm1:
-            st.metric("Toplam Stok (Milyon USD)", f"{stok_ozet['stok']:,.0f}",
-                      f"{stok_ozet['akim']:+,.0f}")
+            st.metric("Toplam Stok (Milyon USD)", _tr0(stok_ozet["stok"]),
+                      _trs(stok_ozet["akim"]))
         with cm2:
-            st.metric("Hisse Senedi Stok", f"{stok_ozet['hisse_stok']:,.0f}",
-                      f"{stok_ozet['hisse_deg']:+,.0f}")
+            st.metric("Hisse Senedi Stok", _tr0(stok_ozet["hisse_stok"]),
+                      _trs(stok_ozet["hisse_deg"]))
         with cm3:
-            st.metric("DİBS Stok", f"{stok_ozet['dibs_stok']:,.0f}",
-                      f"{stok_ozet['dibs_deg']:+,.0f}")
-        st.caption("Δ = bu haftaki net akım (Milyon USD)")
+            st.metric("DİBS Stok", _tr0(stok_ozet["dibs_stok"]),
+                      _trs(stok_ozet["dibs_deg"]))
+        with cm4:
+            if H is not None and not H.empty:
+                st.metric("Net Yabancı Hareketi (hafta)", _trs(H.iloc[-1]["toplam"]),
+                          help="Hisse + DİBS (kesin+dolaylı) + ÖST + Eurobond — Milyon USD.")
+            else:
+                st.metric("Net Yabancı Hareketi (hafta)", "—")
+        st.caption("Δ = bu haftaki net akım, yalnız kesin alım (Hisse M7 / DİBS M8) — Milyon USD")
 
-    # Sekmeler
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📋 Son Hafta Tablosu",
-        "📊 Haftalık Histogram",
-        "📈 Kümülatif Grafikler",
-        "📁 Ham Veriler",
-    ])
+    # ── Net Yabancı Hareketi Grafikleri (haftalık akım) ──
+    if H is not None and len(H) >= 4:
+        hafta_n = st.slider("Gösterilecek hafta sayısı", 12, 104, 27, key="tcmb_hafta_n")
+        hp = H.tail(hafta_n)
+        Lh = H.iloc[-1]
 
-    # Tab 1: Son hafta tablosu
-    with tab1:
-        st.subheader("Son 5 Hafta — Stok ve Haftalık Net Akım (Milyon USD)")
-        show_image_with_download(str(tablo_path), "Son 5 Hafta Tablosu")
+        # Türkçe etiket biçimleri
+        def _t1(v):
+            return f"{v:,.1f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
 
-    # Tab 2: Histogram
-    with tab2:
-        st.subheader("Haftalık Net Akım — Hisse & DİBS (Milyon USD)")
-        hist_path = output_dir / "histogram_haftalik.png"
-        show_image_with_download(str(hist_path), "Haftalık Net Akım Histogramı")
+        def _t0(v):
+            return f"{v:,.0f}".replace(",", ".")
 
-    # Tab 3: Kümülatif grafikler (yalnızca stok serileri)
-    with tab3:
-        st.subheader("Yıl Başından Kümülatif Stok Değişimi")
-        series_map = {
-            "Hisse Senedi Stok": "kumulatif_Hisse_Stok.png",
-            "DİBS Stok": "kumulatif_DIBS_Stok.png",
-        }
-        selected_series = st.selectbox("Seri Seçin", list(series_map.keys()), key="cum_series")
-        img_file = output_dir / series_map[selected_series]
-        show_image_with_download(str(img_file), f"{selected_series} — Yıl Başından Kümülatif Değişim")
+        # Son bar segment etiketi (yığın sırasına göre uç noktaya yazar)
+        def _bar_etiket(fig, x, items):
+            pos = neg = 0.0
+            for y, txt, color in items:
+                if pd.isna(y):
+                    continue
+                if y >= 0:
+                    pos += y; yy = pos; shift = 12
+                else:
+                    neg += y; yy = neg; shift = -14
+                fig.add_annotation(x=x, y=yy, text=txt, showarrow=False, yshift=shift,
+                                   font=dict(size=13, color=color))
 
-    # Tab 4: Ham Veriler
-    with tab4:
-        st.subheader("Ham Veri Dosyaları")
+        # 1) Toplam net yabancı hareketi (Eurobond dahil) + 4 haftalık hareketli toplam
+        st.subheader("Türkiye'nin Menkul Kıymetlerinde Tahmini Net Yabancı Hareketi")
+        st.caption("Hisse + DİBS (kesin+dolaylı) + ÖST + Eurobond — Milyar USD · Kesikli çizgi: 4 haftalık hareketli toplam")
+        f1 = go.Figure()
+        f1.add_bar(x=hp["tarih"], y=hp["toplam"] / 1000, name="Hisse + DİBS + ÖST + Eurobond",
+                   marker_color="#4C9AFF")
+        f1.add_scatter(x=hp["tarih"], y=hp["toplam_4h"] / 1000, name="4-Haftalık Hareketli Toplam",
+                       mode="lines", line=dict(color="#9AA4B2", width=2, dash="dash"))
+        f1.update_traces(hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>%{fullData.name}</extra>")
+        f1.update_layout(height=400, separators=",.", legend_title_text="",
+                         legend=dict(orientation="h", yanchor="bottom", y=-0.35))
+        _bar_etiket(f1, Lh["tarih"], [(Lh["toplam"] / 1000, _t1(Lh["toplam"] / 1000), "#4C9AFF")])
+        f1.add_annotation(x=Lh["tarih"], y=Lh["toplam_4h"] / 1000, text=_t1(Lh["toplam_4h"] / 1000),
+                          showarrow=False, yshift=14, font=dict(size=13, color="#9AA4B2"))
+        styled_chart(f1)
+
+        # 2) Menkul kıymetler (Eurobond hariç) + 4 haftalık hareketli toplam
+        st.subheader("Menkul Kıymetlerde Net Yabancı Hareketi (Eurobond Hariç)")
+        st.caption("Hisse + DİBS (kesin+dolaylı) + ÖST — Milyar USD · Kesikli çizgi: 4 haftalık hareketli toplam")
+        f2 = go.Figure()
+        f2.add_bar(x=hp["tarih"], y=hp["menkul_toplam"] / 1000, name="Hisse + DİBS + ÖST",
+                   marker_color="#4C9AFF")
+        f2.add_scatter(x=hp["tarih"], y=hp["menkul_4h"] / 1000, name="4-Haftalık Hareketli Toplam",
+                       mode="lines", line=dict(color="#9AA4B2", width=2, dash="dash"))
+        f2.update_traces(hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>%{fullData.name}</extra>")
+        f2.update_layout(height=400, separators=",.", legend_title_text="",
+                         legend=dict(orientation="h", yanchor="bottom", y=-0.35))
+        _bar_etiket(f2, Lh["tarih"], [(Lh["menkul_toplam"] / 1000, _t1(Lh["menkul_toplam"] / 1000), "#4C9AFF")])
+        f2.add_annotation(x=Lh["tarih"], y=Lh["menkul_4h"] / 1000, text=_t1(Lh["menkul_4h"] / 1000),
+                          showarrow=False, yshift=14, font=dict(size=13, color="#9AA4B2"))
+        styled_chart(f2)
+
+        # 3) Hisse
+        st.subheader("Hisse Senedi — Net Yabancı Hareketi")
+        st.caption("Milyon USD")
+        f3 = go.Figure()
+        f3.add_bar(x=hp["tarih"], y=hp["hisse"], name="Hisse", marker_color="#ED7D31")
+        f3.update_traces(hovertemplate="%{x|%d.%m.%Y}<br>%{y:,.0f} milyon USD<extra></extra>")
+        f3.update_layout(height=360, separators=",.", showlegend=False)
+        _bar_etiket(f3, Lh["tarih"], [(Lh["hisse"], _t0(Lh["hisse"]), "#ED7D31")])
+        styled_chart(f3)
+
+        # 4) DİBS — Kesin & Dolaylı Alım (yığılmış)
+        st.subheader("DİBS — Net Yabancı Hareketi (Kesin & Dolaylı Alım)")
+        st.caption("Milyon USD · Dolaylı alım = ters repo + teminat + ödünç")
+        f4 = go.Figure()
+        f4.add_bar(x=hp["tarih"], y=hp["dibs_kesin"], name="DİBS Kesin Alım", marker_color="#3D7BE0")
+        f4.add_bar(x=hp["tarih"], y=hp["dibs_dolayli"], name="DİBS Dolaylı Alım", marker_color="#6FD1FF")
+        f4.update_traces(hovertemplate="%{x|%d.%m.%Y}<br>%{y:,.0f} milyon USD<extra>%{fullData.name}</extra>")
+        f4.update_layout(height=380, separators=",.", barmode="relative", legend_title_text="",
+                         legend=dict(orientation="h", yanchor="bottom", y=-0.35))
+        _bar_etiket(f4, Lh["tarih"], [(Lh["dibs_kesin"], _t0(Lh["dibs_kesin"]), "#3D7BE0"),
+                                      (Lh["dibs_dolayli"], _t0(Lh["dibs_dolayli"]), "#6FD1FF")])
+        styled_chart(f4)
+
+        # 5) Eurobond
+        st.subheader("Türkiye Eurobond — Net Yabancı Hareketi")
+        st.caption("Milyon USD · Yurt dışında ihraç edilen genel yönetim, banka, şirket ve diğer finansal kuruluş borçlanma araçları dahil")
+        f5 = go.Figure()
+        f5.add_bar(x=hp["tarih"], y=hp["eurobond"], name="Eurobond", marker_color="#B98AFF")
+        f5.update_traces(hovertemplate="%{x|%d.%m.%Y}<br>%{y:,.0f} milyon USD<extra></extra>")
+        f5.update_layout(height=360, separators=",.", showlegend=False)
+        _bar_etiket(f5, Lh["tarih"], [(Lh["eurobond"], _t0(Lh["eurobond"]), "#B98AFF")])
+        styled_chart(f5)
+
+        # Detay tablo — son 8 hafta
+        with st.expander("📋 Son 8 Hafta Detay (Milyon USD)", expanded=False):
+            t8 = H.tail(8).iloc[::-1]
+            disp = pd.DataFrame({
+                "Hafta": t8["tarih"].dt.strftime("%d.%m.%Y"),
+                "Hisse": t8["hisse"].apply(_trs),
+                "DİBS Kesin": t8["dibs_kesin"].apply(_trs),
+                "DİBS Dolaylı": t8["dibs_dolayli"].apply(_trs),
+                "ÖST": t8["ost"].apply(_trs),
+                "Eurobond": t8["eurobond"].apply(_trs),
+                "Menkul (Eurobond hariç)": t8["menkul_toplam"].apply(_trs),
+                "Toplam": t8["toplam"].apply(_trs),
+            })
+            st.dataframe(disp, hide_index=True, use_container_width=True)
+        get_download_button(str(hareket_path), "📥 Net Yabancı Hareketi (.xlsx)")
+    else:
+        st.info("Net yabancı hareketi verisi henüz yok — '🔄 Verileri Güncelle'ye tıklayın.")
+
+    # ── Ham Veriler (stok & akım serileri) ──
+    with st.expander("📁 Ham Veriler — Stok & Akım Serileri", expanded=False):
         csv_files = sorted(output_dir.glob("raw_*.csv")) if output_dir.exists() else []
 
         if csv_files:
@@ -1171,14 +1298,11 @@ elif selected == "tcmb_stok":
             )
             styled_chart(fig)
 
-            # Tablo
-            with st.expander("Veri Tablosu (Son 20 Satır)"):
-                st.dataframe(
-                    df.tail(20).sort_values("date", ascending=False),
-                    use_container_width=True,
-                    hide_index=True,
-                )
-
+            st.dataframe(
+                df.tail(20).sort_values("date", ascending=False),
+                use_container_width=True,
+                hide_index=True,
+            )
             get_download_button(str(selected_csv))
         else:
             st.info("Henüz ham veri dosyası yok. Verileri güncelleyin.")
