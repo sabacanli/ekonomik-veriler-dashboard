@@ -7,6 +7,13 @@
       "runtimeArgs": ["run", "dashboard.py", "--server.port", "8502"],
       "port": 8502,
       "autoPort": false
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8503", "--directory", "site"],
+      "port": 8503,
+      "autoPort": false
     }
   ]
 }

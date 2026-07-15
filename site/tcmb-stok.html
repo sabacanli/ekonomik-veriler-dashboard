@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TCMB Haftalık Stok — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Menkul Kıymetlerde Net Yabancı Hareketi ve Stok</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet"></div>
+    <div class="metrics" id="metrics"></div>
+    <div class="range" id="range"></div>
+
+    <section class="chart-card">
+      <h3>Türkiye'nin Menkul Kıymetlerinde Tahmini Net Yabancı Hareketi</h3>
+      <p class="cap">Hisse + DİBS (kesin+dolaylı) + ÖST + Eurobond — Milyar USD · Kesikli çizgi: 4 haftalık hareketli toplam</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Menkul Kıymetlerde Net Yabancı Hareketi (Eurobond Hariç)</h3>
+      <p class="cap">Hisse + DİBS (kesin+dolaylı) + ÖST — Milyar USD · Kesikli çizgi: 4 haftalık hareketli toplam</p>
+      <div id="ch2"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Hisse Senedi — Net Yabancı Hareketi</h3>
+      <p class="cap">Milyon USD</p>
+      <div id="ch3"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>DİBS — Net Yabancı Hareketi (Kesin &amp; Dolaylı Alım)</h3>
+      <p class="cap">Milyon USD · Dolaylı alım = ters repo + teminat + ödünç</p>
+      <div id="ch4"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Özel Sektör Tahvili — Net Yabancı Hareketi</h3>
+      <p class="cap">Milyon USD · Genel yönetim dışındaki sektörlerce ihraç edilen borçlanma senetleri</p>
+      <div id="ch5"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Türkiye Eurobond — Net Yabancı Hareketi</h3>
+      <p class="cap">Milyon USD · Yurt dışında ihraç edilen genel yönetim, banka, şirket ve diğer finansal kuruluş borçlanma araçları dahil</p>
+      <div id="ch6"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Menkul Kıymetlerde Yıllık Net Yabancı Hareketi</h3>
+      <p class="cap" id="cap7">Milyar USD · Bileşen bazında, son 3 yıl</p>
+      <div id="ch7"></div>
+    </section>
+
+    <footer>Kaynak: TCMB EVDS (TP.MKNETHAR serileri) · Tüm veriler yurt dışı yerleşiklerin Türkiye menkul kıymet yatırımıdır.</footer>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/tcmb_stok.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+
+      const s = D.stok;
+      setMetrics([
+        ["Toplam Stok (Milyon USD)", trNum(s.toplam, 0), trNum(s.akim, 0, true), s.akim >= 0 ? "up" : "down"],
+        ["Hisse Senedi Stok", trNum(s.hisse, 0), trNum(s.hisse_deg, 0, true), s.hisse_deg >= 0 ? "up" : "down"],
+        ["DİBS Stok", trNum(s.dibs, 0), trNum(s.dibs_deg, 0, true), s.dibs_deg >= 0 ? "up" : "down"],
+        ["Net Yabancı Hareketi (hafta)", trNum(D.hafta.toplam, 0, true), "4 hafta: " + trNum(D.hafta.toplam_4h, 0, true), D.hafta.toplam >= 0 ? "up" : "down"],
+      ]);
+
+      const H = D.hareket;
+      const iL = H.tarih.length - 1;
+      const xL = H.tarih[iL];
+
+      function barLine(id, barVals, lineVals, barName, barColor) {
+        const t = tail(H.tarih, N);
+        draw(id, [
+          { type: "bar", x: t, y: tail(barVals, N).map(v => v === null ? null : v / 1000),
+            name: barName, marker: { color: barColor },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra></extra>" },
+          { type: "scatter", mode: "lines", x: t,
+            y: tail(lineVals, N).map(v => v === null ? null : v / 1000),
+            name: "4-Haftalık Hareketli Toplam",
+            line: { color: C.line, width: 2, dash: "dash" },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>4H toplam</extra>" },
+        ], {
+          height: 400,
+          annotations: [
+            annLast(xL, barVals[iL] / 1000, trNum(barVals[iL] / 1000, 1), barColor),
+            annLast(xL, lineVals[iL] / 1000, trNum(lineVals[iL] / 1000, 1), C.line),
+          ],
+        });
+      }
+
+      function singleBar(id, vals, color) {
+        draw(id, [
+          { type: "bar", x: tail(H.tarih, N), y: tail(vals, N), marker: { color: color },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:,.0f} milyon USD<extra></extra>" },
+        ], {
+          height: 360, showlegend: false,
+          annotations: [annLast(xL, vals[iL], trNum(vals[iL], 0), color)],
+        });
+      }
+
+      let N = 27;
+      function render() {
+        barLine("ch1", H.toplam, H.toplam_4h, "Hisse + DİBS + ÖST + Eurobond", C.toplam);
+        barLine("ch2", H.menkul_toplam, H.menkul_4h, "Hisse + DİBS + ÖST", C.toplam);
+        singleBar("ch3", H.hisse, C.hisse);
+        // DİBS yığılmış
+        const t = tail(H.tarih, N);
+        draw("ch4", [
+          { type: "bar", x: t, y: tail(H.dibs_kesin, N), name: "DİBS Kesin Alım", marker: { color: C.kesin },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:,.0f} milyon USD<extra>Kesin</extra>" },
+          { type: "bar", x: t, y: tail(H.dibs_dolayli, N), name: "DİBS Dolaylı Alım", marker: { color: C.dolayli },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:,.0f} milyon USD<extra>Dolaylı</extra>" },
+        ], {
+          height: 380, barmode: "relative",
+          annotations: annStack(xL, [
+            [H.dibs_kesin[iL], C.kesin, trNum(H.dibs_kesin[iL], 0)],
+            [H.dibs_dolayli[iL], C.dolayli, trNum(H.dibs_dolayli[iL], 0)],
+          ]),
+        });
+        singleBar("ch5", H.ost, C.ost);
+        singleBar("ch6", H.eurobond, C.euro);
+      }
+
+      rangeCtl(document.getElementById("range"),
+        [["6 Ay", 27], ["1 Yıl", 52], ["3 Yıl", 156]], 27,
+        n => { N = n; render(); });
+      render();
+
+      // Yıllık bileşen bazlı (aralıktan bağımsız)
+      const Y = D.yillik;
+      document.getElementById("cap7").textContent =
+        "Milyar USD · Bileşen bazında, son 3 yıl (" + Y.yil[Y.yil.length - 1] + " yılbaşından bugüne)";
+      const YSER = [
+        ["DİBS Kesin Alım", "dibs_kesin", C.kesin],
+        ["Eurobond + Döviz Sukuk", "eurobond", C.euro],
+        ["Hisse", "hisse", C.hisse],
+        ["DİBS Dolaylı Alım", "dibs_dolayli", C.dolayli],
+        ["ÖST", "ost", C.ost],
+      ];
+      draw("ch7", YSER.map(([nm, key, renk]) => ({
+        type: "bar", x: Y.yil, y: Y[key], name: nm, marker: { color: renk },
+        text: Y[key].map(v => trNum(v, 1)), textposition: "inside",
+        insidetextfont: { size: 12, color: "#FFFFFF", family: "'IBM Plex Mono', monospace" },
+        hovertemplate: "%{x}<br>" + nm + ": %{y:.1f} milyar USD<extra></extra>",
+      })), { height: 460, barmode: "relative", bargap: 0.45 });
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>

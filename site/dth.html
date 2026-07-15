@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yabancı Para Hareketi — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Yabancı Para Hareketi</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet"></div>
+    <div class="metrics" id="metrics"></div>
+    <div class="range" id="range"></div>
+
+    <section class="chart-card">
+      <h3>Gerçek Kişiler DTH Hesapları Değer Değişimi</h3>
+      <p class="cap">Altın ve parite etkileri düzeltilmiş, milyar USD</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Yerleşikler DTH Hesapları Değer Değişimi — Tüzel &amp; Gerçek</h3>
+      <p class="cap">Altın ve parite etkileri düzeltilmiş, milyar USD</p>
+      <div id="ch2"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Yerleşikler DTH Hesapları Değer Değişimi — Toplam</h3>
+      <p class="cap">Altın ve parite etkileri düzeltilmiş, milyar USD</p>
+      <div id="ch3"></div>
+    </section>
+
+    <footer>Kaynak: TCMB EVDS — Haftalık Para ve Banka İstatistikleri, Tablo 5 (TP.HPBITABLO5) ·
+      Parite ve kıymetli maden fiyat etkilerinden arındırılmış haftalık değişim.</footer>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/dth.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+
+      const h = D.hafta;
+      setMetrics([
+        ["Yerleşikler Toplam", trNum(h.toplam / 1000, 1, true), null],
+        ["Gerçek Kişiler", trNum(h.gercek / 1000, 1, true), null],
+        ["Tüzel Kişiler", trNum(h.tuzel / 1000, 1, true), null],
+        ["Yılbaşından Beri", trNum(h.ytd / 1000, 1, true), h.ytd >= 0 ? "dolarizasyon" : "de-dolarizasyon", h.ytd >= 0 ? "up" : "down"],
+      ]);
+
+      const W = D.haftalik;
+      const iL = W.tarih.length - 1;
+      const xL = W.tarih[iL];
+      const bn = v => (v === null ? null : v / 1000);
+
+      function stacked(id, aKey, aName, aColor, bKey, bName, bColor) {
+        const t = tail(W.tarih, N);
+        draw(id, [
+          { type: "bar", x: t, y: tail(W[aKey], N).map(bn), name: aName, marker: { color: aColor },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>" + aName + "</extra>" },
+          { type: "bar", x: t, y: tail(W[bKey], N).map(bn), name: bName, marker: { color: bColor },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>" + bName + "</extra>" },
+        ], {
+          height: 380, barmode: "relative",
+          annotations: annStack(xL, [
+            [bn(W[aKey][iL]), aColor, trNum(bn(W[aKey][iL]), 1)],
+            [bn(W[bKey][iL]), bColor, trNum(bn(W[bKey][iL]), 1)],
+          ]),
+        });
+      }
+
+      let N = 27;
+      function render() {
+        stacked("ch1", "altin", "Altın", C.altin, "doviz", "Döviz", C.doviz);
+        stacked("ch2", "tuzel", "Tüzel Kişiler", C.tuzel, "gercek", "Gerçek Kişiler", C.gercek);
+        draw("ch3", [
+          { type: "bar", x: tail(W.tarih, N), y: tail(W.toplam, N).map(bn),
+            marker: { color: C.toplam },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra></extra>" },
+        ], {
+          height: 380, showlegend: false,
+          annotations: [annLast(xL, bn(W.toplam[iL]), trNum(bn(W.toplam[iL]), 1), C.toplam)],
+        });
+      }
+
+      rangeCtl(document.getElementById("range"),
+        [["6 Ay", 27], ["1 Yıl", 52], ["3 Yıl", 156]], 27,
+        n => { N = n; render(); });
+      render();
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>

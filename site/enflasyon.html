@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TÜFE Enflasyon — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">TÜFE Enflasyon</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet"></div>
+    <div class="metrics" id="metrics"></div>
+
+    <section class="chart-card">
+      <h3>Yıllık Enflasyon (%)</h3>
+      <p class="cap">TÜFE, bir önceki yılın aynı ayına göre değişim — son 6 yıl</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Aylık Enflasyon (%)</h3>
+      <p class="cap">TÜFE, bir önceki aya göre değişim — son 24 ay</p>
+      <div id="ch2"></div>
+    </section>
+
+    <footer>Kaynak: TCMB EVDS (TP.TUKFIY2025.GENEL) · TÜİK 2025=100 TÜFE endeksi.</footer>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/enflasyon.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+
+      const s = D.son;
+      // Enflasyonda düşüş iyidir: yıllık oran gerilediyse yeşil
+      const dTxt = trNum(s.d_yillik, 2, true) + " puan (önceki aya göre)";
+      setMetrics([
+        ["Yıllık Enflasyon", "%" + trNum(s.yillik, 2), dTxt, s.d_yillik <= 0 ? "up" : "down"],
+        ["Aylık Enflasyon", "%" + trNum(s.aylik, 2), s.donem, "flat"],
+        ["Yılbaşından Beri", "%" + trNum(s.ytd, 2), null],
+      ]);
+
+      const G = D.genel;
+      const iL = G.tarih.length - 1;
+      const xL = G.tarih[iL];
+
+      draw("ch1", [
+        { type: "scatter", mode: "lines", x: G.tarih, y: G.yillik,
+          line: { color: C.amber, width: 2.5 },
+          hovertemplate: "%{x|%m.%Y}<br>%%{y:.2f}<extra></extra>" },
+      ], {
+        height: 400, showlegend: false,
+        annotations: [annLast(xL, G.yillik[iL], "%" + trNum(G.yillik[iL], 2), C.amber)],
+      });
+
+      const t24 = tail(G.tarih, 24);
+      const a24 = tail(G.aylik, 24);
+      draw("ch2", [
+        { type: "bar", x: t24, y: a24,
+          marker: { color: a24.map(v => (v !== null && v < 0) ? C.green : C.toplam) },
+          hovertemplate: "%{x|%m.%Y}<br>%%{y:.2f}<extra></extra>" },
+      ], {
+        height: 360, showlegend: false,
+        annotations: [annLast(xL, G.aylik[iL], "%" + trNum(G.aylik[iL], 2), C.toplam)],
+      });
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>

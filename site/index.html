@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ekonomik Veriler — Ana Sayfa</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <div class="hero">
+      <h1>Ekonomik Veriler Dashboard</h1>
+      <p>Türkiye ekonomik verilerini tek panelden takip edin. TCMB, Hazine ve BDDK
+        verilerini analiz edin, raporlar oluşturun.</p>
+    </div>
+
+    <h2 class="section-title">Güncel Görünüm</h2>
+    <div class="cards" id="cards"></div>
+
+    <footer>
+      Kaynaklar: TCMB EVDS · HMB Kamu Finansmanı İstatistikleri · TÜİK · BDDK.<br>
+      Bu site geliştirme aşamasındadır — henüz taşınmayan modüller için
+      <a href="https://ekonomik-veriler.streamlit.app" target="_blank" rel="noopener">mevcut uygulamayı</a> kullanabilirsiniz.
+    </footer>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      try {
+        const D = await getJSON("data/home.json");
+        const el = document.getElementById("cards");
+        el.innerHTML = D.cards.map(c => {
+          const inner =
+            '<div class="t">' + c.icon + " " + c.title + "</div>" +
+            '<div class="d">' + c.html + "</div>";
+          if (c.link) {
+            return '<a class="card" href="' + c.link + '">' + inner + '<span class="go">→</span></a>';
+          }
+          return '<div class="card">' + inner + '<span class="pill">yakında</span></div>';
+        }).join("");
+      } catch (e) {
+        document.getElementById("cards").innerHTML =
+          '<div class="card"><div class="d">Veri yüklenemedi: ' + e.message + "</div></div>";
+      }
+    })();
+  </script>
+</body>
+</html>
