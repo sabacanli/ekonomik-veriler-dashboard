@@ -185,6 +185,218 @@ def build_enflasyon():
     })
 
 
+def _kumulatif_yillar(df, val_col, n_yil=5):
+    """Son n yıl için yılbaşından kümülatif seri (Milyar TL) — yıl karşılaştırma grafiği."""
+    cy = int(df["yil"].max())
+    out = []
+    for y in sorted(df["yil"].unique()):
+        y = int(y)
+        if y < cy - n_yil + 1:
+            continue
+        yd = df[df["yil"] == y].sort_values("ay")
+        out.append({"yil": str(y),
+                    "ay": [int(a) for a in yd["ay"]],
+                    "kum": [round(float(v) / 1000, 1) for v in yd[val_col].cumsum()]})
+    return out
+
+
+def build_butce():
+    fp = BASE / "butce" / "butce.xlsx"
+    b = pd.read_excel(fp, sheet_name="Aylik")
+    b["tarih"] = pd.to_datetime(b["tarih"])
+    b = b.sort_values("tarih").reset_index(drop=True)
+    L = b.iloc[-1]
+    cy, cm = int(L["yil"]), int(L["ay"])
+    ytd = float(b[(b.yil == cy) & (b.ay <= cm)]["denge"].sum())
+    ytd_prev = float(b[(b.yil == cy - 1) & (b.ay <= cm)]["denge"].sum())
+    yon = "açık" if L["denge"] < 0 else "fazla"
+    ozet = (f"<b>{AY[cm]} {cy}</b> ayında merkezi yönetim bütçesi "
+            f"<b>{ht(abs(L['denge']) / 1000)} milyar TL {yon}</b> verdi "
+            f"(gelir {ht(L['gelir'] / 1000)}, gider {ht(L['gider'] / 1000)} milyar TL). "
+            f"Faiz dışı denge <b>{ht(L['faiz_disi_denge'] / 1000)} milyar TL</b>, "
+            f"faiz gideri {ht(L['faiz_gideri'] / 1000)} milyar TL. "
+            f"Yılbaşından beri kümülatif bütçe açığı <b>{ht(abs(ytd) / 1000)} milyar TL</b> — "
+            f"geçen yıl aynı dönemde {ht(abs(ytd_prev) / 1000)} milyar TL idi.")
+    dump("butce.json", {
+        "updated": mtime(fp),
+        "ozet_html": ozet,
+        "son": {"donem": f"{AY[cm]} {cy}", "denge": float(L["denge"]), "gelir": float(L["gelir"]),
+                "gider": float(L["gider"]), "faiz_disi": float(L["faiz_disi_denge"]),
+                "faiz": float(L["faiz_gideri"]), "ytd": ytd, "ytd_prev": ytd_prev},
+        "aylik": {
+            "tarih": [t.strftime("%Y-%m-%d") for t in b["tarih"]],
+            "denge": col(b, "denge", 0), "gelir": col(b, "gelir", 0), "gider": col(b, "gider", 0),
+            "dolaysiz": col(b, "dolaysiz_vergi", 0), "dolayli": col(b, "dolayli_vergi", 0),
+        },
+        "kumulatif": _kumulatif_yillar(b, "denge"),
+    })
+
+
+def build_nakit():
+    fp = BASE / "hazine nakit" / "nakit.xlsx"
+    n = pd.read_excel(fp, sheet_name="Aylik")
+    n["tarih"] = pd.to_datetime(n["tarih"])
+    n = n.sort_values("tarih").reset_index(drop=True)
+    L = n.iloc[-1]
+    cy, cm = int(L["yil"]), int(L["ay"])
+    ytd = float(n[(n.yil == cy) & (n.ay <= cm)]["nakit_denge"].sum())
+    ytd_prev = float(n[(n.yil == cy - 1) & (n.ay <= cm)]["nakit_denge"].sum())
+    yon = "açık" if L["nakit_denge"] < 0 else "fazla"
+    yon_ytd = "açığı" if ytd < 0 else "fazlası"
+    yon_prev = "açık" if ytd_prev < 0 else "fazla"
+    ozet = (f"<b>{AY[cm]} {cy}</b> ayında Hazine nakit dengesi "
+            f"<b>{ht(abs(L['nakit_denge']) / 1000)} milyar TL {yon}</b> verdi "
+            f"(gelir {ht(L['gelir'] / 1000)}, gider {ht(L['gider'] / 1000)} milyar TL). "
+            f"Faiz dışı denge <b>{ht(L['faiz_disi_denge'] / 1000)} milyar TL</b>, "
+            f"faiz ödemesi {ht(L['faiz_odemesi'] / 1000)} milyar TL. "
+            f"Yılbaşından beri kümülatif nakit {yon_ytd} <b>{ht(abs(ytd) / 1000)} milyar TL</b> — "
+            f"geçen yıl aynı dönemde {ht(abs(ytd_prev) / 1000)} milyar TL {yon_prev} idi.")
+    dump("nakit.json", {
+        "updated": mtime(fp),
+        "ozet_html": ozet,
+        "son": {"donem": f"{AY[cm]} {cy}", "denge": float(L["nakit_denge"]), "gelir": float(L["gelir"]),
+                "gider": float(L["gider"]), "faiz_disi": float(L["faiz_disi_denge"]),
+                "faiz": float(L["faiz_odemesi"]), "ytd": ytd, "ytd_prev": ytd_prev},
+        "aylik": {
+            "tarih": [t.strftime("%Y-%m-%d") for t in n["tarih"]],
+            "denge": col(n, "nakit_denge", 0), "gelir": col(n, "gelir", 0), "gider": col(n, "gider", 0),
+            "ic_borc": col(n, "ic_borclanma_net", 0), "dis_borc": col(n, "dis_borclanma_net", 0),
+        },
+        "kumulatif": _kumulatif_yillar(n, "nakit_denge"),
+    })
+
+
+def build_rezerv():
+    fp = BASE / "net rezerv" / "net_rezerv.xlsx"
+    r = pd.read_excel(fp)
+    r["tarih"] = pd.to_datetime(r["tarih"])
+    r = r.sort_values("tarih").reset_index(drop=True)
+    L = r.iloc[-1]
+    nrc = "net_rezerv_swap_haric"
+    cur = float(L[nrc])
+    m1 = r[r["tarih"] <= L["tarih"] - pd.Timedelta(days=30)]
+    ys = r[r["tarih"] >= pd.Timestamp(L["tarih"].year, 1, 1)]
+    d1 = (cur - float(m1.iloc[-1][nrc])) / 1000 if len(m1) else None
+    dy = (cur - float(ys.iloc[0][nrc])) / 1000 if len(ys) else None
+    ek = ""
+    if d1 is not None and dy is not None:
+        w1 = "arttı" if d1 >= 0 else "azaldı"
+        wy = "artış" if dy >= 0 else "azalış"
+        ek = (f" Son bir ayda <b>{ht(abs(d1))} milyar USD {w1}</b>; "
+              f"yıl başından beri {ht(abs(dy))} milyar USD {wy}.")
+    ozet = (f"<b>{L['tarih'].strftime('%d.%m.%Y')}</b> itibarıyla net rezerv (swap hariç) "
+            f"<b>{ht(cur / 1000)} milyar USD</b>, swap dahil {ht(L['net_rezerv_swap_dahil'] / 1000)} milyar USD; "
+            f"brüt dış varlıklar {ht(L['dis_varliklar'] / 1000)} milyar USD.{ek}")
+    dump("rezerv.json", {
+        "updated": mtime(fp),
+        "ozet_html": ozet,
+        "son": {"tarih": L["tarih"].strftime("%d.%m.%Y"), "haric": cur,
+                "dahil": float(L["net_rezerv_swap_dahil"]), "brut": float(L["dis_varliklar"]),
+                "net_swap": float(L["net_swap"]), "d1ay": d1, "dytd": dy},
+        "seri": {
+            "tarih": [t.strftime("%Y-%m-%d") for t in r["tarih"]],
+            "haric": col(r, "net_rezerv_swap_haric", 0),
+            "dahil": col(r, "net_rezerv_swap_dahil", 0),
+            "brut": col(r, "dis_varliklar", 0),
+            "net_swap": col(r, "net_swap", 0),
+        },
+    })
+
+
+def build_kredi():
+    fp = BASE / "kredi mevduat" / "kredi_mevduat.xlsx"
+    ka = pd.read_excel(fp, sheet_name="Kredi_Akim")
+    ka["tarih"] = pd.to_datetime(ka["tarih"])
+    ka = ka.sort_values("tarih").reset_index(drop=True)
+    L, P = ka.iloc[-1], ka.iloc[-5]
+    d4 = {k: float(L[c] - P[c]) for k, c in
+          [("ihtiyac", "İhtiyaç Kredisi"), ("tasit", "Taşıt Kredisi"),
+           ("konut", "Konut Kredisi"), ("ticari", "Ticari Krediler")]}
+    wi = "geriledi" if d4["ihtiyac"] < 0 else "yükseldi"
+    wk = "yükseldi" if d4["konut"] > 0 else "geriledi"
+    ozet = (f"<b>{L['tarih'].strftime('%d.%m.%Y')}</b> haftası yeni kredi faizleri (akım, yıllık bileşik): "
+            f"İhtiyaç <b>%{ht(L['İhtiyaç Kredisi'], 2)}</b>, Konut %{ht(L['Konut Kredisi'], 2)}, "
+            f"Taşıt %{ht(L['Taşıt Kredisi'], 2)}, Ticari %{ht(L['Ticari Krediler'], 2)}. "
+            f"Son 4 haftada ihtiyaç kredisi faizi <b>{ht(abs(d4['ihtiyac']), 2)} puan {wi}</b>, "
+            f"konut {ht(abs(d4['konut']), 2)} puan {wk}.")
+    dump("kredi.json", {
+        "updated": mtime(fp),
+        "ozet_html": ozet,
+        "son": {"tarih": L["tarih"].strftime("%d.%m.%Y"),
+                "ihtiyac": float(L["İhtiyaç Kredisi"]), "tasit": float(L["Taşıt Kredisi"]),
+                "konut": float(L["Konut Kredisi"]), "ticari": float(L["Ticari Krediler"]), "d4": d4},
+        "seri": {
+            "tarih": [t.strftime("%Y-%m-%d") for t in ka["tarih"]],
+            "ihtiyac": col(ka, "İhtiyaç Kredisi", 2), "tasit": col(ka, "Taşıt Kredisi", 2),
+            "konut": col(ka, "Konut Kredisi", 2), "ticari": col(ka, "Ticari Krediler", 2),
+            "ticari_usd": col(ka, "Ticari Krediler (USD)", 2),
+            "ticari_eur": col(ka, "Ticari Krediler (EUR)", 2),
+        },
+    })
+
+
+def build_mevduat():
+    fp = BASE / "kredi mevduat" / "kredi_mevduat.xlsx"
+    ma = pd.read_excel(fp, sheet_name="Mevduat_Akim")
+    ma["tarih"] = pd.to_datetime(ma["tarih"])
+    ma = ma.sort_values("tarih").reset_index(drop=True)
+    L = ma.iloc[-1]
+    dt_ = float(L["Toplam"] - ma.iloc[-5]["Toplam"])
+    if abs(dt_) < 0.10:
+        ek = "Son 4 haftada büyük ölçüde <b>yatay</b> seyretti."
+    else:
+        w = "yükseldi" if dt_ > 0 else "geriledi"
+        ek = f"Son 4 haftada toplam mevduat faizi <b>{ht(abs(dt_), 2)} puan {w}</b>."
+    ozet = (f"<b>{L['tarih'].strftime('%d.%m.%Y')}</b> haftası TL mevduat faizi toplam "
+            f"<b>%{ht(L['Toplam'], 2)}</b>; 1 aya kadar %{ht(L['1 Aya Kadar Vadeli'], 2)}, "
+            f"3 aya kadar %{ht(L['3 Aya Kadar Vadeli'], 2)}, 1 yıla kadar %{ht(L['1 Yıla Kadar Vadeli'], 2)}. {ek}")
+    dump("mevduat.json", {
+        "updated": mtime(fp),
+        "ozet_html": ozet,
+        "son": {"tarih": L["tarih"].strftime("%d.%m.%Y"), "toplam": float(L["Toplam"]),
+                "v1ay": float(L["1 Aya Kadar Vadeli"]), "v3ay": float(L["3 Aya Kadar Vadeli"]),
+                "v1yil": float(L["1 Yıla Kadar Vadeli"]), "d4": dt_},
+        "seri": {
+            "tarih": [t.strftime("%Y-%m-%d") for t in ma["tarih"]],
+            "v1ay": col(ma, "1 Aya Kadar Vadeli", 2), "v3ay": col(ma, "3 Aya Kadar Vadeli", 2),
+            "v6ay": col(ma, "6 Aya Kadar Vadeli", 2), "v1yil": col(ma, "1 Yıla Kadar Vadeli", 2),
+            "uzun": col(ma, "1 Yıl ve Daha Uzun Vadeli", 2), "toplam": col(ma, "Toplam", 2),
+            "toplam_usd": col(ma, "Toplam (USD)", 2), "toplam_eur": col(ma, "Toplam (EUR)", 2),
+        },
+    })
+
+
+def build_cari():
+    fp = BASE / "cari acik" / "cari_acik_son.xlsx"
+    c = pd.read_excel(fp)
+    ccol = [x for x in c.columns if "Cari" in str(x)][0]
+    fcol = [x for x in c.columns if "Finans" in str(x)][0]
+    ncol = [x for x in c.columns if "Hata" in str(x)][0]
+    c["cari_4c"] = c[ccol].rolling(4).sum()
+    L = c.iloc[-1]
+    last4 = float(L["cari_4c"])
+    prev4 = float(c[ccol].iloc[-8:-4].sum()) if len(c) >= 8 else None
+    kel = "açık" if last4 < 0 else "fazla"
+    ek = ""
+    if prev4 is not None:
+        yon2 = "genişledi" if abs(last4) > abs(prev4) else "daraldı"
+        ek = f"; bir yıl öncesine göre {yon2}"
+    ozet = (f"Son dönem (<b>{L['Tarih']}</b>) cari işlemler dengesi <b>{ht(L[ccol], 0)} milyon USD</b>. "
+            f"Son dört çeyreğin (12 aylık) toplamı <b>{ht(abs(last4) / 1000)} milyar USD {kel}</b>{ek}. "
+            f"Finans hesabı {ht(L[fcol], 0)}, net hata &amp; noksan {ht(L[ncol], 0)} milyon USD.")
+    dump("cari.json", {
+        "updated": mtime(fp),
+        "ozet_html": ozet,
+        "son": {"donem": str(L["Tarih"]), "cari": float(L[ccol]), "finans": float(L[fcol]),
+                "nhn": float(L[ncol]), "yillik": last4},
+        "seri": {
+            "ceyrek": [str(x) for x in c["Tarih"]],
+            "cari": col(c, ccol, 0), "finans": col(c, fcol, 0), "nhn": col(c, ncol, 0),
+            "cari_4c": col(c, "cari_4c", 0),
+        },
+    })
+
+
 # ──────────────────────────────────────────────────────────────
 # Ana sayfa kartları (dashboard.py home_summaries ile aynı mantık)
 # ──────────────────────────────────────────────────────────────
@@ -225,7 +437,7 @@ def build_home():
                   f"<b>%{ht(abs(pct), 0)} {yon2}</b>.")
         add("🏛️", "Bütçe Dengesi",
             f"{AY[cm]} {cy} ayında merkezi yönetim bütçesi <b>{ht(abs(L['denge']) / 1000)} milyar TL {yon}</b> verdi; "
-            f"yılbaşından beri kümülatif {yon_ytd} <b>{ht(abs(ytd) / 1000)} milyar TL</b>.{ek}")
+            f"yılbaşından beri kümülatif {yon_ytd} <b>{ht(abs(ytd) / 1000)} milyar TL</b>.{ek}", "butce.html")
     except Exception:
         pass
     try:
@@ -246,7 +458,7 @@ def build_home():
                   f"(net {ht(ib / 1000)} milyar TL).")
         add("🪙", "Hazine Nakit Gerçekleşmeleri",
             f"{AY[cm]} {cy} ayında Hazine nakit dengesi <b>{ht(abs(L['nakit_denge']) / 1000)} milyar TL {yon}</b> verdi; "
-            f"yılbaşından beri kümülatif {yon_ytd} <b>{ht(abs(ytd) / 1000)} milyar TL</b>.{ek}")
+            f"yılbaşından beri kümülatif {yon_ytd} <b>{ht(abs(ytd) / 1000)} milyar TL</b>.{ek}", "nakit.html")
     except Exception:
         pass
     try:
@@ -281,7 +493,7 @@ def build_home():
             ek = f" Son bir ayda <b>{ht(abs(d1))} milyar USD {w1}</b>; yıl başından beri {ht(abs(dy))} milyar USD {wy}."
         add("💵", "TCMB Net Rezerv",
             f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla net rezerv (swap hariç) "
-            f"<b>{ht(cur / 1000)} milyar USD</b>, brüt dış varlıklar {ht(L['dis_varliklar'] / 1000)} milyar USD.{ek}")
+            f"<b>{ht(cur / 1000)} milyar USD</b>, brüt dış varlıklar {ht(L['dis_varliklar'] / 1000)} milyar USD.{ek}", "net-rezerv.html")
     except Exception:
         pass
     try:
@@ -297,7 +509,7 @@ def build_home():
             ek = (f" Son dört çeyreğin (12 aylık) toplamı <b>{ht(abs(last4) / 1000)} milyar USD {kel}</b>; "
                   f"bir yıl öncesine göre {yon2}.")
         add("🌍", "Cari Denge",
-            f"Son dönem ({L['Tarih']}) cari işlemler dengesi <b>{ht(L[ccol], 0)} milyon USD</b>.{ek}")
+            f"Son dönem ({L['Tarih']}) cari işlemler dengesi <b>{ht(L[ccol], 0)} milyon USD</b>.{ek}", "cari.html")
     except Exception:
         pass
     try:
@@ -314,7 +526,7 @@ def build_home():
                   f"konut {ht(abs(dk), 2)} puan {wk}.")
         add("🏦", "Kredi Faizleri",
             f"Yeni kredi faizleri ({L['tarih'].strftime('%d.%m.%Y')}): İhtiyaç <b>%{ht(L.get('İhtiyaç Kredisi'), 2)}</b>, "
-            f"Konut %{ht(L.get('Konut Kredisi'), 2)}, Ticari %{ht(L.get('Ticari Krediler'), 2)}.{ek}")
+            f"Konut %{ht(L.get('Konut Kredisi'), 2)}, Ticari %{ht(L.get('Ticari Krediler'), 2)}.{ek}", "kredi.html")
     except Exception:
         pass
     try:
@@ -330,7 +542,7 @@ def build_home():
                 ek = f" Son 4 haftada toplam mevduat faizi <b>{ht(abs(dt_), 2)} puan {w}</b>."
         add("💰", "Mevduat Faizleri",
             f"TL mevduat faizi toplam <b>%{ht(L.get('Toplam'), 2)}</b>; 3 ay %{ht(L.get('3 Aya Kadar Vadeli'), 2)}, "
-            f"1 yıl %{ht(L.get('1 Yıla Kadar Vadeli'), 2)} ({L['tarih'].strftime('%d.%m.%Y')}).{ek}")
+            f"1 yıl %{ht(L.get('1 Yıla Kadar Vadeli'), 2)} ({L['tarih'].strftime('%d.%m.%Y')}).{ek}", "mevduat.html")
     except Exception:
         pass
     try:
@@ -383,7 +595,10 @@ def main():
     print("Site verileri dışa aktarılıyor -> site/data/")
     ok, fail = 0, 0
     for name, fn in [("home", build_home), ("tcmb_stok", build_tcmb_stok),
-                     ("dth", build_dth), ("enflasyon", build_enflasyon)]:
+                     ("dth", build_dth), ("enflasyon", build_enflasyon),
+                     ("butce", build_butce), ("nakit", build_nakit),
+                     ("rezerv", build_rezerv), ("kredi", build_kredi),
+                     ("mevduat", build_mevduat), ("cari", build_cari)]:
         try:
             fn()
             ok += 1

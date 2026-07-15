@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mevduat Faizleri — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Mevduat Faizleri</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet"></div>
+    <div class="metrics" id="metrics"></div>
+    <div class="range" id="range"></div>
+
+    <section class="chart-card">
+      <h3>TL Mevduat Faiz Oranları — Vade Dilimleri</h3>
+      <p class="cap">% · Haftalık (akım) — yeni açılan mevduatlar</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Döviz Mevduat Faizleri — Toplam</h3>
+      <p class="cap">% · USD ve EUR mevduat</p>
+      <div id="ch2"></div>
+    </section>
+
+    <footer>Kaynak: TCMB EVDS — Bankalarca Açılan Mevduatlara Uygulanan Ağırlıklı Ortalama Faiz Oranları (akım) · Haftalık.</footer>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/mevduat.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+
+      const s = D.son;
+      setMetrics([
+        ["Toplam", "%" + trNum(s.toplam, 2),
+          trNum(s.d4, 2, true) + " puan (4 hafta)", Math.abs(s.d4) < 0.1 ? "flat" : (s.d4 > 0 ? "up" : "down")],
+        ["1 Aya Kadar Vadeli", "%" + trNum(s.v1ay, 2), null],
+        ["3 Aya Kadar Vadeli", "%" + trNum(s.v3ay, 2), null],
+        ["1 Yıla Kadar Vadeli", "%" + trNum(s.v1yil, 2), null],
+      ]);
+
+      const S = D.seri;
+      let N = 52;
+      function render() {
+        const t = tail(S.tarih, N);
+        const L = (key, name, color, w) => ({
+          type: "scatter", mode: "lines", x: t, y: tail(S[key], N), name: name,
+          line: { color: color, width: w || 1.8 },
+          hovertemplate: "%{x|%d.%m.%Y}<br>%%{y:.2f}<extra>" + name + "</extra>",
+        });
+        draw("ch1", [
+          L("toplam", "Toplam", C.amber, 3),
+          L("v1ay", "1 Aya Kadar", C.ost),
+          L("v3ay", "3 Aya Kadar", C.toplam),
+          L("v6ay", "6 Aya Kadar", C.dolayli),
+          L("v1yil", "1 Yıla Kadar", C.euro),
+          L("uzun", "1 Yıl+", "#B98AFF"),
+        ], { height: 430 });
+        draw("ch2", [
+          L("toplam_usd", "USD", C.green, 2),
+          L("toplam_eur", "EUR", "#B98AFF", 2),
+        ], { height: 320 });
+      }
+
+      rangeCtl(document.getElementById("range"),
+        [["6 Ay", 26], ["1 Yıl", 52], ["5 Yıl", 260], ["Tümü", 9999]], 52,
+        n => { N = n; render(); });
+      render();
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>

@@ -5,15 +5,15 @@ const NAV = [
   { href: "tcmb-stok.html", label: "TCMB Haftalık Stok" },
   { href: "dth.html", label: "Yabancı Para Hareketi" },
   { href: "enflasyon.html", label: "TÜFE Enflasyon" },
+  { href: "net-rezerv.html", label: "TCMB Net Rezerv" },
+  { href: "cari.html", label: "Cari Denge" },
+  { href: "kredi.html", label: "Kredi Faizleri" },
+  { href: "mevduat.html", label: "Mevduat Faizleri" },
+  { href: "butce.html", label: "Bütçe Dengesi" },
+  { href: "nakit.html", label: "Hazine Nakit Gerçekleşmeleri" },
   { label: "Hazine İhale Verileri" },
   { label: "TCMB Doğrudan Alım" },
   { label: "BDDK Bankacılık Verileri" },
-  { label: "Cari Açık (EVDS)" },
-  { label: "TCMB Net Rezerv" },
-  { label: "Kredi Faizleri" },
-  { label: "Mevduat Faizleri" },
-  { label: "Bütçe Dengesi" },
-  { label: "Hazine Nakit Gerçekleşmeleri" },
 ];
 
 const C = {

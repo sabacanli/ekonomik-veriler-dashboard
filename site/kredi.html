@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kredi Faizleri — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Kredi Faizleri</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet"></div>
+    <div class="metrics" id="metrics"></div>
+    <div class="range" id="range"></div>
+
+    <section class="chart-card">
+      <h3>TL Kredi Faiz Oranları (Akım)</h3>
+      <p class="cap">% · Haftalık, yıllık bileşik — yeni açılan krediler</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Ticari Kredi Faizleri — Döviz Cinsi</h3>
+      <p class="cap">% · USD ve EUR cinsinden ticari krediler</p>
+      <div id="ch2"></div>
+    </section>
+
+    <footer>Kaynak: TCMB EVDS — Bankalarca Açılan Kredilere Uygulanan Ağırlıklı Ortalama Faiz Oranları (akım) · Haftalık.</footer>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/kredi.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+
+      const s = D.son;
+      const dcls = v => (v <= 0 ? "up" : "down");  // faiz düşüşü yeşil
+      setMetrics([
+        ["İhtiyaç Kredisi", "%" + trNum(s.ihtiyac, 2), trNum(s.d4.ihtiyac, 2, true) + " puan (4 hafta)", dcls(s.d4.ihtiyac)],
+        ["Konut Kredisi", "%" + trNum(s.konut, 2), trNum(s.d4.konut, 2, true) + " puan (4 hafta)", dcls(s.d4.konut)],
+        ["Taşıt Kredisi", "%" + trNum(s.tasit, 2), trNum(s.d4.tasit, 2, true) + " puan (4 hafta)", dcls(s.d4.tasit)],
+        ["Ticari Krediler", "%" + trNum(s.ticari, 2), trNum(s.d4.ticari, 2, true) + " puan (4 hafta)", dcls(s.d4.ticari)],
+      ]);
+
+      const S = D.seri;
+      let N = 52;
+      function render() {
+        const t = tail(S.tarih, N);
+        const L = (key, name, color, w) => ({
+          type: "scatter", mode: "lines", x: t, y: tail(S[key], N), name: name,
+          line: { color: color, width: w || 2 },
+          hovertemplate: "%{x|%d.%m.%Y}<br>%%{y:.2f}<extra>" + name + "</extra>",
+        });
+        draw("ch1", [
+          L("ihtiyac", "İhtiyaç", C.amber, 2.5),
+          L("konut", "Konut", C.toplam),
+          L("tasit", "Taşıt", C.dolayli),
+          L("ticari", "Ticari", C.euro),
+        ], { height: 420 });
+        draw("ch2", [
+          L("ticari_usd", "Ticari (USD)", C.green),
+          L("ticari_eur", "Ticari (EUR)", "#B98AFF"),
+        ], { height: 320 });
+      }
+
+      rangeCtl(document.getElementById("range"),
+        [["6 Ay", 26], ["1 Yıl", 52], ["5 Yıl", 260], ["Tümü", 9999]], 52,
+        n => { N = n; render(); });
+      render();
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>

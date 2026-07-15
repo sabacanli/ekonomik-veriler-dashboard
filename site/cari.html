@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cari Denge — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Cari Denge</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet"></div>
+    <div class="metrics" id="metrics"></div>
+    <div class="range" id="range"></div>
+
+    <section class="chart-card">
+      <h3>Çeyreklik Cari İşlemler Dengesi</h3>
+      <p class="cap">Milyon USD · Kesikli çizgi: son 4 çeyrek (12 aylık) hareketli toplam</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Finans Hesabı &amp; Net Hata-Noksan</h3>
+      <p class="cap">Milyon USD · Çeyreklik</p>
+      <div id="ch2"></div>
+    </section>
+
+    <footer>Kaynak: TCMB EVDS — Ödemeler Dengesi (çeyreklik) · Negatif = açık.</footer>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/cari.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+
+      const s = D.son;
+      setMetrics([
+        ["Cari Denge (" + s.donem + ")", trNum(s.cari, 0, true), null, s.cari >= 0 ? "up" : "down"],
+        ["12 Aylık Toplam", trNum(s.yillik / 1000, 1, true) + " mia", null, s.yillik >= 0 ? "up" : "down"],
+        ["Finans Hesabı", trNum(s.finans, 0, true), null],
+        ["Net Hata & Noksan", trNum(s.nhn, 0, true), null],
+      ]);
+
+      const S = D.seri;
+      const iL = S.ceyrek.length - 1;
+
+      let N = 24;
+      function render() {
+        const t = tail(S.ceyrek, N);
+        const cv = tail(S.cari, N);
+        draw("ch1", [
+          { type: "bar", x: t, y: cv, name: "Cari Denge",
+            marker: { color: cv.map(v => (v !== null && v < 0) ? C.red : C.green) },
+            hovertemplate: "%{x}<br>%{y:,.0f} milyon USD<extra></extra>" },
+          { type: "scatter", mode: "lines", x: t, y: tail(S.cari_4c, N),
+            name: "4 Çeyrek Toplamı", line: { color: C.line, width: 2, dash: "dash" },
+            hovertemplate: "%{x}<br>%{y:,.0f} milyon USD<extra>12 aylık</extra>" },
+        ], {
+          height: 400,
+          annotations: [annLast(S.ceyrek[iL], S.cari[iL], trNum(S.cari[iL], 0), C.toplam)],
+        });
+
+        draw("ch2", [
+          { type: "scatter", mode: "lines+markers", x: t, y: tail(S.finans, N),
+            name: "Finans Hesabı", line: { color: C.toplam, width: 2 }, marker: { size: 5 },
+            hovertemplate: "%{x}<br>%{y:,.0f} milyon USD<extra>Finans</extra>" },
+          { type: "scatter", mode: "lines+markers", x: t, y: tail(S.nhn, N),
+            name: "Net Hata & Noksan", line: { color: C.ost, width: 2 }, marker: { size: 5 },
+            hovertemplate: "%{x}<br>%{y:,.0f} milyon USD<extra>NHN</extra>" },
+        ], { height: 340 });
+      }
+
+      rangeCtl(document.getElementById("range"),
+        [["6 Yıl", 24], ["Tümü", 999]], 24,
+        n => { N = n; render(); });
+      render();
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>
