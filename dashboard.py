@@ -1233,15 +1233,51 @@ elif selected == "tcmb_stok":
                                       (Lh["dibs_dolayli"], _t0(Lh["dibs_dolayli"]), "#6FD1FF")])
         styled_chart(f4)
 
-        # 5) Eurobond
+        # 5) ÖST (Özel Sektör Tahvili)
+        st.subheader("Özel Sektör Tahvili — Net Yabancı Hareketi")
+        st.caption("Milyon USD · Genel yönetim dışındaki sektörlerce ihraç edilen borçlanma senetleri")
+        f5o = go.Figure()
+        f5o.add_bar(x=hp["tarih"], y=hp["ost"], name="ÖST", marker_color="#9AA4B2")
+        f5o.update_traces(hovertemplate="%{x|%d.%m.%Y}<br>%{y:,.0f} milyon USD<extra></extra>")
+        f5o.update_layout(height=360, separators=",.", showlegend=False)
+        _bar_etiket(f5o, Lh["tarih"], [(Lh["ost"], _t0(Lh["ost"]), "#9AA4B2")])
+        styled_chart(f5o)
+
+        # 6) Eurobond
         st.subheader("Türkiye Eurobond — Net Yabancı Hareketi")
         st.caption("Milyon USD · Yurt dışında ihraç edilen genel yönetim, banka, şirket ve diğer finansal kuruluş borçlanma araçları dahil")
         f5 = go.Figure()
-        f5.add_bar(x=hp["tarih"], y=hp["eurobond"], name="Eurobond", marker_color="#B98AFF")
+        f5.add_bar(x=hp["tarih"], y=hp["eurobond"], name="Eurobond", marker_color="#4CAF7D")
         f5.update_traces(hovertemplate="%{x|%d.%m.%Y}<br>%{y:,.0f} milyon USD<extra></extra>")
         f5.update_layout(height=360, separators=",.", showlegend=False)
-        _bar_etiket(f5, Lh["tarih"], [(Lh["eurobond"], _t0(Lh["eurobond"]), "#B98AFF")])
+        _bar_etiket(f5, Lh["tarih"], [(Lh["eurobond"], _t0(Lh["eurobond"]), "#4CAF7D")])
         styled_chart(f5)
+
+        # 7) Yıllık net yabancı hareketi — bileşen bazında (son 3 yıl)
+        st.subheader("Menkul Kıymetlerde Yıllık Net Yabancı Hareketi")
+        _cy = int(H["tarih"].dt.year.max())
+        st.caption(f"Milyar USD · Bileşen bazında, son 3 yıl ({_cy} yılbaşından bugüne)")
+        Hy = H.copy()
+        Hy["yil"] = Hy["tarih"].dt.year
+        ycomp = (Hy.groupby("yil")[["dibs_kesin", "eurobond", "hisse", "dibs_dolayli", "ost"]]
+                 .sum().tail(3) / 1000)
+        _ylab = [str(int(y)) for y in ycomp.index]
+        f7 = go.Figure()
+        for _nm, _col, _renk in [
+            ("DİBS Kesin Alım", "dibs_kesin", "#3D7BE0"),
+            ("Eurobond + Döviz Sukuk", "eurobond", "#4CAF7D"),
+            ("Hisse", "hisse", "#ED7D31"),
+            ("DİBS Dolaylı Alım", "dibs_dolayli", "#6FD1FF"),
+            ("ÖST", "ost", "#9AA4B2"),
+        ]:
+            _vals = ycomp[_col].tolist()
+            f7.add_bar(x=_ylab, y=_vals, name=_nm, marker_color=_renk,
+                       text=[_t1(v) for v in _vals], textposition="inside",
+                       insidetextfont=dict(size=12, color="#FFFFFF"),
+                       hovertemplate="%{x}<br>" + _nm + ": %{y:.1f} milyar USD<extra></extra>")
+        f7.update_layout(height=460, separators=",.", barmode="relative", legend_title_text="",
+                         legend=dict(orientation="h", yanchor="bottom", y=-0.22), bargap=0.45)
+        styled_chart(f7)
 
         # Detay tablo — son 8 hafta
         with st.expander("📋 Son 8 Hafta Detay (Milyon USD)", expanded=False):
