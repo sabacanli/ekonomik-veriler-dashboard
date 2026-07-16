@@ -1,0 +1,45 @@
+# Statik siteyi (site/) GitHub Pages'e yayınlar.
+# Tetikleme: site/ altında değişiklik içeren her push (ör. "Buluta Yayınla"
+# ve "Güncelle (yerel + bulut)" butonları) veya elle (Actions sekmesi).
+name: Site Yayınla
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Pages'i yapılandır (ilk çalışmada otomatik etkinleştirir)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Site klasörünü paketle
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Yayınla
+        id: deployment
+        uses: actions/deploy-pages@v4
