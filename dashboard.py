@@ -986,6 +986,46 @@ if selected == "ana_sayfa":
                     f"YP mevduat (USD) {_pp(_ypm.get('hafta'))}."))
         except Exception:
             pass
+        # ── 7c) Hazine İhaleleri & TCMB Doğrudan Alım ──
+        def _wavg_home(vals, weights):
+            m = vals.notna() & weights.notna() & (weights > 0)
+            return float((vals[m] * weights[m]).sum() / weights[m].sum()) if m.any() else None
+
+        try:
+            hz = pd.read_excel(BASE_DIR / "hazine ihale " / "hazine_ihale_verileri.xlsx",
+                               sheet_name="Tüm İhaleler", header=[0, 1])
+            hz.columns = [" / ".join(str(x) for x in c) for c in hz.columns]
+            cv = "Genel Bilgiler / Valör Tarihi"
+            hz[cv] = pd.to_datetime(hz[cv], format="%d.%m.%Y", errors="coerce")
+            hz = hz.dropna(subset=[cv])
+            L_t = hz[cv].max(); cy = int(L_t.year)
+            ytd = hz[hz[cv].dt.year == cy]
+            satis = float(ytd["Toplam Satış / Net (Bin TL)"].sum()) / 1e6
+            s3 = hz[hz[cv] >= L_t - pd.DateOffset(months=3)]
+            f3 = _wavg_home(s3["Kabul Edilen Faiz (%) / Ort. Yıllık Bileşik"],
+                            s3["Toplam Satış / Nominal (Bin TL)"])
+            out.append(("🏦 Hazine İhaleleri",
+                f"{cy} yılında iç borçlanma ihalelerinde toplam <b>{_ht(satis)} milyar TL</b> (net) satış "
+                f"({len(ytd)} ihale, son: {L_t.strftime('%d.%m.%Y')}). Son 3 ayın satış ağırlıklı "
+                f"ortalama bileşik faizi <b>%{_ht(f3, 2)}</b>."))
+        except Exception:
+            pass
+        try:
+            ta = pd.read_excel(BASE_DIR / "tcmb dogrudan alım" / "tcmb_dogrudan_alim.xlsx",
+                               sheet_name="Doğrudan Alım İşlemleri")
+            ta["İşlem Tarihi"] = pd.to_datetime(ta["İşlem Tarihi"], errors="coerce")
+            ta = ta.dropna(subset=["İşlem Tarihi"])
+            L_t = ta["İşlem Tarihi"].max(); cy = int(L_t.year)
+            ytd = ta[ta["İşlem Tarihi"].dt.year == cy]
+            alim = float(ytd["Kazanan Tutar (Nominal)"].sum()) / 1e6
+            s3 = ta[ta["İşlem Tarihi"] >= L_t - pd.DateOffset(months=3)]
+            f3 = _wavg_home(s3["Ortalama Bileşik Faiz"], s3["Kazanan Tutar (Nominal)"])
+            out.append(("🎯 TCMB Doğrudan Alım",
+                f"{cy} yılında doğrudan alım ihalelerinde toplam <b>{_ht(alim)} milyar TL</b> (nominal) "
+                f"işlem ({len(ytd)} işlem, son: {L_t.strftime('%d.%m.%Y')}). Son 3 ayın ortalama "
+                f"bileşik faizi <b>%{_ht(f3, 2)}</b>."))
+        except Exception:
+            pass
         # ── 8) Yabancı Menkul Kıymet Yatırımı ──
         try:
             _td = BASE_DIR / "tcmb haftalık stok" / "output"

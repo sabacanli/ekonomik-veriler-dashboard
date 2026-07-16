@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hazine İhaleleri — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=3">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Hazine İhale Verileri</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet"></div>
+    <div class="metrics" id="metrics"></div>
+    <div class="range" id="range"></div>
+
+    <section class="chart-card">
+      <h3>Aylık İç Borçlanma (İhale, Net Satış)</h3>
+      <p class="cap">Milyar TL · Tüm senet türleri toplamı</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Ağırlıklı Ortalama Yıllık Bileşik Faiz</h3>
+      <p class="cap">% · Aylık, toplam satış (nominal) ağırlıklı</p>
+      <div id="ch2"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Talep / Karşılama Oranı</h3>
+      <p class="cap">Teklif edilen ÷ ihalede kabul edilen (nominal) · Yüksek değer = güçlü talep</p>
+      <div id="ch3"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Yıllık Borçlanmanın Senet Türü Dağılımı</h3>
+      <p class="cap">Milyar TL (net satış) · Son 6 yıl</p>
+      <div id="ch4"></div>
+    </section>
+
+    <footer>Kaynak: HMB iç borçlanma ihale sonuçları (TL cinsi senetler) ·
+      Birim: Bin TL (grafiklerde Milyar TL) · 2012→bugün.</footer>
+  </main>
+
+  <script src="assets/app.js?v=3"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/hazine.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+
+      const s = D.son;
+      setMetrics([
+        [s.yil + " Toplam Satış (Net)", trNum(s.ytd_satis, 1), "milyar TL", "flat"],
+        [s.yil + " İhale Sayısı", trNum(s.ytd_ihale, 0), null],
+        ["Ort. Bileşik Faiz (3 Ay)", "%" + trNum(s.faiz3, 2), "satış ağırlıklı", "flat"],
+        ["Son İhale", s.tarih, null],
+      ]);
+
+      const A = D.aylik;
+      let N = 36;
+      function render() {
+        const t = tail(A.ay, N);
+        draw("ch1", [
+          { type: "bar", x: t, y: tail(A.satis, N), marker: { color: C.toplam },
+            hovertemplate: "%{x|%m.%Y}<br>%{y:.1f} milyar TL<extra></extra>" },
+        ], { height: 380, showlegend: false });
+
+        draw("ch2", [
+          { type: "scatter", mode: "lines+markers", x: t, y: tail(A.faiz, N),
+            line: { color: C.amber, width: 2.5 }, marker: { size: 4 }, connectgaps: true,
+            hovertemplate: "%{x|%m.%Y}<br>%%{y:.2f}<extra></extra>" },
+        ], { height: 360, showlegend: false });
+
+        draw("ch3", [
+          { type: "scatter", mode: "lines+markers", x: t, y: tail(A.bid_cover, N),
+            line: { color: C.green, width: 2 }, marker: { size: 4 }, connectgaps: true,
+            hovertemplate: "%{x|%m.%Y}<br>%{y:.2f}x<extra></extra>" },
+        ], { height: 320, showlegend: false });
+      }
+
+      rangeCtl(document.getElementById("range"),
+        [["3 Yıl", 36], ["6 Yıl", 72], ["Tümü", 9999]], 36,
+        n => { N = n; render(); });
+      render();
+
+      // Yıllık senet türü dağılımı (aralıktan bağımsız)
+      const P = ["#3D7BE0", "#4CAF7D", "#ED7D31", "#6FD1FF", "#9AA4B2", "#B98AFF"];
+      const Y = D.yillik_tur;
+      draw("ch4", Y.turler.map((tur, i) => ({
+        type: "bar", x: Y.yil, y: tur.deger, name: tur.ad, marker: { color: P[i % P.length] },
+        hovertemplate: "%{x}<br>" + tur.ad + ": %{y:.1f} milyar TL<extra></extra>",
+      })), { height: 440, barmode: "relative", bargap: 0.4 });
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>

@@ -397,6 +397,131 @@ def build_cari():
     })
 
 
+def _wavg(vals, weights):
+    """Ağırlıklı ortalama (NaN'ler atlanır)."""
+    m = vals.notna() & weights.notna() & (weights > 0)
+    if not m.any():
+        return None
+    return float((vals[m] * weights[m]).sum() / weights[m].sum())
+
+
+def build_hazine():
+    fp = BASE / "hazine ihale " / "hazine_ihale_verileri.xlsx"
+    df = pd.read_excel(fp, sheet_name="Tüm İhaleler", header=[0, 1])
+    df.columns = [" / ".join(str(x) for x in c) for c in df.columns]
+    C_VAL = "Genel Bilgiler / Valör Tarihi"
+    C_TUR = "Genel Bilgiler / Senet Türü"
+    C_NET = "Toplam Satış / Net (Bin TL)"
+    C_NOM = "Toplam Satış / Nominal (Bin TL)"
+    C_FAIZ = "Kabul Edilen Faiz (%) / Ort. Yıllık Bileşik"
+    C_TEKLIF = "Teklif Edilen Tutar / Nominal (Bin TL)"
+    C_KABUL = "İhale Kabul Edilen Tutar / Nominal (Bin TL)"
+    df[C_VAL] = pd.to_datetime(df[C_VAL], format="%d.%m.%Y", errors="coerce")
+    df = df.dropna(subset=[C_VAL]).sort_values(C_VAL).reset_index(drop=True)
+
+    L_t = df[C_VAL].max()
+    cy = int(L_t.year)
+    ytd = df[df[C_VAL].dt.year == cy]
+    ytd_satis = float(ytd[C_NET].sum()) / 1e6          # Bin TL -> Milyar TL
+    son3ay = df[df[C_VAL] >= L_t - pd.DateOffset(months=3)]
+    faiz3 = _wavg(son3ay[C_FAIZ], son3ay[C_NOM])
+    ozet = (f"<b>{L_t.strftime('%d.%m.%Y')}</b> itibarıyla {cy} yılında Hazine iç borçlanma "
+            f"ihalelerinde toplam <b>{ht(ytd_satis)} milyar TL</b> (net) satış yapıldı "
+            f"({len(ytd)} ihale). Son 3 ayın satış ağırlıklı ortalama yıllık bileşik faizi "
+            f"<b>%{ht(faiz3, 2)}</b>.")
+
+    # Aylık seriler
+    ayg = df.groupby(df[C_VAL].dt.to_period("M"))
+    aylik = pd.DataFrame({
+        "satis": ayg[C_NET].sum() / 1e6,
+        "teklif": ayg[C_TEKLIF].sum(),
+        "kabul": ayg[C_KABUL].sum(),
+    })
+    aylik["faiz"] = ayg.apply(lambda g: _wavg(g[C_FAIZ], g[C_NOM]))
+    aylik["bid_cover"] = (aylik["teklif"] / aylik["kabul"]).where(aylik["kabul"] > 0)
+    aylik.index = aylik.index.to_timestamp()
+
+    # Yıllık senet türü dağılımı (son 6 yıl, Milyar TL)
+    KISA = {"TLREF Endeksli Senetler": "TLREF",
+            "TL Cinsi Kira Sertifikalari": "Kira Sertifikası",
+            "TL Cinsi Kuponsuz Senetler": "Kuponsuz",
+            "TL Cinsi TUFE Endeksli Senetler": "TÜFE Endeksli",
+            "TL Cinsi Sabit Faizli Kuponlu Senetler": "Sabit Kuponlu",
+            "TL Cinsi Degisken Faizli Kuponlu Senetler": "Değişken Kuponlu"}
+    yt = df.copy()
+    yt["yil"] = yt[C_VAL].dt.year
+    yt["tur"] = yt[C_TUR].map(KISA).fillna(yt[C_TUR])
+    piv = (yt.pivot_table(index="yil", columns="tur", values=C_NET, aggfunc="sum")
+           .fillna(0.0) / 1e6).tail(6)
+
+    dump("hazine.json", {
+        "updated": mtime(fp),
+        "ozet_html": ozet,
+        "son": {"tarih": L_t.strftime("%d.%m.%Y"), "ytd_satis": ytd_satis,
+                "ytd_ihale": int(len(ytd)), "faiz3": faiz3, "yil": cy},
+        "aylik": {
+            "ay": [t.strftime("%Y-%m-%d") for t in aylik.index],
+            "satis": [round(float(v), 2) for v in aylik["satis"]],
+            "faiz": [None if pd.isna(v) else round(float(v), 2) for v in aylik["faiz"]],
+            "bid_cover": [None if pd.isna(v) else round(float(v), 2) for v in aylik["bid_cover"]],
+        },
+        "yillik_tur": {
+            "yil": [str(int(y)) for y in piv.index],
+            "turler": [{"ad": c, "deger": [round(float(v), 1) for v in piv[c]]} for c in piv.columns],
+        },
+    })
+
+
+def build_tcmb_alim():
+    fp = BASE / "tcmb dogrudan alım" / "tcmb_dogrudan_alim.xlsx"
+    d = pd.read_excel(fp, sheet_name="Doğrudan Alım İşlemleri")
+    d["İşlem Tarihi"] = pd.to_datetime(d["İşlem Tarihi"], errors="coerce")
+    d["Vade"] = pd.to_datetime(d["Vade"], errors="coerce")
+    d = d.dropna(subset=["İşlem Tarihi"]).sort_values("İşlem Tarihi").reset_index(drop=True)
+
+    L_t = d["İşlem Tarihi"].max()
+    cy = int(L_t.year)
+    ytd = d[d["İşlem Tarihi"].dt.year == cy]
+    ytd_alim = float(ytd["Kazanan Tutar (Nominal)"].sum()) / 1e6   # Bin TL -> Milyar TL
+    son3ay = d[d["İşlem Tarihi"] >= L_t - pd.DateOffset(months=3)]
+    faiz3 = _wavg(son3ay["Ortalama Bileşik Faiz"], son3ay["Kazanan Tutar (Nominal)"])
+    ozet = (f"<b>{L_t.strftime('%d.%m.%Y')}</b> itibarıyla {cy} yılında doğrudan alım "
+            f"ihalelerinde toplam <b>{ht(ytd_alim)} milyar TL</b> (nominal) işlem yapıldı "
+            f"({len(ytd)} işlem). Son 3 ayın tutar ağırlıklı ortalama bileşik faizi "
+            f"<b>%{ht(faiz3, 2)}</b>.")
+
+    ayg = d.groupby(d["İşlem Tarihi"].dt.to_period("M"))
+    aylik = pd.DataFrame({
+        "alim": ayg["Kazanan Tutar (Nominal)"].sum() / 1e6,
+        "islem": ayg["İhale No"].count(),
+    })
+    aylik["faiz"] = ayg.apply(lambda g: _wavg(g["Ortalama Bileşik Faiz"], g["Kazanan Tutar (Nominal)"]))
+    aylik.index = aylik.index.to_timestamp()
+
+    # Yıllık borçlanma (işlem yılı) vs itfa (vade yılı)
+    borc = d.groupby(d["İşlem Tarihi"].dt.year)["Kazanan Tutar (Nominal)"].sum() / 1e6
+    itfa = d.dropna(subset=["Vade"]).groupby(d["Vade"].dt.year)["Kazanan Tutar (Nominal)"].sum() / 1e6
+    yillar = sorted(set(borc.index.astype(int)) | set(itfa.index.astype(int)))
+
+    dump("tcmb_alim.json", {
+        "updated": mtime(fp),
+        "ozet_html": ozet,
+        "son": {"tarih": L_t.strftime("%d.%m.%Y"), "ytd_alim": ytd_alim,
+                "ytd_islem": int(len(ytd)), "faiz3": faiz3, "yil": cy},
+        "aylik": {
+            "ay": [t.strftime("%Y-%m-%d") for t in aylik.index],
+            "alim": [round(float(v), 2) for v in aylik["alim"]],
+            "faiz": [None if pd.isna(v) else round(float(v), 2) for v in aylik["faiz"]],
+            "islem": [int(v) for v in aylik["islem"]],
+        },
+        "yillik": {
+            "yil": [str(y) for y in yillar],
+            "borclanma": [round(float(borc.get(y, 0.0)), 1) for y in yillar],
+            "itfa": [round(float(itfa.get(y, 0.0)), 1) for y in yillar],
+        },
+    })
+
+
 def build_bddk():
     import bddk_analiz as ba
     tl_b, usd_b, kaynak = ba.load_latest(BASE / "bddk_data")
@@ -598,6 +723,40 @@ def build_home():
     except Exception:
         pass
     try:
+        fp = BASE / "hazine ihale " / "hazine_ihale_verileri.xlsx"
+        hz = pd.read_excel(fp, sheet_name="Tüm İhaleler", header=[0, 1])
+        hz.columns = [" / ".join(str(x) for x in c) for c in hz.columns]
+        cv = "Genel Bilgiler / Valör Tarihi"
+        hz[cv] = pd.to_datetime(hz[cv], format="%d.%m.%Y", errors="coerce")
+        hz = hz.dropna(subset=[cv])
+        L_t = hz[cv].max(); cy = int(L_t.year)
+        ytd = hz[hz[cv].dt.year == cy]
+        satis = float(ytd["Toplam Satış / Net (Bin TL)"].sum()) / 1e6
+        s3 = hz[hz[cv] >= L_t - pd.DateOffset(months=3)]
+        f3 = _wavg(s3["Kabul Edilen Faiz (%) / Ort. Yıllık Bileşik"], s3["Toplam Satış / Nominal (Bin TL)"])
+        add("🏦", "Hazine İhaleleri",
+            f"{cy} yılında iç borçlanma ihalelerinde toplam <b>{ht(satis)} milyar TL</b> (net) satış "
+            f"({len(ytd)} ihale, son: {L_t.strftime('%d.%m.%Y')}). Son 3 ayın satış ağırlıklı "
+            f"ortalama bileşik faizi <b>%{ht(f3, 2)}</b>.", "hazine.html")
+    except Exception:
+        pass
+    try:
+        fp = BASE / "tcmb dogrudan alım" / "tcmb_dogrudan_alim.xlsx"
+        ta = pd.read_excel(fp, sheet_name="Doğrudan Alım İşlemleri")
+        ta["İşlem Tarihi"] = pd.to_datetime(ta["İşlem Tarihi"], errors="coerce")
+        ta = ta.dropna(subset=["İşlem Tarihi"])
+        L_t = ta["İşlem Tarihi"].max(); cy = int(L_t.year)
+        ytd = ta[ta["İşlem Tarihi"].dt.year == cy]
+        alim = float(ytd["Kazanan Tutar (Nominal)"].sum()) / 1e6
+        s3 = ta[ta["İşlem Tarihi"] >= L_t - pd.DateOffset(months=3)]
+        f3 = _wavg(s3["Ortalama Bileşik Faiz"], s3["Kazanan Tutar (Nominal)"])
+        add("🎯", "TCMB Doğrudan Alım",
+            f"{cy} yılında doğrudan alım ihalelerinde toplam <b>{ht(alim)} milyar TL</b> (nominal) "
+            f"işlem ({len(ytd)} işlem, son: {L_t.strftime('%d.%m.%Y')}). Son 3 ayın ortalama "
+            f"bileşik faizi <b>%{ht(f3, 2)}</b>.", "tcmb-alim.html")
+    except Exception:
+        pass
+    try:
         td = BASE / "tcmb haftalık stok" / "output"
 
         def lv(n):
@@ -651,7 +810,8 @@ def main():
                      ("butce", build_butce), ("nakit", build_nakit),
                      ("rezerv", build_rezerv), ("kredi", build_kredi),
                      ("mevduat", build_mevduat), ("cari", build_cari),
-                     ("bddk", build_bddk)]:
+                     ("bddk", build_bddk), ("hazine", build_hazine),
+                     ("tcmb_alim", build_tcmb_alim)]:
         try:
             fn()
             ok += 1
