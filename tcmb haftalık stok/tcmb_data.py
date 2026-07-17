@@ -10,7 +10,6 @@ Ciktilar:
 
 import sys
 import os
-import tcmb
 import pandas as pd
 import numpy as np
 import matplotlib
