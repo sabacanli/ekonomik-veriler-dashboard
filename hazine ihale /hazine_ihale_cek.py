@@ -839,7 +839,9 @@ def main():
     for col in ["valor", "itfa"]:
         df[col] = df[col].apply(lambda x: str(x) if x else "")
 
-    output_file = "hazine_ihale_verileri.xlsx"
+    # Çıktı her zaman script'in klasörüne yazılır (çalışma dizininden bağımsız —
+    # otomasyon repo kökünden çalıştırdığında dosya yanlış yere düşmesin).
+    output_file = os.path.join(SCRIPT_DIR, "hazine_ihale_verileri.xlsx")
     print(f"\n>>> Excel dosyasına yazılıyor: {output_file}")
 
     wb_out = openpyxl.Workbook()

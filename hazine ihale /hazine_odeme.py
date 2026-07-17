@@ -810,4 +810,6 @@ def write_odeme_sheets(output_file):
 
 
 if __name__ == '__main__':
-    write_odeme_sheets('hazine_ihale_verileri.xlsx')
+    # Dosya her zaman script'in klasöründe (çalışma dizininden bağımsız).
+    write_odeme_sheets(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                    'hazine_ihale_verileri.xlsx'))

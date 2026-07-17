@@ -6,9 +6,15 @@ Excel formülleriyle oluşturulur. Veri güncellendiğinde analizler
 otomatik olarak yeniden hesaplanır.
 """
 
+import os
+
 from openpyxl import load_workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
+
+# Dosya her zaman script'in klasöründe (çalışma dizininden bağımsız).
+_VARSAYILAN_XLSX = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "hazine_ihale_verileri.xlsx")
 
 # ── Sabitler ─────────────────────────────────────────────────────
 DS = "Tüm İhaleler"  # veri sheet adı
@@ -684,7 +690,7 @@ def _create_detay(wb, years_all, lr):
 
 
 # ── Ana Giriş Noktası ────────────────────────────────────────────
-def write_analysis(filepath="hazine_ihale_verileri.xlsx"):
+def write_analysis(filepath=_VARSAYILAN_XLSX):
     print("Analiz formülleri ekleniyor...")
     wb = load_workbook(filepath)
     ws_data = wb[DS]
