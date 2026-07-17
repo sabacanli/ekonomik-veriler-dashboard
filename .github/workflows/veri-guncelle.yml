@@ -1,6 +1,8 @@
 # Haftalık otomatik veri güncelleme.
-# Her Perşembe ve Cuma 18:00 (TR) — EVDS/HMB/web kaynaklı modüllerin verisini
-# çeker, site paketlerini üretir, commit'ler ve siteyi yeniden yayınlar.
+# Her Perşembe ve Cuma 14:45 (TR) — TCMB haftalık istatistikleri normalde
+# Perşembe 14:30'da açıklanır; resmi tatil kaymalarında Cuma'ya sarkar.
+# EVDS/HMB/web kaynaklı modüllerin verisini çeker, site paketlerini üretir,
+# commit'ler ve siteyi yeniden yayınlar.
 # (BDDK hariç: o veri yalnızca yerel bilgisayardan Selenium ile çekilebilir.)
 #
 # Gerekli secret: EVDS_API_KEY  (Settings → Secrets and variables → Actions)
@@ -9,7 +11,7 @@ name: Haftalık Veri Güncelleme
 
 on:
   schedule:
-    - cron: "0 15 * * 4,5"   # Perşembe ve Cuma 15:00 UTC = 18:00 TR
+    - cron: "45 11 * * 4,5"   # Perşembe ve Cuma 11:45 UTC = 14:45 TR
   workflow_dispatch:
 
 permissions:
