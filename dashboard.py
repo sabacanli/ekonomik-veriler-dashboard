@@ -755,6 +755,9 @@ def _try_publish(rel_paths, message):
                        capture_output=True, timeout=30, env=env)
         subprocess.run(["git", "commit", "-m", message], cwd=str(BASE_DIR),
                        capture_output=True, timeout=30, env=env)
+        # Bulut (GitHub Actions) bu arada commit atmış olabilir — önce senkronla.
+        subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=str(BASE_DIR),
+                       capture_output=True, timeout=60, env=env)
         p = subprocess.run(["git", "push", "origin", "main"], cwd=str(BASE_DIR),
                            capture_output=True, timeout=90, env=env)
         return p.returncode == 0

@@ -61,6 +61,8 @@ def main():
     )
     if commit.returncode != 0:
         print("Not: yeni değişiklik yok (veri zaten güncel).")
+    # Bulut (GitHub Actions) bu arada commit atmış olabilir — önce senkronla.
+    subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=ROOT)
     push = subprocess.run(["git", "push", "origin", "main"], cwd=ROOT)
     if push.returncode != 0:
         print("HATA: git push başarısız. Elle 'git push' gerekebilir.", file=sys.stderr)
