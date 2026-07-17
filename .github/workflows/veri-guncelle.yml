@@ -9,7 +9,7 @@ name: Haftalık Veri Güncelleme
 
 on:
   schedule:
-    - cron: "0 15 * * 5"   # Cuma 15:00 UTC = 18:00 TR
+    - cron: "0 15 * * 4,5"   # Perşembe ve Cuma 15:00 UTC = 18:00 TR
   workflow_dispatch:
 
 permissions:
