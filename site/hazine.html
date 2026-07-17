@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=3">
+  <link rel="stylesheet" href="assets/style.css?v=4">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -20,86 +20,285 @@
     <h1 class="page-title">Hazine İhale Verileri</h1>
     <div class="update-info" id="updated"></div>
     <div class="info-box" id="ozet"></div>
+
+    <div class="filter-box">
+      <div class="filter-lbl">Yıllar</div>
+      <div class="chips" id="fYil"></div>
+      <div class="filter-lbl">Senet Türü</div>
+      <div class="chips" id="fTur"></div>
+    </div>
+
     <div class="metrics" id="metrics"></div>
-    <div class="range" id="range"></div>
 
     <section class="chart-card">
-      <h3>Aylık İç Borçlanma (İhale, Net Satış)</h3>
-      <p class="cap">Milyar TL · Tüm senet türleri toplamı</p>
-      <div id="ch1"></div>
+      <h3>📌 Dolaşımdaki Stok — Tür Bazında</h3>
+      <p class="cap" id="capStok">Bugün itibarıyla itfa olmamış ihraçlar (nominal, Milyar TL) · Yıl filtresinden bağımsız</p>
+      <div id="chStok"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>🗓️ İtfa Takvimi — Yıllara Göre</h3>
+      <p class="cap">Dolaşımdaki stokun itfa yılına dağılımı (nominal, Milyar TL) · Yıl filtresinden bağımsız</p>
+      <div id="chItfa"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Yıllık Borçlanma — Senet Türü Kırılımı</h3>
+      <p class="cap">Net satış, Milyar TL · Seçili yıllar</p>
+      <div id="chYillik"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Aylık Borçlanma</h3>
+      <p class="cap">Net satış, Milyar TL · Seçili yıl ve türler</p>
+      <div id="chAylik"></div>
     </section>
 
     <section class="chart-card">
       <h3>Ağırlıklı Ortalama Yıllık Bileşik Faiz</h3>
-      <p class="cap">% · Aylık, toplam satış (nominal) ağırlıklı</p>
-      <div id="ch2"></div>
+      <p class="cap">% · Aylık, satış (nominal) ağırlıklı · Seçili yıl ve türler</p>
+      <div id="chFaiz"></div>
     </section>
 
     <section class="chart-card">
       <h3>Talep / Karşılama Oranı</h3>
-      <p class="cap">Teklif edilen ÷ ihalede kabul edilen (nominal) · Yüksek değer = güçlü talep</p>
-      <div id="ch3"></div>
+      <p class="cap">Teklif ÷ ihalede kabul (nominal) · Aylık · Yüksek değer = güçlü talep</p>
+      <div id="chBid"></div>
     </section>
 
     <section class="chart-card">
-      <h3>Yıllık Borçlanmanın Senet Türü Dağılımı</h3>
-      <p class="cap">Milyar TL (net satış) · Son 6 yıl</p>
-      <div id="ch4"></div>
+      <h3>Vade Dağılımı</h3>
+      <p class="cap">Seçili dönemdeki satışın (net) vade bandlarına dağılımı, %</p>
+      <div id="chVade"></div>
     </section>
 
-    <footer>Kaynak: HMB iç borçlanma ihale sonuçları (TL cinsi senetler) ·
-      Birim: Bin TL (grafiklerde Milyar TL) · 2012→bugün.</footer>
+    <section class="chart-card">
+      <h3>Son İhaleler</h3>
+      <p class="cap" id="capTbl"></p>
+      <div class="table-wrap" id="tbl"></div>
+    </section>
+
+    <footer>Kaynak: HMB iç borçlanma ihale sonuçları (TL cinsi senetler) · Tutarlar Bin TL kaynaklı
+      (görünümlerde Milyon/Milyar TL) · Stok ve itfa takvimi bu ihale verisinden hesaplanır:
+      geri alım/değişim ihaleleri ve doğrudan satışlar hariçtir; TÜFE endekslilerde enflasyon
+      düzeltmesi yoktur — kesin stok için HMB istatistikleri esastır.</footer>
   </main>
 
-  <script src="assets/app.js?v=3"></script>
+  <script src="assets/app.js?v=4"></script>
   <script>
     (async () => {
       const D = await getJSON("data/hazine.json");
       setUpdated(D.updated);
       setOzet(D.ozet_html);
 
-      const s = D.son;
-      setMetrics([
-        [s.yil + " Toplam Satış (Net)", trNum(s.ytd_satis, 1), "milyar TL", "flat"],
-        [s.yil + " İhale Sayısı", trNum(s.ytd_ihale, 0), null],
-        ["Ort. Bileşik Faiz (3 Ay)", "%" + trNum(s.faiz3, 2), "satış ağırlıklı", "flat"],
-        ["Son İhale", s.tarih, null],
-      ]);
+      const I = D.ihaleler;
+      const N = I.t.length;
 
-      const A = D.aylik;
-      let N = 36;
-      function render() {
-        const t = tail(A.ay, N);
-        draw("ch1", [
-          { type: "bar", x: t, y: tail(A.satis, N), marker: { color: C.toplam },
-            hovertemplate: "%{x|%m.%Y}<br>%{y:.1f} milyar TL<extra></extra>" },
-        ], { height: 380, showlegend: false });
+      const TURLER = [
+        ["Sabit Kuponlu", "#3D7BE0"],
+        ["Kuponsuz", "#6FD1FF"],
+        ["TÜFE Endeksli", "#4CAF7D"],
+        ["Değişken Kuponlu", "#ED7D31"],
+        ["TLREF", "#B98AFF"],
+        ["Kira Sertifikası", "#E8C468"],
+      ];
+      const RENK = Object.fromEntries(TURLER);
 
-        draw("ch2", [
-          { type: "scatter", mode: "lines+markers", x: t, y: tail(A.faiz, N),
-            line: { color: C.amber, width: 2.5 }, marker: { size: 4 }, connectgaps: true,
-            hovertemplate: "%{x|%m.%Y}<br>%%{y:.2f}<extra></extra>" },
-        ], { height: 360, showlegend: false });
+      const yilOf = i => +I.t[i].slice(0, 4);
+      const ayOf = i => I.t[i].slice(0, 7);
+      const bugun = new Date().toISOString().slice(0, 10);
 
-        draw("ch3", [
-          { type: "scatter", mode: "lines+markers", x: t, y: tail(A.bid_cover, N),
-            line: { color: C.green, width: 2 }, marker: { size: 4 }, connectgaps: true,
-            hovertemplate: "%{x|%m.%Y}<br>%{y:.2f}x<extra></extra>" },
-        ], { height: 320, showlegend: false });
+      const yillar = [...new Set(I.t.map(s => +s.slice(0, 4)))].sort((a, b) => b - a);
+      const selYil = new Set(yillar.slice(0, 5));
+      const selTur = new Set(TURLER.map(x => x[0]));
+
+      // ── Filtre çipleri ──
+      function chips(el, items, sel, renkli) {
+        el.innerHTML = '<span class="chip" data-v="__all">Tümü</span>' +
+          items.map(v => {
+            const dot = renkli ? '<span class="dot" style="background:' + RENK[v] + '"></span>' : "";
+            return '<span class="chip" data-v="' + v + '">' + dot + v + "</span>";
+          }).join("");
+        el.querySelectorAll(".chip").forEach(c => {
+          c.onclick = () => {
+            const v = c.dataset.v;
+            if (v === "__all") {
+              if (sel.size === items.length) { sel.clear(); } else { items.forEach(x => sel.add(typeof items[0] === "number" ? +x : x)); }
+            } else {
+              const key = typeof items[0] === "number" ? +v : v;
+              sel.has(key) ? sel.delete(key) : sel.add(key);
+            }
+            boya(el, items, sel);
+            render();
+          };
+        });
+        boya(el, items, sel);
+      }
+      function boya(el, items, sel) {
+        el.querySelectorAll(".chip").forEach(c => {
+          const v = c.dataset.v;
+          if (v === "__all") c.classList.toggle("active", sel.size === items.length);
+          else c.classList.toggle("active", sel.has(typeof items[0] === "number" ? +v : v));
+        });
+      }
+      chips(document.getElementById("fYil"), yillar, selYil, false);
+      chips(document.getElementById("fTur"), TURLER.map(x => x[0]), selTur, true);
+
+      const wavg = (idx, val, w) => {
+        let s = 0, sw = 0;
+        for (const i of idx) {
+          if (val[i] === null || w[i] === null || !w[i]) continue;
+          s += val[i] * w[i]; sw += w[i];
+        }
+        return sw ? s / sw : null;
+      };
+
+      // ── Stok & itfa (yıl filtresinden bağımsız; tür filtresine duyarlı) ──
+      function stokIdx() {
+        const out = [];
+        for (let i = 0; i < N; i++) {
+          if (I.itfa[i] && I.itfa[i] > bugun && selTur.has(I.tur[i])) out.push(i);
+        }
+        return out;
       }
 
-      rangeCtl(document.getElementById("range"),
-        [["3 Yıl", 36], ["6 Yıl", 72], ["Tümü", 9999]], 36,
-        n => { N = n; render(); });
-      render();
+      function render() {
+        const idx = [];
+        for (let i = 0; i < N; i++) {
+          if (selYil.has(yilOf(i)) && selTur.has(I.tur[i])) idx.push(i);
+        }
 
-      // Yıllık senet türü dağılımı (aralıktan bağımsız)
-      const P = ["#3D7BE0", "#4CAF7D", "#ED7D31", "#6FD1FF", "#9AA4B2", "#B98AFF"];
-      const Y = D.yillik_tur;
-      draw("ch4", Y.turler.map((tur, i) => ({
-        type: "bar", x: Y.yil, y: tur.deger, name: tur.ad, marker: { color: P[i % P.length] },
-        hovertemplate: "%{x}<br>" + tur.ad + ": %{y:.1f} milyar TL<extra></extra>",
-      })), { height: 440, barmode: "relative", bargap: 0.4 });
+        // ── Metrikler ──
+        const topNet = idx.reduce((s, i) => s + (I.net[i] || 0), 0);
+        const topTeklif = idx.reduce((s, i) => s + (I.teklif[i] || 0), 0);
+        const topKabul = idx.reduce((s, i) => s + (I.kabul[i] || 0), 0);
+        const aof = wavg(idx, I.faiz, I.nom);
+        const vadeY = wavg(idx, I.vg, I.nom);
+        setMetrics([
+          ["Toplam Satış (Net)", trNum(topNet / 1e6, 1), "milyar TL", "flat"],
+          ["İhale Sayısı", trNum(idx.length, 0), null],
+          ["Ort. Bileşik Faiz", aof === null ? "—" : "%" + trNum(aof, 2), "satış ağırlıklı", "flat"],
+          ["Ort. Vade", vadeY === null ? "—" : trNum(vadeY / 365, 1) + " yıl", null],
+          ["Talep / Karşılama", topKabul ? trNum(topTeklif / topKabul, 2) + "x" : "—", null],
+        ]);
+
+        // ── Dolaşımdaki stok ──
+        const sIdx = stokIdx();
+        const stokTur = {};
+        for (const i of sIdx) stokTur[I.tur[i]] = (stokTur[I.tur[i]] || 0) + (I.nom[i] || 0);
+        const sPairs = Object.entries(stokTur).sort((a, b) => a[1] - b[1]);
+        const sToplam = sPairs.reduce((s, p) => s + p[1], 0);
+        document.getElementById("capStok").textContent =
+          "Bugün itibarıyla itfa olmamış ihraçlar · Toplam: " + trNum(sToplam / 1e6, 0) +
+          " milyar TL (nominal) · Yıl filtresinden bağımsız";
+        draw("chStok", [{
+          type: "bar", orientation: "h",
+          y: sPairs.map(p => p[0]), x: sPairs.map(p => p[1] / 1e6),
+          marker: { color: sPairs.map(p => RENK[p[0]] || "#9AA4B2") },
+          text: sPairs.map(p => trNum(p[1] / 1e6, 0)), textposition: "outside",
+          cliponaxis: false,
+          textfont: { family: "'IBM Plex Mono', monospace", size: 12 },
+          hovertemplate: "%{y}<br>%{x:,.0f} milyar TL<extra></extra>",
+        }], { height: 320, showlegend: false, margin: { l: 150, r: 95 } });
+
+        // ── İtfa takvimi ──
+        const itfaYil = {};
+        for (const i of sIdx) {
+          const y = I.itfa[i].slice(0, 4);
+          (itfaYil[y] = itfaYil[y] || {})[I.tur[i]] = (itfaYil[y][I.tur[i]] || 0) + (I.nom[i] || 0);
+        }
+        const iYillar = Object.keys(itfaYil).sort();
+        draw("chItfa", TURLER.filter(t => selTur.has(t[0])).map(([ad, renk]) => ({
+          type: "bar", x: iYillar, y: iYillar.map(y => (itfaYil[y][ad] || 0) / 1e6),
+          name: ad, marker: { color: renk },
+          hovertemplate: "%{x}<br>" + ad + ": %{y:,.0f} milyar TL<extra></extra>",
+        })), { height: 380, barmode: "relative", bargap: 0.3 });
+
+        // ── Yıllık borçlanma (tür kırılımı) ──
+        const yilTur = {};
+        for (const i of idx) {
+          const y = yilOf(i);
+          (yilTur[y] = yilTur[y] || {})[I.tur[i]] = (yilTur[y][I.tur[i]] || 0) + (I.net[i] || 0);
+        }
+        const bYillar = Object.keys(yilTur).sort();
+        draw("chYillik", TURLER.filter(t => selTur.has(t[0])).map(([ad, renk]) => ({
+          type: "bar", x: bYillar, y: bYillar.map(y => (yilTur[y][ad] || 0) / 1e6),
+          name: ad, marker: { color: renk },
+          hovertemplate: "%{x}<br>" + ad + ": %{y:,.1f} milyar TL<extra></extra>",
+        })), { height: 400, barmode: "relative", bargap: 0.35 });
+
+        // ── Aylık seriler ──
+        const ay = {};
+        for (const i of idx) {
+          const k = ayOf(i);
+          const o = (ay[k] = ay[k] || { net: 0, fS: 0, fW: 0, teklif: 0, kabul: 0 });
+          o.net += I.net[i] || 0;
+          if (I.faiz[i] !== null && I.nom[i]) { o.fS += I.faiz[i] * I.nom[i]; o.fW += I.nom[i]; }
+          o.teklif += I.teklif[i] || 0;
+          o.kabul += I.kabul[i] || 0;
+        }
+        const aylarK = Object.keys(ay).sort();
+        const ax = aylarK.map(k => k + "-01");
+        draw("chAylik", [{
+          type: "bar", x: ax, y: aylarK.map(k => ay[k].net / 1e6), marker: { color: C.toplam },
+          hovertemplate: "%{x|%m.%Y}<br>%{y:,.1f} milyar TL<extra></extra>",
+        }], { height: 340, showlegend: false });
+        draw("chFaiz", [{
+          type: "scatter", mode: "lines+markers", x: ax,
+          y: aylarK.map(k => ay[k].fW ? ay[k].fS / ay[k].fW : null),
+          line: { color: C.amber, width: 2.5 }, marker: { size: 4 }, connectgaps: true,
+          hovertemplate: "%{x|%m.%Y}<br>%%{y:.2f}<extra></extra>",
+        }], { height: 340, showlegend: false });
+        draw("chBid", [{
+          type: "scatter", mode: "lines+markers", x: ax,
+          y: aylarK.map(k => ay[k].kabul ? ay[k].teklif / ay[k].kabul : null),
+          line: { color: C.green, width: 2 }, marker: { size: 4 }, connectgaps: true,
+          hovertemplate: "%{x|%m.%Y}<br>%{y:.2f}x<extra></extra>",
+        }], { height: 300, showlegend: false });
+
+        // ── Vade bandı dağılımı ──
+        const BANT = [["0-1 Yıl", 366], ["1-2 Yıl", 731], ["2-3 Yıl", 1096],
+                      ["3-5 Yıl", 1827], ["5-10 Yıl", 3653], ["10+ Yıl", 1e9]];
+        const bandNet = BANT.map(() => 0);
+        let bandTop = 0;
+        for (const i of idx) {
+          if (I.vg[i] === null) continue;
+          const b = BANT.findIndex(x => I.vg[i] <= x[1]);
+          bandNet[b] += I.net[i] || 0; bandTop += I.net[i] || 0;
+        }
+        draw("chVade", [{
+          type: "bar", x: BANT.map(b => b[0]),
+          y: bandNet.map(v => bandTop ? v / bandTop * 100 : 0),
+          marker: { color: "#4C9AFF" },
+          text: bandNet.map(v => bandTop ? trNum(v / bandTop * 100, 1) + "%" : ""),
+          textposition: "outside", textfont: { size: 12, family: "'IBM Plex Mono', monospace" },
+          hovertemplate: "%{x}<br>%%{y:.1f}<extra></extra>",
+        }], { height: 320, showlegend: false, yaxis: { title: "%" } });
+
+        // ── Son ihaleler tablosu ──
+        const son = [...idx].sort((a, b) => I.t[b].localeCompare(I.t[a])).slice(0, 30);
+        document.getElementById("capTbl").textContent =
+          "Seçili filtredeki en yeni 30 ihale (toplam " + trNum(idx.length, 0) + " kayıt)";
+        let h = '<table class="heat"><thead><tr>' +
+          '<th style="text-align:left">Valör</th><th style="text-align:left">Tür</th>' +
+          "<th>ISIN</th><th>Vade</th><th>Satış Net (mn TL)</th><th>Bileşik %</th>" +
+          "</tr></thead><tbody>";
+        for (const i of son) {
+          const tarih = I.t[i].split("-").reverse().join(".");
+          h += "<tr>" +
+            '<td class="lbl">' + tarih + "</td>" +
+            '<td class="lbl"><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;background:' +
+              (RENK[I.tur[i]] || "#9AA4B2") + '"></span>' + I.tur[i] + "</td>" +
+            "<td>" + (I.isin[i] || "—") + "</td>" +
+            '<td class="num">' + (I.vg[i] === null ? "—" : trNum(I.vg[i] / 365, 1) + " yıl") + "</td>" +
+            '<td class="num">' + (I.net[i] === null ? "—" : trNum(I.net[i] / 1000, 0)) + "</td>" +
+            '<td class="num">' + (I.faiz[i] === null ? "—" : trNum(I.faiz[i], 2)) + "</td>" +
+            "</tr>";
+        }
+        document.getElementById("tbl").innerHTML = h + "</tbody></table>";
+      }
+
+      render();
     })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
   </script>
 </body>

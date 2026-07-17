@@ -209,6 +209,37 @@ a.card:hover { border-color: var(--amber); transform: translateY(-2px); }
 
 footer { color: var(--muted); font-size: 12.5px; margin-top: 28px; line-height: 1.6; }
 
+/* ── Filtre çipleri (Hazine analiz) ── */
+.filter-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px 8px;
+  margin-bottom: 18px;
+}
+.filter-lbl {
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin: 4px 0 7px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.chip {
+  border: 1px solid var(--border);
+  background: #141926;
+  color: var(--muted);
+  padding: 6px 13px;
+  border-radius: 16px;
+  font-size: 12.5px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color .1s;
+}
+.chip:hover { border-color: var(--muted); }
+.chip.active { background: #2A2113; border-color: var(--amber); color: var(--amber); font-weight: 600; }
+.chip .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; }
+
 /* ── Isı haritası tablosu (BDDK) ── */
 .table-wrap { overflow-x: auto; }
 table.heat {

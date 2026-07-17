@@ -405,6 +405,16 @@ def _wavg(vals, weights):
     return float((vals[m] * weights[m]).sum() / weights[m].sum())
 
 
+def _hazine_tarih(col):
+    """Hazine Excel'indeki karışık tarih kolonu: bir kısmı 'GG.AA.YYYY' metni,
+    bir kısmı Excel seri numarası (float). İkisini de çözer."""
+    s_metin = pd.to_datetime(col.where(col.map(lambda x: isinstance(x, str))),
+                             format="%d.%m.%Y", errors="coerce")
+    s_seri = pd.to_datetime(pd.to_numeric(col, errors="coerce"),
+                            unit="D", origin="1899-12-30", errors="coerce")
+    return s_metin.fillna(s_seri)
+
+
 def build_hazine():
     fp = BASE / "hazine ihale " / "hazine_ihale_verileri.xlsx"
     df = pd.read_excel(fp, sheet_name="Tüm İhaleler", header=[0, 1])
@@ -416,7 +426,7 @@ def build_hazine():
     C_FAIZ = "Kabul Edilen Faiz (%) / Ort. Yıllık Bileşik"
     C_TEKLIF = "Teklif Edilen Tutar / Nominal (Bin TL)"
     C_KABUL = "İhale Kabul Edilen Tutar / Nominal (Bin TL)"
-    df[C_VAL] = pd.to_datetime(df[C_VAL], format="%d.%m.%Y", errors="coerce")
+    df[C_VAL] = _hazine_tarih(df[C_VAL])
     df = df.dropna(subset=[C_VAL]).sort_values(C_VAL).reset_index(drop=True)
 
     L_t = df[C_VAL].max()
@@ -454,6 +464,29 @@ def build_hazine():
     piv = (yt.pivot_table(index="yil", columns="tur", values=C_NET, aggfunc="sum")
            .fillna(0.0) / 1e6).tail(6)
 
+    # İhale bazlı kayıtlar (sayfadaki filtreli analizlerin ham verisi).
+    # Birimler: tutarlar Bin TL, faiz %, vade gün.
+    C_ITFA = "Genel Bilgiler / İtfa Tarihi"
+    C_VG = "Genel Bilgiler / Vade (Gün)"
+    C_ISIN = "Genel Bilgiler / ISIN Kodu"
+    itfa = _hazine_tarih(df[C_ITFA])
+
+    def num(s, r=0):
+        return [None if pd.isna(v) else round(float(v), r) for v in s]
+
+    ihaleler = {
+        "t": [d.strftime("%Y-%m-%d") for d in df[C_VAL]],
+        "tur": [KISA.get(x, str(x)) for x in df[C_TUR]],
+        "itfa": [None if pd.isna(d) else d.strftime("%Y-%m-%d") for d in itfa],
+        "vg": num(df[C_VG]),
+        "net": num(df[C_NET]),
+        "nom": num(df[C_NOM]),
+        "teklif": num(df[C_TEKLIF]),
+        "kabul": num(df[C_KABUL]),
+        "faiz": num(df[C_FAIZ], 2),
+        "isin": [None if pd.isna(x) else str(x) for x in df[C_ISIN]],
+    }
+
     dump("hazine.json", {
         "updated": mtime(fp),
         "ozet_html": ozet,
@@ -469,6 +502,7 @@ def build_hazine():
             "yil": [str(int(y)) for y in piv.index],
             "turler": [{"ad": c, "deger": [round(float(v), 1) for v in piv[c]]} for c in piv.columns],
         },
+        "ihaleler": ihaleler,
     })
 
 
@@ -727,7 +761,7 @@ def build_home():
         hz = pd.read_excel(fp, sheet_name="Tüm İhaleler", header=[0, 1])
         hz.columns = [" / ".join(str(x) for x in c) for c in hz.columns]
         cv = "Genel Bilgiler / Valör Tarihi"
-        hz[cv] = pd.to_datetime(hz[cv], format="%d.%m.%Y", errors="coerce")
+        hz[cv] = _hazine_tarih(hz[cv])
         hz = hz.dropna(subset=[cv])
         L_t = hz[cv].max(); cy = int(L_t.year)
         ytd = hz[hz[cv].dt.year == cy]
