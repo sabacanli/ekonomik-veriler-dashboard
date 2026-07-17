@@ -1,0 +1,102 @@
+# Haftalık otomatik veri güncelleme.
+# Her Cuma 18:00 (TR) — EVDS/HMB/web kaynaklı 10 modülün verisini çeker,
+# site paketlerini üretir, commit'ler ve siteyi yeniden yayınlar.
+# (BDDK hariç: o veri yalnızca yerel bilgisayardan Selenium ile çekilebilir.)
+#
+# Gerekli secret: EVDS_API_KEY  (Settings → Secrets and variables → Actions)
+# Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow".
+name: Haftalık Veri Güncelleme
+
+on:
+  schedule:
+    - cron: "0 15 * * 5"   # Cuma 15:00 UTC = 18:00 TR
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  guncelle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      EVDS_API_KEY: ${{ secrets.EVDS_API_KEY }}
+      TCMB_API_KEY: ${{ secrets.EVDS_API_KEY }}
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Kütüphaneleri kur
+        run: pip install --quiet pandas requests openpyxl xlrd beautifulsoup4 matplotlib numpy
+
+      - name: Verileri çek (başarısız modül atlanır, kalanlar devam eder)
+        run: |
+          FAILS=""
+          calistir() {
+            echo "──────── $1 ────────"
+            if timeout 600 python "$2"; then
+              echo "✓ $1 güncellendi"
+            else
+              echo "::warning::$1 güncellenemedi (atlandı)"
+              FAILS="$FAILS | $1"
+            fi
+          }
+          calistir "TCMB Haftalık Stok"      "tcmb haftalık stok/tcmb_data.py"
+          calistir "Net Rezerv"              "net rezerv/net_rezerv_fetch.py"
+          calistir "Enflasyon"               "enflasyon/enflasyon_fetch.py"
+          calistir "Kredi/Mevduat"           "kredi mevduat/kredi_mevduat_fetch.py"
+          calistir "Yabancı Para (DTH)"      "yabanci para hareketi/dth_fetch.py"
+          calistir "Cari Denge"              "cari acik/evds_fetch.py"
+          calistir "Ödemeler Dengesi"        "cari acik/odemeler_dengesi_fetch.py"
+          calistir "Bütçe"                   "butce/butce_fetch.py"
+          calistir "Hazine Nakit"            "hazine nakit/nakit_fetch.py"
+          calistir "Hazine İhale — çek"      "hazine ihale /hazine_ihale_cek.py"
+          calistir "Hazine İhale — analiz"   "hazine ihale /hazine_analiz.py"
+          calistir "Hazine İhale — ödeme"    "hazine ihale /hazine_odeme.py"
+          calistir "TCMB Doğrudan Alım"      "tcmb dogrudan alım/guncelle.py"
+          echo ""
+          echo "Başarısız modüller:${FAILS:- (yok — hepsi güncellendi)}"
+
+      - name: Site veri paketlerini üret
+        run: python site_export.py
+
+      - name: Değişiklikleri commit + push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "tcmb haftalık stok/output" "net rezerv" "enflasyon" "kredi mevduat" \
+                  "yabanci para hareketi" "cari acik" "butce" "hazine nakit" \
+                  "hazine ihale " "tcmb dogrudan alım" site/data
+          if git diff --cached --quiet; then
+            echo "Yeni veri yok — commit atlanıyor."
+          else
+            git commit -m "Otomatik veri güncelleme ($(date -u '+%d.%m.%Y %H:%M') UTC)"
+            git pull --rebase origin main || true
+            git push origin main
+          fi
+
+      - name: Pages'i yapılandır
+        uses: actions/configure-pages@v5
+
+      - name: Site klasörünü paketle
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Yayınla
+        id: deployment
+        uses: actions/deploy-pages@v4
