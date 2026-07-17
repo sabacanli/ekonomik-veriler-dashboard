@@ -1,6 +1,6 @@
 # Haftalık otomatik veri güncelleme.
-# Her Cuma 18:00 (TR) — EVDS/HMB/web kaynaklı 10 modülün verisini çeker,
-# site paketlerini üretir, commit'ler ve siteyi yeniden yayınlar.
+# Her Perşembe ve Cuma 18:00 (TR) — EVDS/HMB/web kaynaklı modüllerin verisini
+# çeker, site paketlerini üretir, commit'ler ve siteyi yeniden yayınlar.
 # (BDDK hariç: o veri yalnızca yerel bilgisayardan Selenium ile çekilebilir.)
 #
 # Gerekli secret: EVDS_API_KEY  (Settings → Secrets and variables → Actions)
