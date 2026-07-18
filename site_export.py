@@ -384,6 +384,23 @@ def build_cari():
     ozet = (f"Son dönem (<b>{L['Tarih']}</b>) cari işlemler dengesi <b>{ht(L[ccol], 0)} milyon USD</b>. "
             f"Son dört çeyreğin (12 aylık) toplamı <b>{ht(abs(last4) / 1000)} milyar USD {kel}</b>{ek}. "
             f"Finans hesabı {ht(L[fcol], 0)}, net hata &amp; noksan {ht(L[ncol], 0)} milyon USD.")
+    # Ödemeler dengesi kırılım tablosu (aylık; hiyerarşik satırlar)
+    odm = None
+    try:
+        ofp = BASE / "cari acik" / "odemeler_dengesi_tablo.xlsx"
+        od = pd.read_excel(ofp, sheet_name=0)
+        deger_kolonlari = [x for x in od.columns if x not in ("Kalem", "_level")]
+        odm = {
+            "updated": mtime(ofp),
+            "cols": [str(x) for x in deger_kolonlari],
+            "rows": [{"k": str(r["Kalem"]),
+                      "lv": int(r["_level"]) if pd.notna(r["_level"]) else 0,
+                      "v": [None if pd.isna(r[c]) else float(r[c]) for c in deger_kolonlari]}
+                     for _, r in od.iterrows()],
+        }
+    except Exception:
+        pass
+
     dump("cari.json", {
         "updated": mtime(fp),
         "ozet_html": ozet,
@@ -394,6 +411,7 @@ def build_cari():
             "cari": col(c, ccol, 0), "finans": col(c, fcol, 0), "nhn": col(c, ncol, 0),
             "cari_4c": col(c, "cari_4c", 0),
         },
+        "odm": odm,
     })
 
 

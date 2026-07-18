@@ -23,6 +23,14 @@
     <div class="metrics" id="metrics"></div>
     <div class="range" id="range"></div>
 
+    <section class="chart-card" id="secOdm" style="display:none">
+      <h3>📋 Ödemeler Dengesi Tablosu</h3>
+      <p class="cap" id="capOdm">Milyon USD · Negatif = açık</p>
+      <div class="table-wrap" id="tblOdm"></div>
+      <p class="cap" style="margin-top:8px">** Birincil ve ikincil gelir dengelerinin toplamıdır.
+        Negatif değerler açık, pozitif değerler fazlayı gösterir.</p>
+    </section>
+
     <section class="chart-card">
       <h3>Çeyreklik Cari İşlemler Dengesi</h3>
       <p class="cap">Milyon USD · Kesikli çizgi: son 4 çeyrek (12 aylık) hareketli toplam</p>
@@ -52,6 +60,27 @@
         ["Finans Hesabı", trNum(s.finans, 0, true), null],
         ["Net Hata & Noksan", trNum(s.nhn, 0, true), null],
       ]);
+
+      // ── Ödemeler dengesi kırılım tablosu ──
+      if (D.odm && D.odm.rows && D.odm.rows.length) {
+        const O = D.odm;
+        document.getElementById("secOdm").style.display = "";
+        document.getElementById("capOdm").textContent =
+          "Milyon USD · Negatif = açık · Güncelleme: " + (O.updated || "—");
+        let h = '<table class="heat"><thead><tr><th style="text-align:left">Kalem</th>' +
+          O.cols.map(c => "<th>" + c + "</th>").join("") + "</tr></thead><tbody>";
+        for (const r of O.rows) {
+          const sec = r.lv === 0 ? ' class="sec"' : "";
+          const pad = 4 + r.lv * 18;
+          h += "<tr" + sec + '><td class="lbl" style="padding-left:' + pad + 'px">' + r.k + "</td>";
+          for (const v of r.v) {
+            const kirmizi = (v !== null && v < 0) ? ' style="color:#FF7A80"' : "";
+            h += '<td class="num"' + kirmizi + ">" + (v === null ? "—" : trNum(v, 0)) + "</td>";
+          }
+          h += "</tr>";
+        }
+        document.getElementById("tblOdm").innerHTML = h + "</tbody></table>";
+      }
 
       const S = D.seri;
       const iL = S.ceyrek.length - 1;
