@@ -510,6 +510,7 @@ def build_tcmb_alim():
     fp = BASE / "tcmb dogrudan alım" / "tcmb_dogrudan_alim.xlsx"
     d = pd.read_excel(fp, sheet_name="Doğrudan Alım İşlemleri")
     d["İşlem Tarihi"] = pd.to_datetime(d["İşlem Tarihi"], errors="coerce")
+    d["Valör"] = pd.to_datetime(d["Valör"], errors="coerce")
     d["Vade"] = pd.to_datetime(d["Vade"], errors="coerce")
     d = d.dropna(subset=["İşlem Tarihi"]).sort_values("İşlem Tarihi").reset_index(drop=True)
 
@@ -553,7 +554,31 @@ def build_tcmb_alim():
             "borclanma": [round(float(borc.get(y, 0.0)), 1) for y in yillar],
             "itfa": [round(float(itfa.get(y, 0.0)), 1) for y in yillar],
         },
+        # İşlem bazlı kayıtlar (sayfadaki filtreli analizlerin ham verisi).
+        # Birimler: tutarlar Bin TL, faiz %, vade gün (valörden itfaya).
+        "islemler": _alim_islemler(d),
     })
+
+
+def _alim_islemler(d):
+    YONTEM = {"GELENEKSEL": "Geleneksel", "PYGELENEKSEL": "PY Geleneksel",
+              "MIKTAR": "Miktar", "PY MIKTAR": "PY Miktar"}
+    vg = (d["Vade"] - d["Valör"]).dt.days
+
+    def num(s, r=0):
+        return [None if pd.isna(v) else round(float(v), r) for v in s]
+
+    return {
+        "t": [x.strftime("%Y-%m-%d") for x in d["İşlem Tarihi"]],
+        "itfa": [None if pd.isna(x) else x.strftime("%Y-%m-%d") for x in d["Vade"]],
+        "vg": num(vg),
+        "nom": num(d["Kazanan Tutar (Nominal)"]),
+        "net": num(d["Kazanan Tutar (Net)"]),
+        "teklif": num(d["Teklif Tutarı (Nominal)"]),
+        "faiz": num(d["Ortalama Bileşik Faiz"], 2),
+        "isin": [None if pd.isna(x) else str(x) for x in d["Tanım (ISIN)"]],
+        "yontem": [YONTEM.get(str(x).strip(), str(x)) for x in d["Yöntem"]],
+    }
 
 
 def build_bddk():
