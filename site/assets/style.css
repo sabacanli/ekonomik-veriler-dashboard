@@ -328,3 +328,44 @@ table.heat td.bos { color: var(--muted); }
   .hero h1 { font-size: 26px; }
   .cards { grid-template-columns: 1fr; }
 }
+
+/* ── Finansal Hesaplar ── */
+.nav-head {
+  display: block;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin: 16px 10px 6px;
+}
+.calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+input.inp {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0E1420;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14.5px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+input.inp:focus { outline: none; border-color: var(--amber); }
+.check { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; margin-top: 12px; cursor: pointer; }
+.check input { accent-color: var(--amber); }
+.warn-line { color: #FFB86B; font-size: 12.5px; margin-top: 8px; }
+.btn {
+  display: inline-block;
+  background: #182031;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.btn:hover { border-color: var(--amber); color: var(--amber); }
+.table-scroll { overflow: auto; max-height: 480px; }
+.table-scroll table.heat thead th { position: sticky; top: 0; z-index: 2; background: var(--panel); }

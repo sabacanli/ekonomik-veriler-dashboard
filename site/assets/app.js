@@ -14,6 +14,8 @@ const NAV = [
   { href: "bddk.html", label: "BDDK Bankacılık Verileri" },
   { href: "hazine.html", label: "Hazine İhale Verileri" },
   { href: "tcmb-alim.html", label: "TCMB Doğrudan Alım" },
+  { head: "Finansal Hesaplar" },
+  { href: "hesap-kredi.html", label: "Kredi Hesaplama" },
 ];
 
 const C = {
@@ -33,6 +35,7 @@ function renderShell() {
     '<div class="brand-sub">Piyasa analiz platformu</div>' +
     '<nav class="nav">' +
     NAV.map(function (n) {
+      if (n.head) return '<span class="nav-head">' + n.head + "</span>";
       if (n.href) {
         const act = n.href === here ? " active" : "";
         return '<a class="' + act.trim() + '" href="' + n.href + '">' + n.label + "</a>";

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=6">
+  <link rel="stylesheet" href="assets/style.css?v=7">
 </head>
 <body>
   <button id="menuBtn">☰</button>
@@ -25,6 +25,18 @@
     <h2 class="section-title">Güncel Görünüm</h2>
     <div class="cards" id="cards"></div>
 
+    <h2 class="section-title" style="margin-top:30px">Finansal Hesaplar</h2>
+    <div class="cards">
+      <a class="card" href="hesap-kredi.html">
+        <div class="t">🧮 Kredi Hesaplama</div>
+        <div class="d">İhtiyaç, taşıt ve konut kredisi için taksit, toplam maliyet ve ay ay
+          anapara / faiz / vergi dökümü (nakit akışı + CSV). İhtiyaç &amp; taşıtta faize
+          <b>%15 KKDF + %15 BSMV</b> otomatik eklenir; <b>konut kredisi bu kesintilerden muaftır</b>.
+          BDDK vade ve kredi/değer sınırları, erken ödeme kuralları da sayfada.</div>
+        <span class="go">→</span>
+      </a>
+    </div>
+
     <footer>
       Kaynaklar: TCMB EVDS · HMB Kamu Finansmanı İstatistikleri · TÜİK · BDDK.<br>
       Bu site geliştirme aşamasındadır — henüz taşınmayan modüller için
@@ -32,7 +44,7 @@
     </footer>
   </main>
 
-  <script src="assets/app.js?v=6"></script>
+  <script src="assets/app.js?v=7"></script>
   <script>
     (async () => {
       try {

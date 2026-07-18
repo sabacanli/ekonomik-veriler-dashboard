@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kredi Hesaplama — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=7">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Kredi Hesaplama</h1>
+    <div class="update-info">Finansal Hesaplar · Bireysel krediler — mevzuat durumu: Temmuz 2026</div>
+    <div class="info-box">📋 Türkiye'de bankaların ilan ettiği aylık faiz <b>vergi hariçtir</b>: ihtiyaç ve
+      taşıt kredilerinde her taksitin faiz kısmına <b>%15 KKDF + %15 BSMV</b> eklenir (efektif maliyet
+      faiz × 1,30). <b>Konut kredisi</b> bu kesintilerden muaftır — üç kredi türü arasındaki asıl maliyet
+      farkı buradan doğar. Aşağıdaki hesaplayıcı vergileri türe göre otomatik uygular ve ödeme planını
+      ay ay anapara / faiz / vergi kırılımıyla çıkarır.</div>
+
+    <!-- ── Mevzuat: kredi türlerini ayıran kurallar ── -->
+    <section class="chart-card">
+      <h3>Kredi Türlerini Ayıran Vergiler ve Kurallar</h3>
+      <p class="cap">Hesaptan önce bilinmesi gerekenler — faiz üzerinden alınan kesintiler ve BDDK sınırları</p>
+      <div class="table-wrap">
+        <table class="heat">
+          <thead>
+            <tr><th style="text-align:left">Özellik</th><th>İhtiyaç</th><th>Taşıt (bireysel)</th><th>Konut</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="lbl">KKDF (faiz üzerinden)</td><td class="num">%15</td><td class="num">%15</td><td class="num">%0 — muaf</td></tr>
+            <tr><td class="lbl">BSMV (faiz üzerinden)</td><td class="num">%15</td><td class="num">%15</td><td class="num">İstisna*</td></tr>
+            <tr class="sec"><td class="lbl">Efektif maliyet çarpanı</td><td class="num">faiz × 1,30</td><td class="num">faiz × 1,30</td><td class="num">faiz × 1,00</td></tr>
+            <tr><td class="lbl">Azami vade (BDDK)</td><td class="num">12–36 ay (tutara göre)</td><td class="num">12–48 ay (araç değerine göre)</td><td class="num">Yasal sınır yok (piyasada 120–240 ay)</td></tr>
+            <tr><td class="lbl">Kredi / değer sınırı</td><td class="num">—</td><td class="num">%20–%70</td><td class="num">%20–%90 (değer + enerji sınıfı)</td></tr>
+            <tr><td class="lbl">Erken ödeme tazminatı</td><td class="num">Yok</td><td class="num">Yok</td><td class="num">Sabit faizlide: kalan vade ≤36 ay %1, &gt;36 ay %2</td></tr>
+            <tr><td class="lbl">Tahsis ücreti üst sınırı</td><td class="num">‰5</td><td class="num">‰5</td><td class="num">‰5 + ekspertiz ücreti</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cap" style="margin-top:10px">
+        <b>Dayanaklar:</b> BSMV tüketici kredilerinde %15 — 7345 sayılı Cumhurbaşkanı Kararı (RG 07.07.2023;
+        önceki adımlar: %5 → %10, 5729 sayılı CK 11.06.2022) · KKDF tüketici kredilerinde %15 — 2010/974 sayılı BKK ·
+        *Konut: konut edinme amaçlı bireysel kredilerde KKDF %0; BSMV istisnası (6802 s.K. md.29/y) 28.12.2023'ten
+        (7491 s.K.) beri <b>kredi kullanım tarihinde üzerine kayıtlı konutu olmayanlarla</b> sınırlı ·
+        İhtiyaç vadesi — BDDK 13.02.2025/11152: ≤125.000 TL → 36 ay, 125–250 bin → 24 ay, üzeri → 12 ay ·
+        Taşıt — BDDK 10099: fatura ≤400 bin %70/48 ay, 400–800 bin %50/36 ay, 800 bin–1,2 mn %30/24 ay,
+        1,2–2 mn %20/12 ay, üzeri kredi kullandırılmaz; elektrikli araçlarda yükseltilmiş eşikler
+        (BDDK 06.03.2025/11158: ≤2,5 mn %70/48 ay … &gt;7,5 mn yok) ·
+        Konut kredi/değer — BDDK 29.01.2026/11364: konut değeri ve enerji sınıfına göre %90'a kadar
+        (örn. ≤5 mn TL &amp; A-B sınıfı %90), ikinci konut sahiplerinde düşürülür ·
+        Tahsis ücreti — TCMB 2020/7 sayılı Tebliğ: anaparanın binde 5'i; bunun dışında ücret alınamaz.
+        Erken ödeme — 6502 sayılı Kanun. Hesaplamalara tahsis ücreti, ekspertiz ve sigortalar dahil değildir.
+      </p>
+    </section>
+
+    <!-- ── Hesaplayıcı ── -->
+    <div class="filter-box">
+      <div class="filter-lbl">Kredi Türü</div>
+      <div class="chips" id="turChips"></div>
+      <div class="calc-grid">
+        <div>
+          <div class="filter-lbl">Kredi Tutarı (TL)</div>
+          <input class="inp" id="inTutar" inputmode="numeric" value="125.000">
+        </div>
+        <div>
+          <div class="filter-lbl">Aylık Faiz (%, vergi hariç)</div>
+          <input class="inp" id="inFaiz" inputmode="decimal" value="3,50">
+        </div>
+        <div>
+          <div class="filter-lbl">Vade (ay)</div>
+          <input class="inp" id="inVade" inputmode="numeric" value="36">
+        </div>
+      </div>
+      <label class="check" id="konutIstisna" style="display:none">
+        <input type="checkbox" id="ckIlkKonut" checked>
+        Kredi kullanım tarihinde üzerime kayıtlı konut yok (BSMV istisnası geçerli)
+      </label>
+      <div class="cap" id="vergiSatir" style="margin-top:10px"></div>
+      <div class="warn-line" id="bddkUyari"></div>
+    </div>
+
+    <div class="metrics" id="metrics"></div>
+
+    <section class="chart-card">
+      <h3>Taksit Bileşimi — Ay Ay</h3>
+      <p class="cap">TL · Her taksitin anapara, faiz ve vergi (KKDF+BSMV) kırılımı</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Kalan Anapara</h3>
+      <p class="cap">TL · Her taksit sonrası kalan borç</p>
+      <div id="ch2"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Ödeme Planı — Nakit Akışı</h3>
+      <p class="cap" id="planCap"></p>
+      <div class="table-wrap table-scroll" id="planTablo"></div>
+      <div style="margin-top:12px"><button class="btn" id="btnCsv">⬇ CSV indir (Excel)</button></div>
+    </section>
+
+    <footer>Bu sayfa bilgilendirme amaçlıdır; banka teklifi değildir. Vergiler faiz üzerinden hesaplanır ve
+      taksite yansıtılır (eşit taksitli/anüite plan, banka uygulamasıyla aynı yöntem). Efektif aylık oran =
+      akdi faiz × (1 + KKDF + BSMV). Tahsis ücreti (azami ‰5), ekspertiz, ipotek/rehin ve sigorta masrafları
+      plana dahil edilmemiştir. Mevzuat: 6802 GVK, 2010/974 BKK, 5729 &amp; 7345 CK, 7491 s.K., 6502 TKHK,
+      BDDK 10099 · 11152 · 11158 · 11364, TCMB 2020/7.</footer>
+  </main>
+
+  <script src="assets/app.js?v=7"></script>
+  <script>
+    const TURLER = {
+      ihtiyac: { ad: "İhtiyaç", kkdf: 0.15, bsmv: 0.15 },
+      tasit:   { ad: "Taşıt",   kkdf: 0.15, bsmv: 0.15 },
+      konut:   { ad: "Konut",   kkdf: 0,    bsmv: 0 },
+    };
+    let tur = "ihtiyac";
+    let plan = null;   // son hesaplanan ödeme planı (CSV için)
+
+    // ── Girdi çözümleme (TR biçimi: 125.000 / 3,50) ──
+    function sayi(el) {
+      const s = String(document.getElementById(el).value).trim()
+        .replace(/\./g, "").replace(",", ".");
+      const v = parseFloat(s);
+      return isNaN(v) ? 0 : v;
+    }
+    function faizOku() {
+      const s = String(document.getElementById("inFaiz").value).trim().replace(",", ".");
+      const v = parseFloat(s);
+      return isNaN(v) ? 0 : v;
+    }
+
+    // ── Vergi oranları (tür + ilk konut durumu) ──
+    function vergiler() {
+      const t = TURLER[tur];
+      let kkdf = t.kkdf, bsmv = t.bsmv;
+      if (tur === "konut" && !document.getElementById("ckIlkKonut").checked) {
+        bsmv = 0.15;  // 7491 s.K.: istisna yalnız üzerine kayıtlı konutu olmayana — ikinci konutta BSMV %15
+      }
+      return { kkdf, bsmv };
+    }
+
+    // ── BDDK sınır uyarıları ──
+    function bddkKontrol(tutar, vade) {
+      if (tur === "ihtiyac") {
+        const az = tutar <= 125000 ? 36 : (tutar <= 250000 ? 24 : 12);
+        if (vade > az) return "BDDK sınırı: " + trNum(tutar, 0) + " TL ihtiyaç kredisinde azami vade " + az + " aydır (13.02.2025/11152).";
+      }
+      if (tur === "tasit" && vade > 48)
+        return "BDDK sınırı: taşıt kredilerinde azami vade 48 aydır; araç değerine göre 12–48 ay arasında değişir.";
+      return "";
+    }
+
+    // ── Ödeme planı (anüite; vergiler faiz üzerinden) ──
+    function hesapla() {
+      const P = sayi("inTutar");
+      const fa = faizOku() / 100;
+      const n = Math.round(sayi("inVade"));
+      if (P <= 0 || fa < 0 || n <= 0 || n > 600) { plan = null; return; }
+      const { kkdf, bsmv } = vergiler();
+      const r = fa * (1 + kkdf + bsmv);                       // efektif aylık maliyet
+      const taksit = r > 0 ? P * r / (1 - Math.pow(1 + r, -n)) : P / n;
+
+      const rows = [];
+      let kalan = P, tF = 0, tK = 0, tB = 0, tOde = 0;
+      for (let m = 1; m <= n; m++) {
+        const faizM = kalan * fa, kkdfM = faizM * kkdf, bsmvM = faizM * bsmv;
+        let anaM = taksit - faizM - kkdfM - bsmvM, takM = taksit;
+        if (m === n) { anaM = kalan; takM = anaM + faizM + kkdfM + bsmvM; }  // yuvarlama artığı son taksitte
+        kalan = Math.max(kalan - anaM, 0);
+        tF += faizM; tK += kkdfM; tB += bsmvM; tOde += takM;
+        rows.push([m, takM, anaM, faizM, kkdfM, bsmvM, kalan]);
+      }
+      plan = { P, fa, n, kkdf, bsmv, r, taksit, rows,
+               toplam: tOde, faiz: tF, kkdfT: tK, bsmvT: tB,
+               yillikBilesik: (Math.pow(1 + r, 12) - 1) * 100 };
+    }
+
+    // ── Görselleştirme ──
+    function goster() {
+      hesapla();
+      const t = TURLER[tur];
+      document.getElementById("konutIstisna").style.display = tur === "konut" ? "flex" : "none";
+
+      if (!plan) {
+        document.getElementById("metrics").innerHTML = "";
+        document.getElementById("vergiSatir").textContent = "Geçerli tutar, faiz ve vade girin.";
+        return;
+      }
+      const p = plan;
+      document.getElementById("vergiSatir").innerHTML =
+        p.kkdf + p.bsmv > 0
+          ? "Uygulanan kesinti: <b>KKDF %" + (p.kkdf * 100) + " + BSMV %" + (p.bsmv * 100) +
+            "</b> → efektif aylık maliyet <b>%" + trNum(p.r * 100, 2) + "</b> (akdi %" + trNum(p.fa * 100, 2) + ")"
+          : "Konut kredisi: <b>KKDF ve BSMV yok</b> — efektif aylık maliyet akdi faize eşit: <b>%" + trNum(p.fa * 100, 2) + "</b>";
+      document.getElementById("bddkUyari").textContent = bddkKontrol(p.P, p.n);
+
+      const vergiT = p.kkdfT + p.bsmvT;
+      setMetrics([
+        ["Aylık Taksit", trNum(p.taksit, 2) + " TL", t.ad + " · " + p.n + " ay", "flat"],
+        ["Toplam Ödeme", trNum(p.toplam, 2) + " TL", "anapara " + trNum(p.P, 0) + " TL", "flat"],
+        ["Toplam Faiz", trNum(p.faiz, 2) + " TL", "akdi %" + trNum(p.fa * 100, 2) + "/ay", "down"],
+        ["Toplam Vergi (KKDF+BSMV)", vergiT > 0 ? trNum(vergiT, 2) + " TL" : "0 TL",
+          vergiT > 0 ? "faizin %" + trNum((p.kkdf + p.bsmv) * 100, 0) + "'u" : "konut muafiyeti", vergiT > 0 ? "down" : "up"],
+        ["Yıllık Bileşik Maliyet", "%" + trNum(p.yillikBilesik, 1), "vergi dahil, masraf hariç", "flat"],
+      ]);
+
+      const ay = p.rows.map(r => r[0]);
+      draw("ch1", [
+        { type: "bar", x: ay, y: p.rows.map(r => r[2]), name: "Anapara", marker: { color: C.green },
+          hovertemplate: "%{x}. ay<br>Anapara: %{y:,.2f} TL<extra></extra>" },
+        { type: "bar", x: ay, y: p.rows.map(r => r[3]), name: "Faiz", marker: { color: C.amber },
+          hovertemplate: "%{x}. ay<br>Faiz: %{y:,.2f} TL<extra></extra>" },
+        { type: "bar", x: ay, y: p.rows.map(r => r[4] + r[5]), name: "Vergi (KKDF+BSMV)", marker: { color: "#B98AFF" },
+          hovertemplate: "%{x}. ay<br>Vergi: %{y:,.2f} TL<extra></extra>" },
+      ], { barmode: "stack", height: 360, bargap: 0.15,
+           xaxis: { title: { text: "Ay", font: { size: 12 } } } });
+
+      draw("ch2", [
+        { type: "scatter", mode: "lines", x: ay, y: p.rows.map(r => r[6]),
+          line: { color: C.toplam, width: 2.5 }, fill: "tozeroy", fillcolor: "rgba(76,154,255,.12)",
+          hovertemplate: "%{x}. ay<br>Kalan: %{y:,.2f} TL<extra></extra>" },
+      ], { height: 320, showlegend: false, xaxis: { title: { text: "Ay", font: { size: 12 } } } });
+
+      // ── Nakit akışı tablosu ──
+      const vergiVar = p.kkdf + p.bsmv > 0;
+      document.getElementById("planCap").textContent =
+        "TL · " + t.ad + " kredisi " + trNum(p.P, 0) + " TL, akdi %" + trNum(p.fa * 100, 2) +
+        "/ay, " + p.n + " ay" + (vergiVar ? " — vergiler faiz üzerinden alınır" : " — KKDF/BSMV muaf");
+      let h = '<table class="heat"><thead><tr><th>Ay</th><th>Taksit</th><th>Anapara</th><th>Faiz</th>';
+      if (vergiVar) h += "<th>KKDF</th><th>BSMV</th>";
+      h += "<th>Kalan Anapara</th></tr></thead><tbody>";
+      for (const r of p.rows) {
+        h += "<tr><td class='num'>" + r[0] + "</td><td class='num'>" + trNum(r[1], 2) +
+             "</td><td class='num'>" + trNum(r[2], 2) + "</td><td class='num'>" + trNum(r[3], 2) + "</td>";
+        if (vergiVar) h += "<td class='num'>" + trNum(r[4], 2) + "</td><td class='num'>" + trNum(r[5], 2) + "</td>";
+        h += "<td class='num'>" + trNum(r[6], 2) + "</td></tr>";
+      }
+      h += '</tbody><tfoot><tr class="sec"><td class="num">Σ</td><td class="num">' + trNum(p.toplam, 2) +
+           '</td><td class="num">' + trNum(p.P, 2) + '</td><td class="num">' + trNum(p.faiz, 2) + "</td>" +
+           (vergiVar ? '<td class="num">' + trNum(p.kkdfT, 2) + '</td><td class="num">' + trNum(p.bsmvT, 2) + "</td>" : "") +
+           '<td class="num">0,00</td></tr></tfoot></table>';
+      document.getElementById("planTablo").innerHTML = h;
+    }
+
+    // ── Tür seçimi ──
+    function chipsCiz() {
+      const el = document.getElementById("turChips");
+      el.innerHTML = Object.keys(TURLER).map(k =>
+        '<button class="chip' + (k === tur ? " active" : "") + '" data-k="' + k + '">' + TURLER[k].ad + "</button>").join("");
+      el.querySelectorAll(".chip").forEach(b => b.onclick = () => { tur = b.dataset.k; chipsCiz(); goster(); });
+    }
+
+    ["inTutar", "inFaiz", "inVade"].forEach(id =>
+      document.getElementById(id).addEventListener("input", goster));
+    document.getElementById("ckIlkKonut").addEventListener("change", goster);
+
+    // Tutar alanını odak dışında TR biçimine çevir
+    document.getElementById("inTutar").addEventListener("blur", function () {
+      const v = sayi("inTutar");
+      if (v > 0) this.value = v.toLocaleString("tr-TR", { maximumFractionDigits: 0 });
+    });
+
+    document.getElementById("btnCsv").onclick = () => {
+      if (!plan) return;
+      const sep = ";", nl = "\r\n";
+      const f = v => v.toFixed(2).replace(".", ",");
+      let csv = "Ay" + sep + "Taksit" + sep + "Anapara" + sep + "Faiz" + sep + "KKDF" + sep + "BSMV" + sep + "Kalan Anapara" + nl;
+      for (const r of plan.rows)
+        csv += r[0] + sep + f(r[1]) + sep + f(r[2]) + sep + f(r[3]) + sep + f(r[4]) + sep + f(r[5]) + sep + f(r[6]) + nl;
+      const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "kredi_odeme_plani_" + TURLER[tur].ad.toLowerCase().replace("ç", "c").replace("ş", "s").replace("ı", "i") + ".csv";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+
+    chipsCiz();
+    goster();
+  </script>
+</body>
+</html>
