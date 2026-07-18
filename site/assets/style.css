@@ -240,6 +240,20 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 28px; line-height: 
 .chip.active { background: #2A2113; border-color: var(--amber); color: var(--amber); font-weight: 600; }
 .chip .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; }
 
+/* ── Açılır seçici (ay seçimi vb.) ── */
+select.sel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13.5px;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+select.sel:focus { outline: none; border-color: var(--amber); }
+
 /* ── Isı haritası tablosu (BDDK) ── */
 .table-wrap { overflow-x: auto; }
 table.heat {

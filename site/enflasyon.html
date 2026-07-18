@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=4">
+  <link rel="stylesheet" href="assets/style.css?v=5">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -21,6 +21,19 @@
     <div class="update-info" id="updated"></div>
     <div class="info-box" id="ozet"></div>
     <div class="metrics" id="metrics"></div>
+
+    <section class="chart-card">
+      <h3>📊 Ana Harcama Gruplarında Yıllık Değişim</h3>
+      <p class="cap" id="capAlt">TÜİK ana grupları (COICOP) · Yıllık %, seçili ay itibarıyla</p>
+      <select class="sel" id="aySec"></select>
+      <div id="chAlt"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Alt Kalem Detayı</h3>
+      <p class="cap" id="capAltTbl"></p>
+      <div class="table-wrap" id="tblAlt"></div>
+    </section>
 
     <section class="chart-card">
       <h3>Yıllık Enflasyon (%)</h3>
@@ -37,7 +50,7 @@
     <footer>Kaynak: TCMB EVDS (TP.TUKFIY2025.GENEL) · TÜİK 2025=100 TÜFE endeksi.</footer>
   </main>
 
-  <script src="assets/app.js?v=4"></script>
+  <script src="assets/app.js?v=5"></script>
   <script>
     (async () => {
       const D = await getJSON("data/enflasyon.json");
@@ -52,6 +65,54 @@
         ["Aylık Enflasyon", "%" + trNum(s.aylik, 2), s.donem, "flat"],
         ["Yılbaşından Beri", "%" + trNum(s.ytd, 2), null],
       ]);
+
+      // ── Alt kalemler (ay seçicili TÜİK paneli) ──
+      const A = D.alt;
+      if (A) {
+        const sel = document.getElementById("aySec");
+        sel.innerHTML = A.aylar.map((k, i) =>
+          '<option value="' + i + '"' + (i === A.aylar.length - 1 ? " selected" : "") + ">" +
+          A.ay_adlari[i] + "</option>").join("");
+        sel.onchange = () => altCiz(+sel.value);
+
+        function altCiz(mi) {
+          document.getElementById("capAlt").textContent =
+            "TÜİK ana grupları (COICOP) · Yıllık %, " + A.ay_adlari[mi] + " itibarıyla";
+          const items = A.kalemler
+            .map((k, j) => ({ ad: k, v: A.yillik[mi][j], ay: A.aylik[mi][j], ytd: A.ytd[mi][j] }))
+            .filter(x => x.v !== null);
+          items.push({ ad: "Genel TÜFE", v: A.genel.yillik[mi],
+                       ay: A.genel.aylik[mi], ytd: A.genel.ytd[mi], genel: true });
+          const sirali = [...items].sort((a, b) => a.v - b.v);
+          draw("chAlt", [{
+            type: "bar", orientation: "h",
+            y: sirali.map(x => x.ad), x: sirali.map(x => x.v),
+            marker: { color: sirali.map(x => x.genel ? C.amber : "#4C9AFF") },
+            text: sirali.map(x => "%" + trNum(x.v, 2)), textposition: "outside",
+            cliponaxis: false,
+            textfont: { family: "'IBM Plex Mono', monospace", size: 11.5 },
+            hovertemplate: "%{y}<br>%%{x:.2f}<extra></extra>",
+          }], { height: 500, showlegend: false, margin: { l: 200, r: 80 } });
+
+          document.getElementById("capAltTbl").textContent =
+            A.ay_adlari[mi] + " · Aylık, yıllık ve yılbaşından beri değişim (%)";
+          const desc = [...items].sort((a, b) => b.v - a.v);
+          const genel = desc.find(x => x.genel);
+          const digerleri = desc.filter(x => !x.genel);
+          let h = '<table class="heat"><thead><tr><th style="text-align:left">Kalem</th>' +
+            "<th>Aylık %</th><th>Yıllık %</th><th>Yılbaşından %</th></tr></thead><tbody>";
+          for (const x of [genel, ...digerleri]) {
+            const sec = x.genel ? ' class="sec"' : "";
+            h += "<tr" + sec + '><td class="lbl">' + x.ad + "</td>" +
+              [x.ay, x.v, x.ytd].map(v => {
+                const kirmizi = (v !== null && v < 0) ? ' style="color:#FF7A80"' : "";
+                return '<td class="num"' + kirmizi + ">" + (v === null ? "—" : trNum(v, 2)) + "</td>";
+              }).join("") + "</tr>";
+          }
+          document.getElementById("tblAlt").innerHTML = h + "</tbody></table>";
+        }
+        altCiz(A.aylar.length - 1);
+      }
 
       const G = D.genel;
       const iL = G.tarih.length - 1;

@@ -169,6 +169,64 @@ def build_enflasyon():
             f"<b>{ht(abs(d_yil), 2)} puan {yon}</b> — {trend}; "
             f"son 3 ayın ortalama aylık artışı %{ht(avg3, 2)}.")
 
+    # ── Alt kalemler (COICOP ana grupları) — son 24 ay ──
+    KISA = {
+        "01. Gıda Ve Alkolsüz İçecekler": "Gıda ve Alkolsüz İçecekler",
+        "02. Alkollü İçecekler, Tütün Ve Tütün Ürünleri": "Alkollü İçecek ve Tütün",
+        "03. Giyim Ve Ayakkabı": "Giyim ve Ayakkabı",
+        "04. Konut, Su, Elektrik, Gaz Ve Diğer Yakıtlar": "Konut ve Enerji",
+        "05. Mobilya, Mefruşat Ve Evde Kullanılan Ekipmanlar İle Rutin Ev Bakım Ve Onarımı": "Ev Eşyası",
+        "06. Sağlık": "Sağlık",
+        "07. Ulaştırma": "Ulaştırma",
+        "08. Bilgi Ve İletişim": "Bilgi ve İletişim",
+        "09. Eğlence, Dinlence, Spor Ve Kültür": "Eğlence ve Kültür",
+        "10. Eğitim Hizmetleri": "Eğitim",
+        "11. Lokantalar Ve Konaklama Hizmetleri": "Lokanta ve Otel",
+        "12. Sigorta Ve Finansal Hizmetler": "Sigorta ve Finans",
+        "13. Kişisel Bakım, Sosyal Koruma Ve Çeşitli Mal Ve Hizmetler": "Kişisel Bakım ve Diğer",
+    }
+    ende = pd.read_excel(fp, sheet_name="AltKalem_Endeks")
+    yill = pd.read_excel(fp, sheet_name="AltKalem_Yillik")
+    for _df in (ende, yill):
+        _df["tarih"] = pd.to_datetime(_df["tarih"])
+        _df.sort_values("tarih", inplace=True)
+    kalemler = [c for c in ende.columns if c != "tarih"]
+
+    # Aylık %: endeksten; YTD %: önceki yıl Aralık endeksine göre
+    ayl = ende.set_index("tarih")[kalemler].pct_change() * 100
+    e_idx = ende.set_index("tarih")[kalemler]
+    aralik = e_idx[e_idx.index.month == 12]
+    ytd_m = pd.DataFrame(index=e_idx.index, columns=kalemler, dtype=float)
+    for t in e_idx.index:
+        onceki = aralik[aralik.index < t]
+        if len(onceki):
+            ytd_m.loc[t] = (e_idx.loc[t] / onceki.iloc[-1] - 1) * 100
+
+    son24 = ende["tarih"].tail(24).tolist()
+    y_idx = yill.set_index("tarih")[kalemler]
+
+    def matris(kaynak):
+        out = []
+        for t in son24:
+            satir = kaynak.loc[t]
+            out.append([None if pd.isna(v) else round(float(v), 2) for v in satir])
+        return out
+
+    g_idx = g.set_index("tarih")
+    alt = {
+        "kalemler": [KISA.get(k, k) for k in kalemler],
+        "aylar": [t.strftime("%Y-%m") for t in son24],
+        "ay_adlari": [f"{AY[t.month]} {t.year}" for t in son24],
+        "yillik": matris(y_idx),
+        "aylik": matris(ayl),
+        "ytd": matris(ytd_m),
+        "genel": {
+            "yillik": [round(float(g_idx.loc[t, "yillik"]), 2) for t in son24],
+            "aylik": [round(float(g_idx.loc[t, "aylik"]), 2) for t in son24],
+            "ytd": [round(float(g_idx.loc[t, "ytd"]), 2) for t in son24],
+        },
+    }
+
     gp = g.tail(72)  # son 6 yıl aylık
     dump("enflasyon.json", {
         "updated": mtime(fp),
@@ -182,6 +240,7 @@ def build_enflasyon():
             "aylik": col(gp, "aylik", 2),
             "ytd": col(gp, "ytd", 2),
         },
+        "alt": alt,
     })
 
 
