@@ -4126,15 +4126,17 @@ elif selected == "net_rezerv":
                 seri_haric.append((float(es_.iloc[-1]["net_ur"]) + float(Lk_["swap_toplam"])) / 1000)
             if seri_t:
                 st.subheader("Swap Pozisyonu & Swap Hariç Net UR — Haftalık (Milyar USD)")
-                st.caption("URDL şablonlarından biriktirilen seri — her haftalık güncellemede yeni nokta eklenir.")
+                st.caption("URDL şablonları — geçmiş noktalar web arşivinden geri dolduruldu, her haftalık "
+                           "güncellemede yeni nokta eklenir (boşluklar arşivde kayıt bulunmayan dönemlerdir).")
                 f4 = go.Figure()
-                f4.add_bar(x=seri_t, y=seri_swap, name="Toplam Swap/Forward Pozisyonu",
-                           marker_color="#B98AFF",
-                           hovertemplate="%{x|%d.%m.%Y}<br>Swap pozisyonu: %{y:.1f} milyar USD<extra></extra>")
+                f4.add_scatter(x=seri_t, y=seri_swap, mode="lines+markers",
+                               name="Toplam Swap/Forward Pozisyonu",
+                               line=dict(color="#B98AFF", width=2.2), marker=dict(size=6),
+                               hovertemplate="%{x|%d.%m.%Y}<br>Swap pozisyonu: %{y:.1f} milyar USD<extra></extra>")
                 f4.add_scatter(x=seri_t, y=seri_haric, mode="lines+markers", name="Net UR — Swap Hariç",
                                line=dict(color="#FF9E1B", width=2.5), marker=dict(size=6),
                                hovertemplate="%{x|%d.%m.%Y}<br>Swap hariç: %{y:.1f} milyar USD<extra></extra>")
-                f4.update_layout(height=380, separators=",.", legend_title_text="", bargap=0.5)
+                f4.update_layout(height=380, separators=",.", legend_title_text="")
                 styled_chart(f4)
 
     col_d1, col_d2 = st.columns(2)

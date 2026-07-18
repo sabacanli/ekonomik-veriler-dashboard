@@ -113,9 +113,15 @@ def compute(df):
 
 def main():
     print("TCMB Net Rezerv verisi çekiliyor (EVDS3)...")
-    items = fetch_items()
-    print(f"  {len(items)} ham kayıt alındı")
+    # EVDS3 tek istekte en yeni ~1000 satır döndürüyor; tarihçe için pencerelere bölünür
+    # (likidite tablosundaki 2022 tarihli noktaların NUR eşleşmesi için 2022'den başlar)
+    items = []
+    for bas, son in [("01-01-2022", "31-12-2023"), ("01-01-2024", None)]:
+        parca = fetch_items(bas, son)
+        print(f"  {bas} → {son or 'bugün'}: {len(parca)} ham kayıt")
+        items.extend(parca)
     df = to_dataframe(items)
+    df = df.drop_duplicates(subset=["tarih"], keep="last").sort_values("tarih").reset_index(drop=True)
     df = compute(df)
     print(f"  Hesaplandı: {len(df)} tam kayıt | "
           f"{df['tarih'].min().date()} → {df['tarih'].max().date()}")

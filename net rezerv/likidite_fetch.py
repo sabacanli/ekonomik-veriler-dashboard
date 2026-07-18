@@ -58,10 +58,13 @@ def zip_url_bul():
 
 
 def kolon_tarihi(v):
-    """Kolon başlığını tarihe çevirir: datetime ya da 'Haziran 2026' (ay sonu)."""
+    """Kolon başlığını tarihe çevirir: datetime, '13.05.2022' ya da 'Haziran 2026' (ay sonu)."""
     if isinstance(v, datetime):
         return pd.Timestamp(v).normalize()
     s = str(v).strip().lower()
+    m = re.fullmatch(r"(\d{1,2})[./](\d{1,2})[./](\d{4})", s)
+    if m:  # eski şablonlarda tarihler metin
+        return pd.Timestamp(int(m.group(3)), int(m.group(2)), int(m.group(1)))
     for ad, no in AYLAR.items():
         if s.startswith(ad):
             yil = int(re.search(r"(\d{4})", s).group(1))
