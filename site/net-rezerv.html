@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TCMB Net Rezerv — Ekonomik Veriler</title>
+  <title>TCMB Rezervleri — Ekonomik Veriler</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=5">
+  <link rel="stylesheet" href="assets/style.css?v=6">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -17,35 +17,37 @@
   <aside id="sidebar"></aside>
 
   <main>
-    <h1 class="page-title">TCMB Net Rezerv</h1>
+    <h1 class="page-title">TCMB Uluslararası Rezervler</h1>
     <div class="update-info" id="updated"></div>
     <div class="info-box" id="ozet"></div>
     <div class="metrics" id="metrics"></div>
     <div class="range" id="range"></div>
 
     <section class="chart-card">
-      <h3>Net Rezerv — Swap Hariç &amp; Swap Dahil</h3>
-      <p class="cap">Milyar USD · Günlük (analitik bilanço bazlı)</p>
+      <h3>Net Uluslararası Rezervler (Swap Dahil)</h3>
+      <p class="cap">Milyar USD · Günlük — TCMB haftalık vaziyet "2A Net Uluslararası Rezervler" kalemi (analitik bilanço)</p>
       <div id="ch1"></div>
     </section>
 
     <section class="chart-card">
-      <h3>Brüt Dış Varlıklar</h3>
-      <p class="cap">Milyar USD</p>
+      <h3>Haftalık Değişim — Net Uluslararası Rezervler</h3>
+      <p class="cap">Milyar USD · Cuma kapanışına göre haftalık fark (son nokta devam eden haftadır)</p>
       <div id="ch2"></div>
     </section>
 
     <section class="chart-card">
-      <h3>Net Swap (Alım − Satım)</h3>
-      <p class="cap">Milyar USD · TCMB tek taraflı swap stoku</p>
+      <h3>Brüt Rezervler — Döviz &amp; Altın</h3>
+      <p class="cap">Milyar USD · Günlük</p>
       <div id="ch3"></div>
     </section>
 
-    <footer>Kaynak: TCMB EVDS — Analitik Bilanço (TP.AB serileri) + swap stokları ·
-      Hesap: Net Rezerv = Dış Varlıklar − Dış Yükümlülükler − Kamu Mevduatı − Banka Mevduatı; swap hariç = net swap düşülmüş.</footer>
+    <footer>Kaynak: TCMB EVDS — Analitik Bilanço (Dış Varlıklar, Altın, Net Uluslararası Rezervler) ·
+      Günlük veriler; USD karşılıkları gün sonu kuru ile hesaplanır. "Swap hariç" net rezerv,
+      TCMB'nin aylık "Uluslararası Rezervler ve Döviz Likiditesi" tablosundaki toplam swap stoğunu
+      gerektirir; günlük seride yayımlanmadığından burada yer verilmemiştir.</footer>
   </main>
 
-  <script src="assets/app.js?v=5"></script>
+  <script src="assets/app.js?v=6"></script>
   <script>
     (async () => {
       const D = await getJSON("data/rezerv.json");
@@ -53,42 +55,48 @@
       setOzet(D.ozet_html);
 
       const s = D.son;
+      const dcls = v => (v === null ? "flat" : (v >= 0 ? "up" : "down"));
+      const dtxt = v => (v === null ? null : trNum(v / 1000, 1, true) + " (hafta)");
       setMetrics([
-        ["Net Rezerv — Swap Hariç", trNum(s.haric / 1000, 1),
-          s.d1ay !== null ? trNum(s.d1ay, 1, true) + " (1 ay)" : null,
-          s.d1ay >= 0 ? "up" : "down"],
-        ["Net Rezerv — Swap Dahil", trNum(s.dahil / 1000, 1), null],
-        ["Brüt Dış Varlıklar", trNum(s.brut / 1000, 1), null],
-        ["Yıl Başından Beri", trNum(s.dytd, 1, true),
-          "swap hariç değişim", s.dytd >= 0 ? "up" : "down"],
+        ["Brüt Döviz Rezervi", trNum(s.brut_doviz / 1000, 1), dtxt(s.d_brut_doviz), dcls(s.d_brut_doviz)],
+        ["Altın Rezervi", trNum(s.altin / 1000, 1), dtxt(s.d_altin), dcls(s.d_altin)],
+        ["Toplam Brüt Rezerv", trNum(s.brut_toplam / 1000, 1), "döviz + altın", "flat"],
+        ["Net Uluslararası Rezervler", trNum(s.net_ur / 1000, 1), dtxt(s.d_net_ur), dcls(s.d_net_ur)],
+        ["Yıl Başından Beri (Net UR)", s.ytd_net_ur === null ? "—" : trNum(s.ytd_net_ur, 1, true),
+          "milyar USD", s.ytd_net_ur >= 0 ? "up" : "down"],
       ]);
 
       const S = D.seri;
+      const W = D.haftalik;
       const bn = v => (v === null ? null : v / 1000);
 
       let N = 252;
       function render() {
         const t = tail(S.tarih, N);
         draw("ch1", [
-          { type: "scatter", mode: "lines", x: t, y: tail(S.haric, N).map(bn),
-            name: "Swap Hariç", line: { color: C.amber, width: 2.5 },
-            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Swap hariç</extra>" },
-          { type: "scatter", mode: "lines", x: t, y: tail(S.dahil, N).map(bn),
-            name: "Swap Dahil", line: { color: C.toplam, width: 1.8 },
-            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Swap dahil</extra>" },
-        ], { height: 400 });
-
-        draw("ch2", [
-          { type: "scatter", mode: "lines", x: t, y: tail(S.brut, N).map(bn),
-            line: { color: C.euro, width: 2.2 },
+          { type: "scatter", mode: "lines", x: t, y: tail(S.net_ur, N).map(bn),
+            line: { color: C.amber, width: 2.5 },
             hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra></extra>" },
+        ], { height: 400, showlegend: false });
+
+        // Haftalık değişim: aynı pencereye denk gelen haftalar
+        const wN = Math.max(8, Math.round(N / 5));
+        const wt = tail(W.tarih, wN);
+        const wv = tail(W.net_ur_d, wN).map(bn);
+        draw("ch2", [
+          { type: "bar", x: wt, y: wv,
+            marker: { color: wv.map(v => (v !== null && v < 0) ? C.red : C.green) },
+            hovertemplate: "%{x|%d.%m.%Y} haftası<br>%{y:+.1f} milyar USD<extra></extra>" },
         ], { height: 340, showlegend: false });
 
         draw("ch3", [
-          { type: "scatter", mode: "lines", x: t, y: tail(S.net_swap, N).map(bn),
-            line: { color: C.ost, width: 2 }, fill: "tozeroy",
-            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra></extra>" },
-        ], { height: 300, showlegend: false });
+          { type: "scatter", mode: "lines", x: t, y: tail(S.brut_doviz, N).map(bn),
+            name: "Brüt Döviz", line: { color: C.toplam, width: 2.2 },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Döviz</extra>" },
+          { type: "scatter", mode: "lines", x: t, y: tail(S.altin, N).map(bn),
+            name: "Altın", line: { color: C.amber, width: 2 },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Altın</extra>" },
+        ], { height: 380 });
       }
 
       rangeCtl(document.getElementById("range"),

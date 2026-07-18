@@ -5,7 +5,7 @@ const NAV = [
   { href: "tcmb-stok.html", label: "TCMB Haftalık Stok" },
   { href: "dth.html", label: "Yabancı Para Hareketi" },
   { href: "enflasyon.html", label: "TÜFE Enflasyon" },
-  { href: "net-rezerv.html", label: "TCMB Net Rezerv" },
+  { href: "net-rezerv.html", label: "TCMB Rezervleri" },
   { href: "cari.html", label: "Cari Denge" },
   { href: "kredi.html", label: "Kredi Faizleri" },
   { href: "mevduat.html", label: "Mevduat Faizleri" },

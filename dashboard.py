@@ -879,29 +879,25 @@ if selected == "ana_sayfa":
             out.append(("💱 Yabancı Para Hareketi", base + analiz))
         except Exception:
             pass
-        # ── 4) TCMB Net Rezerv ──
+        # ── 4) TCMB Rezervleri (analist çerçevesi: brüt döviz + altın + net UR) ──
         try:
             r = pd.read_excel(BASE_DIR / "net rezerv" / "net_rezerv.xlsx")
             r["tarih"] = pd.to_datetime(r["tarih"]); r = r.sort_values("tarih"); L = r.iloc[-1]
-            base = (f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla net rezerv (swap hariç) "
-                    f"<b>{_ht(L['net_rezerv_swap_haric']/1000)} milyar USD</b>, "
-                    f"brüt dış varlıklar {_ht(L['dis_varliklar']/1000)} milyar USD.")
-            analiz = ""
-            try:
-                nrc = "net_rezerv_swap_haric"
-                cur = float(L[nrc])
-                m1 = r[r["tarih"] <= L["tarih"] - pd.Timedelta(days=30)]
+            if "net_ur" in r.columns:
+                ri = r.set_index("tarih")[["dis_varliklar", "altin", "net_ur"]]
+                wd = ri.resample("W-FRI").last().dropna(how="all").diff().iloc[-1]
                 ys = r[r["tarih"] >= pd.Timestamp(L["tarih"].year, 1, 1)]
-                if len(m1) and len(ys):
-                    d1 = (cur - float(m1.iloc[-1][nrc])) / 1000
-                    dy = (cur - float(ys.iloc[0][nrc])) / 1000
-                    w1 = "arttı" if d1 >= 0 else "azaldı"
-                    wy = "artış" if dy >= 0 else "azalış"
-                    analiz = (f" Son bir ayda <b>{_ht(abs(d1))} milyar USD {w1}</b>; "
-                              f"yıl başından beri {_ht(abs(dy))} milyar USD {wy}.")
-            except Exception:
-                pass
-            out.append(("💵 TCMB Net Rezerv", base + analiz))
+                ytd_nur = (float(L["net_ur"]) - float(ys.iloc[0]["net_ur"])) / 1000 if len(ys) else None
+                out.append(("💵 TCMB Rezervleri",
+                    f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla brüt döviz rezervleri "
+                    f"<b>{_ht(L['dis_varliklar']/1000)} milyar USD</b> (haftalık {_ht(wd['dis_varliklar']/1000, 1, sign=True)}), "
+                    f"altın {_ht(L['altin']/1000)} milyar USD. Net uluslararası rezervler (swap dahil) "
+                    f"<b>{_ht(L['net_ur']/1000)} milyar USD</b> (haftalık {_ht(wd['net_ur']/1000, 1, sign=True)}); "
+                    f"yıl başından beri {_ht(ytd_nur, 1, sign=True)} milyar USD."))
+            else:
+                out.append(("💵 TCMB Rezervleri",
+                    f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla brüt dış varlıklar "
+                    f"<b>{_ht(L['dis_varliklar']/1000)} milyar USD</b>."))
         except Exception:
             pass
         # ── 5) Cari Denge ──

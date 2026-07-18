@@ -36,6 +36,8 @@ SERIES = {
     "TP.AB.A11": "dis_yukumlulukler_tl",
     "TP.AB.A13": "kamu_mevduati_tl",
     "TP.AB.A14": "banka_mevduati_tl",
+    "TP.AB.A18": "altin_tl",            # Altın rezervi (analitik bilanço)
+    "TP.AB.A20": "net_ur_tl",           # Net Uluslararası Rezervler (swap dahil)
     "TP.DK.USD.A.YTL": "usdtry",
     "TP.SWAPTEKTAR.TOTALSTOKALIMYONLU": "swap_alim",
     "TP.SWAPTEKTAR.TOTALSTOKSATIMYONLU": "swap_satim",
@@ -83,7 +85,7 @@ def to_dataframe(items):
 
 def compute(df):
     bs_cols = ["dis_varliklar_tl", "dis_yukumlulukler_tl",
-               "kamu_mevduati_tl", "banka_mevduati_tl"]
+               "kamu_mevduati_tl", "banka_mevduati_tl", "altin_tl", "net_ur_tl"]
     aux_cols = ["usdtry", "swap_alim", "swap_satim"]
     # Yardımcı serileri (kur + swap stoku) ileri-doldur; bilanço kalemlerini DOLDURMA.
     # Böylece her bilanço tarihi KENDİ günün kuruyla USD'ye çevrilir (kur/tarih uyumsuzluğu
@@ -95,13 +97,17 @@ def compute(df):
     for tl, usd in [("dis_varliklar_tl", "dis_varliklar"),
                     ("dis_yukumlulukler_tl", "dis_yukumlulukler"),
                     ("kamu_mevduati_tl", "kamu_mevduati"),
-                    ("banka_mevduati_tl", "banka_mevduati")]:
+                    ("banka_mevduati_tl", "banka_mevduati"),
+                    ("altin_tl", "altin"),
+                    ("net_ur_tl", "net_ur")]:
         df[usd] = df[tl] / df["usdtry"] / 1000.0
 
     df["net_swap"] = df["swap_alim"] - df["swap_satim"]
     df["net_rezerv_swap_dahil"] = (df["dis_varliklar"] - df["dis_yukumlulukler"]
                                    - df["kamu_mevduati"] - df["banka_mevduati"])
     df["net_rezerv_swap_haric"] = df["net_rezerv_swap_dahil"] - df["net_swap"]
+    # Analist çerçevesi: brüt döviz (A02) + altın (A18); net uluslararası rezervler = A20
+    df["brut_toplam"] = df["dis_varliklar"] + df["altin"]
     return df
 
 
@@ -116,7 +122,8 @@ def main():
 
     out = Path(__file__).parent / "net_rezerv.xlsx"
     cols = ["tarih", "usdtry",
-            "dis_varliklar", "dis_yukumlulukler", "kamu_mevduati", "banka_mevduati",
+            "dis_varliklar", "altin", "brut_toplam", "net_ur",
+            "dis_yukumlulukler", "kamu_mevduati", "banka_mevduati",
             "swap_alim", "swap_satim", "net_swap",
             "net_rezerv_swap_dahil", "net_rezerv_swap_haric",
             "dis_varliklar_tl", "dis_yukumlulukler_tl", "kamu_mevduati_tl", "banka_mevduati_tl"]
@@ -131,6 +138,9 @@ def main():
     print(f"  Net Swap (Alım−Satım) : {last['net_swap']:>12,.0f} mn USD")
     print(f"  → Net Rezerv (Swap Dahil) : {last['net_rezerv_swap_dahil']:>12,.0f} mn USD")
     print(f"  → Net Rezerv (Swap Hariç) : {last['net_rezerv_swap_haric']:>12,.0f} mn USD")
+    print(f"  Altın                 : {last['altin']:>12,.0f} mn USD")
+    print(f"  Brüt Toplam (döviz+altın): {last['brut_toplam']:>10,.0f} mn USD")
+    print(f"  → Net Uluslararası Rezervler (A20): {last['net_ur']:>10,.0f} mn USD")
     print(f"\nKaydedildi: {out.name}")
     print("BAŞARILI")
 
