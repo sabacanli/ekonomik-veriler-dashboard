@@ -163,3 +163,14 @@ function rangeCtl(el, options, initial, onChange) {
 }
 
 function tail(arr, n) { return arr.slice(-n); }
+
+/* ── Cloudflare Web Analytics (ziyaretçi ölçümü; yerel önizlemede kapalı) ── */
+(function () {
+  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") return;
+  var s = document.createElement("script");
+  s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+  s.type = "module";
+  s.defer = true;
+  s.setAttribute("data-cf-beacon", '{"token": "f251039fc2e04dde870f0912e7ea774a"}');
+  document.head.appendChild(s);
+})();
