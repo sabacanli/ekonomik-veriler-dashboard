@@ -4109,6 +4109,34 @@ elif selected == "net_rezerv":
     f3.update_layout(height=380, separators=",.", legend_title_text="")
     styled_chart(f3)
 
+    # ── Swap pozisyonu & swap hariç — haftalık biriken seri (URDL) ──
+    if likidite_file.exists():
+        try:
+            lk_tum = load_likidite(str(likidite_file), int(likidite_file.stat().st_mtime))
+        except Exception:
+            lk_tum = None
+        if lk_tum is not None and len(lk_tum):
+            seri_t, seri_swap, seri_haric = [], [], []
+            for _, Lk_ in lk_tum.iterrows():
+                es_ = rez[rez["tarih"] <= Lk_["tarih"]]
+                if not len(es_):
+                    continue
+                seri_t.append(Lk_["tarih"])
+                seri_swap.append(abs(float(Lk_["swap_toplam"])) / 1000)
+                seri_haric.append((float(es_.iloc[-1]["net_ur"]) + float(Lk_["swap_toplam"])) / 1000)
+            if seri_t:
+                st.subheader("Swap Pozisyonu & Swap Hariç Net UR — Haftalık (Milyar USD)")
+                st.caption("URDL şablonlarından biriktirilen seri — her haftalık güncellemede yeni nokta eklenir.")
+                f4 = go.Figure()
+                f4.add_bar(x=seri_t, y=seri_swap, name="Toplam Swap/Forward Pozisyonu",
+                           marker_color="#B98AFF",
+                           hovertemplate="%{x|%d.%m.%Y}<br>Swap pozisyonu: %{y:.1f} milyar USD<extra></extra>")
+                f4.add_scatter(x=seri_t, y=seri_haric, mode="lines+markers", name="Net UR — Swap Hariç",
+                               line=dict(color="#FF9E1B", width=2.5), marker=dict(size=6),
+                               hovertemplate="%{x|%d.%m.%Y}<br>Swap hariç: %{y:.1f} milyar USD<extra></extra>")
+                f4.update_layout(height=380, separators=",.", legend_title_text="", bargap=0.5)
+                styled_chart(f4)
+
     col_d1, col_d2 = st.columns(2)
     with col_d1:
         get_download_button(str(data_file), "📥 Rezerv Verisi (.xlsx)")

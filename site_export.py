@@ -343,19 +343,27 @@ def build_rezerv():
 
     # Swap hariç: haftalık URDL şablonundaki toplam swap/forward pozisyonuyla
     # (likidite.xlsx — II.2 + II.3, negatif). Aynı tarihli günlük Net UR ile eşlenir.
+    # Tarihsel seri de üretilir (her likidite tarihi için eşleşen NUR + swap).
     swap_haric = swap_tarih = swap_toplam = None
+    lk_seri = None
     try:
         lk = pd.read_excel(BASE / "net rezerv" / "likidite.xlsx")
         lk["tarih"] = pd.to_datetime(lk["tarih"])
         lk = lk.dropna(subset=["swap_toplam"]).sort_values("tarih")
         if len(lk):
-            Lk = lk.iloc[-1]
-            es = r[r["tarih"] <= Lk["tarih"]]
-            if len(es):
-                nur_eslesen = float(es.iloc[-1]["net_ur"])
-                swap_toplam = float(Lk["swap_toplam"])
-                swap_haric = nur_eslesen + swap_toplam
-                swap_tarih = Lk["tarih"].strftime("%d.%m.%Y")
+            seri_t, seri_swap, seri_haric = [], [], []
+            for _, Lk_ in lk.iterrows():
+                es_ = r[r["tarih"] <= Lk_["tarih"]]
+                if not len(es_):
+                    continue
+                seri_t.append(Lk_["tarih"].strftime("%Y-%m-%d"))
+                seri_swap.append(round(float(Lk_["swap_toplam"]), 0))
+                seri_haric.append(round(float(es_.iloc[-1]["net_ur"]) + float(Lk_["swap_toplam"]), 0))
+            if seri_t:
+                lk_seri = {"tarih": seri_t, "swap_toplam": seri_swap, "swap_haric": seri_haric}
+                swap_toplam = seri_swap[-1]
+                swap_haric = seri_haric[-1]
+                swap_tarih = pd.Timestamp(seri_t[-1]).strftime("%d.%m.%Y")
     except Exception:
         pass
 
@@ -396,6 +404,7 @@ def build_rezerv():
             "tarih": [t.strftime("%Y-%m-%d") for t in wd.index],
             "net_ur_d": [None if pd.isna(v) else round(float(v), 0) for v in wd["net_ur"]],
         },
+        "likidite": lk_seri,
     })
 
 

@@ -41,6 +41,12 @@
       <div id="ch3"></div>
     </section>
 
+    <section class="chart-card" id="secLk" style="display:none">
+      <h3>Swap Pozisyonu &amp; Swap Hariç Net UR — Haftalık</h3>
+      <p class="cap" id="capLk">Milyar USD · URDL şablonlarından biriktirilen seri — her haftalık güncellemede yeni nokta eklenir</p>
+      <div id="ch4"></div>
+    </section>
+
     <footer>Kaynak: TCMB EVDS — Analitik Bilanço (Dış Varlıklar, Altın, Net Uluslararası Rezervler;
       günlük, USD karşılıkları gün sonu kuruyla) + TCMB "Uluslararası Rezervler ve Döviz Likiditesi"
       haftalık şablonu · <b>Swap hariç</b> = Net UR − toplam swap/forward pozisyonu (şablonun II.2 +
@@ -108,6 +114,21 @@
         [["6 Ay", 126], ["1 Yıl", 252], ["Tümü", 99999]], 252,
         n => { N = n; render(); });
       render();
+
+      // ── Swap pozisyonu & swap hariç (haftalık, biriken seri) ──
+      const LK = D.likidite;
+      if (LK && LK.tarih && LK.tarih.length) {
+        document.getElementById("secLk").style.display = "";
+        draw("ch4", [
+          { type: "bar", x: LK.tarih, y: LK.swap_toplam.map(v => Math.abs(v) / 1000),
+            name: "Toplam Swap/Forward Pozisyonu", marker: { color: "#B98AFF" },
+            hovertemplate: "%{x|%d.%m.%Y}<br>Swap pozisyonu: %{y:.1f} milyar USD<extra></extra>" },
+          { type: "scatter", mode: "lines+markers", x: LK.tarih,
+            y: LK.swap_haric.map(v => v / 1000),
+            name: "Net UR — Swap Hariç", line: { color: C.amber, width: 2.5 }, marker: { size: 6 },
+            hovertemplate: "%{x|%d.%m.%Y}<br>Swap hariç: %{y:.1f} milyar USD<extra></extra>" },
+        ], { height: 380, bargap: 0.5 });
+      }
     })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
   </script>
 </body>
