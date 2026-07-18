@@ -341,6 +341,24 @@ def build_rezerv():
     ys = r[r["tarih"] >= pd.Timestamp(L["tarih"].year, 1, 1)]
     ytd_nur = (float(L["net_ur"]) - float(ys.iloc[0]["net_ur"])) / 1000 if len(ys) else None
 
+    # Swap hariç: haftalık URDL şablonundaki toplam swap/forward pozisyonuyla
+    # (likidite.xlsx — II.2 + II.3, negatif). Aynı tarihli günlük Net UR ile eşlenir.
+    swap_haric = swap_tarih = swap_toplam = None
+    try:
+        lk = pd.read_excel(BASE / "net rezerv" / "likidite.xlsx")
+        lk["tarih"] = pd.to_datetime(lk["tarih"])
+        lk = lk.dropna(subset=["swap_toplam"]).sort_values("tarih")
+        if len(lk):
+            Lk = lk.iloc[-1]
+            es = r[r["tarih"] <= Lk["tarih"]]
+            if len(es):
+                nur_eslesen = float(es.iloc[-1]["net_ur"])
+                swap_toplam = float(Lk["swap_toplam"])
+                swap_haric = nur_eslesen + swap_toplam
+                swap_tarih = Lk["tarih"].strftime("%d.%m.%Y")
+    except Exception:
+        pass
+
     yon = "artışla" if dW["net_ur"] >= 0 else "azalışla"
     ozet = (f"<b>{L['tarih'].strftime('%d.%m.%Y')}</b> itibarıyla TCMB'nin brüt döviz rezervleri "
             f"<b>{ht(L['dis_varliklar'] / 1000)} milyar USD</b> "
@@ -351,6 +369,10 @@ def build_rezerv():
             f"<b>{ht(abs(dW['net_ur']) / 1000)} milyar USD {yon} "
             f"{ht(L['net_ur'] / 1000)} milyar USD</b> seviyesinde. "
             f"Yıl başından beri net UR değişimi {ht(ytd_nur, 1, True)} milyar USD.")
+    if swap_haric is not None:
+        ozet += (f" <b>Swap hariç net rezerv {ht(swap_haric / 1000)} milyar USD</b> "
+                 f"({swap_tarih} likidite tablosu; toplam swap/forward pozisyonu "
+                 f"{ht(swap_toplam / 1000, 1)} milyar USD).")
 
     dump("rezerv.json", {
         "updated": mtime(fp),
@@ -361,7 +383,9 @@ def build_rezerv():
                 "d_brut_doviz": None if pd.isna(dW["dis_varliklar"]) else float(dW["dis_varliklar"]),
                 "d_altin": None if pd.isna(dW["altin"]) else float(dW["altin"]),
                 "d_net_ur": None if pd.isna(dW["net_ur"]) else float(dW["net_ur"]),
-                "ytd_net_ur": ytd_nur},
+                "ytd_net_ur": ytd_nur,
+                "swap_haric": swap_haric, "swap_tarih": swap_tarih,
+                "swap_toplam": swap_toplam},
         "seri": {
             "tarih": [t.strftime("%Y-%m-%d") for t in r["tarih"]],
             "brut_doviz": col(r, "dis_varliklar", 0),

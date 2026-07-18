@@ -28,6 +28,7 @@ calistir() {
 
 calistir "TCMB Haftalık Stok"      "tcmb haftalık stok/tcmb_data.py"
 calistir "Net Rezerv"              "net rezerv/net_rezerv_fetch.py"
+calistir "Rezerv Likidite (URDL)"  "net rezerv/likidite_fetch.py"
 calistir "Enflasyon"               "enflasyon/enflasyon_fetch.py"
 calistir "Kredi/Mevduat"           "kredi mevduat/kredi_mevduat_fetch.py"
 calistir "Yabancı Para (DTH)"      "yabanci para hareketi/dth_fetch.py"

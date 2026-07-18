@@ -41,10 +41,10 @@
       <div id="ch3"></div>
     </section>
 
-    <footer>Kaynak: TCMB EVDS — Analitik Bilanço (Dış Varlıklar, Altın, Net Uluslararası Rezervler) ·
-      Günlük veriler; USD karşılıkları gün sonu kuru ile hesaplanır. "Swap hariç" net rezerv,
-      TCMB'nin aylık "Uluslararası Rezervler ve Döviz Likiditesi" tablosundaki toplam swap stoğunu
-      gerektirir; günlük seride yayımlanmadığından burada yer verilmemiştir.</footer>
+    <footer>Kaynak: TCMB EVDS — Analitik Bilanço (Dış Varlıklar, Altın, Net Uluslararası Rezervler;
+      günlük, USD karşılıkları gün sonu kuruyla) + TCMB "Uluslararası Rezervler ve Döviz Likiditesi"
+      haftalık şablonu · <b>Swap hariç</b> = Net UR − toplam swap/forward pozisyonu (şablonun II.2 +
+      II.3 kalemleri); likidite tablosu haftalık yayımlandığından bu satır tablo tarihiyle etiketlenir.</footer>
   </main>
 
   <script src="assets/app.js?v=6"></script>
@@ -57,14 +57,19 @@
       const s = D.son;
       const dcls = v => (v === null ? "flat" : (v >= 0 ? "up" : "down"));
       const dtxt = v => (v === null ? null : trNum(v / 1000, 1, true) + " (hafta)");
-      setMetrics([
+      const mler = [
         ["Brüt Döviz Rezervi", trNum(s.brut_doviz / 1000, 1), dtxt(s.d_brut_doviz), dcls(s.d_brut_doviz)],
         ["Altın Rezervi", trNum(s.altin / 1000, 1), dtxt(s.d_altin), dcls(s.d_altin)],
         ["Toplam Brüt Rezerv", trNum(s.brut_toplam / 1000, 1), "döviz + altın", "flat"],
         ["Net Uluslararası Rezervler", trNum(s.net_ur / 1000, 1), dtxt(s.d_net_ur), dcls(s.d_net_ur)],
         ["Yıl Başından Beri (Net UR)", s.ytd_net_ur === null ? "—" : trNum(s.ytd_net_ur, 1, true),
           "milyar USD", s.ytd_net_ur >= 0 ? "up" : "down"],
-      ]);
+      ];
+      if (s.swap_haric !== null && s.swap_haric !== undefined) {
+        mler.splice(4, 0, ["Net UR — Swap Hariç", trNum(s.swap_haric / 1000, 1),
+          "likidite tablosu " + s.swap_tarih, "flat"]);
+      }
+      setMetrics(mler);
 
       const S = D.seri;
       const W = D.haftalik;
