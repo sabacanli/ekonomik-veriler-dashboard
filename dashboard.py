@@ -3952,24 +3952,26 @@ elif selected == "cari_acik":
 # ══════════════════════════════════════════════════════════
 
 elif selected == "net_rezerv":
-    st.markdown('<div class="main-header">TCMB Net Rezerv</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">TCMB Uluslararası Rezervler</div>', unsafe_allow_html=True)
 
     rez_dir = BASE_DIR / "net rezerv"
     fetch_script = rez_dir / "net_rezerv_fetch.py"
+    likidite_script = rez_dir / "likidite_fetch.py"
     data_file = rez_dir / "net_rezerv.xlsx"
+    likidite_file = rez_dir / "likidite.xlsx"
 
-    st.info(
-        "TCMB analitik bilanço kalemlerinden hesaplanan **net rezerv** (milyon USD). "
-        "TL kalemleri USD/TRY **alış** kuruyla USD'ye çevrilir.\n\n"
-        "**Net Rezerv (Swap Dahil)** = Dış Varlıklar − Dış Yükümlülükler − Kamu Mevduatı − Bankalar Mevduatı\n\n"
-        "**Net Rezerv (Swap Hariç)** = (Swap Dahil) − Net Swap  ·  Net Swap = Swap Alım − Swap Satım"
-    )
-
-    col_u1, col_u2 = st.columns([1, 4])
+    col_u1, col_u2 = st.columns([1.4, 4])
     with col_u1:
-        if st.button("🔄 Verileri Güncelle", key="rez_update", use_container_width=True):
-            if run_script(str(fetch_script), timeout_sec=120):
+        if st.button("🔄 Güncelle (yerel + bulut)", key="rez_update", use_container_width=True):
+            ok1 = run_script(str(fetch_script), timeout_sec=120)
+            ok2 = run_script(str(likidite_script), timeout_sec=120)
+            if ok1 or ok2:
                 st.cache_data.clear()
+                if _try_publish(["net rezerv/net_rezerv.xlsx", "net rezerv/likidite.xlsx"],
+                                "Rezerv verisi guncellendi (otomatik yayin)"):
+                    st.success("Güncellendi ve buluta yayınlandı ✓")
+                else:
+                    st.info("Yerel veri güncellendi. (Buluta yayın yalnızca yerel bilgisayardan yapılır.)")
     with col_u2:
         if data_file.exists():
             st.markdown(
@@ -3983,111 +3985,145 @@ elif selected == "net_rezerv":
         st.stop()
 
     @st.cache_data
-    def load_rezerv(path):
+    def load_rezerv(path, cache_key):
         d = pd.read_excel(path)
         d["tarih"] = pd.to_datetime(d["tarih"], errors="coerce")
         return d.dropna(subset=["tarih"]).sort_values("tarih").reset_index(drop=True)
 
-    rez = load_rezerv(str(data_file))
+    @st.cache_data
+    def load_likidite(path, cache_key):
+        d = pd.read_excel(path)
+        d["tarih"] = pd.to_datetime(d["tarih"], errors="coerce")
+        return d.dropna(subset=["tarih", "swap_toplam"]).sort_values("tarih").reset_index(drop=True)
+
+    rez = load_rezerv(str(data_file), int(data_file.stat().st_mtime))
     if rez.empty:
         st.warning("Veri boş.")
+        st.stop()
+    if "net_ur" not in rez.columns:
+        st.warning("Yeni rezerv serileri (Altın, Net UR) henüz çekilmemiş — '🔄 Güncelle'ye tıklayın.")
         st.stop()
 
     last = rez.iloc[-1]
     son_t = last["tarih"]
 
-    def _ref_row(days_back):
-        target = son_t - pd.Timedelta(days=days_back)
-        idx = (rez["tarih"] - target).abs().idxmin()
-        return rez.loc[idx]
+    # Türkçe milyar biçimi
+    def _b1(v, sign=False):
+        if v is None or pd.isna(v):
+            return "—"
+        fmt = "{:+,.1f}" if sign else "{:,.1f}"
+        return fmt.format(v / 1000).replace(",", "\x00").replace(".", ",").replace("\x00", ".")
 
-    m1 = _ref_row(30)
-    cy = int(son_t.year)
-    _prev = rez[rez["tarih"].dt.year == cy - 1]
-    ystart = _prev.iloc[-1] if len(_prev) else rez.iloc[0]
+    # Haftalık (Cuma kapanışlı) değişimler — analist çerçevesi
+    ri = rez.set_index("tarih")[["dis_varliklar", "altin", "brut_toplam", "net_ur"]]
+    wd = ri.resample("W-FRI").last().dropna(how="all").diff()
+    dW = wd.iloc[-1]
+    ys = rez[rez["tarih"] >= pd.Timestamp(son_t.year, 1, 1)]
+    ytd_nur = (float(last["net_ur"]) - float(ys.iloc[0]["net_ur"])) if len(ys) else None
 
-    st.markdown(f"#### {son_t.strftime('%d.%m.%Y')} itibarıyla  ·  USD/TRY = {last['usdtry']:.4f}")
+    # Swap hariç: haftalık URDL likidite tablosuyla (II.2 + II.3)
+    swap_haric = swap_tarih = swap_toplam = None
+    if likidite_file.exists():
+        try:
+            lk = load_likidite(str(likidite_file), int(likidite_file.stat().st_mtime))
+            if len(lk):
+                Lk = lk.iloc[-1]
+                es = rez[rez["tarih"] <= Lk["tarih"]]
+                if len(es):
+                    swap_toplam = float(Lk["swap_toplam"])
+                    swap_haric = float(es.iloc[-1]["net_ur"]) + swap_toplam
+                    swap_tarih = Lk["tarih"].strftime("%d.%m.%Y")
+        except Exception:
+            pass
 
-    k1, k2, k3 = st.columns(3)
+    yon = "artışla" if dW["net_ur"] >= 0 else "azalışla"
+    ozet = (f"📋 **{son_t.strftime('%d.%m.%Y')}** itibarıyla brüt döviz rezervleri "
+            f"**{_b1(last['dis_varliklar'])} milyar USD** (haftalık {_b1(dW['dis_varliklar'], True)}), "
+            f"altın **{_b1(last['altin'])} milyar USD** (haftalık {_b1(dW['altin'], True)}). "
+            f"**Net uluslararası rezervler (swap dahil)** bir önceki haftaya göre "
+            f"**{_b1(abs(dW['net_ur']))} milyar USD {yon} {_b1(last['net_ur'])} milyar USD** seviyesinde; "
+            f"yıl başından beri {_b1(ytd_nur, True)} milyar USD.")
+    if swap_haric is not None:
+        ozet += (f" **Swap hariç net rezerv {_b1(swap_haric)} milyar USD** "
+                 f"({swap_tarih} likidite tablosu).")
+    st.info(ozet)
+
+    st.markdown(f"#### {son_t.strftime('%d.%m.%Y')} itibarıyla  ·  USD/TRY = {last['usdtry']:.4f}  ·  Milyar USD")
+    k1, k2, k3, k4, k5 = st.columns(5)
     with k1:
-        st.metric(
-            "Net Rezerv — Swap Hariç (mn USD)",
-            f"{last['net_rezerv_swap_haric']:,.0f}",
-            f"{last['net_rezerv_swap_haric'] - m1['net_rezerv_swap_haric']:+,.0f}",
-            help=f"≈ ${last['net_rezerv_swap_haric']/1000:.1f} milyar. Net swap etkisi düşülmüştür "
-                 f"(asıl aranan net rezerv).",
-        )
+        st.metric("Brüt Döviz Rezervi", _b1(last["dis_varliklar"]), _b1(dW["dis_varliklar"], True))
     with k2:
-        st.metric(
-            "Net Rezerv — Swap Dahil (mn USD)",
-            f"{last['net_rezerv_swap_dahil']:,.0f}",
-            f"{last['net_rezerv_swap_dahil'] - m1['net_rezerv_swap_dahil']:+,.0f}",
-            help=f"≈ ${last['net_rezerv_swap_dahil']/1000:.1f} milyar. Bilanço net rezervi "
-                 f"(swap kaynaklı döviz dahil).",
-        )
+        st.metric("Altın Rezervi", _b1(last["altin"]), _b1(dW["altin"], True))
     with k3:
-        st.metric(
-            "Brüt Dış Varlıklar (mn USD)",
-            f"{last['dis_varliklar']:,.0f}",
-            f"{last['dis_varliklar'] - m1['dis_varliklar']:+,.0f}",
-            help=f"≈ ${last['dis_varliklar']/1000:.1f} milyar.",
-        )
-
-    st.caption(
-        f"Δ değerleri **son ~1 ay** (≈30 gün) değişimidir.  ·  "
-        f"Yılbaşından beri (swap hariç): "
-        f"**{last['net_rezerv_swap_haric'] - ystart['net_rezerv_swap_haric']:+,.0f}** mn USD  ·  "
-        f"Net Swap: **{last['net_swap']:+,.0f}** mn USD "
-        f"(Alım {last['swap_alim']:,.0f} − Satım {last['swap_satim']:,.0f})"
-    )
+        st.metric("Toplam Brüt Rezerv", _b1(last["brut_toplam"]), help="Döviz + altın.")
+    with k4:
+        st.metric("Net UR (Swap Dahil)", _b1(last["net_ur"]), _b1(dW["net_ur"], True),
+                  help="TCMB haftalık vaziyet '2A Net Uluslararası Rezervler' kalemi (analitik bilanço).")
+    with k5:
+        st.metric("Net UR — Swap Hariç", "—" if swap_haric is None else _b1(swap_haric),
+                  help=(f"Likidite tablosu ({swap_tarih}): Net UR − toplam swap/forward pozisyonu "
+                        f"(URDL II.2 + II.3)." if swap_haric is not None
+                        else "Likidite tablosu verisi için 'Güncelle'ye tıklayın."))
+    st.caption("Δ = bir önceki Cuma kapanışına göre haftalık değişim (Milyar USD).")
 
     # ── Hesap kırılımı (formül şeffaflığı) ──
-    with st.expander("🧮 Hesap Kırılımı (son tarih)", expanded=True):
-        _f = lambda v: f"{v:,.0f}"
-        breakdown = pd.DataFrame([
-            {"Kalem": "Dış Varlıklar", "İşaret": "+", "Değer (mn USD)": _f(last["dis_varliklar"])},
-            {"Kalem": "Dış Yükümlülükler", "İşaret": "−", "Değer (mn USD)": _f(last["dis_yukumlulukler"])},
-            {"Kalem": "Kamu Mevduatı", "İşaret": "−", "Değer (mn USD)": _f(last["kamu_mevduati"])},
-            {"Kalem": "Bankalar Mevduatı", "İşaret": "−", "Değer (mn USD)": _f(last["banka_mevduati"])},
-            {"Kalem": "= Net Rezerv (Swap Dahil)", "İşaret": "=", "Değer (mn USD)": _f(last["net_rezerv_swap_dahil"])},
-            {"Kalem": "Net Swap (Alım − Satım)", "İşaret": "−", "Değer (mn USD)": _f(last["net_swap"])},
-            {"Kalem": "= Net Rezerv (Swap Hariç)", "İşaret": "=", "Değer (mn USD)": _f(last["net_rezerv_swap_haric"])},
-        ])
-        st.dataframe(breakdown, hide_index=True, use_container_width=True)
+    if swap_haric is not None:
+        with st.expander(f"🧮 Swap Hariç Hesabı ({swap_tarih} likidite tablosu)", expanded=False):
+            es = rez[rez["tarih"] <= pd.to_datetime(swap_tarih, format="%d.%m.%Y")]
+            nur_es = float(es.iloc[-1]["net_ur"]) if len(es) else None
+            lk_son = load_likidite(str(likidite_file), int(likidite_file.stat().st_mtime)).iloc[-1]
+            _f = lambda v: "—" if v is None or pd.isna(v) else f"{v:,.0f}".replace(",", ".")
+            st.dataframe(pd.DataFrame([
+                {"Kalem": "Net Uluslararası Rezervler (A20, aynı tarih)", "Değer (mn USD)": _f(nur_es)},
+                {"Kalem": "II.2 Forward/Swap açık pozisyonları", "Değer (mn USD)": _f(lk_son.get("swap_forward"))},
+                {"Kalem": "II.3 Diğer (repo vb.)", "Değer (mn USD)": _f(lk_son.get("diger"))},
+                {"Kalem": "= Net UR — Swap Hariç", "Değer (mn USD)": _f(swap_haric)},
+            ]), hide_index=True, use_container_width=True)
 
-    # ── Net rezerv trendi ──
-    st.subheader("Net Rezerv Trendi")
-    plot_long = (rez[["tarih", "net_rezerv_swap_haric", "net_rezerv_swap_dahil"]]
-                 .rename(columns={"net_rezerv_swap_haric": "Swap Hariç",
-                                  "net_rezerv_swap_dahil": "Swap Dahil"})
-                 .melt("tarih", var_name="Seri", value_name="mn USD"))
-    fig = px.line(plot_long, x="tarih", y="mn USD", color="Seri",
-                  labels={"tarih": "Tarih", "mn USD": "Milyon USD"})
-    fig.update_layout(height=420, template="plotly_white", legend_title_text="")
-    styled_chart(fig)
+    # ── Grafikler ──
+    st.subheader("Net Uluslararası Rezervler (Swap Dahil)")
+    f1 = go.Figure()
+    f1.add_scatter(x=rez["tarih"], y=rez["net_ur"] / 1000, mode="lines",
+                   line=dict(color="#FF9E1B", width=2.5),
+                   hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra></extra>")
+    f1.update_layout(height=400, separators=",.", showlegend=False)
+    styled_chart(f1)
 
-    # ── Bileşenler ──
-    st.subheader("Bileşenler")
-    comp_long = (rez[["tarih", "dis_varliklar", "banka_mevduati"]]
-                 .rename(columns={"dis_varliklar": "Dış Varlıklar",
-                                  "banka_mevduati": "Bankalar Mevduatı"})
-                 .melt("tarih", var_name="Kalem", value_name="mn USD"))
-    fig2 = px.line(comp_long, x="tarih", y="mn USD", color="Kalem",
-                   labels={"tarih": "Tarih", "mn USD": "Milyon USD"})
-    fig2.update_layout(height=380, template="plotly_white", legend_title_text="")
-    styled_chart(fig2)
+    st.subheader("Haftalık Değişim — Net UR (Milyar USD)")
+    wser = wd["net_ur"].dropna() / 1000
+    f2 = go.Figure()
+    f2.add_bar(x=wser.index, y=wser.values,
+               marker_color=["#FF5A5F" if v < 0 else "#26C281" for v in wser.values],
+               hovertemplate="%{x|%d.%m.%Y} haftası<br>%{y:+.1f} milyar USD<extra></extra>")
+    f2.update_layout(height=340, separators=",.", showlegend=False)
+    styled_chart(f2)
 
-    get_download_button(str(data_file), "📥 Net Rezerv Verisi (.xlsx)")
+    st.subheader("Brüt Rezervler — Döviz & Altın (Milyar USD)")
+    f3 = go.Figure()
+    f3.add_scatter(x=rez["tarih"], y=rez["dis_varliklar"] / 1000, mode="lines", name="Brüt Döviz",
+                   line=dict(color="#4C9AFF", width=2.2),
+                   hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Döviz</extra>")
+    f3.add_scatter(x=rez["tarih"], y=rez["altin"] / 1000, mode="lines", name="Altın",
+                   line=dict(color="#FF9E1B", width=2),
+                   hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Altın</extra>")
+    f3.update_layout(height=380, separators=",.", legend_title_text="")
+    styled_chart(f3)
 
-    st.markdown("**Seri Bilgileri (EVDS):**")
+    col_d1, col_d2 = st.columns(2)
+    with col_d1:
+        get_download_button(str(data_file), "📥 Rezerv Verisi (.xlsx)")
+    with col_d2:
+        if likidite_file.exists():
+            get_download_button(str(likidite_file), "📥 Likidite Tablosu (.xlsx)")
+
+    st.markdown("**Seri Bilgileri:**")
     st.markdown(
-        "- `TP.AB.A02` → Dış Varlıklar (Bin TL)\n"
-        "- `TP.AB.A11` → Dış Yükümlülükler (Bin TL)\n"
-        "- `TP.AB.A13` → Kamu Mevduatı (Bin TL)\n"
-        "- `TP.AB.A14` → Bankalar Mevduatı (Bin TL)\n"
-        "- `TP.DK.USD.A.YTL` → USD/TRY alış kuru\n"
-        "- `TP.SWAPTEKTAR.TOTALSTOKALIMYONLU` / `...SATIMYONLU` → Swap stoku (mn USD)\n"
-        "- **Frekans:** Günlük (iş günü)  ·  **Birim:** Milyon USD  ·  **Kaynak:** TCMB EVDS"
+        "- `TP.AB.A02` → Dış Varlıklar / brüt döviz (Bin TL)\n"
+        "- `TP.AB.A18` → Altın (Bin TL)\n"
+        "- `TP.AB.A20` → Net Uluslararası Rezervler, swap dahil (Bin TL — haftalık vaziyet '2A')\n"
+        "- `TP.DK.USD.A.YTL` → USD/TRY alış kuru (günlük USD karşılıkları bu kurla)\n"
+        "- **URDL haftalık şablonu** → toplam swap/forward pozisyonu (II.2 + II.3) — 'swap hariç' bu tabloyla hesaplanır\n"
+        "- **Frekans:** Günlük (iş günü); likidite tablosu haftalık  ·  **Kaynak:** TCMB EVDS + TCMB URDL"
     )
 
 
