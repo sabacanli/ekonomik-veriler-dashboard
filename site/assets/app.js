@@ -100,7 +100,39 @@ function plLayout(over) {
 const PCFG = { displayModeBar: false, responsive: true };
 
 function draw(id, traces, layoutOver) {
-  Plotly.newPlot(id, traces, plLayout(layoutOver), PCFG);
+  const gd = document.getElementById(id);
+  Plotly.newPlot(gd, traces, plLayout(layoutOver), PCFG).then(function () {
+    zoomSifirlaKur(gd);
+  });
+}
+
+/* Zoom yapılınca kartın sağ üstünde "sıfırla" düğmesi belirir (çift tıklama da sıfırlar) */
+function zoomSifirlaKur(gd) {
+  let b = gd.__resetBtn;
+  if (!b) {
+    const kap = gd.parentElement || gd;
+    if (getComputedStyle(kap).position === "static") kap.style.position = "relative";
+    b = document.createElement("button");
+    b.type = "button";
+    b.className = "pl-reset";
+    b.textContent = "↺ Zoom'u sıfırla";
+    b.style.display = "none";
+    b.onclick = function () {
+      Plotly.relayout(gd, { "xaxis.autorange": true, "yaxis.autorange": true });
+    };
+    kap.appendChild(b);
+    gd.__resetBtn = b;
+  }
+  b.style.display = "none";
+  gd.on("plotly_relayout", function (e) {
+    if (!e) return;
+    const sifirlandi = e["xaxis.autorange"] === true || e["yaxis.autorange"] === true;
+    const zoomlandi = Object.keys(e).some(function (k) {
+      return k.indexOf("range") !== -1 && k.indexOf("autorange") === -1;
+    });
+    if (sifirlandi) b.style.display = "none";
+    else if (zoomlandi) b.style.display = "";
+  });
 }
 
 /* Son bar etiketi — işarete göre üste/alta */

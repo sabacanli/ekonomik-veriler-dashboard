@@ -369,3 +369,24 @@ input.inp:focus { outline: none; border-color: var(--amber); }
 .btn:hover { border-color: var(--amber); color: var(--amber); }
 .table-scroll { overflow: auto; max-height: 480px; }
 .table-scroll table.heat thead th { position: sticky; top: 0; z-index: 2; background: var(--panel); }
+
+/* ── Grafik zoom sıfırlama ── */
+.pl-reset {
+  position: absolute;
+  top: 12px; right: 14px;
+  z-index: 6;
+  background: #2A2113;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 12.5px;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.pl-reset:hover { background: #33270F; }
+
+/* ── Sıralanabilir tablo başlıkları ── */
+table.heat th.sortable { cursor: pointer; user-select: none; }
+table.heat th.sortable:hover { color: var(--text); }
+table.heat th.sortable.sorted { color: var(--amber); }

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=8">
+  <link rel="stylesheet" href="assets/style.css?v=9">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -50,7 +50,7 @@
     <footer>Kaynak: TCMB EVDS (TP.TUKFIY2025.GENEL) · TÜİK 2025=100 TÜFE endeksi.</footer>
   </main>
 
-  <script src="assets/app.js?v=8"></script>
+  <script src="assets/app.js?v=9"></script>
   <script>
     (async () => {
       const D = await getJSON("data/enflasyon.json");
@@ -95,13 +95,33 @@
           }], { height: 500, showlegend: false, margin: { l: 200, r: 80 } });
 
           document.getElementById("capAltTbl").textContent =
-            A.ay_adlari[mi] + " · Aylık, yıllık ve yılbaşından beri değişim (%)";
-          const desc = [...items].sort((a, b) => b.v - a.v);
-          const genel = desc.find(x => x.genel);
-          const digerleri = desc.filter(x => !x.genel);
-          let h = '<table class="heat"><thead><tr><th style="text-align:left">Kalem</th>' +
-            "<th>Aylık %</th><th>Yıllık %</th><th>Yılbaşından %</th></tr></thead><tbody>";
-          for (const x of [genel, ...digerleri]) {
+            A.ay_adlari[mi] + " · Aylık, yıllık ve yılbaşından beri değişim (%) — başlığa tıklayınca sıralanır";
+          altItems = items;
+          tabloCiz();
+        }
+
+        // ── Sıralanabilir tablo (Genel TÜFE satırı hep en üstte sabit) ──
+        let altItems = null;
+        const sirala = { kol: "v", yon: -1 };  // varsayılan: Yıllık % büyükten küçüğe
+        const KOLONLAR = [["ad", "Kalem"], ["ay", "Aylık %"], ["v", "Yıllık %"], ["ytd", "Yılbaşından %"]];
+
+        function tabloCiz() {
+          if (!altItems) return;
+          const genel = altItems.find(x => x.genel);
+          const digerleri = altItems.filter(x => !x.genel).slice().sort((a, b) => {
+            const va = a[sirala.kol], vb = b[sirala.kol];
+            if (va === null || va === undefined) return 1;
+            if (vb === null || vb === undefined) return -1;
+            if (sirala.kol === "ad") return sirala.yon * String(va).localeCompare(String(vb), "tr");
+            return sirala.yon * (va - vb);
+          });
+          let h = '<table class="heat"><thead><tr>' + KOLONLAR.map(([k, ad]) => {
+            const aktif = k === sirala.kol;
+            const ok = aktif ? (sirala.yon === -1 ? " ▼" : " ▲") : "";
+            return '<th class="sortable' + (aktif ? " sorted" : "") + '" data-k="' + k + '"' +
+              (k === "ad" ? ' style="text-align:left"' : "") + ">" + ad + ok + "</th>";
+          }).join("") + "</tr></thead><tbody>";
+          for (const x of [genel, ...digerleri].filter(Boolean)) {
             const sec = x.genel ? ' class="sec"' : "";
             h += "<tr" + sec + '><td class="lbl">' + x.ad + "</td>" +
               [x.ay, x.v, x.ytd].map(v => {
@@ -110,6 +130,12 @@
               }).join("") + "</tr>";
           }
           document.getElementById("tblAlt").innerHTML = h + "</tbody></table>";
+          document.querySelectorAll("#tblAlt th.sortable").forEach(th => th.onclick = () => {
+            const k = th.dataset.k;
+            if (sirala.kol === k) sirala.yon = -sirala.yon;
+            else { sirala.kol = k; sirala.yon = k === "ad" ? 1 : -1; }
+            tabloCiz();
+          });
         }
         altCiz(A.aylar.length - 1);
       }
