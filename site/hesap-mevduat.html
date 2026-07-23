@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mevduat / Stopaj Hesaplama — Ekonomik Veriler</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=10">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Mevduat / Stopaj Hesaplama</h1>
+    <div class="update-info">Finansal Hesaplar · Vadeli mevduat net getirisi — mevzuat durumu: Temmuz 2026</div>
+    <div class="info-box">📋 Mevduat faizinden tek vergi kesilir: <b>gelir vergisi stopajı</b> (GVK geçici 67. md).
+      Bireysel yatırımcı için stopaj <b>nihai vergidir</b> — beyanname gerekmez, BSMV de yoktur. Oran TL'de
+      vadeye göre <b>%17,5 / %15 / %10</b>, dövizde tüm vadelerde <b>%25</b>, altında <b>%15</b>.
+      Bankaların 367 günlük ürünlerinin sırrı da burada: vade 1 yılı aştığı an stopaj %10'a düşer.
+      Aşağıdaki hesap, sitedeki güncel TCMB sektör ortalaması faizleri ve enflasyon verisiyle bağlantılıdır.</div>
+
+    <!-- ── Mevzuat: stopaj oranları ── -->
+    <section class="chart-card">
+      <h3>Güncel Stopaj Oranları</h3>
+      <p class="cap">Hesaptan önce bilinmesi gerekenler — oran, hesabın açıldığı/yenilendiği tarihe göre belirlenir ve vade boyunca değişmez</p>
+      <div class="table-wrap">
+        <table class="heat">
+          <thead>
+            <tr><th style="text-align:left">Hesap Türü</th><th>Vade</th><th>Stopaj</th><th>Geçerlilik</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="lbl">TL Vadeli Mevduat</td><td class="num">6 aya kadar (dahil)</td><td class="num">%17,5</td><td class="num" rowspan="3">09.07.2025 CK</td></tr>
+            <tr><td class="lbl"></td><td class="num">1 yıla kadar (dahil)</td><td class="num">%15</td></tr>
+            <tr class="sec"><td class="lbl"></td><td class="num">1 yıldan uzun</td><td class="num">%10</td></tr>
+            <tr><td class="lbl">Döviz Tevdiat (DTH)</td><td class="num">Tüm vadeler</td><td class="num">%25</td><td class="num">28.06.2023'ten beri</td></tr>
+            <tr><td class="lbl">Altın Mevduat</td><td class="num">Tüm vadeler</td><td class="num">%15</td><td class="num">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cap" style="margin-top:10px">
+        <b>Bilinmesi gerekenler:</b> Stopaj GVK geçici 67. maddesine dayanır; oranlar Cumhurbaşkanı Kararı ile
+        belirlenir (TL oranları son olarak 9 Temmuz 2025 tarihli CK ile artırıldı) · Karar öncesi açılan hesap,
+        vadesi bitene dek açılış tarihindeki orana tabidir · Bireysel yatırımcı için stopaj <b>nihai vergi</b>dir,
+        beyana dahil edilmez; mevduat faizinde BSMV/KKDF yoktur · Faiz hesabı banka uygulamasıyla aynıdır:
+        <b>brüt faiz = anapara × yıllık oran × gün / 365</b> · <b>TMSF güvencesi (2026):</b> kişi başı, banka başı
+        <b>1.200.000 TL</b> — TL + döviz + altın mevduat ve katılım fonlarının toplamını kapsar (950 bin TL'den yükseltildi).
+      </p>
+    </section>
+
+    <!-- ── Hesaplayıcı ── -->
+    <div class="filter-box">
+      <div class="filter-lbl">Hesap Türü</div>
+      <div class="chips" id="turChips"></div>
+      <div class="filter-lbl">Vade (hızlı seçim)</div>
+      <div class="chips" id="vadeChips"></div>
+      <div class="calc-grid">
+        <div>
+          <div class="filter-lbl" id="lblAnapara">Anapara (TL)</div>
+          <input class="inp" id="inAnapara" inputmode="numeric" value="1.000.000">
+        </div>
+        <div>
+          <div class="filter-lbl">Yıllık Basit Faiz (%)</div>
+          <input class="inp" id="inFaiz" inputmode="decimal" value="48,27">
+        </div>
+        <div>
+          <div class="filter-lbl">Vade (gün)</div>
+          <input class="inp" id="inVade" inputmode="numeric" value="92">
+        </div>
+      </div>
+      <div class="cap" id="oneriSatir" style="margin-top:10px"></div>
+      <div class="cap" id="stopajSatir" style="margin-top:4px"></div>
+    </div>
+
+    <div class="metrics" id="metrics"></div>
+
+    <section class="chart-card">
+      <h3>1 Yıl Yenileme Senaryosu — Bakiye Büyümesi</h3>
+      <p class="cap" id="capCh1">Vade sonunda anapara + net faiz aynı koşullarla yenilenirse (bileşik etki)</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Yenileme Tablosu — Dönem Dönem</h3>
+      <p class="cap" id="capTbl"></p>
+      <div class="table-wrap" id="tblPlan"></div>
+    </section>
+
+    <footer>Bu sayfa bilgilendirme amaçlıdır; banka teklifi değildir. Stopaj oranı hesabın açıldığı gün
+      yürürlükte olan orandır ve vade boyunca sabittir. Döviz/altın hesaplarında getiri kur/fiyat değişimini
+      içermez — yalnız faiz getirisi hesaplanır; reel getiri kıyası bu yüzden sadece TL'de gösterilir.
+      Faiz günü: 365. Kaynaklar: GVK geçici 67 · 09.07.2025 tarihli CK (TL oranları) · banka stopaj
+      tabloları (DTH %25, altın %15) · TMSF 2026 sigorta limiti kararı · TCMB haftalık faiz istatistikleri ·
+      TÜİK/TCMB TÜFE.</footer>
+  </main>
+
+  <script src="assets/app.js?v=10"></script>
+  <script>
+    const TURLER = {
+      tl:    { ad: "TL Vadeli",    birim: "TL",   varsayilanFaiz: null },
+      dth:   { ad: "Döviz (DTH)",  birim: "birim", varsayilanFaiz: "4,00" },
+      altin: { ad: "Altın",        birim: "gram", varsayilanFaiz: "1,50" },
+    };
+    const VADELER = [32, 92, 181, 270, 367];
+    let tur = "tl";
+    let MO = null;   // TCMB sektör ortalaması mevduat faizleri (mevduat.json)
+    let ENF = null;  // yıllık TÜFE (enflasyon.json)
+
+    function sayi(id) {
+      const v = parseFloat(String(document.getElementById(id).value).trim()
+        .replace(/\./g, "").replace(",", "."));
+      return isNaN(v) ? 0 : v;
+    }
+    function faizOku() {
+      const v = parseFloat(String(document.getElementById("inFaiz").value).trim().replace(",", "."));
+      return isNaN(v) ? 0 : v;
+    }
+
+    // ── Stopaj oranı: tür + vade basamağı ──
+    function stopajOrani(gun) {
+      if (tur === "dth") return 0.25;
+      if (tur === "altin") return 0.15;
+      if (gun <= 183) return 0.175;   // 6 aya kadar (dahil)
+      if (gun <= 365) return 0.15;    // 1 yıla kadar (dahil)
+      return 0.10;                    // 1 yıldan uzun
+    }
+    function basamakAdi(gun) {
+      if (tur === "dth") return "DTH — tüm vadeler";
+      if (tur === "altin") return "altın — tüm vadeler";
+      if (gun <= 183) return "TL, 6 aya kadar";
+      if (gun <= 365) return "TL, 1 yıla kadar";
+      return "TL, 1 yıldan uzun";
+    }
+
+    // ── TCMB ortalamasından faiz önerisi (yalnız TL) ──
+    function tcmbOneri(gun) {
+      if (!MO || tur !== "tl") return null;
+      if (gun <= 45) return MO.v1ay;
+      if (gun <= 120) return MO.v3ay;
+      return MO.v1yil;
+    }
+
+    function hesapla() {
+      const P = sayi("inAnapara");
+      const oran = faizOku() / 100;
+      const gun = Math.round(sayi("inVade"));
+      if (P <= 0 || oran < 0 || gun <= 0 || gun > 1100) return null;
+      const st = stopajOrani(gun);
+      const brut = P * oran * gun / 365;
+      const stopaj = brut * st;
+      const net = brut - stopaj;
+      const netDonem = net / P;
+      const yillikNet = Math.pow(1 + netDonem, 365 / gun) - 1;
+      // 1 yıl yenileme senaryosu (tam dönemler)
+      const donemler = [];
+      let bak = P, t = 0;
+      while (t + gun <= 365 || donemler.length === 0) {
+        const b = bak * oran * gun / 365, s = b * st;
+        donemler.push({ no: donemler.length + 1, bas: bak, brut: b, stopaj: s, net: b - s, son: bak + b - s });
+        bak += b - s; t += gun;
+        if (donemler.length > 60) break;
+      }
+      return { P, oran, gun, st, brut, stopaj, net, netDonem, yillikNet, donemler };
+    }
+
+    function goster() {
+      const t = TURLER[tur];
+      document.getElementById("lblAnapara").textContent =
+        "Anapara (" + (tur === "tl" ? "TL" : tur === "dth" ? "USD / EUR" : "gram") + ")";
+      const h = hesapla();
+      const oneri = tcmbOneri(h ? h.gun : 92);
+      document.getElementById("oneriSatir").innerHTML = MO && tur === "tl"
+        ? "TCMB sektör ortalaması (" + MO.tarih + "): 1 ay %" + trNum(MO.v1ay, 2) +
+          " · 3 ay %" + trNum(MO.v3ay, 2) + " · 1 yıl %" + trNum(MO.v1yil, 2) +
+          " — vade seçince faiz alanına otomatik yazılır, elle değiştirebilirsin"
+        : "Döviz/altın faiz oranları bankaya göre değişir — kendi teklifini gir";
+      if (!h) { document.getElementById("metrics").innerHTML = ""; return; }
+
+      document.getElementById("stopajSatir").innerHTML =
+        "Uygulanan stopaj: <b>%" + trNum(h.st * 100, 1) + "</b> (" + basamakAdi(h.gun) + ")" +
+        (tur === "tl" && h.gun > 365 ? " — 1 yılı aşan vadede en düşük dilim" : "");
+
+      const b = t.birim === "TL" ? " TL" : (tur === "dth" ? "" : " gr");
+      const reel = (tur === "tl" && ENF !== null) ? (1 + h.yillikNet) / (1 + ENF) - 1 : null;
+      setMetrics([
+        ["Brüt Faiz (dönem)", trNum(h.brut, 2) + b, h.gun + " gün · %" + trNum(h.oran * 100, 2) + " yıllık", "flat"],
+        ["Stopaj Kesintisi", trNum(h.stopaj, 2) + b, "%" + trNum(h.st * 100, 1) + " · nihai vergi", "down"],
+        ["Net Faiz (dönem)", trNum(h.net, 2) + b, "dönem getirisi %" + trNum(h.netDonem * 100, 2), "up"],
+        ["Vade Sonu Bakiye", trNum(h.P + h.net, 2) + b, "anapara " + trNum(h.P, 0) + b, "flat"],
+        ["Net Yıllık Bileşik", "%" + trNum(h.yillikNet * 100, 2), "aynı koşullarla yenilenirse", "flat"],
+        ["Reel Getiri (Yıllık)", reel === null ? "—" : "%" + trNum(reel * 100, 2),
+          reel === null ? (tur === "tl" ? "enflasyon verisi yok" : "kur/fiyat değişimi hariç — TL'de gösterilir")
+                        : "TÜFE %" + trNum(ENF * 100, 2) + " ile",
+          reel === null ? "flat" : (reel >= 0 ? "up" : "down")],
+      ]);
+
+      // ── Grafik: yenileme senaryosu ──
+      const gx = [0], gy = [h.P];
+      for (const d of h.donemler) { gx.push(d.no * h.gun); gy.push(d.son); }
+      const izler = [{
+        type: "scatter", mode: "lines+markers", x: gx, y: gy, name: "Nominal bakiye",
+        line: { color: C.green, width: 2.5 }, marker: { size: 6 },
+        hovertemplate: "%{x}. gün<br>Bakiye: %{y:,.2f}" + b + "<extra></extra>",
+      }];
+      if (tur === "tl" && ENF !== null) {
+        izler.push({
+          type: "scatter", mode: "lines+markers", x: gx,
+          y: gy.map((v, i) => v / Math.pow(1 + ENF, gx[i] / 365)),
+          name: "Reel (bugünkü satın alma gücü)", line: { color: C.amber, width: 2, dash: "dot" },
+          marker: { size: 5 },
+          hovertemplate: "%{x}. gün<br>Reel: %{y:,.2f}" + b + "<extra></extra>",
+        });
+      }
+      draw("ch1", izler, { height: 360, xaxis: { title: { text: "Gün", font: { size: 12 } } } });
+      document.getElementById("capCh1").textContent =
+        "Vade sonunda anapara + net faiz aynı faiz ve stopajla yenilenirse — " + h.donemler.length +
+        " tam dönem (bileşik etki)" + (tur === "tl" && ENF !== null ? " · kesikli çizgi: %" +
+        trNum(ENF * 100, 1) + " TÜFE ile bugünkü satın alma gücü" : "");
+
+      // ── Tablo ──
+      document.getElementById("capTbl").textContent =
+        (tur === "tl" ? "TL" : t.ad) + " · her satır bir vade dönemi (" + h.gun + " gün)";
+      let html = '<table class="heat"><thead><tr><th>Dönem</th><th>Başlangıç</th><th>Brüt Faiz</th>' +
+        "<th>Stopaj</th><th>Net Faiz</th><th>Dönem Sonu</th></tr></thead><tbody>";
+      for (const d of h.donemler) {
+        html += "<tr><td class='num'>" + d.no + "</td><td class='num'>" + trNum(d.bas, 2) +
+          "</td><td class='num'>" + trNum(d.brut, 2) + "</td><td class='num'>" + trNum(d.stopaj, 2) +
+          "</td><td class='num'>" + trNum(d.net, 2) + "</td><td class='num'>" + trNum(d.son, 2) + "</td></tr>";
+      }
+      const son = h.donemler[h.donemler.length - 1];
+      html += '</tbody><tfoot><tr class="sec"><td class="num">Σ</td><td class="num">' + trNum(h.P, 2) +
+        '</td><td class="num">' + trNum(h.donemler.reduce((a, d) => a + d.brut, 0), 2) +
+        '</td><td class="num">' + trNum(h.donemler.reduce((a, d) => a + d.stopaj, 0), 2) +
+        '</td><td class="num">' + trNum(h.donemler.reduce((a, d) => a + d.net, 0), 2) +
+        '</td><td class="num">' + trNum(son.son, 2) + "</td></tr></tfoot></table>";
+      document.getElementById("tblPlan").innerHTML = html;
+    }
+
+    // ── Chips ──
+    function turChipsCiz() {
+      const el = document.getElementById("turChips");
+      el.innerHTML = Object.keys(TURLER).map(k =>
+        '<button class="chip' + (k === tur ? " active" : "") + '" data-k="' + k + '">' + TURLER[k].ad + "</button>").join("");
+      el.querySelectorAll(".chip").forEach(bt => bt.onclick = () => {
+        tur = bt.dataset.k;
+        const t = TURLER[tur];
+        if (tur === "tl") { const o = tcmbOneri(Math.round(sayi("inVade"))); if (o) document.getElementById("inFaiz").value = trNum(o, 2); }
+        else if (t.varsayilanFaiz) document.getElementById("inFaiz").value = t.varsayilanFaiz;
+        turChipsCiz(); goster();
+      });
+    }
+    function vadeChipsCiz() {
+      const g = Math.round(sayi("inVade"));
+      const el = document.getElementById("vadeChips");
+      el.innerHTML = VADELER.map(v =>
+        '<button class="chip' + (v === g ? " active" : "") + '" data-v="' + v + '">' + v + " gün</button>").join("");
+      el.querySelectorAll(".chip").forEach(bt => bt.onclick = () => {
+        document.getElementById("inVade").value = bt.dataset.v;
+        const o = tcmbOneri(+bt.dataset.v);
+        if (o && tur === "tl") document.getElementById("inFaiz").value = trNum(o, 2);
+        vadeChipsCiz(); goster();
+      });
+    }
+
+    ["inAnapara", "inFaiz", "inVade"].forEach(id =>
+      document.getElementById(id).addEventListener("input", () => { vadeChipsCiz(); goster(); }));
+    document.getElementById("inAnapara").addEventListener("blur", function () {
+      const v = sayi("inAnapara");
+      if (v > 0) this.value = v.toLocaleString("tr-TR", { maximumFractionDigits: 0 });
+    });
+
+    // ── Platform verilerini bağla (varsa) ──
+    (async () => {
+      try {
+        const M = await getJSON("data/mevduat.json");
+        MO = { v1ay: M.son.v1ay, v3ay: M.son.v3ay, v1yil: M.son.v1yil, tarih: M.son.tarih };
+        const o = tcmbOneri(92);
+        if (o) document.getElementById("inFaiz").value = trNum(o, 2);
+      } catch (e) { /* öneri yoksa elle girilir */ }
+      try {
+        const E = await getJSON("data/enflasyon.json");
+        ENF = E.son.yillik / 100;
+      } catch (e) { /* reel getiri gösterilmez */ }
+      turChipsCiz(); vadeChipsCiz(); goster();
+    })();
+  </script>
+</body>
+</html>

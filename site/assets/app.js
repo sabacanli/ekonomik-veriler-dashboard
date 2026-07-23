@@ -16,6 +16,7 @@ const NAV = [
   { href: "tcmb-alim.html", label: "TCMB Doğrudan Alım" },
   { head: "Finansal Hesaplar" },
   { href: "hesap-kredi.html", label: "Kredi Hesaplama" },
+  { href: "hesap-mevduat.html", label: "Mevduat / Stopaj" },
 ];
 
 const C = {
