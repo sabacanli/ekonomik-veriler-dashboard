@@ -12,6 +12,7 @@ butonlarıyla (Selenium) veri çekilmiş olmalı.
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -62,12 +63,17 @@ def main():
     if commit.returncode != 0:
         print("Not: yeni değişiklik yok (veri zaten güncel).")
     # Bulut (GitHub Actions) bu arada commit atmış olabilir — önce senkronla.
-    subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=ROOT)
-    push = subprocess.run(["git", "push", "origin", "main"], cwd=ROOT)
-    if push.returncode != 0:
-        print("HATA: git push başarısız. Elle 'git push' gerekebilir.", file=sys.stderr)
-        sys.exit(1)
-    print("BAŞARILI: BDDK verileri buluta yayınlandı.")
+    # Ağ, uyanma sonrası geç gelebilir: pull + push başarısızsa bekleyip yeniden dene.
+    for deneme in range(1, 6):
+        subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=ROOT)
+        push = subprocess.run(["git", "push", "origin", "main"], cwd=ROOT)
+        if push.returncode == 0:
+            print("BAŞARILI: BDDK verileri buluta yayınlandı.")
+            return
+        print(f"UYARI: push başarısız (deneme {deneme}/5) — 30 sn sonra tekrar.", file=sys.stderr)
+        time.sleep(30)
+    print("HATA: git push 5 denemede de başarısız. Elle 'git push' gerekebilir.", file=sys.stderr)
+    sys.exit(1)
 
 
 if __name__ == "__main__":
