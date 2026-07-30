@@ -17,10 +17,11 @@ log() { echo "[$(date '+%d.%m.%Y %H:%M:%S')] $1"; }
 log "BDDK otomatik güncelleme başladı"
 cd "$REPO" || { log "HATA: repo klasörü bulunamadı"; exit 1; }
 
-# Mac uykudan yeni uyandıysa ağ henüz bağlanmamış olabilir — scrape (BDDK sitesi)
-# ve push (GitHub) için önce bağlantıyı bekle (en fazla ~4 dk).
+# Mac uykudan yeni uyandıysa ağ henüz bağlanmamış olabilir — scrape ve push için
+# önce bağlantıyı bekle (en fazla ~4 dk). Sonda adresi curl-dostu olmalı:
+# bddk.org.tr bot koruması yüzünden curl'e yanıt vermiyor (30.07 koşusunda 4 dk boşa bekletti).
 i=0
-until curl -sm 5 -o /dev/null "https://www.bddk.org.tr" 2>/dev/null || [ $i -ge 16 ]; do
+until curl -sm 5 -o /dev/null "https://www.gstatic.com/generate_204" 2>/dev/null || [ $i -ge 16 ]; do
   i=$((i + 1))
   log "Ağ bekleniyor... ($i/16)"
   sleep 15
