@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=11">
+  <link rel="stylesheet" href="assets/style.css?v=12">
 </head>
 <body>
   <button id="menuBtn">☰</button>
@@ -24,6 +24,7 @@
       <h3>📊 Menkul Değerler · Krediler · Bankalardan Alacaklar</h3>
       <p class="cap" id="cap1"></p>
       <button class="btn apko-btn" data-sec="sec1">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn kopya-btn" data-t="1">📋 Panoya kopyala (Excel)</button>
       <div class="table-wrap" id="t1"></div>
     </section>
 
@@ -31,6 +32,7 @@
       <h3>💰 Mevduat · Diğer Bilanço Kalemleri</h3>
       <p class="cap" id="cap2"></p>
       <button class="btn apko-btn" data-sec="sec2">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn kopya-btn" data-t="2">📋 Panoya kopyala (Excel)</button>
       <div class="table-wrap" id="t2"></div>
     </section>
 
@@ -39,7 +41,7 @@
       Sağ 4 kolon: banka grubu bazında haftalık değişim.</footer>
   </main>
 
-  <script src="assets/app.js?v=11"></script>
+  <script src="assets/app.js?v=12"></script>
   <script>
     (async () => {
       const D = await getJSON("data/bddk.json");
@@ -95,6 +97,48 @@
       document.querySelectorAll(".apko-btn").forEach(b => b.onclick = () => {
         const acik = document.getElementById(b.dataset.sec).classList.toggle("apko");
         b.textContent = acik ? "🌙 Koyu zemine dön" : "🖨 Beyaz zemin (sunum)";
+      });
+
+      // ── Panoya kopyala: Excel/PowerPoint'e renkleriyle yapışan satır-içi stilli tablo ──
+      function kopyaHtml(rows) {
+        const td = "border:1px solid #B7BFCC;padding:3px 8px;color:#1A2233;" +
+                   "font-family:Calibri,Arial,sans-serif;font-size:11pt";
+        const bas = td + ";background:#F1F4F9;font-weight:700";
+        let h = '<table style="border-collapse:collapse"><thead>';
+        h += '<tr><th style="' + bas + '"></th><th colspan="4" style="' + bas + '">Sektör</th>' +
+             '<th colspan="4" style="' + bas + '">Sektör Kırılımı (Haftalık)</th></tr>';
+        h += "<tr>" + ["Kalem", "Toplam", ...KOLONLAR.map(k => k[1])].map((k, i) =>
+             '<th style="' + bas + ";text-align:" + (i ? "right" : "left") + '">' + k + "</th>").join("") +
+             "</tr></thead><tbody>";
+        for (const r of rows) {
+          const kalin = r.bold ? ";font-weight:700;color:#8A5A00" : "";
+          const pad = "    ".repeat(r.indent);
+          h += '<tr><td style="' + td + kalin + '">' + pad + r.label + "</td>" +
+               '<td style="' + td + ";text-align:right" + kalin + '">' + fTop(r.toplam) + "</td>";
+          for (const [k] of KOLONLAR) {
+            const bg = heat(r[k], D.olcek[k]);
+            h += '<td style="' + td + ";text-align:right" + (bg ? ";background:" + bg : "") + '">' +
+                 fPct(r[k]) + "</td>";
+          }
+          h += "</tr>";
+        }
+        return h + "</tbody></table>";
+      }
+
+      document.querySelectorAll(".kopya-btn").forEach(b => b.onclick = async () => {
+        const rows = b.dataset.t === "1" ? D.tablo1 : D.tablo2;
+        const duz = rows.map(r => [r.label, fTop(r.toplam), ...KOLONLAR.map(([k]) => fPct(r[k]))]
+          .join("\t")).join("\n");
+        try {
+          await navigator.clipboard.write([new ClipboardItem({
+            "text/html": new Blob([kopyaHtml(rows)], { type: "text/html" }),
+            "text/plain": new Blob([duz], { type: "text/plain" }),
+          })]);
+          b.textContent = "✓ Kopyalandı — Excel'e yapıştır";
+        } catch (e) {
+          b.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+        }
+        setTimeout(() => { b.textContent = "📋 Panoya kopyala (Excel)"; }, 3000);
       });
     })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
   </script>
