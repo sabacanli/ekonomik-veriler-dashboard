@@ -24,7 +24,8 @@ from pathlib import Path
 # Excel'deki kalem sırası (Tarih=0. kolon; her kalem 3 kolon: TP, YP, TOPLAM)
 ITEMS = ["menkul_toplam", "devlet_tahvil", "bank_alacak", "bank_alacak_yd",
          "kredi_toplam", "tuketici_bkk", "konut", "tasit", "ihtiyac", "bkk",
-         "ticari", "kkart_kurumsal", "mevduat", "mevduat_gk", "mevduat_tk",
+         "ticari", "kkart_kurumsal", "kmh_tuketici", "kmh_ticari",
+         "mevduat", "mevduat_gk", "mevduat_tk",
          "bank_borc", "bank_borc_yd", "repo", "ihrac", "kkm"]
 
 TP, YP, TOPLAM = 0, 1, 2
@@ -53,6 +54,8 @@ TABLO1 = [
     ("Konut",                              "TL",  "konut",          TP,     2, False),
     ("Taşıt",                              "TL",  "tasit",          TP,     2, False),
     ("İhtiyaç",                            "TL",  "ihtiyac",        TP,     2, False),
+    ("Kredili Mevduat Hes. — Tüketici (TL)","TL", "kmh_tuketici",   TP,     2, False),
+    ("Kredili Mevduat Hes. — Taksitli Ticari (TL)","TL","kmh_ticari",TP,    2, False),
     ("Bireysel Kredi Kartları (TL)",       "TL",  "bkk",            TP,     1, False),
     ("Kurumsal Kredi Kartları (TL)",       "TL",  "kkart_kurumsal", TP,     1, False),
     ("YP Krediler (USD)",                  "USD", "kredi_toplam",   YP,     1, False),
@@ -88,6 +91,11 @@ TABLO2 = [
 def _parse_blocks(fp):
     """Dosyayı grup bloklarına ayırır: {'sektor': df, 'kamu': df, ...}"""
     raw = pd.read_excel(fp, header=None)
+    beklenen = 1 + 3 * len(ITEMS)
+    if raw.shape[1] != beklenen:
+        raise ValueError(
+            f"{Path(fp).name}: {raw.shape[1]} kolon var, {beklenen} bekleniyordu — "
+            "scraper kalem listesi ile ITEMS uyumsuz (dosyayı yeniden çekin).")
     raw = raw.iloc[1:].reset_index(drop=True)  # üst başlık satırı
 
     # Ayraç satırlarını bul
