@@ -31,6 +31,15 @@ def main():
         print("HATA: 'bddk veri çekme' klasörü bulunamadı.", file=sys.stderr)
         sys.exit(1)
 
+    # ÖNCE bulutla senkronla: export bulutun taze verisi ÜZERİNE yapılır, commit
+    # temiz uygulanır (yerel commit sonrası pull'da site/data çakışması yaşanmaz).
+    # Yarım kalmış bir rebase varsa (önceki koşu çakışmayla kesildiyse) temizle.
+    subprocess.run(["git", "rebase", "--abort"], cwd=ROOT, capture_output=True)
+    on_pull = subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=ROOT)
+    if on_pull.returncode != 0:
+        subprocess.run(["git", "rebase", "--abort"], cwd=ROOT, capture_output=True)
+        print("UYARI: ön senkron başarısız — mevcut yerel tabanla devam.", file=sys.stderr)
+
     picked = latest("bddk_krediler_TL_*.xls*", KEEP) + latest("bddk_krediler_USD_*.xls*", KEEP)
     if not picked:
         print("HATA: Yayınlanacak BDDK Excel'i yok. Önce 'TL/USD Çek' ile veri çekin.",
@@ -65,7 +74,10 @@ def main():
     # Bulut (GitHub Actions) bu arada commit atmış olabilir — önce senkronla.
     # Ağ, uyanma sonrası geç gelebilir: pull + push başarısızsa bekleyip yeniden dene.
     for deneme in range(1, 6):
-        subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=ROOT)
+        pull = subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=ROOT)
+        if pull.returncode != 0:
+            # Çakışan rebase repoyu kilitlemesin — temizle, sonraki denemede yeniden dene
+            subprocess.run(["git", "rebase", "--abort"], cwd=ROOT, capture_output=True)
         push = subprocess.run(["git", "push", "origin", "main"], cwd=ROOT)
         if push.returncode == 0:
             print("BAŞARILI: BDDK verileri buluta yayınlandı.")
