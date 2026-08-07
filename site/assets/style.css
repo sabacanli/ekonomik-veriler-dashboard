@@ -390,3 +390,18 @@ input.inp:focus { outline: none; border-color: var(--amber); }
 table.heat th.sortable { cursor: pointer; user-select: none; }
 table.heat th.sortable:hover { color: var(--text); }
 table.heat th.sortable.sorted { color: var(--amber); }
+
+/* ── Sunum (APKO) görünümü: kart bazında beyaz zemin ── */
+.apko-btn { margin-bottom: 12px; }
+.chart-card.apko { background: #FFFFFF; border-color: #D8DEE9; }
+.chart-card.apko h3 { color: #1A2233; }
+.chart-card.apko .cap { color: #55627A; }
+.chart-card.apko .btn { background: #F1F4F9; border-color: #C9D2E0; color: #1A2233; }
+.chart-card.apko .btn:hover { border-color: #8A5A00; color: #8A5A00; }
+.chart-card.apko table.heat th { color: #55627A; border-bottom-color: #C9D2E0; }
+.chart-card.apko table.heat th.grp { color: #8A5A00; }
+.chart-card.apko table.heat td { color: #1A2233; border-bottom-color: #E4E9F2; }
+.chart-card.apko table.heat td.lbl { color: #1A2233; }
+.chart-card.apko table.heat tr.sec td.lbl,
+.chart-card.apko table.heat tr.sec td.num { color: #8A5A00; }
+.chart-card.apko table.heat td.bos { color: #97A1B5; }
