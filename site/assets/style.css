@@ -392,7 +392,7 @@ table.heat th.sortable:hover { color: var(--text); }
 table.heat th.sortable.sorted { color: var(--amber); }
 
 /* ── Sunum (APKO) görünümü: kart bazında beyaz zemin ── */
-.apko-btn, .kopya-btn { margin: 0 8px 12px 0; }
+.apko-btn, .kopya-btn, .resim-btn { margin: 0 8px 12px 0; }
 .chart-card.apko { background: #FFFFFF; border-color: #D8DEE9; }
 .chart-card.apko h3 { color: #1A2233; }
 .chart-card.apko .cap { color: #55627A; }

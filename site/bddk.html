@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=12">
+  <link rel="stylesheet" href="assets/style.css?v=13">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <button id="menuBtn">☰</button>
@@ -25,6 +26,7 @@
       <p class="cap" id="cap1"></p>
       <button class="btn apko-btn" data-sec="sec1">🖨 Beyaz zemin (sunum)</button>
       <button class="btn kopya-btn" data-t="1">📋 Panoya kopyala (Excel)</button>
+      <button class="btn resim-btn" data-sec="sec1">🖼 Resim olarak kopyala</button>
       <div class="table-wrap" id="t1"></div>
     </section>
 
@@ -33,6 +35,7 @@
       <p class="cap" id="cap2"></p>
       <button class="btn apko-btn" data-sec="sec2">🖨 Beyaz zemin (sunum)</button>
       <button class="btn kopya-btn" data-t="2">📋 Panoya kopyala (Excel)</button>
+      <button class="btn resim-btn" data-sec="sec2">🖼 Resim olarak kopyala</button>
       <div class="table-wrap" id="t2"></div>
     </section>
 
@@ -41,7 +44,7 @@
       Sağ 4 kolon: banka grubu bazında haftalık değişim.</footer>
   </main>
 
-  <script src="assets/app.js?v=12"></script>
+  <script src="assets/app.js?v=13"></script>
   <script>
     (async () => {
       const D = await getJSON("data/bddk.json");
@@ -139,6 +142,35 @@
           b.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
         }
         setTimeout(() => { b.textContent = "📋 Panoya kopyala (Excel)"; }, 3000);
+      });
+
+      // ── Resim olarak kopyala: tabloyu HER ZAMAN beyaz zeminli PNG'ye çevirir ──
+      function tabloResmi(sec) {
+        const geciciBeyaz = !sec.classList.contains("apko");
+        if (geciciBeyaz) sec.classList.add("apko");
+        return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+          .then(() => html2canvas(sec.querySelector("table.heat"),
+                                  { scale: 2, backgroundColor: "#FFFFFF", logging: false }))
+          .then(cv => new Promise(r => cv.toBlob(r, "image/png")))
+          .finally(() => { if (geciciBeyaz) sec.classList.remove("apko"); });
+      }
+
+      document.querySelectorAll(".resim-btn").forEach(b => b.onclick = async () => {
+        const sec = document.getElementById(b.dataset.sec);
+        b.textContent = "⏳ Hazırlanıyor...";
+        try {
+          // Safari: blob sözü ClipboardItem'a jest anında verilmeli; eski Chrome için yedek yol
+          try {
+            await navigator.clipboard.write([new ClipboardItem({ "image/png": tabloResmi(sec) })]);
+          } catch (e1) {
+            const blob = await tabloResmi(sec);
+            await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+          }
+          b.textContent = "✓ Resim kopyalandı — yapıştırabilirsin";
+        } catch (e) {
+          b.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+        }
+        setTimeout(() => { b.textContent = "🖼 Resim olarak kopyala"; }, 3000);
       });
     })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
   </script>
