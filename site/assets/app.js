@@ -121,23 +121,107 @@ function draw(id, traces, layoutOver, acik) {
   });
 }
 
-/* Pencere içi en yüksek / en düşük nokta etiketleri (▲/▼) */
-function annMinMaks(t, v, renkMax, renkMin) {
-  let iMax = -1, iMin = -1;
-  for (let i = 0; i < v.length; i++) {
-    const y = v[i];
-    if (y === null || y === undefined || isNaN(y)) continue;
-    if (iMax < 0 || y > v[iMax]) iMax = i;
-    if (iMin < 0 || y < v[iMin]) iMin = i;
+/* ── Faiz/oran grafikleri için ortak takım ──
+   Etiketler grafiğin O ANKİ görünür serilerinden hesaplanır (lejant aç/kapa dahil):
+   sağ kenarda seri başına son değer, ▲/▼ pencere uçları (kenardaysa içeri bakar). */
+const ANN_MONO = { size: 12.5, family: "'IBM Plex Mono', monospace" };
+
+function annGuncelle(gd) {
+  const gorunur = gd.data.filter(function (tr) { return tr.visible === undefined || tr.visible === true; });
+  const annlar = [];
+  let gMax = null, gMin = null;
+  const sonlar = [];
+  for (const tr of gorunur) {
+    const y = tr.y, x = tr.x, renk = tr.line.color, n = y.length;
+    let iSon = -1;
+    for (let i = n - 1; i >= 0; i--) if (y[i] !== null && y[i] !== undefined) { iSon = i; break; }
+    if (iSon < 0) continue;
+    sonlar.push({ x: x[iSon], y: y[iSon], renk: renk });
+    for (let i = 0; i < n; i++) {
+      const v = y[i];
+      if (v === null || v === undefined) continue;
+      if (!gMax || v > gMax.v) gMax = { v: v, x: x[i], renk: renk, i: i, n: n };
+      if (!gMin || v < gMin.v) gMin = { v: v, x: x[i], renk: renk, i: i, n: n };
+    }
   }
-  if (iMax < 0) return [];
-  const f = { size: 12, family: "'IBM Plex Mono', monospace" };
-  return [
-    { x: t[iMax], y: v[iMax], text: "▲ %" + trNum(v[iMax], 2), showarrow: false,
-      yshift: 15, font: Object.assign({ color: renkMax }, f) },
-    { x: t[iMin], y: v[iMin], text: "▼ %" + trNum(v[iMin], 2), showarrow: false,
-      yshift: -15, font: Object.assign({ color: renkMin || renkMax }, f) },
-  ];
+  // Son değerler çizgi ucunun sağına (kenar boşluğu); yakın olanlar dikeyde kademelenir
+  const aralik = gMax && gMin ? Math.max(gMax.v - gMin.v, 0.01) : 1;
+  sonlar.sort(function (a, b) { return b.y - a.y; });
+  let sonShift = 0, oncekiY = null;
+  for (const s_ of sonlar) {
+    sonShift = (oncekiY !== null && (oncekiY - s_.y) < aralik * 0.05) ? sonShift - 16 : 0;
+    oncekiY = s_.y;
+    annlar.push({ x: s_.x, y: s_.y, text: "%" + trNum(s_.y, 2), showarrow: false,
+      xanchor: "left", xshift: 8, yshift: sonShift,
+      font: Object.assign({ color: s_.renk }, ANN_MONO) });
+  }
+  const kenar = function (u) {
+    return u.i >= u.n - 2 ? { xanchor: "right", xshift: -6 }
+         : u.i <= 1 ? { xanchor: "left", xshift: 6 }
+         : { xanchor: "center", xshift: 0 };
+  };
+  if (gMax) annlar.push(Object.assign({ x: gMax.x, y: gMax.v, text: "▲ %" + trNum(gMax.v, 2),
+    showarrow: false, yshift: 15, font: Object.assign({ color: gMax.renk }, ANN_MONO) }, kenar(gMax)));
+  if (gMin) annlar.push(Object.assign({ x: gMin.x, y: gMin.v, text: "▼ %" + trNum(gMin.v, 2),
+    showarrow: false, yshift: -15, font: Object.assign({ color: gMin.renk }, ANN_MONO) }, kenar(gMin)));
+  Plotly.relayout(gd, { annotations: annlar });
+}
+
+/* Pencereli çok serili çizgi grafiği + görünürlüğe duyarlı etiketler.
+   veriler: [[dizi, ad, renk, kalınlık?], ...] */
+function cokSerili(id, veriler, tarih, W, yukseklik, acik) {
+  const t = tail(tarih, W);
+  const izler = veriler.map(function (v) {
+    return { type: "scatter", mode: "lines", x: t, y: tail(v[0], W), name: v[1],
+      line: { color: v[2], width: v[3] || 2 },
+      hovertemplate: "%{x|%d.%m.%Y}<br>%%{y:.2f}<extra>" + v[1] + "</extra>" };
+  });
+  return draw(id, izler, { height: yukseklik, margin: { l: 54, r: 74, t: 26, b: 44 } }, acik)
+    .then(function (gd) {
+      annGuncelle(gd);
+      gd.on("plotly_restyle", function () { annGuncelle(gd); });  // lejant aç/kapa
+      return gd;
+    });
+}
+
+/* Kart başına "Beyaz zemin (sunum)" + "Resim olarak kopyala" düğmeleri.
+   Kural: kart id'si secN, grafik id'si chN. CIZ[secN]() grafiği yeniden çizer (promise döner). */
+function sunumAraclariKur(TEMA, CIZ) {
+  document.querySelectorAll(".apko-btn").forEach(function (b) {
+    b.onclick = function () {
+      const sec = b.dataset.sec;
+      TEMA[sec] = !TEMA[sec];
+      document.getElementById(sec).classList.toggle("apko", TEMA[sec]);
+      CIZ[sec]();
+      b.textContent = TEMA[sec] ? "🌙 Koyu zemine dön" : "🖨 Beyaz zemin (sunum)";
+    };
+  });
+  function grafikResmi(sec) {
+    const onceki = TEMA[sec];
+    TEMA[sec] = true;
+    return Promise.resolve(CIZ[sec]())
+      .then(function (gd) { return Plotly.toImage(gd, { format: "png", scale: 2 }); })
+      .then(function (url) { return fetch(url).then(function (r) { return r.blob(); }); })
+      .finally(function () { TEMA[sec] = onceki; CIZ[sec](); });
+  }
+  document.querySelectorAll(".resim-btn").forEach(function (b) {
+    b.onclick = async function () {
+      const sec = b.dataset.sec;
+      b.textContent = "⏳ Hazırlanıyor...";
+      try {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": grafikResmi(sec) })]);
+        } catch (e1) {
+          const blob = await grafikResmi(sec);
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        }
+        b.textContent = "✓ Resim kopyalandı — yapıştırabilirsin";
+      } catch (e) {
+        b.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+      }
+      setTimeout(function () { b.textContent = "🖼 Resim olarak kopyala"; }, 3000);
+    };
+  });
 }
 
 /* Zoom yapılınca kartın sağ üstünde "sıfırla" düğmesi belirir (çift tıklama da sıfırlar) */

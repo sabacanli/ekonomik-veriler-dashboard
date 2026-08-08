@@ -475,9 +475,30 @@ def build_mevduat():
     else:
         w = "yükseldi" if dt_ > 0 else "geriledi"
         ek = f"Son 4 haftada toplam mevduat faizi <b>{ht(abs(dt_), 2)} puan {w}</b>."
+    # Stok (portföy ortalaması) mevduat faizleri — aylık, para birimi bazında vade kırılımı
+    ms = pd.read_excel(fp, sheet_name="Mevduat_Stok")
+    ms["tarih"] = pd.to_datetime(ms["tarih"])
+    ms = ms.sort_values("tarih").reset_index(drop=True)
+    Ls = ms.iloc[-1]
+    AYLAR_TR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+    stok_donem = f"{AYLAR_TR[Ls['tarih'].month - 1]} {Ls['tarih'].year}"
+
+    def stok_grup(ek_ad):
+        s = f" ({ek_ad})" if ek_ad else ""
+        return {
+            "v1ay": col(ms, "1 Aya Kadar Vadeli" + s, 2), "v3ay": col(ms, "3 Aya Kadar Vadeli" + s, 2),
+            "v6ay": col(ms, "6 Aya Kadar Vadeli" + s, 2), "v1yil": col(ms, "1 Yıla Kadar Vadeli" + s, 2),
+            "uzun": col(ms, "1 Yıl ve Daha Uzun Vadeli" + s, 2),
+            "toplam": col(ms, "Toplam (Vadesiz Mevduat Hariç)" + s, 2),
+        }
+
     ozet = (f"<b>{L['tarih'].strftime('%d.%m.%Y')}</b> haftası TL mevduat faizi toplam "
             f"<b>%{ht(L['Toplam'], 2)}</b>; 1 aya kadar %{ht(L['1 Aya Kadar Vadeli'], 2)}, "
-            f"3 aya kadar %{ht(L['3 Aya Kadar Vadeli'], 2)}, 1 yıla kadar %{ht(L['1 Yıla Kadar Vadeli'], 2)}. {ek}")
+            f"3 aya kadar %{ht(L['3 Aya Kadar Vadeli'], 2)}, 1 yıla kadar %{ht(L['1 Yıla Kadar Vadeli'], 2)}. {ek} "
+            f"Stokta ({stok_donem}, portföy ortalaması) TL %{ht(Ls['Toplam (Vadesiz Mevduat Hariç)'], 2)}, "
+            f"USD %{ht(Ls['Toplam (Vadesiz Mevduat Hariç) (USD)'], 2)}, "
+            f"EUR %{ht(Ls['Toplam (Vadesiz Mevduat Hariç) (EUR)'], 2)}.")
     dump("mevduat.json", {
         "updated": mtime(fp),
         "ozet_html": ozet,
@@ -490,6 +511,11 @@ def build_mevduat():
             "v6ay": col(ma, "6 Aya Kadar Vadeli", 2), "v1yil": col(ma, "1 Yıla Kadar Vadeli", 2),
             "uzun": col(ma, "1 Yıl ve Daha Uzun Vadeli", 2), "toplam": col(ma, "Toplam", 2),
             "toplam_usd": col(ma, "Toplam (USD)", 2), "toplam_eur": col(ma, "Toplam (EUR)", 2),
+        },
+        "stok_donem": stok_donem,
+        "stok": {
+            "tarih": [t.strftime("%Y-%m-%d") for t in ms["tarih"]],
+            "tl": stok_grup(""), "usd": stok_grup("USD"), "eur": stok_grup("EUR"),
         },
     })
 

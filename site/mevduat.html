@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=15">
+  <link rel="stylesheet" href="assets/style.css?v=16">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -23,22 +23,52 @@
     <div class="metrics" id="metrics"></div>
     <div class="range" id="range"></div>
 
-    <section class="chart-card">
-      <h3>TL Mevduat Faiz Oranları — Vade Dilimleri</h3>
-      <p class="cap">% · Haftalık (akım) — yeni açılan mevduatlar</p>
+    <section class="chart-card" id="sec1">
+      <h3>TL Mevduat Faiz Oranları — Vade Dilimleri (Akım)</h3>
+      <p class="cap">% · Haftalık — yeni açılan mevduatlar · ▲/▼ görünen pencerenin uç değerleri</p>
+      <button class="btn apko-btn" data-sec="sec1">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec1">🖼 Resim olarak kopyala</button>
       <div id="ch1"></div>
     </section>
 
-    <section class="chart-card">
-      <h3>Döviz Mevduat Faizleri — Toplam</h3>
+    <section class="chart-card" id="sec2">
+      <h3>Döviz Mevduat Faizleri — Toplam (Akım)</h3>
       <p class="cap">% · USD ve EUR mevduat</p>
+      <button class="btn apko-btn" data-sec="sec2">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec2">🖼 Resim olarak kopyala</button>
       <div id="ch2"></div>
     </section>
 
-    <footer>Kaynak: TCMB EVDS — Bankalarca Açılan Mevduatlara Uygulanan Ağırlıklı Ortalama Faiz Oranları (akım) · Haftalık.</footer>
+    <section class="chart-card" id="sec3">
+      <h3>TL Mevduat Faizleri — Stok</h3>
+      <p class="cap" id="capS1">% · Aylık — mevcut mevduat portföyünün ağırlıklı ortalama faizi, vade dilimleriyle</p>
+      <button class="btn apko-btn" data-sec="sec3">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec3">🖼 Resim olarak kopyala</button>
+      <div id="ch3"></div>
+    </section>
+
+    <section class="chart-card" id="sec4">
+      <h3>USD Mevduat Faizleri — Stok</h3>
+      <p class="cap" id="capS2">% · Aylık — vade dilimleriyle</p>
+      <button class="btn apko-btn" data-sec="sec4">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec4">🖼 Resim olarak kopyala</button>
+      <div id="ch4"></div>
+    </section>
+
+    <section class="chart-card" id="sec5">
+      <h3>EUR Mevduat Faizleri — Stok</h3>
+      <p class="cap" id="capS3">% · Aylık — vade dilimleriyle</p>
+      <button class="btn apko-btn" data-sec="sec5">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec5">🖼 Resim olarak kopyala</button>
+      <div id="ch5"></div>
+    </section>
+
+    <footer>Kaynak: TCMB EVDS — Bankalarca Açılan Mevduatlara Uygulanan Ağırlıklı Ortalama Faiz Oranları
+      (akım, haftalık) + Mevduat Ağırlıklı Ortalama Faiz Oranları — Stok (aylık; TP.MT210AGS.* serileri,
+      vadesiz hariç). Akım yeni fiyatlamayı, stok mevcut portföyün ortalama maliyetini gösterir.</footer>
   </main>
 
-  <script src="assets/app.js?v=15"></script>
+  <script src="assets/app.js?v=16"></script>
   <script>
     (async () => {
       const D = await getJSON("data/mevduat.json");
@@ -54,33 +84,50 @@
         ["1 Yıla Kadar Vadeli", "%" + trNum(s.v1yil, 2), null],
       ]);
 
-      const S = D.seri;
-      let N = 52;
-      function render() {
-        const t = tail(S.tarih, N);
-        const L = (key, name, color, w) => ({
-          type: "scatter", mode: "lines", x: t, y: tail(S[key], N), name: name,
-          line: { color: color, width: w || 1.8 },
-          hovertemplate: "%{x|%d.%m.%Y}<br>%%{y:.2f}<extra>" + name + "</extra>",
-        });
-        draw("ch1", [
-          L("toplam", "Toplam", C.amber, 3),
-          L("v1ay", "1 Aya Kadar", C.ost),
-          L("v3ay", "3 Aya Kadar", C.toplam),
-          L("v6ay", "6 Aya Kadar", C.dolayli),
-          L("v1yil", "1 Yıla Kadar", C.euro),
-          L("uzun", "1 Yıl+", "#B98AFF"),
-        ], { height: 430 });
-        draw("ch2", [
-          L("toplam_usd", "USD", C.green, 2),
-          L("toplam_eur", "EUR", "#B98AFF", 2),
-        ], { height: 320 });
+      const S = D.seri, K = D.stok;
+      if (K && document.getElementById("capS1")) {
+        const not = " · Son dönem: " + D.stok_donem;
+        document.getElementById("capS1").textContent =
+          "% · Aylık — mevcut mevduat portföyünün ağırlıklı ortalama faizi, vade dilimleriyle" + not;
+        document.getElementById("capS2").textContent = "% · Aylık — vade dilimleriyle" + not;
+        document.getElementById("capS3").textContent = "% · Aylık — vade dilimleriyle" + not;
       }
+
+      let N = 52;                                     // akım penceresi (hafta)
+      const TEMA = { sec1: false, sec2: false, sec3: false, sec4: false, sec5: false };
+
+      // Vade dilimi renkleri — üç para biriminde aynı
+      const stokSeri = g => [
+        [g.toplam, "Toplam (vadesiz hariç)", C.amber, 3],
+        [g.v1ay, "1 Aya Kadar", C.ost],
+        [g.v3ay, "3 Aya Kadar", C.toplam],
+        [g.v6ay, "6 Aya Kadar", C.dolayli],
+        [g.v1yil, "1 Yıla Kadar", C.euro],
+        [g.uzun, "1 Yıl+", "#B98AFF"],
+      ];
+      const CIZ = {
+        sec1: () => cokSerili("ch1", [
+          [S.toplam, "Toplam", C.amber, 3], [S.v1ay, "1 Aya Kadar", C.ost],
+          [S.v3ay, "3 Aya Kadar", C.toplam], [S.v6ay, "6 Aya Kadar", C.dolayli],
+          [S.v1yil, "1 Yıla Kadar", C.euro], [S.uzun, "1 Yıl+", "#B98AFF"],
+        ], S.tarih, N, 430, TEMA.sec1),
+        sec2: () => cokSerili("ch2", [
+          [S.toplam_usd, "USD", C.green], [S.toplam_eur, "EUR", "#B98AFF"],
+        ], S.tarih, N, 320, TEMA.sec2),
+        sec3: () => K && cokSerili("ch3", stokSeri(K.tl), K.tarih, ayPenceresi(), 430, TEMA.sec3),
+        sec4: () => K && cokSerili("ch4", stokSeri(K.usd), K.tarih, ayPenceresi(), 380, TEMA.sec4),
+        sec5: () => K && cokSerili("ch5", stokSeri(K.eur), K.tarih, ayPenceresi(), 380, TEMA.sec5),
+      };
+      // akım penceresi hafta cinsinden; stok aylık — yaklaşık karşılığı
+      function ayPenceresi() { return N > 5000 ? 99999 : Math.max(6, Math.round(N / 4.33)); }
+      function render() { CIZ.sec1(); CIZ.sec2(); CIZ.sec3(); CIZ.sec4(); CIZ.sec5(); }
 
       rangeCtl(document.getElementById("range"),
         [["6 Ay", 26], ["1 Yıl", 52], ["5 Yıl", 260], ["Tümü", 9999]], 52,
         n => { N = n; render(); });
       render();
+
+      sunumAraclariKur(TEMA, CIZ);
     })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
   </script>
 </body>
