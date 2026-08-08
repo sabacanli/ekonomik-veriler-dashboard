@@ -1029,6 +1029,51 @@ def build_home():
     })
 
 
+def build_sitemap():
+    """site/sitemap.xml — her export'ta taze lastmod ile yazılır (SEO)."""
+    sayfalar = ["", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
+                "cari.html", "kredi.html", "mevduat.html", "butce.html", "nakit.html",
+                "bddk.html", "hazine.html", "tcmb-alim.html",
+                "hesap-kredi.html", "hesap-mevduat.html"]
+    bugun = datetime.now().strftime("%Y-%m-%d")
+    satirlar = ['<?xml version="1.0" encoding="UTF-8"?>',
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for s in sayfalar:
+        satirlar += ["  <url>", f"    <loc>https://ekordion.com.tr/{s}</loc>",
+                     f"    <lastmod>{bugun}</lastmod>",
+                     "    <changefreq>weekly</changefreq>", "  </url>"]
+    satirlar.append("</urlset>")
+    (BASE / "site" / "sitemap.xml").write_text("\n".join(satirlar) + "\n", encoding="utf-8")
+
+
+def ozet_gom():
+    """Dinamik özet cümlelerini sayfa HTML'lerine düz metin olarak gömer —
+    arama motorları JS beklemeden her hafta taze içerik görür (JS yüklenince
+    aynı metnin biçimli hâli üzerine yazılır)."""
+    import re as _re
+    esle = {"tcmb-stok.html": "tcmb_stok.json", "dth.html": "dth.json",
+            "enflasyon.html": "enflasyon.json", "net-rezerv.html": "rezerv.json",
+            "cari.html": "cari.json", "kredi.html": "kredi.json",
+            "mevduat.html": "mevduat.json", "butce.html": "butce.json",
+            "nakit.html": "nakit.json", "bddk.html": "bddk.json",
+            "hazine.html": "hazine.json", "tcmb-alim.html": "tcmb_alim.json"}
+    for sayfa, js in esle.items():
+        try:
+            d = json.loads((DATA / js).read_text(encoding="utf-8"))
+            metin = _re.sub(r"<[^>]+>", "", d.get("ozet_html", "")).strip()
+            if not metin:
+                continue
+            p = BASE / "site" / sayfa
+            s = p.read_text(encoding="utf-8")
+            yeni, n = _re.subn(r'(<div class="info-box" id="ozet">).*?(</div>)',
+                               lambda m: m.group(1) + "📋 " + metin + m.group(2),
+                               s, count=1, flags=_re.S)
+            if n == 1 and yeni != s:
+                p.write_text(yeni, encoding="utf-8")
+        except Exception as e:
+            print(f"  ~ özet gömülemedi ({sayfa}): {e}")
+
+
 def main():
     print("Site verileri dışa aktarılıyor -> site/data/")
     ok, fail = 0, 0
@@ -1045,7 +1090,10 @@ def main():
         except Exception as e:
             fail += 1
             print(f"  ✗ {name}: {e}")
-    print(f"Bitti: {ok} paket yazıldı" + (f", {fail} hata" if fail else ""))
+    build_sitemap()
+    ozet_gom()
+    print(f"Bitti: {ok} paket yazıldı" + (f", {fail} hata" if fail else "") +
+          " · sitemap + gömülü özetler tazelendi")
     return 0 if fail == 0 else 1
 
 

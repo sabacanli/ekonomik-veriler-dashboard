@@ -45,7 +45,7 @@ calistir "TCMB Doğrudan Alım"      "tcmb dogrudan alım/guncelle.py"
 
 git add "tcmb haftalık stok/output" "net rezerv" "enflasyon" "kredi mevduat" \
         "yabanci para hareketi" "cari acik" "butce" "hazine nakit" \
-        "hazine ihale " "tcmb dogrudan alım" site/data 2>> "$LOG"
+        "hazine ihale " "tcmb dogrudan alım" site 2>> "$LOG"
 if git diff --cached --quiet; then
   echo "Yeni veri yok — commit atlandı."
 else

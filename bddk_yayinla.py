@@ -64,7 +64,7 @@ def main():
     def git(*args, check=True):
         return subprocess.run(["git", *args], cwd=ROOT, check=check)
 
-    git("add", "bddk_data", "site/data")
+    git("add", "bddk_data", "site")
     commit = subprocess.run(
         ["git", "commit", "-m", "BDDK verisi guncellendi (buluta yayin)"],
         cwd=ROOT,

@@ -748,7 +748,7 @@ def _try_publish(rel_paths, message):
         try:
             subprocess.run([sys.executable, str(BASE_DIR / "site_export.py")],
                            cwd=str(BASE_DIR), capture_output=True, timeout=120)
-            rel_paths = [*rel_paths, "site/data"]
+            rel_paths = [*rel_paths, "site"]
         except Exception:
             pass
         subprocess.run(["git", "add", *rel_paths], cwd=str(BASE_DIR),
