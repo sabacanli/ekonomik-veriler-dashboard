@@ -272,17 +272,23 @@ function annLast(x, y, text, color) {
   };
 }
 
-/* Yığılmış son bar etiketleri — [ [değer, renk], ... ] yığın sırasında */
+/* Yığılmış son bar etiketleri — [ [değer, renk, metin], ... ] yığın sırasında.
+   Etiketler değer konumuna değil, barın ucuna sabit piksel merdiveniyle dizilir:
+   pozitifler üstte, negatifler altta alt alta — değerler ne kadar yakın olursa
+   olsun üst üste binemezler (renk hangi bileşen olduğunu söyler). */
 function annStack(x, items) {
-  let pos = 0, neg = 0;
+  const gecerli = items.filter(function (it) {
+    return it[0] !== null && it[0] !== undefined && !isNaN(it[0]);
+  });
+  let posT = 0, negT = 0;
+  for (const it of gecerli) { if (it[0] >= 0) posT += it[0]; else negT += it[0]; }
   const out = [];
-  for (const it of items) {
+  let pi = 0, ni = 0;
+  for (const it of gecerli) {
     const v = it[0], color = it[1], txt = it[2];
-    if (v === null || v === undefined || isNaN(v)) continue;
-    let y, shift;
-    if (v >= 0) { pos += v; y = pos; shift = 14; }
-    else { neg += v; y = neg; shift = -14; }
-    out.push({ x: x, y: y, text: txt, showarrow: false, yshift: shift,
+    const ust = v >= 0;
+    out.push({ x: x, y: ust ? posT : negT, text: txt, showarrow: false,
+               yshift: ust ? 14 + 17 * pi++ : -14 - 17 * ni++,
                font: { size: 13, color: color, family: "'IBM Plex Mono', monospace" } });
   }
   return out;
