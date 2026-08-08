@@ -115,8 +115,9 @@ const PCFG = { displayModeBar: false, responsive: true };
 
 function draw(id, traces, layoutOver, acik) {
   const gd = document.getElementById(id);
-  Plotly.newPlot(gd, traces, plLayout(layoutOver, acik), PCFG).then(function () {
+  return Plotly.newPlot(gd, traces, plLayout(layoutOver, acik), PCFG).then(function () {
     zoomSifirlaKur(gd);
+    return gd;
   });
 }
 

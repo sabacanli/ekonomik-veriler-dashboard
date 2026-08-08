@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=14">
+  <link rel="stylesheet" href="assets/style.css?v=15">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -61,7 +61,7 @@
       ikisi arasındaki makas yeniden fiyatlama hızının göstergesidir.</footer>
   </main>
 
-  <script src="assets/app.js?v=14"></script>
+  <script src="assets/app.js?v=15"></script>
   <script>
     (async () => {
       const D = await getJSON("data/kredi.json");
@@ -88,53 +88,63 @@
       let N = 52;                                     // akım penceresi (hafta)
       const TEMA = { sec1: false, sec2: false, sec3: false, sec4: false };
 
-      // Pencerelenmiş çok serili grafik: son değer etiketi her seride,
-      // ▲/▼ ise grafikteki görünen küresel uç noktalarda (sahibi serinin renginde)
-      function cokSerili(id, veriler, tarih, W, yukseklik, acik) {
-        const t = tail(tarih, W);
-        const izler = [], annlar = [];
+      // ── Etiketler HER ZAMAN grafiğin o anki görünür serilerinden hesaplanır ──
+      // (lejanttan seri kapatılınca yeniden hesaplanır; ▲/▼ uçlar + sağ kenarda son değerler)
+      const MONO = { size: 12.5, family: "'IBM Plex Mono', monospace" };
+      function annGuncelle(gd) {
+        const gorunur = gd.data.filter(tr => tr.visible === undefined || tr.visible === true);
+        const annlar = [];
         let gMax = null, gMin = null;
-        for (const [dizi, ad, renk, kalinlik] of veriler) {
-          const y = tail(dizi, W);
-          izler.push({ type: "scatter", mode: "lines", x: t, y: y, name: ad,
-            line: { color: renk, width: kalinlik || 2 },
-            hovertemplate: "%{x|%d.%m.%Y}<br>%%{y:.2f}<extra>" + ad + "</extra>" });
-          // serinin son dolu değeri
+        const sonlar = [];
+        for (const tr of gorunur) {
+          const y = tr.y, x = tr.x, renk = tr.line.color, n = y.length;
           let iSon = -1;
-          for (let i = y.length - 1; i >= 0; i--) if (y[i] !== null && y[i] !== undefined) { iSon = i; break; }
-          if (iSon >= 0) {
-            const a = annLast(t[iSon], y[iSon], "%" + trNum(y[iSon], 2), renk);
-            a.__son = true;
-            annlar.push(a);
-          }
-          // küresel uçlar
-          for (let i = 0; i < y.length; i++) {
+          for (let i = n - 1; i >= 0; i--) if (y[i] !== null && y[i] !== undefined) { iSon = i; break; }
+          if (iSon < 0) continue;
+          sonlar.push({ x: x[iSon], y: y[iSon], renk });
+          for (let i = 0; i < n; i++) {
             const v = y[i];
             if (v === null || v === undefined) continue;
-            if (!gMax || v > gMax.v) gMax = { v, x: t[i], renk };
-            if (!gMin || v < gMin.v) gMin = { v, x: t[i], renk };
+            if (!gMax || v > gMax.v) gMax = { v, x: x[i], renk, i, n };
+            if (!gMin || v < gMin.v) gMin = { v, x: x[i], renk, i, n };
           }
         }
-        // Değerleri çok yakın serilerin son etiketleri üst üste binmesin: alttakini çizginin altına al
-        if (gMax && gMin) {
-          const esik = Math.max((gMax.v - gMin.v) * 0.05, 0.01);
-          const sonlar = annlar.filter(a => a.__son).sort((a, b) => b.y - a.y);
-          for (let i = 1; i < sonlar.length; i++) {
-            if (sonlar[i - 1].y - sonlar[i].y < esik &&
-                (sonlar[i - 1].yshift > 0) === (sonlar[i].yshift > 0)) {
-              sonlar[i].yshift = sonlar[i - 1].yshift > 0 ? -15 : 15;
-            }
-          }
+        // Son değerler: çizgi ucunun SAĞINA, kenar boşluğuna (▲/▼ ile çakışamaz);
+        // birbirine çok yakın olanlar dikeyde kademelenir
+        const aralik = gMax && gMin ? Math.max(gMax.v - gMin.v, 0.01) : 1;
+        sonlar.sort((a, b) => b.y - a.y);
+        let sonShift = 0, oncekiY = null;
+        for (const s_ of sonlar) {
+          sonShift = (oncekiY !== null && (oncekiY - s_.y) < aralik * 0.05) ? sonShift - 16 : 0;
+          oncekiY = s_.y;
+          annlar.push({ x: s_.x, y: s_.y, text: "%" + trNum(s_.y, 2), showarrow: false,
+            xanchor: "left", xshift: 8, yshift: sonShift,
+            font: Object.assign({ color: s_.renk }, MONO) });
         }
-        if (gMax) {
-          const f = { size: 12, family: "'IBM Plex Mono', monospace" };
-          annlar.push({ x: gMax.x, y: gMax.v, text: "▲ %" + trNum(gMax.v, 2), showarrow: false,
-            yshift: 15, font: Object.assign({ color: gMax.renk }, f) });
-          annlar.push({ x: gMin.x, y: gMin.v, text: "▼ %" + trNum(gMin.v, 2), showarrow: false,
-            yshift: -15, font: Object.assign({ color: gMin.renk }, f) });
-        }
-        draw(id, izler, { height: yukseklik, annotations: annlar,
-          margin: { l: 54, r: 64, t: 24, b: 44 } }, acik);
+        // ▲/▼: pencere kenarındaysa etiket içeri bakar, hep görünür kalır
+        const kenar = u => u.i >= u.n - 2 ? { xanchor: "right", xshift: -6 }
+                        : u.i <= 1 ? { xanchor: "left", xshift: 6 }
+                        : { xanchor: "center", xshift: 0 };
+        if (gMax) annlar.push(Object.assign({ x: gMax.x, y: gMax.v, text: "▲ %" + trNum(gMax.v, 2),
+          showarrow: false, yshift: 15, font: Object.assign({ color: gMax.renk }, MONO) }, kenar(gMax)));
+        if (gMin) annlar.push(Object.assign({ x: gMin.x, y: gMin.v, text: "▼ %" + trNum(gMin.v, 2),
+          showarrow: false, yshift: -15, font: Object.assign({ color: gMin.renk }, MONO) }, kenar(gMin)));
+        Plotly.relayout(gd, { annotations: annlar });
+      }
+
+      function cokSerili(id, veriler, tarih, W, yukseklik, acik) {
+        const t = tail(tarih, W);
+        const izler = veriler.map(([dizi, ad, renk, kalinlik]) => ({
+          type: "scatter", mode: "lines", x: t, y: tail(dizi, W), name: ad,
+          line: { color: renk, width: kalinlik || 2 },
+          hovertemplate: "%{x|%d.%m.%Y}<br>%%{y:.2f}<extra>" + ad + "</extra>",
+        }));
+        return draw(id, izler, { height: yukseklik, margin: { l: 54, r: 74, t: 26, b: 44 } }, acik)
+          .then(gd => {
+            annGuncelle(gd);
+            gd.on("plotly_restyle", () => annGuncelle(gd));  // lejant aç/kapa
+            return gd;
+          });
       }
 
       const CIZ = {
@@ -175,9 +185,9 @@
       // ── Resim olarak kopyala — her zaman beyaz zeminli PNG ──
       function grafikResmi(sec) {
         const onceki = TEMA[sec];
-        TEMA[sec] = true; CIZ[sec]();
-        const gd = document.getElementById("ch" + sec.slice(3));
-        return Plotly.toImage(gd, { format: "png", scale: 2 })
+        TEMA[sec] = true;
+        return Promise.resolve(CIZ[sec]())            // etiketler çizilmeden fotoğraf çekme
+          .then(gd => Plotly.toImage(gd, { format: "png", scale: 2 }))
           .then(url => fetch(url).then(r => r.blob()))
           .finally(() => { TEMA[sec] = onceki; CIZ[sec](); });
       }
