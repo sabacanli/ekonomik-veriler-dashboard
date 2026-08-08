@@ -81,6 +81,13 @@ function deepMerge(base, over) {
   return out;
 }
 
+/* Sağ altta ince imza — kopyalanan/paylaşılan görsellerde üretici belli olur */
+function imzaAnn(acik) {
+  return { text: "bacanlı", xref: "paper", yref: "paper", x: 1, y: 0,
+    xanchor: "right", yanchor: "bottom", xshift: -6, yshift: 5, showarrow: false,
+    font: { size: 10, color: acik ? "#C3CBD9" : "#39445A", family: "'IBM Plex Mono', monospace" } };
+}
+
 function plLayout(over, acik) {
   const base = acik ? {
     // Açık tema — sunum/beyaz zemin görünümü
@@ -108,7 +115,9 @@ function plLayout(over, acik) {
     bargap: 0.25,
     height: 380,
   };
-  return deepMerge(base, over || {});
+  const out = deepMerge(base, over || {});
+  out.annotations = (out.annotations || []).concat([imzaAnn(!!acik)]);
+  return out;
 }
 
 const PCFG = { displayModeBar: false, responsive: true };
@@ -164,6 +173,7 @@ function annGuncelle(gd) {
     showarrow: false, yshift: 15, font: Object.assign({ color: gMax.renk }, ANN_MONO) }, kenar(gMax)));
   if (gMin) annlar.push(Object.assign({ x: gMin.x, y: gMin.v, text: "▼ %" + trNum(gMin.v, 2),
     showarrow: false, yshift: -15, font: Object.assign({ color: gMin.renk }, ANN_MONO) }, kenar(gMin)));
+  annlar.push(imzaAnn(gd.layout.paper_bgcolor === "#FFFFFF"));  // imza korunur
   Plotly.relayout(gd, { annotations: annlar });
 }
 
