@@ -81,8 +81,21 @@ function deepMerge(base, over) {
   return out;
 }
 
-function plLayout(over) {
-  const base = {
+function plLayout(over, acik) {
+  const base = acik ? {
+    // Açık tema — sunum/beyaz zemin görünümü
+    paper_bgcolor: "#FFFFFF",
+    plot_bgcolor: "#FFFFFF",
+    font: { family: "'IBM Plex Sans', sans-serif", color: "#1A2233", size: 13 },
+    separators: ",.",
+    margin: { l: 54, r: 18, t: 10, b: 44 },
+    xaxis: { gridcolor: "#E4E9F2", zerolinecolor: "#C9D2E0", linecolor: "#C9D2E0" },
+    yaxis: { gridcolor: "#E4E9F2", zerolinecolor: "#C9D2E0", linecolor: "#C9D2E0" },
+    legend: { orientation: "h", y: -0.22, font: { size: 12 } },
+    hoverlabel: { bgcolor: "#FFFFFF", bordercolor: "#C9D2E0", font: { color: "#1A2233", family: "'IBM Plex Sans', sans-serif" } },
+    bargap: 0.25,
+    height: 380,
+  } : {
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
     font: { family: "'IBM Plex Sans', sans-serif", color: "#E6EAF2", size: 13 },
@@ -100,11 +113,30 @@ function plLayout(over) {
 
 const PCFG = { displayModeBar: false, responsive: true };
 
-function draw(id, traces, layoutOver) {
+function draw(id, traces, layoutOver, acik) {
   const gd = document.getElementById(id);
-  Plotly.newPlot(gd, traces, plLayout(layoutOver), PCFG).then(function () {
+  Plotly.newPlot(gd, traces, plLayout(layoutOver, acik), PCFG).then(function () {
     zoomSifirlaKur(gd);
   });
+}
+
+/* Pencere içi en yüksek / en düşük nokta etiketleri (▲/▼) */
+function annMinMaks(t, v, renkMax, renkMin) {
+  let iMax = -1, iMin = -1;
+  for (let i = 0; i < v.length; i++) {
+    const y = v[i];
+    if (y === null || y === undefined || isNaN(y)) continue;
+    if (iMax < 0 || y > v[iMax]) iMax = i;
+    if (iMin < 0 || y < v[iMin]) iMin = i;
+  }
+  if (iMax < 0) return [];
+  const f = { size: 12, family: "'IBM Plex Mono', monospace" };
+  return [
+    { x: t[iMax], y: v[iMax], text: "▲ %" + trNum(v[iMax], 2), showarrow: false,
+      yshift: 15, font: Object.assign({ color: renkMax }, f) },
+    { x: t[iMin], y: v[iMin], text: "▼ %" + trNum(v[iMin], 2), showarrow: false,
+      yshift: -15, font: Object.assign({ color: renkMin || renkMax }, f) },
+  ];
 }
 
 /* Zoom yapılınca kartın sağ üstünde "sıfırla" düğmesi belirir (çift tıklama da sıfırlar) */

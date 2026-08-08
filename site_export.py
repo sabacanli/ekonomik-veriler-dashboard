@@ -419,11 +419,24 @@ def build_kredi():
            ("konut", "Konut Kredisi"), ("ticari", "Ticari Krediler")]}
     wi = "geriledi" if d4["ihtiyac"] < 0 else "yükseldi"
     wk = "yükseldi" if d4["konut"] > 0 else "geriledi"
+
+    # Stok (portföy ortalaması) faizleri — aylık
+    ks = pd.read_excel(fp, sheet_name="Kredi_Stok")
+    ks["tarih"] = pd.to_datetime(ks["tarih"])
+    ks = ks.sort_values("tarih").reset_index(drop=True)
+    Ls = ks.iloc[-1]
+    AYLAR_TR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+    stok_donem = f"{AYLAR_TR[Ls['tarih'].month - 1]} {Ls['tarih'].year}"
+
     ozet = (f"<b>{L['tarih'].strftime('%d.%m.%Y')}</b> haftası yeni kredi faizleri (akım, yıllık bileşik): "
             f"İhtiyaç <b>%{ht(L['İhtiyaç Kredisi'], 2)}</b>, Konut %{ht(L['Konut Kredisi'], 2)}, "
             f"Taşıt %{ht(L['Taşıt Kredisi'], 2)}, Ticari %{ht(L['Ticari Krediler'], 2)}. "
             f"Son 4 haftada ihtiyaç kredisi faizi <b>{ht(abs(d4['ihtiyac']), 2)} puan {wi}</b>, "
-            f"konut {ht(abs(d4['konut']), 2)} puan {wk}.")
+            f"konut {ht(abs(d4['konut']), 2)} puan {wk}. "
+            f"Stokta ({stok_donem}, portföy ortalaması) ihtiyaç %{ht(Ls['İhtiyaç Kredisi'], 2)}, "
+            f"konut %{ht(Ls['Konut Kredisi'], 2)} — akım/stok makası kredi yeniden "
+            f"fiyatlamasının yönünü gösterir.")
     dump("kredi.json", {
         "updated": mtime(fp),
         "ozet_html": ozet,
@@ -436,6 +449,16 @@ def build_kredi():
             "konut": col(ka, "Konut Kredisi", 2), "ticari": col(ka, "Ticari Krediler", 2),
             "ticari_usd": col(ka, "Ticari Krediler (USD)", 2),
             "ticari_eur": col(ka, "Ticari Krediler (EUR)", 2),
+        },
+        "stok_donem": stok_donem,
+        "stok": {
+            "tarih": [t.strftime("%Y-%m-%d") for t in ks["tarih"]],
+            "ihtiyac": col(ks, "İhtiyaç Kredisi", 2),
+            "ihtiyac_kmh": col(ks, "İhtiyaç Kredisi (KMH Dahil)", 2),
+            "tasit": col(ks, "Taşıt Kredisi", 2), "konut": col(ks, "Konut Kredisi", 2),
+            "ticari": col(ks, "Ticari Krediler", 2),
+            "ticari_usd": col(ks, "Ticari Krediler (USD)", 2),
+            "ticari_eur": col(ks, "Ticari Krediler (EUR)", 2),
         },
     })
 
