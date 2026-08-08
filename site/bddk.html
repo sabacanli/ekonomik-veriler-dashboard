@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=17">
+  <link rel="stylesheet" href="assets/style.css?v=18">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
@@ -44,7 +44,7 @@
       Sağ 4 kolon: banka grubu bazında haftalık değişim.</footer>
   </main>
 
-  <script src="assets/app.js?v=17"></script>
+  <script src="assets/app.js?v=18"></script>
   <script>
     (async () => {
       const D = await getJSON("data/bddk.json");
@@ -90,7 +90,7 @@
           }
           h += "</tr>";
         }
-        return h + "</tbody></table>";
+        return h + '</tbody></table><div class="tablo-imza">bacanlı</div>';
       }
 
       document.getElementById("t1").innerHTML = tablo(D.tablo1);
@@ -125,6 +125,8 @@
           }
           h += "</tr>";
         }
+        h += '<tr><td colspan="9" style="border:none;text-align:right;color:#B9C2D0;' +
+             'font-family:Calibri,Arial,sans-serif;font-size:8pt;padding:2px 4px">bacanlı</td></tr>';
         return h + "</tbody></table>";
       }
 
@@ -145,14 +147,21 @@
       });
 
       // ── Resim olarak kopyala: tabloyu HER ZAMAN beyaz zeminli PNG'ye çevirir ──
+      // (tablo + imza birlikte; dar ekranda kesilmesin diye sarmalayıcı tablo genişliğine açılır)
       function tabloResmi(sec) {
         const geciciBeyaz = !sec.classList.contains("apko");
+        const wrap = sec.querySelector(".table-wrap");
+        const tbl = sec.querySelector("table.heat");
+        const eskiW = wrap.style.width;
         if (geciciBeyaz) sec.classList.add("apko");
+        wrap.style.width = tbl.scrollWidth + "px";
         return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
-          .then(() => html2canvas(sec.querySelector("table.heat"),
-                                  { scale: 2, backgroundColor: "#FFFFFF", logging: false }))
+          .then(() => html2canvas(wrap, { scale: 2, backgroundColor: "#FFFFFF", logging: false }))
           .then(cv => new Promise(r => cv.toBlob(r, "image/png")))
-          .finally(() => { if (geciciBeyaz) sec.classList.remove("apko"); });
+          .finally(() => {
+            wrap.style.width = eskiW;
+            if (geciciBeyaz) sec.classList.remove("apko");
+          });
       }
 
       document.querySelectorAll(".resim-btn").forEach(b => b.onclick = async () => {

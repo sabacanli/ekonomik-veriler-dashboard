@@ -405,3 +405,12 @@ table.heat th.sortable.sorted { color: var(--amber); }
 .chart-card.apko table.heat tr.sec td.lbl,
 .chart-card.apko table.heat tr.sec td.num { color: #8A5A00; }
 .chart-card.apko table.heat td.bos { color: #97A1B5; }
+
+/* ── Tablo imzası (BDDK vb.) ── */
+.tablo-imza {
+  text-align: right;
+  color: #39445A;
+  font: 10px 'IBM Plex Mono', monospace;
+  padding: 5px 4px 0;
+}
+.chart-card.apko .tablo-imza { color: #B9C2D0; }
