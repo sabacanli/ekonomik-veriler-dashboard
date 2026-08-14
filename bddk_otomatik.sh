@@ -42,6 +42,15 @@ else
   log "UYARI: USD scrape başarısız (mevcut veriyle devam)"
 fi
 
+# Scraper exit 0 dese de indirme başarısız olabiliyor (14.08'de yaşandı):
+# bugünün damgasını taşıyan dosyalar gerçekten var mı doğrula
+BUGUN=$(date +%Y%m%d)
+for PB in TL USD; do
+  if ! ls "bddk veri çekme"/bddk_krediler_${PB}_${BUGUN}_*.xlsx >/dev/null 2>&1; then
+    log "UYARI: bugünün ${PB} dosyası İNMEMİŞ — yayın eski dosyalarla yapılacak"
+  fi
+done
+
 if "$PY" bddk_yayinla.py; then
   log "Buluta yayınlandı (Streamlit + site)"
 else
