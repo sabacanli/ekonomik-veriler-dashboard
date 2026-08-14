@@ -50,7 +50,17 @@ if git diff --cached --quiet; then
   echo "Yeni veri yok — commit atlandı."
 else
   git commit -q -m "Toplu veri güncelleme (yerel, $(date '+%d.%m.%Y %H:%M'))" >> "$LOG" 2>&1
-  git pull --rebase -q origin main >> "$LOG" 2>&1
-  GIT_TERMINAL_PROMPT=0 git push -q origin main >> "$LOG" 2>&1 && echo "PUSH: tamam" || echo "PUSH: BAŞARISIZ"
+  # Dayanıklı yayın: pull çakışırsa rebase'i iptal et (repo asla yarım kalmasın), 3 kez dene
+  PUSH_OK=""
+  for i in 1 2 3; do
+    if ! git pull --rebase -q origin main >> "$LOG" 2>&1; then
+      git rebase --abort >> "$LOG" 2>&1
+    fi
+    if GIT_TERMINAL_PROMPT=0 git push -q origin main >> "$LOG" 2>&1; then
+      PUSH_OK=1; break
+    fi
+    sleep 20
+  done
+  [ -n "$PUSH_OK" ] && echo "PUSH: tamam" || echo "PUSH: BAŞARISIZ"
 fi
 echo "[$(date '+%d.%m.%Y %H:%M:%S')] SONUC — başarısız:${FAILS:- (yok)}"
