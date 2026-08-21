@@ -600,6 +600,10 @@ def build_hazine():
     C_KABUL = "İhale Kabul Edilen Tutar / Nominal (Bin TL)"
     df[C_VAL] = _hazine_tarih(df[C_VAL])
     df = df.dropna(subset=[C_VAL]).sort_values(C_VAL).reset_index(drop=True)
+    # Bin TL ölçekli tutarlar int64 kalırsa uç çarpımlarda taşma uyarısı istisnaya
+    # dönüşebiliyor (21.08.2026'da yaşandı) — float64 bu sınıfı tamamen kapatır
+    for c in [C_NET, C_NOM, C_FAIZ, C_TEKLIF, C_KABUL]:
+        df[c] = pd.to_numeric(df[c], errors="coerce").astype("float64")
 
     L_t = df[C_VAL].max()
     cy = int(L_t.year)
