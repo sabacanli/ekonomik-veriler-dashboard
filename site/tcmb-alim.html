@@ -171,24 +171,36 @@
           if (selYil.has(yilOf(i)) && selYnt.has(I.yontem[i])) idx.push(i);
         }
 
-        // ── Metrikler ──
-        const topNom = idx.reduce((s, i) => s + (I.nom[i] || 0), 0);
-        const topTeklif = idx.reduce((s, i) => s + (I.teklif[i] || 0), 0);
-        const aof = wavg(idx, I.faiz, I.nom);
-        const vadeG = wavg(idx, I.vg, I.nom);
-        setMetrics([
-          ["Toplam İşlem (Nominal)", trNum(topNom / 1e6, 1), "milyar TL", "flat"],
-          ["İşlem Sayısı", trNum(idx.length, 0), null],
-          ["Ort. Bileşik Faiz", aof === null ? "—" : "%" + trNum(aof, 2), "tutar ağırlıklı", "flat"],
-          ["Ort. Vade", vadeG === null ? "—" : trNum(vadeG / 365, 1) + " yıl", null],
-          ["Talep / Karşılama", topNom ? trNum(topTeklif / topNom, 2) + "x" : "—", null],
-        ]);
-
-        // ── Dolaşımdaki stok (vade bandına göre; yıl filtresinden bağımsız) ──
+        // Dolaşımdaki (itfa olmamış) alımlar — stok metrikleri ve stok grafikleri bunları kullanır
         const sIdx = [];
         for (let i = 0; i < N; i++) {
           if (I.itfa[i] && I.itfa[i] > bugun && selYnt.has(I.yontem[i])) sIdx.push(i);
         }
+
+        // ── Metrikler ──
+        // Dönem satırları seçili yılların İŞLEM istatistikleridir (itfa olmuşlar dahil —
+        // tarihsel işlem özeti); STOK satırları yalnız dolaşımdaki alımlardan hesaplanır.
+        const topNom = idx.reduce((s, i) => s + (I.nom[i] || 0), 0);
+        const topTeklif = idx.reduce((s, i) => s + (I.teklif[i] || 0), 0);
+        const aof = wavg(idx, I.faiz, I.nom);
+        const stokAof = wavg(sIdx, I.faiz, I.nom);
+        let ks = 0, kw = 0;
+        for (const i of sIdx) {
+          if (!I.nom[i]) continue;
+          ks += ((new Date(I.itfa[i]) - new Date(bugun)) / 86400000) * I.nom[i];
+          kw += I.nom[i];
+        }
+        const stokKalan = kw ? ks / kw : null;
+        setMetrics([
+          ["Toplam İşlem (Nominal)", trNum(topNom / 1e6, 1), "milyar TL · seçili dönem", "flat"],
+          ["İşlem Sayısı", trNum(idx.length, 0), "seçili dönem", "flat"],
+          ["Dönem Ort. Bileşik", aof === null ? "—" : "%" + trNum(aof, 2), "seçili dönem işlemleri, tutar ağırlıklı", "flat"],
+          ["Talep / Karşılama", topNom ? trNum(topTeklif / topNom, 2) + "x" : "—", "seçili dönem", "flat"],
+          ["Stok Ort. Bileşik", stokAof === null ? "—" : "%" + trNum(stokAof, 2), "dolaşımdaki alımlar, alım faizleriyle", "flat"],
+          ["Stok Ort. Kalan Vade", stokKalan === null ? "—" : trNum(stokKalan / 365, 1) + " yıl", "bugünden itfaya, nominal ağırlıklı", "flat"],
+        ]);
+
+        // ── Dolaşımdaki stok (vade bandına göre; yıl filtresinden bağımsız) ──
         const stokBand = BANT.map(() => 0);
         for (const i of sIdx) {
           if (I.itfa[i] === null) continue;

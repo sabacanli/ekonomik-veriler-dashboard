@@ -179,23 +179,33 @@
         for (let i = 0; i < N; i++) {
           if (selYil.has(yilOf(i)) && selTur.has(I.tur[i])) idx.push(i);
         }
+        const sIdx = stokIdx();   // dolaşımdaki (itfa olmamış) senetler
 
         // ── Metrikler ──
+        // Dönem satırları seçili yılların İHALE istatistikleridir (itfa olmuşlar dahil —
+        // tarihsel işlem özeti); STOK satırları yalnız dolaşımdaki senetlerden hesaplanır.
         const topNet = idx.reduce((s, i) => s + (I.net[i] || 0), 0);
         const topTeklif = idx.reduce((s, i) => s + (I.teklif[i] || 0), 0);
         const topKabul = idx.reduce((s, i) => s + (I.kabul[i] || 0), 0);
         const aof = wavg(idx, I.faiz, I.nom);
-        const vadeY = wavg(idx, I.vg, I.nom);
+        const stokAof = wavg(sIdx, I.faiz, I.nom);
+        let ks = 0, kw = 0;
+        for (const i of sIdx) {
+          if (!I.nom[i]) continue;
+          ks += ((new Date(I.itfa[i]) - new Date(bugun)) / 86400000) * I.nom[i];
+          kw += I.nom[i];
+        }
+        const stokKalan = kw ? ks / kw : null;
         setMetrics([
-          ["Toplam Satış (Net)", trNum(topNet / 1e6, 1), "milyar TL", "flat"],
-          ["İhale Sayısı", trNum(idx.length, 0), null],
-          ["Ort. Bileşik Faiz", aof === null ? "—" : "%" + trNum(aof, 2), "satış ağırlıklı", "flat"],
-          ["Ort. Vade", vadeY === null ? "—" : trNum(vadeY / 365, 1) + " yıl", null],
-          ["Talep / Karşılama", topKabul ? trNum(topTeklif / topKabul, 2) + "x" : "—", null],
+          ["Toplam Satış (Net)", trNum(topNet / 1e6, 1), "milyar TL · seçili dönem", "flat"],
+          ["İhale Sayısı", trNum(idx.length, 0), "seçili dönem", "flat"],
+          ["Dönem Ort. Bileşik", aof === null ? "—" : "%" + trNum(aof, 2), "seçili dönem ihaleleri, satış ağırlıklı", "flat"],
+          ["Talep / Karşılama", topKabul ? trNum(topTeklif / topKabul, 2) + "x" : "—", "seçili dönem", "flat"],
+          ["Stok Ort. Bileşik", stokAof === null ? "—" : "%" + trNum(stokAof, 2), "dolaşımdaki senetler, ihraç faizleriyle", "flat"],
+          ["Stok Ort. Kalan Vade", stokKalan === null ? "—" : trNum(stokKalan / 365, 1) + " yıl", "bugünden itfaya, nominal ağırlıklı", "flat"],
         ]);
 
         // ── Dolaşımdaki stok ──
-        const sIdx = stokIdx();
         const stokTur = {};
         for (const i of sIdx) stokTur[I.tur[i]] = (stokTur[I.tur[i]] || 0) + (I.nom[i] || 0);
         const sPairs = Object.entries(stokTur).sort((a, b) => a[1] - b[1]);
