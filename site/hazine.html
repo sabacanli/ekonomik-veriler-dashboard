@@ -79,8 +79,8 @@
     </section>
 
     <section class="chart-card">
-      <h3>Vade Dağılımı</h3>
-      <p class="cap">Seçili dönemdeki satışın (net) vade bandlarına dağılımı, %</p>
+      <h3>Vade Dağılımı — Dolaşımdaki Stok</h3>
+      <p class="cap">Seçili yıl ihraçlarından bugün dolaşımda olanların KALAN vadeye göre dağılımı (nominal), %</p>
       <div id="chVade"></div>
     </section>
 
@@ -184,25 +184,24 @@
         const sIdx = stokIdx();   // dolaşımdaki (itfa olmamış) senetler
 
         // ── Metrikler ──
-        // Dönem satırları seçili yılların İHALE istatistikleridir (itfa olmuşlar dahil —
-        // tarihsel işlem özeti); STOK satırları yalnız dolaşımdaki senetlerden hesaplanır.
-        const topNet = idx.reduce((s, i) => s + (I.net[i] || 0), 0);
+        // Tutar/sayı/faiz/vade satırları yalnız DOLAŞIMDAKİ (itfa olmamış) senetlerden;
+        // Talep/Karşılama seçili dönemin ihale istatistiğidir (itfa kavramı uygulanmaz).
         const topTeklif = idx.reduce((s, i) => s + (I.teklif[i] || 0), 0);
         const topKabul = idx.reduce((s, i) => s + (I.kabul[i] || 0), 0);
-        const aof = wavg(idx, I.faiz, I.nom);
+        const stokNet = sIdx.reduce((s, i) => s + (I.net[i] || 0), 0);
         const stokAof = wavg(sIdx, I.faiz, I.nom);
+        const kalanGun = i => (new Date(I.itfa[i]) - new Date(bugun)) / 86400000;
         let ks = 0, kw = 0;
         for (const i of sIdx) {
           if (!I.nom[i]) continue;
-          ks += ((new Date(I.itfa[i]) - new Date(bugun)) / 86400000) * I.nom[i];
+          ks += kalanGun(i) * I.nom[i];
           kw += I.nom[i];
         }
         const stokKalan = kw ? ks / kw : null;
         setMetrics([
-          ["Toplam Satış (Net)", trNum(topNet / 1e6, 1), "milyar TL · seçili dönem", "flat"],
-          ["İhale Sayısı", trNum(idx.length, 0), "seçili dönem", "flat"],
-          ["Dönem Ort. Bileşik", aof === null ? "—" : "%" + trNum(aof, 2), "seçili dönem ihaleleri, satış ağırlıklı", "flat"],
-          ["Talep / Karşılama", topKabul ? trNum(topTeklif / topKabul, 2) + "x" : "—", "seçili dönem", "flat"],
+          ["Toplam Satış (Net)", trNum(stokNet / 1e6, 1), "milyar TL · dolaşımdakiler", "flat"],
+          ["İhraç Sayısı", trNum(sIdx.length, 0), "dolaşımdakiler", "flat"],
+          ["Talep / Karşılama", topKabul ? trNum(topTeklif / topKabul, 2) + "x" : "—", "seçili dönem ihaleleri", "flat"],
           ["Stok Ort. Bileşik", stokAof === null ? "—" : "%" + trNum(stokAof, 2), "seçili yıl ihraçlarından bugün dolaşımda olanlar", "flat"],
           ["Stok Ort. Kalan Vade", stokKalan === null ? "—" : trNum(stokKalan / 365, 1) + " yıl", "bugünden itfaya, nominal ağırlıklı", "flat"],
         ]);
@@ -281,15 +280,15 @@
           hovertemplate: "%{x|%m.%Y}<br>%{y:.2f}x<extra></extra>",
         }], { height: 300, showlegend: false });
 
-        // ── Vade bandı dağılımı ──
+        // ── Vade bandı dağılımı: dolaşımdaki stokun KALAN vadesine göre ──
         const BANT = [["0-1 Yıl", 366], ["1-2 Yıl", 731], ["2-3 Yıl", 1096],
                       ["3-5 Yıl", 1827], ["5-10 Yıl", 3653], ["10+ Yıl", 1e9]];
         const bandNet = BANT.map(() => 0);
         let bandTop = 0;
-        for (const i of idx) {
-          if (I.vg[i] === null) continue;
-          const b = BANT.findIndex(x => I.vg[i] <= x[1]);
-          bandNet[b] += I.net[i] || 0; bandTop += I.net[i] || 0;
+        for (const i of sIdx) {
+          const kalan = kalanGun(i);
+          const b = BANT.findIndex(x => kalan <= x[1]);
+          bandNet[b] += I.nom[i] || 0; bandTop += I.nom[i] || 0;
         }
         draw("chVade", [{
           type: "bar", x: BANT.map(b => b[0]),

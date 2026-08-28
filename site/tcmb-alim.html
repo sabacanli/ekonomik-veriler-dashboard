@@ -183,7 +183,7 @@
         // tarihsel işlem özeti); STOK satırları yalnız dolaşımdaki alımlardan hesaplanır.
         const topNom = idx.reduce((s, i) => s + (I.nom[i] || 0), 0);
         const topTeklif = idx.reduce((s, i) => s + (I.teklif[i] || 0), 0);
-        const aof = wavg(idx, I.faiz, I.nom);
+        const stokNom = sIdx.reduce((s, i) => s + (I.nom[i] || 0), 0);
         const stokAof = wavg(sIdx, I.faiz, I.nom);
         let ks = 0, kw = 0;
         for (const i of sIdx) {
@@ -193,10 +193,9 @@
         }
         const stokKalan = kw ? ks / kw : null;
         setMetrics([
-          ["Toplam İşlem (Nominal)", trNum(topNom / 1e6, 1), "milyar TL · seçili dönem", "flat"],
-          ["İşlem Sayısı", trNum(idx.length, 0), "seçili dönem", "flat"],
-          ["Dönem Ort. Bileşik", aof === null ? "—" : "%" + trNum(aof, 2), "seçili dönem işlemleri, tutar ağırlıklı", "flat"],
-          ["Talep / Karşılama", topNom ? trNum(topTeklif / topNom, 2) + "x" : "—", "seçili dönem", "flat"],
+          ["Toplam İşlem (Nominal)", trNum(stokNom / 1e6, 1), "milyar TL · dolaşımdakiler", "flat"],
+          ["İşlem Sayısı", trNum(sIdx.length, 0), "dolaşımdakiler", "flat"],
+          ["Talep / Karşılama", topNom ? trNum(topTeklif / topNom, 2) + "x" : "—", "seçili dönem işlemleri", "flat"],
           ["Stok Ort. Bileşik", stokAof === null ? "—" : "%" + trNum(stokAof, 2), "seçili yıl alımlarından bugün dolaşımda olanlar", "flat"],
           ["Stok Ort. Kalan Vade", stokKalan === null ? "—" : trNum(stokKalan / 365, 1) + " yıl", "bugünden itfaya, nominal ağırlıklı", "flat"],
         ]);
