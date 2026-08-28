@@ -44,13 +44,13 @@
 
     <section class="chart-card">
       <h3>📌 Dolaşımdaki Stok — Vade Bandına Göre</h3>
-      <p class="cap" id="capStok">Bugün itibarıyla itfa olmamış alımlar (nominal, Milyar TL) · Yıl filtresinden bağımsız</p>
+      <p class="cap" id="capStok">Seçili yıllarda alınıp bugün dolaşımda olanlar (nominal, Milyar TL)</p>
       <div id="chStok"></div>
     </section>
 
     <section class="chart-card">
       <h3>🗓️ İtfa Takvimi — Yıllara Göre</h3>
-      <p class="cap">Dolaşımdaki stokun itfa yılına dağılımı (nominal, Milyar TL) · Yıl filtresinden bağımsız</p>
+      <p class="cap">Seçili filtrelerdeki dolaşımdaki stokun itfa yılına dağılımı (nominal, Milyar TL)</p>
       <div id="chItfa"></div>
     </section>
 
@@ -171,10 +171,11 @@
           if (selYil.has(yilOf(i)) && selYnt.has(I.yontem[i])) idx.push(i);
         }
 
-        // Dolaşımdaki (itfa olmamış) alımlar — stok metrikleri ve stok grafikleri bunları kullanır
+        // Seçili yıllarda alınıp BUGÜN dolaşımda olanlar (vintage görünümü) —
+        // stok metrikleri ve stok grafikleri bunları kullanır
         const sIdx = [];
         for (let i = 0; i < N; i++) {
-          if (I.itfa[i] && I.itfa[i] > bugun && selYnt.has(I.yontem[i])) sIdx.push(i);
+          if (I.itfa[i] && I.itfa[i] > bugun && selYnt.has(I.yontem[i]) && selYil.has(yilOf(i))) sIdx.push(i);
         }
 
         // ── Metrikler ──
@@ -196,7 +197,7 @@
           ["İşlem Sayısı", trNum(idx.length, 0), "seçili dönem", "flat"],
           ["Dönem Ort. Bileşik", aof === null ? "—" : "%" + trNum(aof, 2), "seçili dönem işlemleri, tutar ağırlıklı", "flat"],
           ["Talep / Karşılama", topNom ? trNum(topTeklif / topNom, 2) + "x" : "—", "seçili dönem", "flat"],
-          ["Stok Ort. Bileşik", stokAof === null ? "—" : "%" + trNum(stokAof, 2), "dolaşımdaki alımlar, alım faizleriyle", "flat"],
+          ["Stok Ort. Bileşik", stokAof === null ? "—" : "%" + trNum(stokAof, 2), "seçili yıl alımlarından bugün dolaşımda olanlar", "flat"],
           ["Stok Ort. Kalan Vade", stokKalan === null ? "—" : trNum(stokKalan / 365, 1) + " yıl", "bugünden itfaya, nominal ağırlıklı", "flat"],
         ]);
 
@@ -210,8 +211,9 @@
         }
         const sToplam = stokBand.reduce((a, b) => a + b, 0);
         document.getElementById("capStok").textContent =
-          "Bugün itibarıyla itfa olmamış alımlar (kalan vadeye göre) · Toplam: " +
-          trNum(sToplam / 1e6, 0) + " milyar TL (nominal) · Yıl filtresinden bağımsız";
+          sToplam ? "Seçili yıllarda alınıp bugün dolaşımda olanlar (kalan vadeye göre) · Toplam: " +
+            trNum(sToplam / 1e6, 0) + " milyar TL (nominal)"
+          : "Seçili yıl/yöntem kombinasyonunda bugün dolaşımda alım yok — tümü itfa olmuş";
         const sPairs = BANT.map((b, j) => [b[0], stokBand[j]]).filter(p => p[1] > 0).reverse();
         draw("chStok", [{
           type: "bar", orientation: "h",
