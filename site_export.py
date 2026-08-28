@@ -1091,9 +1091,18 @@ def main():
         try:
             fn()
             ok += 1
-        except Exception as e:
-            fail += 1
-            print(f"  ✗ {name}: {e}")
+        except Exception as e1:
+            # Aralıklı/tek seferlik hatalar (ör. hazine'de nadir taşma) tekrarla geçiyor
+            try:
+                fn()
+                ok += 1
+                print(f"  ~ {name}: ilk deneme hatası ({e1}) — tekrar başarılı")
+            except Exception as e2:
+                fail += 1
+                import traceback
+                iz = traceback.format_exc().strip().splitlines()
+                konum = next((s.strip() for s in reversed(iz) if "site_export" in s), "")
+                print(f"  ✗ {name}: {e2}  [{konum}]")
     build_sitemap()
     ozet_gom()
     print(f"Bitti: {ok} paket yazıldı" + (f", {fail} hata" if fail else "") +
