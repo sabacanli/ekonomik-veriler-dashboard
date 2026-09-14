@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Hazine İhale Verileri ve İtfa Takvimi | Ekordion</title>
-  <meta name="description" content="Hazine DİBS ihale sonuçları: ortalama faizler, teklif/karşılama oranları, dolaşımdaki stok ve itfa takvimi — senet türü ve yıl filtreleriyle.">
+  <meta name="description" content="Hazine DİBS ihale sonuçları: finansman programı vs gerçekleşme tablosu (aylık iç borç ödemeleri, ihale borçlanma hedefi ve gerçekleşme oranı), ortalama faizler, dolaşımdaki stok ve itfa takvimi.">
   <link rel="canonical" href="https://ekordion.com.tr/hazine.html">
   <meta property="og:title" content="Hazine İhale Verileri ve İtfa Takvimi | Ekordion">
-  <meta property="og:description" content="Hazine DİBS ihale sonuçları: ortalama faizler, teklif/karşılama oranları, dolaşımdaki stok ve itfa takvimi — senet türü ve yıl filtreleriyle.">
+  <meta property="og:description" content="Hazine DİBS ihale sonuçları: finansman programı vs gerçekleşme tablosu (aylık iç borç ödemeleri, ihale borçlanma hedefi ve gerçekleşme oranı), ortalama faizler, dolaşımdaki stok ve itfa takvimi.">
   <meta property="og:url" content="https://ekordion.com.tr/hazine.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Ekordion">
@@ -22,6 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css?v=19">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <button id="menuBtn">☰</button>
@@ -31,7 +32,7 @@
   <main>
     <h1 class="page-title">Hazine İhale Verileri</h1>
     <div class="update-info" id="updated"></div>
-    <div class="info-box" id="ozet">📋 19.08.2026 itibarıyla 2026 yılında Hazine iç borçlanma ihalelerinde toplam 2.188,4 milyar TL (net) satış yapıldı (51 ihale). Son 3 ayın satış ağırlıklı ortalama yıllık bileşik faizi %41,45.</div>
+    <div class="info-box" id="ozet">📋 19.08.2026 itibarıyla 2026 yılında Hazine iç borçlanma ihalelerinde toplam 2.188,4 milyar TL (net) satış yapıldı (51 ihale). Son 3 ayın satış ağırlıklı ortalama yıllık bileşik faizi %41,45. Finansman programında 2026 yılı için bugüne kadar piyasadan ihale yoluyla 1.739,6 milyar TL borçlanma öngörülmüş, 1.840,4 milyar TL gerçekleşti (program gerçekleşme oranı %105,8).</div>
 
     <div class="filter-box">
       <div class="filter-lbl">Yıllar</div>
@@ -41,6 +42,19 @@
     </div>
 
     <div class="metrics" id="metrics"></div>
+
+    <section class="chart-card" id="secProg" style="display:none">
+      <h3>📅 Finansman Programı vs Gerçekleşme</h3>
+      <p class="cap">Milyar TL · HMB aylık "İç Borçlanma Stratejisi" programı ile ihale gerçekleşmeleri ·
+        Gerçekleşen = TL cinsi ihalelerde toplam net satış − kamu ROT (programdaki "piyasadan ihale yoluyla"
+        tanımıyla aynı) · Doğrudan satış kalemi döviz/altın cinsi ihraçları (FX DİBS) içerir, oranlara dahil değildir ·
+        <i>öngörü</i>: kesin programı henüz yayımlanmamış ay (2–3 ay ileriye dönük tahmin)</p>
+      <div class="chips" id="progYil" style="margin-bottom:10px"></div>
+      <button class="btn apko-btn" data-sec="secProg">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn kopya-btn" id="progKopya">📋 Panoya kopyala (Excel)</button>
+      <button class="btn resim-btn" data-sec="secProg">🖼 Resim olarak kopyala</button>
+      <div class="table-wrap" id="tProg"></div>
+    </section>
 
     <section class="chart-card">
       <h3>📌 Dolaşımdaki Stok — Tür Bazında</h3>
@@ -90,7 +104,8 @@
       <div class="table-wrap" id="tbl"></div>
     </section>
 
-    <footer>Kaynak: HMB iç borçlanma ihale sonuçları (TL cinsi senetler) · Tutarlar Bin TL kaynaklı
+    <footer>Kaynak: HMB iç borçlanma ihale sonuçları (TL cinsi senetler) + HMB aylık "İç Borçlanma
+      Stratejisi" duyuruları (finansman programı ve iç borç ödeme takvimi) · Tutarlar Bin TL kaynaklı
       (görünümlerde Milyon/Milyar TL) · Stok ve itfa takvimi bu ihale verisinden hesaplanır:
       geri alım/değişim ihaleleri ve doğrudan satışlar hariçtir; TÜFE endekslilerde enflasyon
       düzeltmesi yoktur — kesin stok için HMB istatistikleri esastır.</footer>
@@ -323,6 +338,183 @@
       }
 
       render();
+
+      // ══ Finansman programı vs gerçekleşme tablosu ══
+      const PR = D.program;
+      if (PR && PR.aylar && PR.aylar.length) programKur();
+
+      function programKur() {
+        const AYAD = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                      "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+        const sec = document.getElementById("secProg");
+        sec.style.display = "";
+        const pYillar = [...new Set(PR.aylar.map(a => a.slice(0, 4)))].sort().reverse();
+        let pYil = pYillar[0];
+
+        const yEl = document.getElementById("progYil");
+        yEl.innerHTML = pYillar.map(y => '<span class="chip" data-v="' + y + '">' + y + "</span>").join("");
+        yEl.querySelectorAll(".chip").forEach(c => c.onclick = () => { pYil = c.dataset.v; ciz(); });
+
+        const bos = v => v === null || v === undefined;
+        const f1 = v => (bos(v) ? "—" : trNum(v, 1));
+        const fS = v => (bos(v) ? "—" : trNum(v, 1, true));
+        const fP = v => (bos(v) ? "—" : trNum(v, 1) + "%");
+        // Isı rengi: merkez etrafında kırmızı (−) → sarı → yeşil (+)
+        function heat(v, merkez, olcek) {
+          if (bos(v)) return null;
+          const x = Math.max(-1, Math.min(1, (v - merkez) / olcek));
+          const KIR = [224, 92, 87], SAR = [238, 210, 100], YES = [80, 178, 110];
+          let a, b, t;
+          if (x < 0) { a = KIR; b = SAR; t = x + 1; } else { a = SAR; b = YES; t = x; }
+          return "rgb(" + a.map((av, i) => Math.round(av + (b[i] - av) * t)).join(",") + ")";
+        }
+
+        function satirlar() {
+          const rows = [];
+          PR.aylar.forEach((a, i) => {
+            if (a.slice(0, 4) !== pYil) return;
+            const p = PR.plan_ihale[i], g = PR.gercek_piyasa[i], op = PR.odeme_piyasa[i];
+            rows.push({
+              ay: AYAD[+a.slice(5, 7) - 1], ongoru: PR.ufuk[i] > 1, kismi: PR.son_ay_kismi === a,
+              op, ok: PR.odeme_kamu[i], ot: PR.odeme_toplam[i],
+              plan: p, gercek: g,
+              fark: (bos(g) || bos(p)) ? null : g - p,
+              gerc: (bos(g) || !p) ? null : g / p * 100,
+              cevir: (bos(g) || !op) ? null : g / op * 100,
+              dogrudan: PR.plan_dogrudan[i], kamuya: PR.plan_kamuya[i], n: PR.ihale_sayisi[i],
+            });
+          });
+          const sum = (arr, k) => arr.reduce((s, r) => s + (r[k] || 0), 0);
+          const kisa = r => r.ay.slice(0, 3);
+          const ozet = [];
+          const ytd = rows.filter(r => !bos(r.gercek));
+          if (ytd.length) {
+            const P = sum(ytd, "plan"), G = sum(ytd, "gercek"), OP = sum(ytd, "op");
+            ozet.push({ ay: "Gerçekleşen dönem (" + kisa(ytd[0]) + "–" + kisa(ytd[ytd.length - 1]) + ")", bold: true,
+              op: OP, ok: sum(ytd, "ok"), ot: sum(ytd, "ot"), plan: P, gercek: G, fark: G - P,
+              gerc: P ? G / P * 100 : null, cevir: OP ? G / OP * 100 : null,
+              dogrudan: sum(ytd, "dogrudan"), kamuya: sum(ytd, "kamuya"), n: sum(ytd, "n") });
+          }
+          // Yıl tamamlandığında program toplamı gerçekleşen dönemle aynı olur — tekrar etme
+          if (rows.length && rows.length !== ytd.length) {
+            ozet.push({ ay: "Program toplamı (" + kisa(rows[0]) + "–" + kisa(rows[rows.length - 1]) + ")", bold: true,
+              op: sum(rows, "op"), ok: sum(rows, "ok"), ot: sum(rows, "ot"), plan: sum(rows, "plan"),
+              gercek: null, fark: null, gerc: null, cevir: null,
+              dogrudan: sum(rows, "dogrudan"), kamuya: sum(rows, "kamuya"), n: null });
+          }
+          return { rows, ozet };
+        }
+
+        const BASLIK = [["Ay", "left"], ["Piyasa", "num"], ["Kamu", "num"], ["Toplam", "num"],
+                        ["Program", "num"], ["Gerçekleşen", "num"], ["Fark", "num"],
+                        ["Gerçekleşme", "pct"], ["Piyasa Çevirme", "pct"],
+                        ["Doğrudan Satış (FX/altın dahil)", "num"], ["Kamuya Satış", "num"]];
+        const GRUP = '<tr><th></th><th colspan="3" class="grp">İç Borç Ödemeleri (Program)</th>' +
+                     '<th colspan="3" class="grp">Piyasadan İhale Yoluyla Borçlanma</th>' +
+                     '<th colspan="2" class="grp">Oranlar</th>' +
+                     '<th colspan="2" class="grp">Diğer Program Kalemleri</th></tr>';
+        const etiket = r => r.ay +
+          (r.ongoru ? ' <span style="font-size:10px;color:var(--muted);font-weight:400">öngörü</span>' : "") +
+          (r.kismi ? ' <span style="font-size:10px;color:var(--muted);font-weight:400">ay içi</span>' : "");
+        const hucre = r => [f1(r.op), f1(r.ok), f1(r.ot), f1(r.plan), f1(r.gercek), fS(r.fark),
+                            fP(r.gerc), fP(r.cevir), f1(r.dogrudan), f1(r.kamuya)];
+
+        function ciz() {
+          yEl.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.v === pYil));
+          const { rows, ozet } = satirlar();
+          let h = '<table class="heat"><thead>' + GRUP + "<tr>" +
+            BASLIK.map(b => '<th style="text-align:' + (b[1] === "left" ? "left" : "right") + '">' + b[0] + "</th>").join("") +
+            "</tr></thead><tbody>";
+          for (const r of rows.concat(ozet)) {
+            h += "<tr" + (r.bold ? ' class="sec"' : "") + '><td class="lbl">' + etiket(r) + "</td>";
+            hucre(r).forEach((v, j) => {
+              const kolon = BASLIK[j + 1];
+              if (kolon[0] === "Gerçekleşme") {
+                const bg = heat(r.gerc, 100, 35);
+                h += bg ? '<td class="pct" style="background:' + bg + '">' + v + "</td>" : '<td class="bos">—</td>';
+              } else {
+                h += v === "—" ? '<td class="bos">—</td>' : '<td class="num">' + v + "</td>";
+              }
+            });
+            h += "</tr>";
+          }
+          document.getElementById("tProg").innerHTML = h + '</tbody></table><div class="tablo-imza">bacanlı</div>';
+        }
+        ciz();
+
+        // ── Sunum araçları: beyaz zemin / Excel'e kopyala / resim olarak kopyala ──
+        sec.querySelector(".apko-btn").onclick = function () {
+          const acik = sec.classList.toggle("apko");
+          this.textContent = acik ? "🌙 Koyu zemine dön" : "🖨 Beyaz zemin (sunum)";
+        };
+
+        function kopyaHtml() {
+          const { rows, ozet } = satirlar();
+          const td = "border:1px solid #B7BFCC;padding:3px 8px;color:#1A2233;" +
+                     "font-family:Calibri,Arial,sans-serif;font-size:11pt";
+          const bas = td + ";background:#F1F4F9;font-weight:700";
+          let h = '<table style="border-collapse:collapse"><thead>' +
+            '<tr><th style="' + bas + '"></th><th colspan="3" style="' + bas + '">İç Borç Ödemeleri (Program)</th>' +
+            '<th colspan="3" style="' + bas + '">Piyasadan İhale Yoluyla Borçlanma</th>' +
+            '<th colspan="2" style="' + bas + '">Oranlar</th><th colspan="2" style="' + bas + '">Diğer Program Kalemleri</th></tr>' +
+            "<tr>" + BASLIK.map((b, i) => '<th style="' + bas + ";text-align:" + (i ? "right" : "left") + '">' + b[0] + "</th>").join("") +
+            "</tr></thead><tbody>";
+          for (const r of rows.concat(ozet)) {
+            const kalin = r.bold ? ";font-weight:700;color:#8A5A00" : "";
+            h += '<tr><td style="' + td + kalin + '">' + r.ay + (r.ongoru ? " (öngörü)" : "") + (r.kismi ? " (ay içi)" : "") + "</td>";
+            hucre(r).forEach((v, j) => {
+              const bg = BASLIK[j + 1][0] === "Gerçekleşme" ? heat(r.gerc, 100, 35) : null;
+              h += '<td style="' + td + ";text-align:right" + kalin + (bg ? ";background:" + bg : "") + '">' + v + "</td>";
+            });
+            h += "</tr>";
+          }
+          h += '<tr><td colspan="11" style="border:none;text-align:right;color:#B9C2D0;' +
+               'font-family:Calibri,Arial,sans-serif;font-size:8pt;padding:2px 4px">bacanlı</td></tr>';
+          return { html: h + "</tbody></table>",
+                   duz: [BASLIK.map(b => b[0]).join("\t")].concat(rows.concat(ozet).map(r => [r.ay].concat(hucre(r)).join("\t"))).join("\n") };
+        }
+        document.getElementById("progKopya").onclick = async function () {
+          const { html, duz } = kopyaHtml();
+          try {
+            await navigator.clipboard.write([new ClipboardItem({
+              "text/html": new Blob([html], { type: "text/html" }),
+              "text/plain": new Blob([duz], { type: "text/plain" }),
+            })]);
+            this.textContent = "✓ Kopyalandı — Excel'e yapıştır";
+          } catch (e) {
+            this.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+          }
+          setTimeout(() => { this.textContent = "📋 Panoya kopyala (Excel)"; }, 3000);
+        };
+
+        // Tabloyu HER ZAMAN beyaz zeminli PNG'ye çevirir (tablo + imza birlikte)
+        function tabloResmi() {
+          const geciciBeyaz = !sec.classList.contains("apko");
+          const wrap = sec.querySelector(".table-wrap"), tbl = sec.querySelector("table.heat");
+          const eskiW = wrap.style.width;
+          if (geciciBeyaz) sec.classList.add("apko");
+          wrap.style.width = tbl.scrollWidth + "px";
+          return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))
+            .then(() => html2canvas(wrap, { scale: 2, backgroundColor: "#FFFFFF", logging: false }))
+            .then(cv => new Promise(r => cv.toBlob(r, "image/png")))
+            .finally(() => { wrap.style.width = eskiW; if (geciciBeyaz) sec.classList.remove("apko"); });
+        }
+        sec.querySelector(".resim-btn").onclick = async function () {
+          this.textContent = "⏳ Hazırlanıyor...";
+          try {
+            try {
+              await navigator.clipboard.write([new ClipboardItem({ "image/png": tabloResmi() })]);
+            } catch (e1) {
+              const blob = await tabloResmi();
+              await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+            }
+            this.textContent = "✓ Resim kopyalandı — yapıştırabilirsin";
+          } catch (e) {
+            this.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+          }
+          setTimeout(() => { this.textContent = "🖼 Resim olarak kopyala"; }, 3000);
+        };
+      }
     })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
   </script>
 </body>

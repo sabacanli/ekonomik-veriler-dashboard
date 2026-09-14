@@ -31,3 +31,6 @@ bddk veri çekme/
 # İşletim sistemi
 .DS_Store
 Thumbs.db
+
+# HMB İç Borçlanma Stratejisi PDF kaynakları (ayrıştırılmış program.json izlenir)
+hazine ihale /borclanma programi/pdf/

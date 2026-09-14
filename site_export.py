@@ -663,9 +663,21 @@ def build_hazine():
         "isin": [None if pd.isna(x) else str(x) for x in df[C_ISIN]],
     }
 
+    # Finansman programı (HMB İç Borçlanma Stratejisi) ile gerçekleşme eşlemesi
+    program = _hazine_program(df, C_VAL, C_NET, L_t)
+    if program:
+        pl = [(p, g) for a, p, g in zip(program["aylar"], program["plan_ihale"], program["gercek_piyasa"])
+              if a.startswith(str(cy)) and p is not None and g is not None]
+        if pl:
+            P, G = sum(p for p, _ in pl), sum(g for _, g in pl)
+            ozet += (f" Finansman programında {cy} yılı için bugüne kadar piyasadan ihale yoluyla "
+                     f"<b>{ht(P)} milyar TL</b> borçlanma öngörülmüş, <b>{ht(G)} milyar TL</b> "
+                     f"gerçekleşti (program gerçekleşme oranı <b>%{ht(G / P * 100)}</b>).")
+
     dump("hazine.json", {
         "updated": mtime(fp),
         "ozet_html": ozet,
+        "program": program,
         "son": {"tarih": L_t.strftime("%d.%m.%Y"), "ytd_satis": ytd_satis,
                 "ytd_ihale": int(len(ytd)), "faiz3": faiz3, "yil": cy},
         "aylik": {
@@ -680,6 +692,65 @@ def build_hazine():
         },
         "ihaleler": ihaleler,
     })
+
+
+def _hazine_program(df, C_VAL, C_NET, L_t):
+    """HMB aylık İç Borçlanma Stratejisi (program.json) ile ihale gerçekleşmelerini ay bazında eşler.
+
+    Gerçekleşen = Toplam Satış (Net) − Rekabetçi Olmayan Teklif Kamu (Net): programdaki
+    "Piyasadan İhale Yoluyla İç Borçlanma" kalemiyle aynı tanım (kamuya satışlar hariç).
+    Tutarlar Milyar TL; verisi henüz olmayan (son ihale ayından sonraki) aylar None.
+    """
+    import json
+    fp = BASE / "hazine ihale " / "borclanma programi" / "program.json"
+    if not fp.exists():
+        return None
+    P = json.loads(fp.read_text(encoding="utf-8"))["aylar"]
+    C_ROTK = "Rek. Olmayan Teklif - Kamu / Net (Bin TL)"
+    g = pd.DataFrame({
+        "ay": df[C_VAL].dt.strftime("%Y-%m"),
+        "toplam": df[C_NET].fillna(0.0),
+        "rotk": pd.to_numeric(df[C_ROTK], errors="coerce").fillna(0.0),
+    })
+    ag = g.groupby("ay").agg(toplam=("toplam", "sum"), rotk=("rotk", "sum"), n=("toplam", "size"))
+    son_ay = L_t.strftime("%Y-%m")
+    aylar = sorted(P)
+
+    def r1(v):
+        return None if v is None else round(float(v), 1)
+
+    def prog(a, k):
+        return r1((P[a].get("program") or {}).get(k))
+
+    def odeme(a, k):
+        return r1((P[a].get("odeme") or {}).get(k))
+
+    def gercek(a):
+        if a > son_ay:
+            return None, None, None
+        if a not in ag.index:
+            return 0.0, 0.0, 0
+        t, k = float(ag.loc[a, "toplam"]) / 1e6, float(ag.loc[a, "rotk"]) / 1e6   # Bin TL → Milyar
+        return round(t - k, 1), round(k, 1), int(ag.loc[a, "n"])
+
+    G = {a: gercek(a) for a in aylar}
+    return {
+        "aylar": aylar,
+        "ufuk": [P[a]["ufuk"] for a in aylar],
+        "yayin": [P[a].get("yayin") for a in aylar],
+        "odeme_piyasa": [odeme(a, "piyasa") for a in aylar],
+        "odeme_kamu": [odeme(a, "kamu") for a in aylar],
+        "odeme_toplam": [odeme(a, "toplam") for a in aylar],
+        "plan_ihale": [prog(a, "ihale") for a in aylar],
+        "plan_dogrudan": [prog(a, "dogrudan") for a in aylar],
+        "plan_kamuya": [prog(a, "kamuya") for a in aylar],
+        "plan_ic_borclanma": [prog(a, "ic_borclanma") for a in aylar],
+        "gercek_piyasa": [G[a][0] for a in aylar],
+        "gercek_rot_kamu": [G[a][1] for a in aylar],
+        "ihale_sayisi": [G[a][2] for a in aylar],
+        "son_ay": son_ay,
+        "son_ay_kismi": son_ay if pd.Timestamp.today().strftime("%Y-%m") == son_ay else None,
+    }
 
 
 def build_tcmb_alim():

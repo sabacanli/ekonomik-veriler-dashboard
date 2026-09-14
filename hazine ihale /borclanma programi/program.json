@@ -1,0 +1,867 @@
+{
+ "aylar": {
+  "2025-01": {
+   "ufuk": 1,
+   "kaynak": "Tr01-Ocak-Mart-2025-Ic-Borclanma-Stratejisi.pdf",
+   "yayin": "2024-12-31",
+   "odeme": {
+    "piyasa": 216.805,
+    "kamu": 8.617,
+    "toplam": 225.422
+   },
+   "program": {
+    "odemeler": 265.2,
+    "ic_servis": 225.4,
+    "dis_servis": 39.8,
+    "borclanma_disi": -28.6,
+    "borclanma": 293.8,
+    "ic_borclanma": 293.8,
+    "ihale": 189.5,
+    "dogrudan": 92.3,
+    "kamuya": 12.0,
+    "ic_anapara": 106.5,
+    "ic_faiz": 118.9
+   }
+  },
+  "2025-02": {
+   "ufuk": 1,
+   "kaynak": "Tr02-Subat-Nisan-2025-Ic-Borclanma-Stratejisi.pdf",
+   "yayin": "2025-01-31",
+   "odeme": {
+    "piyasa": 106.687,
+    "kamu": 11.072,
+    "toplam": 117.759
+   },
+   "program": {
+    "odemeler": 248.1,
+    "ic_servis": 117.8,
+    "dis_servis": 130.4,
+    "borclanma_disi": 68.0,
+    "borclanma": 180.1,
+    "ic_borclanma": 180.1,
+    "ihale": 155.9,
+    "dogrudan": 4.2,
+    "kamuya": 20.0,
+    "ic_anapara": 0.0,
+    "ic_faiz": 117.8
+   }
+  },
+  "2025-03": {
+   "ufuk": 1,
+   "kaynak": "Tr03-Mart-Mayis-2025-Ic-Borclanma-Stratejisi.pdf",
+   "yayin": "2025-02-28",
+   "odeme": {
+    "piyasa": 108.98,
+    "kamu": 15.753,
+    "toplam": 124.733
+   },
+   "program": {
+    "odemeler": 274.0,
+    "ic_servis": 124.7,
+    "dis_servis": 149.3,
+    "borclanma_disi": 72.8,
+    "borclanma": 201.2,
+    "ic_borclanma": 201.2,
+    "ihale": 183.2,
+    "dogrudan": 0.0,
+    "kamuya": 18.0,
+    "ic_anapara": 14.8,
+    "ic_faiz": 110.0
+   }
+  },
+  "2025-04": {
+   "ufuk": 1,
+   "kaynak": "Tr04-Nisan-Haziran-2025-Ic-Borclanma-Stratejisi-4db15b9ad967bcb2.pdf",
+   "yayin": "2025-03-28",
+   "odeme": {
+    "piyasa": 236.466,
+    "kamu": 56.843,
+    "toplam": 293.31
+   },
+   "program": {
+    "odemeler": 317.6,
+    "ic_servis": 293.3,
+    "dis_servis": 24.3,
+    "borclanma_disi": -11.9,
+    "borclanma": 329.5,
+    "ic_borclanma": 329.5,
+    "ihale": 232.1,
+    "dogrudan": 28.4,
+    "kamuya": 69.0,
+    "ic_anapara": 57.0,
+    "ic_faiz": 236.3
+   }
+  },
+  "2025-05": {
+   "ufuk": 1,
+   "kaynak": "Tr05-Mayis-Temmuz-2025-Ic-Borclanma-Stratejisi-0819056e3b66c342.pdf",
+   "yayin": "2025-04-30",
+   "odeme": {
+    "piyasa": 155.948,
+    "kamu": 4.788,
+    "toplam": 160.737
+   },
+   "program": {
+    "odemeler": 190.0,
+    "ic_servis": 160.7,
+    "dis_servis": 29.2,
+    "borclanma_disi": 2.5,
+    "borclanma": 187.5,
+    "ic_borclanma": 187.5,
+    "ihale": 90.1,
+    "dogrudan": 82.4,
+    "kamuya": 15.0,
+    "ic_anapara": 83.1,
+    "ic_faiz": 77.6
+   }
+  },
+  "2025-06": {
+   "ufuk": 1,
+   "kaynak": "Tr06-Haziran-Agustos-2025-Ic-Borclanma-Stratejisi-7ea2d4cb338a9f0b.pdf",
+   "yayin": "2025-05-30",
+   "odeme": {
+    "piyasa": 251.209,
+    "kamu": 14.427,
+    "toplam": 265.637
+   },
+   "program": {
+    "odemeler": 320.3,
+    "ic_servis": 265.6,
+    "dis_servis": 54.6,
+    "borclanma_disi": 41.3,
+    "borclanma": 278.9,
+    "ic_borclanma": 278.9,
+    "ihale": 247.0,
+    "dogrudan": 13.9,
+    "kamuya": 18.0,
+    "ic_anapara": 25.0,
+    "ic_faiz": 240.7
+   }
+  },
+  "2025-07": {
+   "ufuk": 1,
+   "kaynak": "Tr07-Temmuz-Eylul-2025-Ic-Borclanma-Stratejisi-4914cc578981a670.pdf",
+   "yayin": "2025-06-30",
+   "odeme": {
+    "piyasa": 314.51,
+    "kamu": 2.061,
+    "toplam": 316.571
+   },
+   "program": {
+    "odemeler": 373.3,
+    "ic_servis": 316.6,
+    "dis_servis": 56.8,
+    "borclanma_disi": -3.0,
+    "borclanma": 376.4,
+    "ic_borclanma": 376.4,
+    "ihale": 167.9,
+    "dogrudan": 180.5,
+    "kamuya": 28.0,
+    "ic_anapara": 235.9,
+    "ic_faiz": 80.7
+   }
+  },
+  "2025-08": {
+   "ufuk": 1,
+   "kaynak": "Tr08-Agustos-Ekim-2025-Ic-Borclanma-Stratejisi-6a32cc7325d76126.pdf",
+   "yayin": "2025-07-31",
+   "odeme": {
+    "piyasa": 315.146,
+    "kamu": 23.908,
+    "toplam": 339.055
+   },
+   "program": {
+    "odemeler": 363.2,
+    "ic_servis": 339.1,
+    "dis_servis": 24.2,
+    "borclanma_disi": -77.5,
+    "borclanma": 440.8,
+    "ic_borclanma": 440.8,
+    "ihale": 210.8,
+    "dogrudan": 190.0,
+    "kamuya": 40.0,
+    "ic_anapara": 187.2,
+    "ic_faiz": 151.8
+   }
+  },
+  "2025-09": {
+   "ufuk": 1,
+   "kaynak": "Tr09-Eylul-Kasim-2025-Ic-Borclanma-Stratejisi-ee90e93dd9e9711c.pdf",
+   "yayin": "2025-08-29",
+   "odeme": {
+    "piyasa": 226.416,
+    "kamu": 29.334,
+    "toplam": 255.75
+   },
+   "program": {
+    "odemeler": 290.1,
+    "ic_servis": 255.7,
+    "dis_servis": 34.4,
+    "borclanma_disi": -55.9,
+    "borclanma": 346.0,
+    "ic_borclanma": 346.0,
+    "ihale": 274.0,
+    "dogrudan": 25.0,
+    "kamuya": 47.0,
+    "ic_anapara": 54.3,
+    "ic_faiz": 201.5
+   }
+  },
+  "2025-10": {
+   "ufuk": 1,
+   "kaynak": "Tr10-Ekim-Aralik-2025-Ic-Borclanma-Stratejisi-68a0f2f9d005e31e.pdf",
+   "yayin": "2025-09-30",
+   "odeme": {
+    "piyasa": 235.207,
+    "kamu": 28.425,
+    "toplam": 263.632
+   },
+   "program": {
+    "odemeler": 373.2,
+    "ic_servis": 263.6,
+    "dis_servis": 109.5,
+    "borclanma_disi": 83.1,
+    "borclanma": 290.1,
+    "ic_borclanma": 290.1,
+    "ihale": 210.1,
+    "dogrudan": 35.0,
+    "kamuya": 45.0,
+    "ic_anapara": 126.4,
+    "ic_faiz": 137.2
+   }
+  },
+  "2025-11": {
+   "ufuk": 1,
+   "kaynak": "Tr11-Kasim-2025-Ocak-2026-Ic-Borclanma-Stratejisi-5e56be20b2036198.pdf",
+   "yayin": "2025-10-31",
+   "odeme": {
+    "piyasa": 88.665,
+    "kamu": 6.353,
+    "toplam": 95.018
+   },
+   "program": {
+    "odemeler": 232.6,
+    "ic_servis": 95.0,
+    "dis_servis": 137.6,
+    "borclanma_disi": 104.3,
+    "borclanma": 128.3,
+    "ic_borclanma": 128.3,
+    "ihale": 48.3,
+    "dogrudan": 60.0,
+    "kamuya": 20.0,
+    "ic_anapara": 0.0,
+    "ic_faiz": 95.0
+   }
+  },
+  "2025-12": {
+   "ufuk": 1,
+   "kaynak": "Tr12-Aralik-2025-Subat-2026-Ic-Borclanma-Stratejisi-74ef78cfbfc279d9.pdf",
+   "yayin": "2025-11-28",
+   "odeme": {
+    "piyasa": 97.213,
+    "kamu": 12.429,
+    "toplam": 109.642
+   },
+   "program": {
+    "odemeler": 124.2,
+    "ic_servis": 109.6,
+    "dis_servis": 14.6,
+    "borclanma_disi": 0.0,
+    "borclanma": 124.2,
+    "ic_borclanma": 124.2,
+    "ihale": 79.2,
+    "dogrudan": 15.0,
+    "kamuya": 30.0,
+    "ic_anapara": 0.5,
+    "ic_faiz": 109.1
+   }
+  },
+  "2026-01": {
+   "ufuk": 1,
+   "kaynak": "Tr01-Ocak-Mart-2026-Ic-Borclanma-Stratejisi-f3a8bbd23a879490.pdf",
+   "yayin": "2025-12-31",
+   "odeme": {
+    "piyasa": 558.1,
+    "kamu": 55.249,
+    "toplam": 613.349
+   },
+   "program": {
+    "odemeler": 744.8,
+    "ic_servis": 613.3,
+    "dis_servis": 131.5,
+    "borclanma_disi": 257.2,
+    "borclanma": 487.7,
+    "ic_borclanma": 487.7,
+    "ihale": 255.7,
+    "dogrudan": 160.0,
+    "kamuya": 72.0,
+    "ic_anapara": 204.4,
+    "ic_faiz": 408.9
+   }
+  },
+  "2026-02": {
+   "ufuk": 1,
+   "kaynak": "Tr02-Subat-Nisan-2026-Ic-Borclanma-Stratejisi-4c5f37075b0024d3.pdf",
+   "yayin": "2026-01-30",
+   "odeme": {
+    "piyasa": 612.234,
+    "kamu": 44.35,
+    "toplam": 656.584
+   },
+   "program": {
+    "odemeler": 773.3,
+    "ic_servis": 656.6,
+    "dis_servis": 116.8,
+    "borclanma_disi": 248.1,
+    "borclanma": 525.3,
+    "ic_borclanma": 525.3,
+    "ihale": 181.3,
+    "dogrudan": 300.0,
+    "kamuya": 44.0,
+    "ic_anapara": 501.8,
+    "ic_faiz": 154.8
+   }
+  },
+  "2026-03": {
+   "ufuk": 1,
+   "kaynak": "Tr03-Mart-Mayis-2026-Ic-Borclanma-Stratejisi-451eb592e23fb30a.pdf",
+   "yayin": "2026-02-27",
+   "odeme": {
+    "piyasa": 372.322,
+    "kamu": 22.013,
+    "toplam": 394.335
+   },
+   "program": {
+    "odemeler": 430.2,
+    "ic_servis": 394.3,
+    "dis_servis": 35.8,
+    "borclanma_disi": 114.7,
+    "borclanma": 315.5,
+    "ic_borclanma": 315.5,
+    "ihale": 127.5,
+    "dogrudan": 145.0,
+    "kamuya": 43.0,
+    "ic_anapara": 192.7,
+    "ic_faiz": 201.6
+   }
+  },
+  "2026-04": {
+   "ufuk": 2,
+   "kaynak": "Tr03-Mart-Mayis-2026-Ic-Borclanma-Stratejisi-451eb592e23fb30a.pdf",
+   "yayin": "2026-02-27",
+   "odeme": {
+    "piyasa": 492.887,
+    "kamu": 22.505,
+    "toplam": 515.392
+   },
+   "program": {
+    "odemeler": 612.3,
+    "ic_servis": 515.4,
+    "dis_servis": 96.9,
+    "borclanma_disi": 148.4,
+    "borclanma": 463.9,
+    "ic_borclanma": 463.9,
+    "ihale": 223.9,
+    "dogrudan": 215.0,
+    "kamuya": 25.0,
+    "ic_anapara": 297.9,
+    "ic_faiz": 217.5
+   }
+  },
+  "2026-05": {
+   "ufuk": 3,
+   "kaynak": "Tr03-Mart-Mayis-2026-Ic-Borclanma-Stratejisi-451eb592e23fb30a.pdf",
+   "yayin": "2026-02-27",
+   "odeme": {
+    "piyasa": 346.808,
+    "kamu": 7.897,
+    "toplam": 354.705
+   },
+   "program": {
+    "odemeler": 391.2,
+    "ic_servis": 354.7,
+    "dis_servis": 36.5,
+    "borclanma_disi": 27.2,
+    "borclanma": 363.9,
+    "ic_borclanma": 363.9,
+    "ihale": 125.9,
+    "dogrudan": 230.0,
+    "kamuya": 8.0,
+    "ic_anapara": 257.6,
+    "ic_faiz": 97.1
+   }
+  },
+  "2026-06": {
+   "ufuk": 1,
+   "kaynak": "Tr06-Haziran-Agustos-2026-Ic-Borclanma-Stratejisi-d2af353a0f41bc85.pdf",
+   "yayin": "2026-05-26",
+   "odeme": {
+    "piyasa": 468.831,
+    "kamu": 86.113,
+    "toplam": 554.944
+   },
+   "program": {
+    "odemeler": 686.6,
+    "ic_servis": 554.9,
+    "dis_servis": 131.7,
+    "borclanma_disi": 142.8,
+    "borclanma": 543.8,
+    "ic_borclanma": 543.8,
+    "ihale": 233.8,
+    "dogrudan": 240.0,
+    "kamuya": 70.0,
+    "ic_anapara": 373.5,
+    "ic_faiz": 181.4
+   }
+  },
+  "2026-07": {
+   "ufuk": 1,
+   "kaynak": "Tr07-Temmuz-Eylul-2026-Ic-Borclanma-Stratejisi-0fef0ace4ecfbfee.pdf",
+   "yayin": "2026-06-30",
+   "odeme": {
+    "piyasa": 615.858,
+    "kamu": 22.886,
+    "toplam": 638.744
+   },
+   "program": {
+    "odemeler": 703.8,
+    "ic_servis": 638.7,
+    "dis_servis": 65.1,
+    "borclanma_disi": 97.0,
+    "borclanma": 606.8,
+    "ic_borclanma": 606.8,
+    "ihale": 256.8,
+    "dogrudan": 330.0,
+    "kamuya": 20.0,
+    "ic_anapara": 365.9,
+    "ic_faiz": 272.8
+   }
+  },
+  "2026-08": {
+   "ufuk": 1,
+   "kaynak": "Tr08-Agustos-Ekim-2026-Ic-Borclanma-Stratejisi-3bb4819136c1d61c.pdf",
+   "yayin": "2026-07-31",
+   "odeme": {
+    "piyasa": 557.226,
+    "kamu": 39.115,
+    "toplam": 596.341
+   },
+   "program": {
+    "odemeler": 644.9,
+    "ic_servis": 596.3,
+    "dis_servis": 48.6,
+    "borclanma_disi": 108.2,
+    "borclanma": 536.7,
+    "ic_borclanma": 536.7,
+    "ihale": 334.7,
+    "dogrudan": 165.0,
+    "kamuya": 37.0,
+    "ic_anapara": 468.3,
+    "ic_faiz": 128.0
+   }
+  },
+  "2026-09": {
+   "ufuk": 1,
+   "kaynak": "Tr09-Eylul-Kasim-2026-Ic-Borclanma-Stratejisi-29b66b0316cfa769.pdf",
+   "yayin": "2026-08-31",
+   "odeme": {
+    "piyasa": 249.218,
+    "kamu": 47.491,
+    "toplam": 296.709
+   },
+   "program": {
+    "odemeler": 343.1,
+    "ic_servis": 296.7,
+    "dis_servis": 46.3,
+    "borclanma_disi": 61.2,
+    "borclanma": 281.9,
+    "ic_borclanma": 281.9,
+    "ihale": 216.9,
+    "dogrudan": 20.0,
+    "kamuya": 45.0,
+    "ic_anapara": 56.6,
+    "ic_faiz": 240.1
+   }
+  },
+  "2026-10": {
+   "ufuk": 2,
+   "kaynak": "Tr09-Eylul-Kasim-2026-Ic-Borclanma-Stratejisi-29b66b0316cfa769.pdf",
+   "yayin": "2026-08-31",
+   "odeme": {
+    "piyasa": 375.752,
+    "kamu": 33.379,
+    "toplam": 409.131
+   },
+   "program": {
+    "odemeler": 587.2,
+    "ic_servis": 409.1,
+    "dis_servis": 178.1,
+    "borclanma_disi": 178.1,
+    "borclanma": 409.1,
+    "ic_borclanma": 409.1,
+    "ihale": 199.1,
+    "dogrudan": 180.0,
+    "kamuya": 30.0,
+    "ic_anapara": 178.9,
+    "ic_faiz": 230.2
+   }
+  },
+  "2026-11": {
+   "ufuk": 3,
+   "kaynak": "Tr09-Eylul-Kasim-2026-Ic-Borclanma-Stratejisi-29b66b0316cfa769.pdf",
+   "yayin": "2026-08-31",
+   "odeme": {
+    "piyasa": 112.815,
+    "kamu": 9.877,
+    "toplam": 122.692
+   },
+   "program": {
+    "odemeler": 164.6,
+    "ic_servis": 122.7,
+    "dis_servis": 41.9,
+    "borclanma_disi": 54.2,
+    "borclanma": 110.4,
+    "ic_borclanma": 110.4,
+    "ihale": 75.4,
+    "dogrudan": 25.0,
+    "kamuya": 10.0,
+    "ic_anapara": 29.6,
+    "ic_faiz": 93.1
+   }
+  }
+ },
+ "revizyon": {
+  "2025-01": [
+   {
+    "ufuk": 1,
+    "yayin": "2024-12-31",
+    "ihale": 189.5
+   }
+  ],
+  "2025-02": [
+   {
+    "ufuk": 2,
+    "yayin": "2024-12-31",
+    "ihale": 152.2
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-01-31",
+    "ihale": 155.9
+   }
+  ],
+  "2025-03": [
+   {
+    "ufuk": 3,
+    "yayin": "2024-12-31",
+    "ihale": 143.5
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-01-31",
+    "ihale": 166.7
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-02-28",
+    "ihale": 183.2
+   }
+  ],
+  "2025-04": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-01-31",
+    "ihale": 295.1
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-02-28",
+    "ihale": 271.7
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-03-28",
+    "ihale": 232.1
+   }
+  ],
+  "2025-05": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-02-28",
+    "ihale": 170.2
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-03-28",
+    "ihale": 170.2
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-04-30",
+    "ihale": 90.1
+   }
+  ],
+  "2025-06": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-03-28",
+    "ihale": 267.4
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-04-30",
+    "ihale": 247.4
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-05-30",
+    "ihale": 247.0
+   }
+  ],
+  "2025-07": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-04-30",
+    "ihale": 341.6
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-05-30",
+    "ihale": 335.9
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-06-30",
+    "ihale": 167.9
+   }
+  ],
+  "2025-08": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-05-30",
+    "ihale": 372.1
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-06-30",
+    "ihale": 364.5
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-07-31",
+    "ihale": 210.8
+   }
+  ],
+  "2025-09": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-06-30",
+    "ihale": 262.4
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-07-31",
+    "ihale": 297.0
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-08-29",
+    "ihale": 274.0
+   }
+  ],
+  "2025-10": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-07-31",
+    "ihale": 310.7
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-08-29",
+    "ihale": 285.7
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-09-30",
+    "ihale": 210.1
+   }
+  ],
+  "2025-11": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-08-29",
+    "ihale": 101.5
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-09-30",
+    "ihale": 87.6
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-10-31",
+    "ihale": 48.3
+   }
+  ],
+  "2025-12": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-09-30",
+    "ihale": 108.8
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-10-31",
+    "ihale": 114.1
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-11-28",
+    "ihale": 79.2
+   }
+  ],
+  "2026-01": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-10-31",
+    "ihale": 504.0
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-11-28",
+    "ihale": 467.6
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2025-12-31",
+    "ihale": 255.7
+   }
+  ],
+  "2026-02": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-11-28",
+    "ihale": 519.0
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2025-12-31",
+    "ihale": 183.9
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2026-01-30",
+    "ihale": 181.3
+   }
+  ],
+  "2026-03": [
+   {
+    "ufuk": 3,
+    "yayin": "2025-12-31",
+    "ihale": 157.3
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2026-01-30",
+    "ihale": 130.0
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2026-02-27",
+    "ihale": 127.5
+   }
+  ],
+  "2026-04": [
+   {
+    "ufuk": 3,
+    "yayin": "2026-01-30",
+    "ihale": 209.7
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2026-02-27",
+    "ihale": 223.9
+   }
+  ],
+  "2026-05": [
+   {
+    "ufuk": 3,
+    "yayin": "2026-02-27",
+    "ihale": 125.9
+   }
+  ],
+  "2026-06": [
+   {
+    "ufuk": 1,
+    "yayin": "2026-05-26",
+    "ihale": 233.8
+   }
+  ],
+  "2026-07": [
+   {
+    "ufuk": 2,
+    "yayin": "2026-05-26",
+    "ihale": 286.7
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2026-06-30",
+    "ihale": 256.8
+   }
+  ],
+  "2026-08": [
+   {
+    "ufuk": 3,
+    "yayin": "2026-05-26",
+    "ihale": 316.8
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2026-06-30",
+    "ihale": 378.0
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2026-07-31",
+    "ihale": 334.7
+   }
+  ],
+  "2026-09": [
+   {
+    "ufuk": 3,
+    "yayin": "2026-06-30",
+    "ihale": 254.2
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2026-07-31",
+    "ihale": 207.9
+   },
+   {
+    "ufuk": 1,
+    "yayin": "2026-08-31",
+    "ihale": 216.9
+   }
+  ],
+  "2026-10": [
+   {
+    "ufuk": 3,
+    "yayin": "2026-07-31",
+    "ihale": 205.1
+   },
+   {
+    "ufuk": 2,
+    "yayin": "2026-08-31",
+    "ihale": 199.1
+   }
+  ],
+  "2026-11": [
+   {
+    "ufuk": 3,
+    "yayin": "2026-08-31",
+    "ihale": 75.4
+   }
+  ]
+ },
+ "baski_sayisi": 19
+}
