@@ -234,6 +234,60 @@ function sunumAraclariKur(TEMA, CIZ) {
   });
 }
 
+/* Tablo kartları için sunum araçları: kart içindeki .apko-btn beyaz zemini açıp kapatır,
+   .kopya-btn tabloyu Excel/PowerPoint'e renkleriyle yapışacak şekilde panoya yazar,
+   .resim-btn tabloyu HER ZAMAN beyaz zeminli PNG olarak kopyalar (sayfada html2canvas gerekir).
+   kopyaVerisi() → { html: satır-içi stilli tablo, duz: sekmeyle ayrılmış düz metin } */
+function tabloSunumKur(sec, kopyaVerisi) {
+  const apko = sec.querySelector(".apko-btn"), kopya = sec.querySelector(".kopya-btn"),
+        resim = sec.querySelector(".resim-btn");
+  if (apko) apko.onclick = function () {
+    const acik = sec.classList.toggle("apko");
+    apko.textContent = acik ? "🌙 Koyu zemine dön" : "🖨 Beyaz zemin (sunum)";
+  };
+  if (kopya) kopya.onclick = async function () {
+    const v = kopyaVerisi();
+    try {
+      await navigator.clipboard.write([new ClipboardItem({
+        "text/html": new Blob([v.html], { type: "text/html" }),
+        "text/plain": new Blob([v.duz], { type: "text/plain" }),
+      })]);
+      kopya.textContent = "✓ Kopyalandı — Excel'e yapıştır";
+    } catch (e) {
+      kopya.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+    }
+    setTimeout(function () { kopya.textContent = "📋 Panoya kopyala (Excel)"; }, 3000);
+  };
+  // Dar ekranda kesilmesin diye sarmalayıcı geçici olarak tablo genişliğine açılır
+  function tabloResmi() {
+    const geciciBeyaz = !sec.classList.contains("apko");
+    const wrap = sec.querySelector(".table-wrap"), tbl = sec.querySelector("table.heat");
+    const eskiW = wrap.style.width;
+    if (geciciBeyaz) sec.classList.add("apko");
+    wrap.style.width = tbl.scrollWidth + "px";
+    return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); })
+      .then(function () { return html2canvas(wrap, { scale: 2, backgroundColor: "#FFFFFF", logging: false }); })
+      .then(function (cv) { return new Promise(function (r) { cv.toBlob(r, "image/png"); }); })
+      .finally(function () { wrap.style.width = eskiW; if (geciciBeyaz) sec.classList.remove("apko"); });
+  }
+  if (resim) resim.onclick = async function () {
+    resim.textContent = "⏳ Hazırlanıyor...";
+    try {
+      // Safari: blob sözü ClipboardItem'a jest anında verilmeli; eski Chrome için yedek yol
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": tabloResmi() })]);
+      } catch (e1) {
+        const blob = await tabloResmi();
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      }
+      resim.textContent = "✓ Resim kopyalandı — yapıştırabilirsin";
+    } catch (e) {
+      resim.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+    }
+    setTimeout(function () { resim.textContent = "🖼 Resim olarak kopyala"; }, 3000);
+  };
+}
+
 /* Zoom yapılınca kartın sağ üstünde "sıfırla" düğmesi belirir (çift tıklama da sıfırlar) */
 function zoomSifirlaKur(gd) {
   let b = gd.__resetBtn;
