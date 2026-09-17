@@ -587,10 +587,40 @@ def _hazine_tarih(col):
     return s_metin.fillna(s_seri)
 
 
-def build_hazine():
+def _hazine_yukle():
+    """'Tüm İhaleler' sayfasını analize hazır döndürür: (dosya yolu, DataFrame).
+
+    - Valör tarihi çözülür; tutar/faiz kolonları float64'e çevrilir (Bin TL ölçekli tutarlar
+      int64 kalırsa uç çarpımlarda taşma uyarısı istisnaya dönüşebiliyor — 21.08.2026'da yaşandı).
+    - TL kira sertifikaları ihaleyle değil doğrudan satışla ihraç edilir: HMB dosyasında tutar
+      yalnız "İhale Kabul Edilen Tutar" altında gelir, "Toplam Satış" boştur. Stok/itfa/yıllık
+      görünümlerde eksik kalmasınlar diye toplam satış oradan doldurulur; ortada ihale olmadığından
+      kabul tutarı boşaltılır (talep/karşılama istatistiğine girmesin). `_ds` = doğrudan satış.
+    """
     fp = BASE / "hazine ihale " / "hazine_ihale_verileri.xlsx"
     df = pd.read_excel(fp, sheet_name="Tüm İhaleler", header=[0, 1])
     df.columns = [" / ".join(str(x) for x in c) for c in df.columns]
+    C_VAL = "Genel Bilgiler / Valör Tarihi"
+    C_NET, C_NOM = "Toplam Satış / Net (Bin TL)", "Toplam Satış / Nominal (Bin TL)"
+    C_KABUL = "İhale Kabul Edilen Tutar / Nominal (Bin TL)"
+    C_KABUL_NET = "İhale Kabul Edilen Tutar / Net (Bin TL)"
+    df[C_VAL] = _hazine_tarih(df[C_VAL])
+    df = df.dropna(subset=[C_VAL]).sort_values(C_VAL).reset_index(drop=True)
+    for c in [C_NET, C_NOM, C_KABUL, C_KABUL_NET,
+              "Kabul Edilen Faiz (%) / Ort. Yıllık Bileşik",
+              "Teklif Edilen Tutar / Nominal (Bin TL)",
+              "Rek. Olmayan Teklif - Kamu / Net (Bin TL)"]:
+        df[c] = pd.to_numeric(df[c], errors="coerce").astype("float64")
+    ds = df["Genel Bilgiler / Senet Türü"].astype(str).str.contains("Kira", na=False) & df[C_NET].isna()
+    df.loc[ds, C_NET] = df.loc[ds, C_KABUL_NET]
+    df.loc[ds, C_NOM] = df.loc[ds, C_KABUL]
+    df.loc[ds, C_KABUL] = float("nan")
+    df["_ds"] = ds
+    return fp, df
+
+
+def build_hazine():
+    fp, df = _hazine_yukle()
     C_VAL = "Genel Bilgiler / Valör Tarihi"
     C_TUR = "Genel Bilgiler / Senet Türü"
     C_NET = "Toplam Satış / Net (Bin TL)"
@@ -598,12 +628,6 @@ def build_hazine():
     C_FAIZ = "Kabul Edilen Faiz (%) / Ort. Yıllık Bileşik"
     C_TEKLIF = "Teklif Edilen Tutar / Nominal (Bin TL)"
     C_KABUL = "İhale Kabul Edilen Tutar / Nominal (Bin TL)"
-    df[C_VAL] = _hazine_tarih(df[C_VAL])
-    df = df.dropna(subset=[C_VAL]).sort_values(C_VAL).reset_index(drop=True)
-    # Bin TL ölçekli tutarlar int64 kalırsa uç çarpımlarda taşma uyarısı istisnaya
-    # dönüşebiliyor (21.08.2026'da yaşandı) — float64 bu sınıfı tamamen kapatır
-    for c in [C_NET, C_NOM, C_FAIZ, C_TEKLIF, C_KABUL]:
-        df[c] = pd.to_numeric(df[c], errors="coerce").astype("float64")
 
     L_t = df[C_VAL].max()
     cy = int(L_t.year)
@@ -611,10 +635,12 @@ def build_hazine():
     ytd_satis = float(ytd[C_NET].sum()) / 1e6          # Bin TL -> Milyar TL
     son3ay = df[df[C_VAL] >= L_t - pd.DateOffset(months=3)]
     faiz3 = _wavg(son3ay[C_FAIZ], son3ay[C_NOM])
-    ozet = (f"<b>{L_t.strftime('%d.%m.%Y')}</b> itibarıyla {cy} yılında Hazine iç borçlanma "
-            f"ihalelerinde toplam <b>{ht(ytd_satis)} milyar TL</b> (net) satış yapıldı "
-            f"({len(ytd)} ihale). Son 3 ayın satış ağırlıklı ortalama yıllık bileşik faizi "
-            f"<b>%{ht(faiz3, 2)}</b>.")
+    n_ds = int(ytd["_ds"].sum())
+    ozet = (f"<b>{L_t.strftime('%d.%m.%Y')}</b> itibarıyla {cy} yılında Hazine'nin TL cinsi iç "
+            f"borçlanmasında toplam <b>{ht(ytd_satis)} milyar TL</b> (net) satış yapıldı "
+            f"({len(ytd) - n_ds} ihale"
+            + (f" + {n_ds} kira sertifikası doğrudan satışı" if n_ds else "") +
+            f"). Son 3 ayın satış ağırlıklı ortalama yıllık bileşik faizi <b>%{ht(faiz3, 2)}</b>.")
 
     # Aylık seriler
     ayg = df.groupby(df[C_VAL].dt.to_period("M"))
@@ -661,6 +687,7 @@ def build_hazine():
         "kabul": num(df[C_KABUL]),
         "faiz": num(df[C_FAIZ], 2),
         "isin": [None if pd.isna(x) else str(x) for x in df[C_ISIN]],
+        "ds": [int(x) for x in df["_ds"]],       # 1 = doğrudan satış (kira sertifikası)
     }
 
     # Finansman programı (HMB İç Borçlanma Stratejisi) ile gerçekleşme eşlemesi
@@ -707,10 +734,11 @@ def _hazine_program(df, C_VAL, C_NET, L_t):
         return None
     P = json.loads(fp.read_text(encoding="utf-8"))["aylar"]
     C_ROTK = "Rek. Olmayan Teklif - Kamu / Net (Bin TL)"
+    ih = df[~df["_ds"]]      # doğrudan satışlar (kira sertifikası) programın "ihale" kalemine girmez
     g = pd.DataFrame({
-        "ay": df[C_VAL].dt.strftime("%Y-%m"),
-        "toplam": df[C_NET].fillna(0.0),
-        "rotk": pd.to_numeric(df[C_ROTK], errors="coerce").fillna(0.0),
+        "ay": ih[C_VAL].dt.strftime("%Y-%m"),
+        "toplam": ih[C_NET].fillna(0.0),
+        "rotk": ih[C_ROTK].fillna(0.0),
     })
     ag = g.groupby("ay").agg(toplam=("toplam", "sum"), rotk=("rotk", "sum"), n=("toplam", "size"))
     son_ay = L_t.strftime("%Y-%m")
@@ -1025,21 +1053,17 @@ def build_home():
     except Exception:
         pass
     try:
-        fp = BASE / "hazine ihale " / "hazine_ihale_verileri.xlsx"
-        hz = pd.read_excel(fp, sheet_name="Tüm İhaleler", header=[0, 1])
-        hz.columns = [" / ".join(str(x) for x in c) for c in hz.columns]
+        _, hz = _hazine_yukle()
         cv = "Genel Bilgiler / Valör Tarihi"
-        hz[cv] = _hazine_tarih(hz[cv])
-        hz = hz.dropna(subset=[cv])
         L_t = hz[cv].max(); cy = int(L_t.year)
         ytd = hz[hz[cv].dt.year == cy]
         satis = float(ytd["Toplam Satış / Net (Bin TL)"].sum()) / 1e6
         s3 = hz[hz[cv] >= L_t - pd.DateOffset(months=3)]
         f3 = _wavg(s3["Kabul Edilen Faiz (%) / Ort. Yıllık Bileşik"], s3["Toplam Satış / Nominal (Bin TL)"])
         add("🏦", "Hazine İhaleleri",
-            f"{cy} yılında iç borçlanma ihalelerinde toplam <b>{ht(satis)} milyar TL</b> (net) satış "
-            f"({len(ytd)} ihale, son: {L_t.strftime('%d.%m.%Y')}). Son 3 ayın satış ağırlıklı "
-            f"ortalama bileşik faizi <b>%{ht(f3, 2)}</b>.", "hazine.html")
+            f"{cy} yılında TL cinsi iç borçlanmada toplam <b>{ht(satis)} milyar TL</b> (net) satış "
+            f"({len(ytd)} ihraç, kira sertifikaları dahil; son: {L_t.strftime('%d.%m.%Y')}). Son 3 ayın "
+            f"satış ağırlıklı ortalama bileşik faizi <b>%{ht(f3, 2)}</b>.", "hazine.html")
     except Exception:
         pass
     try:

@@ -32,7 +32,7 @@
   <main>
     <h1 class="page-title">Hazine İhale Verileri</h1>
     <div class="update-info" id="updated"></div>
-    <div class="info-box" id="ozet">📋 16.09.2026 itibarıyla 2026 yılında Hazine iç borçlanma ihalelerinde toplam 2.450,3 milyar TL (net) satış yapıldı (56 ihale). Son 3 ayın satış ağırlıklı ortalama yıllık bileşik faizi %41,10. Finansman programında 2026 yılı için bugüne kadar piyasadan ihale yoluyla 1.956,5 milyar TL borçlanma öngörülmüş, 2.060,9 milyar TL gerçekleşti (program gerçekleşme oranı %105,3).</div>
+    <div class="info-box" id="ozet">📋 16.09.2026 itibarıyla 2026 yılında Hazine'nin TL cinsi iç borçlanmasında toplam 2.655,2 milyar TL (net) satış yapıldı (49 ihale + 7 kira sertifikası doğrudan satışı). Son 3 ayın satış ağırlıklı ortalama yıllık bileşik faizi %41,10. Finansman programında 2026 yılı için bugüne kadar piyasadan ihale yoluyla 1.956,5 milyar TL borçlanma öngörülmüş, 2.060,9 milyar TL gerçekleşti (program gerçekleşme oranı %105,3).</div>
 
     <div class="filter-box">
       <div class="filter-lbl">Yıllar</div>
@@ -47,7 +47,8 @@
       <h3>📅 Finansman Programı vs Gerçekleşme</h3>
       <p class="cap">Milyar TL · HMB aylık "İç Borçlanma Stratejisi" programı ile ihale gerçekleşmeleri ·
         Gerçekleşen = TL cinsi ihalelerde toplam net satış − kamu ROT (programdaki "piyasadan ihale yoluyla"
-        tanımıyla aynı) · Doğrudan satış kalemi döviz/altın cinsi ihraçları (FX DİBS) içerir, oranlara dahil değildir ·
+        tanımıyla aynı; kira sertifikası doğrudan satışları hariç) · Doğrudan satış kalemi kira sertifikası ile
+        döviz/altın cinsi ihraçları (FX DİBS) içerir, oranlara dahil değildir ·
         <i>öngörü</i>: kesin programı henüz yayımlanmamış ay (2–3 ay ileriye dönük tahmin)</p>
       <div class="chips" id="progYil" style="margin-bottom:10px"></div>
       <button class="btn apko-btn" data-sec="secProg">🖨 Beyaz zemin (sunum)</button>
@@ -106,9 +107,10 @@
 
     <footer>Kaynak: HMB iç borçlanma ihale sonuçları (TL cinsi senetler) + HMB aylık "İç Borçlanma
       Stratejisi" duyuruları (finansman programı ve iç borç ödeme takvimi) · Tutarlar Bin TL kaynaklı
-      (görünümlerde Milyon/Milyar TL) · Stok ve itfa takvimi bu ihale verisinden hesaplanır:
-      geri alım/değişim ihaleleri ve doğrudan satışlar hariçtir; TÜFE endekslilerde enflasyon
-      düzeltmesi yoktur — kesin stok için HMB istatistikleri esastır.</footer>
+      (görünümlerde Milyon/Milyar TL) · Stok ve itfa takvimi bu ihraç verisinden hesaplanır:
+      TL cinsi kira sertifikası doğrudan satışları dahildir (faiz ve talep/karşılama istatistiklerine
+      girmez); geri alım/değişim ihaleleri ile döviz/altın cinsi doğrudan satışlar hariçtir; TÜFE
+      endekslilerde enflasyon düzeltmesi yoktur — kesin stok için HMB istatistikleri esastır.</footer>
   </main>
 
   <script src="assets/app.js?v=19"></script>
@@ -327,7 +329,8 @@
           h += "<tr>" +
             '<td class="lbl">' + tarih + "</td>" +
             '<td class="lbl"><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;background:' +
-              (RENK[I.tur[i]] || "#9AA4B2") + '"></span>' + I.tur[i] + "</td>" +
+              (RENK[I.tur[i]] || "#9AA4B2") + '"></span>' + I.tur[i] +
+              (I.ds && I.ds[i] ? ' <span style="font-size:10px;color:var(--muted)">doğrudan satış</span>' : "") + "</td>" +
             "<td>" + (I.isin[i] || "—") + "</td>" +
             '<td class="num">' + (I.vg[i] === null ? "—" : trNum(I.vg[i] / 365, 1) + " yıl") + "</td>" +
             '<td class="num">' + (I.net[i] === null ? "—" : trNum(I.net[i] / 1000, 0)) + "</td>" +
