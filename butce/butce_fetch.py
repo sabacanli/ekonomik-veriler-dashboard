@@ -8,6 +8,11 @@ güncel URL otomatik bulunur (her ay yeni klasör/hash'te yayınlanır).
 Excel yapısı: yıl başına bir sheet; satırlar bütçe kalemleri, sütunlar aylar
 (Oca..Ara) + TOPLAM. Değerler Milyon TL.
 
+HMB bu dosyayı aylık sonuçlar açıklandıktan günler-haftalar sonra yeniler. Aradaki
+boşlukta eksik son ay(lar), sonuçların açıklandığı gün güncellenen Muhasebat Genel
+Müdürlüğü "Konsolide Bütçe Denge Tablosu"ndan (cari yıl, Bin TL) tamamlanır. O tabloda
+dolaysız/dolaylı vergi kırılımı yoktur; bu iki kolon HMB dosyası yenilenene dek boş kalır.
+
 Çıktı: butce.xlsx  (Aylik sheet — tarih bazlı anahtar kalemler).
 """
 import sys
@@ -47,6 +52,89 @@ def discover_url():
         if u.rsplit("/", 1)[-1].startswith(FILE_STEM):
             return u
     raise RuntimeError(f"'{FILE_STEM}' linki HMB sayfasında bulunamadı.")
+
+
+MUH_PAGE_API = "https://muhasebat.hmb.gov.tr/portal/v2/pages?slug=merkezi-yonetim-butce-istatistikleri"
+MUH_FILES_API = "https://muhasebat.hmb.gov.tr/portal/v2/files"
+MUH_STEM = "Merkezi-Yonetim-Konsolide-Butce-Denge-Tablosu-"
+MONTHS_TAM = {"Ocak": 1, "Şubat": 2, "Mart": 3, "Nisan": 4, "Mayıs": 5, "Haziran": 6,
+              "Temmuz": 7, "Ağustos": 8, "Eylül": 9, "Ekim": 10, "Kasım": 11, "Aralık": 12}
+# Muhasebat denge tablosu satır etiketi -> iç sütun adı
+MUH_ROWS = {
+    "Gelirler": "gelir",
+    "Vergi Gelirleri": "vergi",
+    "Harcamalar": "gider",
+    "1-Faiz Hariç Harcama": "faiz_haric_gider",
+    "2-Faiz Harcamaları": "faiz_gideri",
+    "Faiz Dışı Denge": "faiz_disi_denge",
+    "Bütçe Dengesi": "denge",
+}
+UA = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+
+
+def muhasebat_url(year):
+    """İstatistik ağacındaki '<yıl> Merkezi Yönetim… → Bütçe Dengesi' düğümünün denge tablosu URL'si."""
+    agac = requests.get(MUH_PAGE_API, headers=UA, timeout=30).json()[0]["content"]["rendered"]
+    m = re.search(rf'data-name="{year} Merkezi Yönetim[^"]*".*?data-name="Bütçe Dengesi" data-id="(\d+)"',
+                  agac, re.S)
+    if not m:
+        return None
+    liste = requests.get(MUH_FILES_API, params={"name": "Bütçe Dengesi", "id": m.group(1)},
+                         headers=UA, timeout=30).json()["content"]
+    for u in re.findall(r'href="(https://ms\.hmb\.gov\.tr/uploads/[^"]+?\.xlsx?)"', liste):
+        ad = u.rsplit("/", 1)[-1]
+        if ad.startswith(MUH_STEM) and "Onceki-Yilla" not in ad:
+            return u
+    return None
+
+
+def muhasebat_aylar(year):
+    """Muhasebat'ın cari yıl denge tablosu → {ay: {kalem: Milyon TL}} (yalnız yayımlanmış aylar)."""
+    import xlrd
+    import xlrd.biffh
+    url = muhasebat_url(year)
+    if not url:
+        return {}
+    content = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=60).content
+    # Dosyadaki bozuk sayı-biçimi dizgileri xlrd'yi düşürüyor; hücre değerlerini etkilemez
+    xlrd.biffh.unicode = lambda b, enc: b.decode(enc, errors="replace")
+    df = pd.read_excel(xlrd.open_workbook(file_contents=content), engine="xlrd",
+                       sheet_name=0, header=None)
+    hrow = next((i for i in range(min(12, len(df)))
+                 if any(str(v).strip() == "Ocak" for v in df.iloc[i].tolist())), None)
+    if hrow is None:
+        return {}
+    col_month = {c: MONTHS_TAM[str(df.iloc[hrow, c]).strip()] for c in range(df.shape[1])
+                 if str(df.iloc[hrow, c]).strip() in MONTHS_TAM}
+    recs = {}
+    for i in range(df.shape[0]):
+        lab = df.iloc[i, 1]
+        lab = lab.strip() if isinstance(lab, str) else ""
+        if lab in MUH_ROWS:
+            for c, m in col_month.items():
+                v = df.iloc[i, c]
+                if isinstance(v, (int, float)) and pd.notna(v):
+                    recs.setdefault(m, {})[MUH_ROWS[lab]] = float(v) / 1000.0   # Bin TL → Milyon TL
+    return {m: d for m, d in recs.items() if d.get("gelir")}
+
+
+def muhasebat_tamamla(out):
+    """HMB dosyasında henüz olmayan ayları Muhasebat tablosundan ekler; ortak aylarda dengeyi çapraz denetler."""
+    eklenen = []
+    for year in sorted({int(out["yil"].max()), pd.Timestamp.today().year}):
+        mevcut = set(out.loc[out["yil"] == year, "ay"])
+        for m, d in sorted(muhasebat_aylar(year).items()):
+            if m in mevcut:
+                ref = out[(out["yil"] == year) & (out["ay"] == m)].iloc[0]
+                if "denge" in d and abs(ref["denge"] - d["denge"]) > 1:
+                    print(f"  UYARI: {m:02d}.{year} denge HMB {ref['denge']:,.0f} ≠ Muhasebat {d['denge']:,.0f}")
+                continue
+            out = pd.concat([out, pd.DataFrame([{"yil": year, "ay": m, **d}])], ignore_index=True)
+            eklenen.append(f"{m:02d}.{year}")
+    if eklenen:
+        print(f"  + Muhasebat'tan tamamlanan ay(lar): {', '.join(eklenen)} "
+              f"(vergi kırılımı HMB dosyası yenilenince dolar)")
+    return out
 
 
 def parse_sheet(df, year):
@@ -101,6 +189,10 @@ def main():
             rows.append(row)
 
     out = pd.DataFrame(rows)
+    try:
+        out = muhasebat_tamamla(out)
+    except Exception as e:
+        print(f"  UYARI: Muhasebat tamamlama atlandı ({e}) — HMB dosyasındaki son ayla devam")
     out["tarih"] = pd.to_datetime(dict(year=out["yil"], month=out["ay"], day=1))
     out = out.sort_values("tarih").reset_index(drop=True)
     # Kolon sırası
