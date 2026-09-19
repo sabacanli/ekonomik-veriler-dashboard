@@ -16,6 +16,7 @@ Kullanım:
   python haberler/bulten_gonder.py --mod test      # yalnız listedeki İLK alıcıya
   python haberler/bulten_gonder.py --mod evet      # tüm listeye
   python haberler/bulten_gonder.py --kuru out.html # göndermeden HTML önizleme yaz
+  python haberler/bulten_gonder.py --denetle       # göndermeden alıcı listesini denetle (adres yazdırmaz)
 """
 import argparse
 import datetime as dt
@@ -125,12 +126,46 @@ def metin_yap(D):
     return "\n".join(S)
 
 
+def alicilari_oku():
+    ham = [x.strip() for x in re.split(r"[,;\s]+", os.environ.get("BULTEN_ALICILAR", "")) if x.strip()]
+    return ham
+
+
+ADRES_DESENI = re.compile(r"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)+$")
+
+
+def denetle():
+    """Secret'lardaki alıcı listesini göndermeden denetler. Adresler ASLA yazdırılmaz — yalnız sıra
+    numarası ve sayılar. Sonuç ayrıca GitHub 'notice' ek açıklaması olarak da verilir."""
+    ham = alicilari_oku()
+    gecerli = [x for x in ham if ADRES_DESENI.match(x)]
+    hatali = [i for i, x in enumerate(ham, 1) if not ADRES_DESENI.match(x)]
+    yinelenen = len(gecerli) - len({x.lower() for x in gecerli})
+    yanit = os.environ.get("BULTEN_YANIT", "").strip()
+    satirlar = [
+        f"alıcı listesi: {len(ham)} öğe · biçimce geçerli {len(gecerli)} · hatalı {len(hatali)}"
+        + (f" (sıra: {', '.join(map(str, hatali))})" if hatali else "") + f" · yinelenen {yinelenen}",
+        "yanıt adresi (BULTEN_YANIT): " + ("tanımlı, biçimi geçerli" if ADRES_DESENI.match(yanit)
+                                          else "tanımlı ama biçimi HATALI" if yanit else "tanımlı değil"),
+        "Resend anahtarı (RESEND_API_KEY): " + ("tanımlı" if os.environ.get("RESEND_API_KEY", "").strip() else "TANIMLI DEĞİL"),
+    ]
+    for t in satirlar:
+        print(t)
+    print("::notice title=Bülten listesi::" + " | ".join(satirlar))
+    if hatali or not gecerli:
+        sys.exit(1)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mod", choices=["test", "evet"], default="test")
     ap.add_argument("--gun", default=dt.datetime.now(TR).strftime("%Y-%m-%d"))
     ap.add_argument("--kuru", metavar="DOSYA", help="göndermeden HTML önizlemeyi bu dosyaya yaz")
+    ap.add_argument("--denetle", action="store_true", help="göndermeden alıcı listesini denetle")
     a = ap.parse_args()
+    if a.denetle:
+        denetle()
+        return
 
     fp = HABER_DIR / f"{a.gun}.json"
     if not fp.exists():
@@ -146,17 +181,17 @@ def main():
         return
 
     anahtar = os.environ.get("RESEND_API_KEY", "").strip()
-    alicilar = [x.strip() for x in re.split(r"[,;\s]+", os.environ.get("BULTEN_ALICILAR", "")) if "@" in x]
-    alicilar = list(dict.fromkeys(alicilar))
+    alicilar = list(dict.fromkeys(x for x in alicilari_oku() if ADRES_DESENI.match(x)))
     if not anahtar or not alicilar:
         print("Bülten atlandı: RESEND_API_KEY ve/veya BULTEN_ALICILAR tanımlı değil.")
         return
+    toplam = len(alicilar)
     if a.mod == "test":
         alicilar = alicilar[:1]
     gonderen = os.environ.get("BULTEN_GONDEREN", "").strip() or "Ekordion Gündem <bulten@ekordion.com.tr>"
     yanit = os.environ.get("BULTEN_YANIT", "").strip()
 
-    print(f"Bülten gönderiliyor — mod: {a.mod} · alıcı sayısı: {len(alicilar)} · konu: {konu}")
+    print(f"Bülten gönderiliyor — mod: {a.mod} · gönderilecek alıcı: {len(alicilar)} (listede {toplam}) · konu: {konu}")
     tamam = atlanan = hata = 0
     for i, alici in enumerate(alicilar, 1):
         yuk = {"from": gonderen, "to": [alici], "subject": konu, "html": govde, "text": duz}

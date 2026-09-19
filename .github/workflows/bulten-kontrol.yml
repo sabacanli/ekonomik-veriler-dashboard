@@ -1,0 +1,27 @@
+# Bülten alıcı listesini GÖNDERMEDEN denetler: kaç adres var, hepsi biçimce geçerli mi, yinelenen var mı.
+# Adresler hiçbir yere yazdırılmaz (depo ve loglar herkese açık) — yalnız sayılar ve sıra numaraları.
+# BULTEN_ALICILAR secret'ını güncelledikten sonra: Actions → bu workflow → "Run workflow".
+name: Bülten listesi kontrolü
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests
+      - name: Listeyi denetle
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          BULTEN_ALICILAR: ${{ secrets.BULTEN_ALICILAR }}
+          BULTEN_YANIT: ${{ secrets.BULTEN_YANIT }}
+        run: python haberler/bulten_gonder.py --denetle
