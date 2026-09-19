@@ -10,15 +10,16 @@
 #   BULTEN_YANIT       — isteğe bağlı yanıt adresi
 # Variable'lar: HABER_MODEL (varsayılan claude-opus-5), BULTEN_GONDEREN (varsayılan bulten@ekordion.com.tr)
 #
-# Not: GitHub zamanlayıcısı bu depoda saatlerce gecikebiliyor; kesin saat için harici tetik
-#   (workflow_dispatch API çağrısı, bulten=evet) kullanılmalı. Aynı gün iki koşu olursa Resend'in
+# Tetikleme: GitHub zamanlayıcısı bu depoda saatlerce gecikebildiğinden asıl tetik Cloudflare Worker'dır
+#   (cloudflare/gundem-tetik.js → workflow_dispatch, 07:50 TR). Aşağıdaki schedule yalnız YEDEKTİR: o gün
+#   Claude seçkili gündem zaten üretilmişse hiçbir şey yapmadan çıkar. Yine de iki koşu olursa Resend'in
 #   Idempotency-Key'i sayesinde kimseye ikinci e-posta gitmez.
 # Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow" (bülten: hayir / test / evet).
 name: Finans Gündemi (günlük)
 
 on:
   schedule:
-    - cron: "30 4 * * *"   # her gün 04:30 UTC = 07:30 TR
+    - cron: "30 6 * * *"   # YEDEK: 06:30 UTC = 09:30 TR (asıl tetik: cloudflare/gundem-tetik.js, 07:50 TR)
   workflow_dispatch:
     inputs:
       saat:
@@ -50,15 +51,30 @@ jobs:
       - name: Kodu al
         uses: actions/checkout@v4
 
+      - name: Yedek koşu gerekli mi?
+        id: kontrol
+        run: |
+          BUGUN=$(TZ=Europe/Istanbul date +%Y-%m-%d)
+          DOSYA="site/data/haber/$BUGUN.json"
+          if [ "${{ github.event_name }}" = "schedule" ] && [ -f "$DOSYA" ] && grep -q '"mod":"ai"' "$DOSYA"; then
+            echo "Bugünün Claude seçkili gündemi zaten üretilmiş (harici tetik çalışmış) — yedek koşu atlanıyor."
+            echo "atla=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "atla=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Python kur
+        if: steps.kontrol.outputs.atla != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Kütüphaneleri kur
+        if: steps.kontrol.outputs.atla != 'true'
         run: pip install --quiet requests anthropic
 
       - name: Haberleri topla
+        if: steps.kontrol.outputs.atla != 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
@@ -71,6 +87,7 @@ jobs:
           python haberler/haber_topla.py --saat "$SAAT"
 
       - name: Değişiklikleri commit + push
+        if: steps.kontrol.outputs.atla != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -84,18 +101,22 @@ jobs:
           fi
 
       - name: Pages'i yapılandır
+        if: steps.kontrol.outputs.atla != 'true'
         uses: actions/configure-pages@v5
 
       - name: Site klasörünü paketle
+        if: steps.kontrol.outputs.atla != 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
       - name: Yayınla
+        if: steps.kontrol.outputs.atla != 'true'
         id: deployment
         uses: actions/deploy-pages@v4
 
       - name: E-posta bültenini gönder
+        if: steps.kontrol.outputs.atla != 'true'
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           BULTEN_ALICILAR: ${{ secrets.BULTEN_ALICILAR }}
