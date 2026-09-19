@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=20">
+  <link rel="stylesheet" href="assets/style.css?v=21">
 </head>
 <body>
   <button id="menuBtn">☰</button>
@@ -32,6 +32,17 @@
       <h1>Ekonomik Veriler Dashboard</h1>
       <p>Türkiye ekonomik verilerini tek panelden takip edin. TCMB, Hazine ve BDDK
         verilerini analiz edin, raporlar oluşturun.</p>
+    </div>
+
+    <div id="gundemBlok" style="display:none">
+      <h2 class="section-title">Finans Gündemi</h2>
+      <div class="cards" style="grid-template-columns:1fr;margin-bottom:30px">
+        <a class="card" href="gundem.html">
+          <div class="t" id="gundemBaslik">📰 Günün Öne Çıkanları</div>
+          <div class="d"><ol id="gundemListe"></ol></div>
+          <span class="go">→</span>
+        </a>
+      </div>
     </div>
 
     <h2 class="section-title">Güncel Görünüm</h2>
@@ -64,8 +75,19 @@
     </footer>
   </main>
 
-  <script src="assets/app.js?v=20"></script>
+  <script src="assets/app.js?v=21"></script>
   <script>
+    // Gündem kartı: akışlardan gelen metin yalnız textContent ile yazılır
+    getJSON("data/haber/index.json").then(G => {
+      if (!G.ozet || !G.ozet.length) return;
+      const g = G.son;
+      document.getElementById("gundemBaslik").textContent =
+        "📰 Günün Öne Çıkanları — " + g.slice(8, 10) + "." + g.slice(5, 7) + "." + g.slice(0, 4);
+      const ol = document.getElementById("gundemListe");
+      G.ozet.slice(0, 5).forEach(m => { const li = document.createElement("li"); li.textContent = m; ol.appendChild(li); });
+      document.getElementById("gundemBlok").style.display = "";
+    }).catch(() => {});
+
     (async () => {
       try {
         const D = await getJSON("data/home.json");

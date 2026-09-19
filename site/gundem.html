@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finans Gündemi — Günün Ekonomi Haberleri | Ekordion</title>
+  <meta name="description" content="Son 24 saatin finans ve ekonomi gündemi: para politikası, Hazine ve bütçe, bankacılık, piyasalar, makro veriler ve küresel ekonomi haberleri — kaynak bağlantılarıyla, her sabah güncellenir.">
+  <link rel="canonical" href="https://ekordion.com.tr/gundem.html">
+  <meta property="og:title" content="Finans Gündemi — Günün Ekonomi Haberleri | Ekordion">
+  <meta property="og:description" content="Son 24 saatin finans ve ekonomi gündemi: para politikası, Hazine ve bütçe, bankacılık, piyasalar, makro veriler ve küresel ekonomi haberleri — kaynak bağlantılarıyla, her sabah güncellenir.">
+  <meta property="og:url" content="https://ekordion.com.tr/gundem.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ekordion">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:image" content="https://ekordion.com.tr/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css?v=21">
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Finans Gündemi</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet">📰 19.09.2026 finans gündemi — son 24 saatte 17 kaynaktan 89 haber: BDDK, Bank Mellat'ın İstanbul şubesinin faaliyet iznini kaldırdı · THY 11. kez Avrupa'nın en iyi havayolu seçildi · Küresel petrol ürünleri piyasasında arz sıkışıklığı derinleşiyor · Altını ve doları geride bıraktı: Elinde gümüşü olanları mutlu edecek haber geldi · Altın yeniden yükselecek mi? Fed'in faiz kararı sonrası kritik hafta</div>
+
+    <div class="chips" id="gunler"></div>
+
+    <section class="chart-card" id="secOne" style="display:none">
+      <h3>⭐ Günün Öne Çıkanları</h3>
+      <p class="cap" id="capOne"></p>
+      <ol class="one-cikan" id="oneCikan"></ol>
+    </section>
+
+    <div id="kategoriler"></div>
+
+    <footer>Başlıklar ilgili yayıncılara aittir; her başlık haberin kaynağına gider ve haber metni bu
+      sitede yayımlanmaz. Seçki ve kısa özetler otomatik üretilir — yatırım tavsiyesi değildir.
+      Kaynaklar: AA, CNBC-e, Ekonomim, Dünya, Ekonomist, Borsa Gündem, Investing, Habertürk, TRT Haber,
+      Sabah, Milliyet, Sözcü, Hürriyet, Euronews, Cumhuriyet, BBC Türkçe, DW Türkçe.</footer>
+  </main>
+
+  <script src="assets/app.js?v=21"></script>
+  <script>
+    (async () => {
+      const AYK = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+      // Akışlardan gelen metinler güvenilmez: sayfaya yalnız kaçışlanmış olarak girer
+      const esc = s => String(s === null || s === undefined ? "" : s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      const guvenliLink = u => (/^https?:\/\//i.test(u || "") ? esc(u) : "#");
+      const gunEtiket = g => +g.slice(8, 10) + " " + AYK[+g.slice(5, 7) - 1];
+
+      const IDX = await getJSON("data/haber/index.json");
+      const istenen = new URLSearchParams(location.search).get("gun");
+      let gun = IDX.gunler.includes(istenen) ? istenen : IDX.son;
+
+      const gEl = document.getElementById("gunler");
+      gEl.innerHTML = IDX.gunler.slice(0, 14).map(g =>
+        '<span class="chip" data-v="' + g + '">' + gunEtiket(g) + "</span>").join("");
+      gEl.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+        gun = c.dataset.v;
+        history.replaceState(null, "", gun === IDX.son ? "gundem.html" : "gundem.html?gun=" + gun);
+        yukle();
+      });
+
+      async function yukle() {
+        gEl.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.v === gun));
+        const D = await getJSON("data/haber/" + gun + ".json");
+        setUpdated(D.updated);
+        const s = D.sayilar;
+        document.getElementById("ozet").innerHTML = "📰 <b>" + gunEtiket(gun) + " " + gun.slice(0, 4) +
+          "</b> · son " + D.pencere_saat + " saatte " + s.kaynak + " kaynaktan taranan " + s.pencere +
+          " haberden <b>" + s.secilen + "</b> finans haberi seçildi" +
+          (D.mod === "ai" ? " · seçki ve özetler Claude ile hazırlandı." : " · seçki anahtar kelime filtresiyle yapıldı.");
+
+        const one = document.getElementById("secOne");
+        one.style.display = D.ozet && D.ozet.length ? "" : "none";
+        document.getElementById("capOne").textContent = D.mod === "ai"
+          ? "Günün gelişmelerinin kısa özeti" : "En çok kaynakta yer alan ve en yüksek puanlı başlıklar";
+        document.getElementById("oneCikan").innerHTML = (D.ozet || []).map(m => "<li>" + esc(m) + "</li>").join("");
+
+        document.getElementById("kategoriler").innerHTML = D.kategoriler.map(k =>
+          '<section class="chart-card"><h3>' + esc(k.ad) + '</h3><p class="cap">' + k.haberler.length +
+          ' haber</p><ul class="haber-liste">' + k.haberler.map(h =>
+            '<li class="haber">' + (h.onem >= 4 ? '<span class="onem" title="Öne çıkan"></span>' : "") +
+            '<a class="baslik" href="' + guvenliLink(h.link) + '" target="_blank" rel="noopener nofollow">' +
+            esc(h.baslik) + "</a>" +
+            (h.ozet ? '<div class="oz">' + esc(h.ozet) + "</div>" : "") +
+            '<div class="meta">' + esc(h.kaynak) + " · " + esc(h.zaman) +
+            (h.diger && h.diger.length ? " · ayrıca: " + h.diger.map(d =>
+              '<a href="' + guvenliLink(d.link) + '" target="_blank" rel="noopener nofollow">' +
+              esc(d.kaynak) + "</a>").join(", ") : "") +
+            "</div></li>").join("") + "</ul></section>").join("");
+      }
+      yukle();
+    })().catch(e => {
+      document.getElementById("ozet").textContent = "Gündem yüklenemedi: " + e.message;
+    });
+  </script>
+</body>
+</html>

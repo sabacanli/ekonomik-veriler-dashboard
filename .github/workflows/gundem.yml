@@ -1,0 +1,79 @@
+# Finans Gündemi — günlük haber toplama.
+# Her sabah son 24 saatin finans haberlerini RSS akışlarından toplar, seçer, kategorilere ayırır,
+# site/data/haber/ altına günlük arşivi yazar ve siteyi yeniden yayınlar.
+#
+# İsteğe bağlı secret: ANTHROPIC_API_KEY  (Settings → Secrets and variables → Actions)
+#   Varsa seçki ve kısa özetler Claude ile hazırlanır; yoksa anahtar kelime filtresi kullanılır.
+#   Model HABER_MODEL değişkeniyle değiştirilebilir (varsayılan: claude-opus-5).
+# Not: GitHub zamanlayıcısı bu depoda saatlerce gecikebiliyor; kesin saat için harici tetik
+#   (workflow_dispatch API çağrısı) kullanılmalı.
+# Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow".
+name: Finans Gündemi (günlük)
+
+on:
+  schedule:
+    - cron: "30 4 * * *"   # her gün 04:30 UTC = 07:30 TR
+  workflow_dispatch:
+    inputs:
+      saat:
+        description: "Geriye dönük pencere (saat)"
+        default: "24"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  gundem:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Kütüphaneleri kur
+        run: pip install --quiet requests anthropic
+
+      - name: Haberleri topla
+        run: python haberler/haber_topla.py --saat "${{ github.event.inputs.saat || '24' }}"
+
+      - name: Değişiklikleri commit + push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site
+          if git diff --cached --quiet; then
+            echo "Yeni haber yok — commit atlanıyor."
+          else
+            git commit -m "Finans gündemi ($(TZ=Europe/Istanbul date '+%d.%m.%Y %H:%M'))"
+            git pull --rebase origin main || true
+            git push origin main
+          fi
+
+      - name: Pages'i yapılandır
+        uses: actions/configure-pages@v5
+
+      - name: Site klasörünü paketle
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Yayınla
+        id: deployment
+        uses: actions/deploy-pages@v4

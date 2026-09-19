@@ -414,3 +414,22 @@ table.heat th.sortable.sorted { color: var(--amber); }
   padding: 5px 4px 0;
 }
 .chart-card.apko .tablo-imza { color: #B9C2D0; }
+
+/* ── Gündem (haber listesi) ── */
+.haber-liste { list-style: none; margin: 0; padding: 0; }
+.haber { padding: 11px 2px; border-bottom: 1px solid var(--border); }
+.haber:last-child { border-bottom: none; }
+.haber a.baslik { color: var(--text); text-decoration: none; font-weight: 600; font-size: 15px; line-height: 1.4; }
+.haber a.baslik:hover { color: var(--amber); }
+.haber .oz { color: var(--muted); font-size: 13.5px; line-height: 1.55; margin-top: 3px; }
+.haber .meta { color: var(--muted); font: 11.5px 'IBM Plex Mono', monospace; margin-top: 5px; }
+.haber .meta a { color: var(--muted); }
+.haber .meta a:hover { color: var(--amber); }
+.haber .onem {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--amber); margin-right: 8px; vertical-align: middle;
+}
+.one-cikan { margin: 6px 0 0; padding-left: 22px; line-height: 1.6; }
+.one-cikan li { margin-bottom: 7px; }
+.card .d ol { margin: 0; padding-left: 18px; }
+.card .d ol li { margin-bottom: 4px; }

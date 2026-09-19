@@ -1130,7 +1130,7 @@ def build_home():
 
 def build_sitemap():
     """site/sitemap.xml — her export'ta taze lastmod ile yazılır (SEO)."""
-    sayfalar = ["", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
+    sayfalar = ["", "gundem.html", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
                 "cari.html", "kredi.html", "mevduat.html", "butce.html", "nakit.html",
                 "bddk.html", "hazine.html", "tcmb-alim.html",
                 "hesap-kredi.html", "hesap-mevduat.html"]
