@@ -1,13 +1,19 @@
-# Finans Gündemi — günlük haber toplama.
-# Her sabah son 24 saatin finans haberlerini RSS akışlarından toplar, seçer, kategorilere ayırır,
-# site/data/haber/ altına günlük arşivi yazar ve siteyi yeniden yayınlar.
+# Finans Gündemi — günlük haber toplama + e-posta bülteni.
+# Her sabah son 24 saatin (Pazartesi: hafta sonu dahil 72 saatin) finans haberlerini RSS akışlarından
+# toplar, seçer, kategorilere ayırır, site/data/haber/ altına günlük arşivi yazar, siteyi yeniden
+# yayınlar ve hafta içi günlerde bülteni e-postayla gönderir.
 #
-# İsteğe bağlı secret: ANTHROPIC_API_KEY  (Settings → Secrets and variables → Actions)
-#   Varsa seçki ve kısa özetler Claude ile hazırlanır; yoksa anahtar kelime filtresi kullanılır.
-#   Model HABER_MODEL değişkeniyle değiştirilebilir (varsayılan: claude-opus-5).
+# Secret'lar (Settings → Secrets and variables → Actions):
+#   ANTHROPIC_API_KEY  — isteğe bağlı; varsa seçki ve özetler Claude ile, yoksa anahtar kelime filtresi
+#   RESEND_API_KEY     — e-posta gönderimi (Resend); yoksa bülten adımı sessizce atlanır
+#   BULTEN_ALICILAR    — alıcı adresleri, virgülle ayrılmış (DEPO HERKESE AÇIK: adresler yalnız burada durur)
+#   BULTEN_YANIT       — isteğe bağlı yanıt adresi
+# Variable'lar: HABER_MODEL (varsayılan claude-opus-5), BULTEN_GONDEREN (varsayılan bulten@ekordion.com.tr)
+#
 # Not: GitHub zamanlayıcısı bu depoda saatlerce gecikebiliyor; kesin saat için harici tetik
-#   (workflow_dispatch API çağrısı) kullanılmalı.
-# Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow".
+#   (workflow_dispatch API çağrısı, bulten=evet) kullanılmalı. Aynı gün iki koşu olursa Resend'in
+#   Idempotency-Key'i sayesinde kimseye ikinci e-posta gitmez.
+# Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow" (bülten: hayir / test / evet).
 name: Finans Gündemi (günlük)
 
 on:
@@ -16,8 +22,13 @@ on:
   workflow_dispatch:
     inputs:
       saat:
-        description: "Geriye dönük pencere (saat)"
-        default: "24"
+        description: "Geriye dönük pencere (saat) — boş: otomatik (Pazartesi 72, diğer günler 24)"
+        default: ""
+      bulten:
+        description: "E-posta bülteni: hayir = gönderme · test = yalnız ilk alıcıya · evet = tüm listeye"
+        type: choice
+        options: ["hayir", "test", "evet"]
+        default: "hayir"
 
 permissions:
   contents: write
@@ -35,9 +46,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    env:
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
     steps:
       - name: Kodu al
         uses: actions/checkout@v4
@@ -51,7 +59,16 @@ jobs:
         run: pip install --quiet requests anthropic
 
       - name: Haberleri topla
-        run: python haberler/haber_topla.py --saat "${{ github.event.inputs.saat || '24' }}"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
+        run: |
+          SAAT="${{ github.event.inputs.saat }}"
+          if [ -z "$SAAT" ]; then
+            # Pazartesi bülteni hafta sonunu da kapsar
+            if [ "$(TZ=Europe/Istanbul date +%u)" = "1" ]; then SAAT=72; else SAAT=24; fi
+          fi
+          python haberler/haber_topla.py --saat "$SAAT"
 
       - name: Değişiklikleri commit + push
         run: |
@@ -77,3 +94,21 @@ jobs:
       - name: Yayınla
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: E-posta bültenini gönder
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          BULTEN_ALICILAR: ${{ secrets.BULTEN_ALICILAR }}
+          BULTEN_YANIT: ${{ secrets.BULTEN_YANIT }}
+          BULTEN_GONDEREN: ${{ vars.BULTEN_GONDEREN }}
+        run: |
+          MOD="${{ github.event.inputs.bulten }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # zamanlanmış koşu: hafta içi (Pzt–Cum, TR saatiyle) tüm listeye gönder
+            if [ "$(TZ=Europe/Istanbul date +%u)" -le 5 ]; then MOD=evet; else MOD=hayir; fi
+          fi
+          if [ "$MOD" = "evet" ] || [ "$MOD" = "test" ]; then
+            python haberler/bulten_gonder.py --mod "$MOD"
+          else
+            echo "Bülten gönderilmiyor (mod: ${MOD:-hayir})."
+          fi
