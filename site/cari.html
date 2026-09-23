@@ -32,7 +32,7 @@
   <main>
     <h1 class="page-title">Cari Denge</h1>
     <div class="update-info" id="updated"></div>
-    <div class="info-box" id="ozet">📋 Son dönem (2026-Q3) cari işlemler dengesi 36 milyon USD. Son dört çeyreğin (12 aylık) toplamı 46,0 milyar USD açık; bir yıl öncesine göre genişledi. Finans hesabı 549, net hata &amp; noksan 620 milyon USD.</div>
+    <div class="info-box" id="ozet">📋 Son dönem (2026-Q3) cari işlemler dengesi 36 milyon USD. Son dört çeyreğin (12 aylık) toplamı 46,0 milyar USD açık; bir yıl öncesine göre genişledi. Finans hesabı 549, net hata &amp; noksan 620 milyon USD. 12 aylık cari denge -40,7 milyar USD = GSYH'nin %-2,4 (Temmuz 2026); bileşenler: altın %-1,1, enerji %-3,0, altın ve enerji hariç %1,6.</div>
     <div class="metrics" id="metrics"></div>
     <div class="range" id="range"></div>
 
@@ -42,6 +42,14 @@
       <div class="table-wrap" id="tblOdm"></div>
       <p class="cap" style="margin-top:8px">** Birincil ve ikincil gelir dengelerinin toplamıdır.
         Negatif değerler açık, pozitif değerler fazlayı gösterir.</p>
+    </section>
+
+    <section class="chart-card" id="secBil" style="display:none">
+      <h3>Cari Denge Bileşenleri — Altın, Enerji ve Diğer</h3>
+      <p class="cap" id="capBil">GSYH'ye oran, % · 12 aylık hareketli toplamlar ÷ son 4 çeyrek GSYH (USD) · Alanlar: parasal olmayan altın net, enerji (27. fasıl) net, altın ve enerji hariç cari denge · Çizgi: cari işlemler dengesi</p>
+      <button class="btn apko-btn" data-sec="secBil">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secBil">🖼 Resim olarak kopyala</button>
+      <div id="chBil"></div>
     </section>
 
     <section class="chart-card">
@@ -56,7 +64,9 @@
       <div id="ch2"></div>
     </section>
 
-    <footer>Kaynak: TCMB EVDS — Ödemeler Dengesi (çeyreklik) · Negatif = açık.</footer>
+    <footer>Kaynak: TCMB EVDS — Ödemeler Dengesi (çeyreklik); Cari İşlemler Hesabı, Parasal Olmayan Altın ve
+      Enerji Dış Ticareti (aylık); TÜİK cari fiyatlarla GSYH (çeyrek ortalama USD/TL kuruyla dolara çevrilir,
+      son 4 çeyrek toplanır) · Negatif = açık.</footer>
   </main>
 
   <script src="assets/app.js?v=22"></script>
@@ -128,6 +138,33 @@
         [["6 Yıl", 24], ["Tümü", 999]], 24,
         n => { N = n; render(); });
       render();
+
+      // ── Bileşenler: yığılmış alan (altın / enerji / diğer) + cari denge çizgisi, GSYH'ye oran ──
+      const B = D.bilesen;
+      if (B && B.tarih && B.tarih.length) {
+        document.getElementById("secBil").style.display = "";
+        const TEMA = { secBil: false };
+        const alan = (y, ad, renk) => ({ type: "scatter", mode: "lines", x: B.tarih, y: y, name: ad,
+          stackgroup: "b", line: { color: renk, width: 0.6 }, fillcolor: renk, opacity: 0.85,
+          hovertemplate: "%{x|%m.%Y}<br>" + ad + ": %{y:.1f}% GSYH<extra></extra>" });
+        const CIZ = {
+          secBil: () => draw("chBil", [
+            alan(B.altin_gsyh, "Altın (net)", PAL.sari),
+            alan(B.enerji_gsyh, "Enerji (net)", C.kesin),
+            alan(B.diger_gsyh, "Diğer cari akımlar (net)", C.toplam),
+            { type: "scatter", mode: "lines", x: B.tarih, y: B.cari_gsyh, name: "Cari denge (% GSYH)",
+              line: { color: C.amber, width: 2.8 },
+              hovertemplate: "%{x|%m.%Y}<br>Cari denge: %{y:.1f}% GSYH<extra></extra>" },
+          ], { height: 420, yaxis: { title: "% GSYH", zeroline: true },
+               annotations: [annLast(B.tarih[B.tarih.length - 1], B.cari_gsyh[B.cari_gsyh.length - 1],
+                                     trNum(B.cari_gsyh[B.cari_gsyh.length - 1], 1) + "%", C.amber)] }, TEMA.secBil),
+        };
+        document.getElementById("capBil").textContent += " · Son: " + B.son_ay + " — 12 aylık cari denge " +
+          trNum(B.son_cari_12, 1) + " milyar USD, GSYH'nin %" + trNum(B.oran.cari, 1) +
+          " (altın %" + trNum(B.oran.altin, 1) + ", enerji %" + trNum(B.oran.enerji, 1) + ", diğer %" + trNum(B.oran.diger, 1) + ")";
+        CIZ.secBil();
+        sunumAraclariKur(TEMA, CIZ);
+      }
     })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
   </script>
 </body>

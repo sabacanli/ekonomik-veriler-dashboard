@@ -555,6 +555,27 @@ def build_cari():
     except Exception:
         pass
 
+    # Bileşenler: altın / enerji / diğer — 12 aylık toplam, GSYH'ye oran (Moody's görünümü)
+    bilesen = None
+    try:
+        bfp = BASE / "cari acik" / "cari_bilesen.xlsx"
+        b = pd.read_excel(bfp, sheet_name="Aylik"); b["tarih"] = pd.to_datetime(b["tarih"])
+        b = b.sort_values("tarih"); b2 = b[b["tarih"] >= "2016-01-01"]
+        bL = b.dropna(subset=["cari_gsyh"]).iloc[-1]
+        bilesen = {
+            "son_ay": f"{AY[bL['tarih'].month]} {bL['tarih'].year}",
+            "son_cari_12": round(float(bL["cari_12"]), 1), "gsyh_4c": round(float(bL["gsyh_4c_usd"]), 0),
+            "oran": {k: round(float(bL[k + "_gsyh"]), 2) for k in ["cari", "altin", "enerji", "diger"]},
+            "tarih": [t.strftime("%Y-%m-%d") for t in b2["tarih"]],
+            **{k + "_gsyh": col(b2, k + "_gsyh", 2) for k in ["cari", "altin", "enerji", "diger"]},
+            **{k + "_12": col(b2, k + "_12", 1) for k in ["cari", "altin", "enerji", "diger"]},
+        }
+        ozet += (f" 12 aylık cari denge <b>{ht(bL['cari_12'])} milyar USD</b> = GSYH'nin "
+                 f"<b>%{ht(bL['cari_gsyh'])}</b> ({bilesen['son_ay']}); bileşenler: altın "
+                 f"%{ht(bL['altin_gsyh'])}, enerji %{ht(bL['enerji_gsyh'])}, altın ve enerji hariç "
+                 f"%{ht(bL['diger_gsyh'])}.")
+    except Exception as e:
+        print(f"  ~ cari bileşenleri atlandı: {e}")
     dump("cari.json", {
         "updated": mtime(fp),
         "ozet_html": ozet,
@@ -566,6 +587,7 @@ def build_cari():
             "cari_4c": col(c, "cari_4c", 0),
         },
         "odm": odm,
+        "bilesen": bilesen,
     })
 
 

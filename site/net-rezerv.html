@@ -36,6 +36,15 @@
     <div class="metrics" id="metrics"></div>
     <div class="range" id="range"></div>
 
+    <section class="chart-card" id="secTampon">
+      <h3>Rezerv Tamponları — Brüt, Döviz ve Swap Hariç Net</h3>
+      <p class="cap">Milyar USD · 2022'den bugüne — brüt rezerv (döviz + altın) ve döviz rezervi günlük; net UR (swap dahil) günlük;
+        swap hariç net rezerv haftalık likidite tablosu noktaları</p>
+      <button class="btn apko-btn" data-sec="secTampon">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secTampon">🖼 Resim olarak kopyala</button>
+      <div id="chTampon"></div>
+    </section>
+
     <section class="chart-card">
       <h3>Net Uluslararası Rezervler (Swap Dahil)</h3>
       <p class="cap">Milyar USD · Günlük — TCMB haftalık vaziyet "2A Net Uluslararası Rezervler" kalemi (analitik bilanço)</p>
@@ -128,6 +137,26 @@
         [["6 Ay", 126], ["1 Yıl", 252], ["Tümü", 99999]], 252,
         n => { N = n; render(); });
       render();
+
+      // ── Rezerv tamponları (Moody's görünümü): brüt / döviz / net UR / swap hariç net ──
+      const LK0 = D.likidite;
+      {
+        const TEMA = { secTampon: false };
+        const brut = S.brut_doviz.map((v, i) => (v === null || S.altin[i] === null) ? null : (v + S.altin[i]) / 1000);
+        const mlr = v => trNum(v, 1) + " mlr $";
+        const CIZ = {
+          secTampon: () => cokSerili("chTampon", [
+            [brut, "Brüt rezerv (döviz + altın)", C.toplam, 2.4],
+            [S.brut_doviz.map(bn), "Döviz rezervi", C.kesin, 2],
+            [S.net_ur.map(bn), "Net UR (swap dahil)", C.ost, 1.8],
+            (LK0 && LK0.tarih && LK0.tarih.length)
+              ? [LK0.swap_haric.map(bn), "Swap hariç net rezerv", C.amber, 2.6, { mode: "lines+markers", marker: { size: 5 } }, LK0.tarih]
+              : [S.net_ur.map(bn), "Net UR", C.amber, 2.6],
+          ], S.tarih, 99999, 440, TEMA.secTampon, { fmt: mlr, hoverBirim: "%{y:.1f} milyar USD" }),
+        };
+        CIZ.secTampon();
+        sunumAraclariKur(TEMA, CIZ);
+      }
 
       // ── Swap pozisyonu & swap hariç (haftalık, biriken seri) ──
       const LK = D.likidite;

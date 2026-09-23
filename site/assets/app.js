@@ -177,6 +177,7 @@ function draw(id, traces, layoutOver, acik) {
 const ANN_MONO = Object.assign({ size: 12.5 }, ANN_FONT);
 
 function annGuncelle(gd) {
+  const fmt = gd.__fmt || function (v) { return "%" + trNum(v, 2); };   // varsayılan: yüzde
   const gorunur = gd.data.filter(function (tr) { return tr.visible === undefined || tr.visible === true; });
   const annlar = [];
   let gMax = null, gMin = null;
@@ -201,7 +202,7 @@ function annGuncelle(gd) {
   for (const s_ of sonlar) {
     sonShift = (oncekiY !== null && (oncekiY - s_.y) < aralik * 0.05) ? sonShift - 16 : 0;
     oncekiY = s_.y;
-    annlar.push({ x: s_.x, y: s_.y, text: "%" + trNum(s_.y, 2), showarrow: false,
+    annlar.push({ x: s_.x, y: s_.y, text: fmt(s_.y), showarrow: false,
       xanchor: "left", xshift: 8, yshift: sonShift,
       font: Object.assign({ color: s_.renk }, ANN_MONO) });
   }
@@ -210,9 +211,9 @@ function annGuncelle(gd) {
          : u.i <= 1 ? { xanchor: "left", xshift: 6 }
          : { xanchor: "center", xshift: 0 };
   };
-  if (gMax) annlar.push(Object.assign({ x: gMax.x, y: gMax.v, text: "▲ %" + trNum(gMax.v, 2),
+  if (gMax) annlar.push(Object.assign({ x: gMax.x, y: gMax.v, text: "▲ " + fmt(gMax.v),
     showarrow: false, yshift: 15, font: Object.assign({ color: gMax.renk }, ANN_MONO) }, kenar(gMax)));
-  if (gMin) annlar.push(Object.assign({ x: gMin.x, y: gMin.v, text: "▼ %" + trNum(gMin.v, 2),
+  if (gMin) annlar.push(Object.assign({ x: gMin.x, y: gMin.v, text: "▼ " + fmt(gMin.v),
     showarrow: false, yshift: -15, font: Object.assign({ color: gMin.renk }, ANN_MONO) }, kenar(gMin)));
   annlar.push(imzaAnn(gd.layout.paper_bgcolor === "#FFFFFF"));  // imza korunur
   Plotly.relayout(gd, { annotations: annlar });
@@ -220,15 +221,19 @@ function annGuncelle(gd) {
 
 /* Pencereli çok serili çizgi grafiği + görünürlüğe duyarlı etiketler.
    veriler: [[dizi, ad, renk, kalınlık?], ...] */
-function cokSerili(id, veriler, tarih, W, yukseklik, acik) {
+function cokSerili(id, veriler, tarih, W, yukseklik, acik, secenek) {
+  secenek = secenek || {};
   const t = tail(tarih, W);
+  const hoverBirim = secenek.hoverBirim || "%%{y:.2f}";
   const izler = veriler.map(function (v) {
-    return { type: "scatter", mode: "lines", x: t, y: tail(v[0], W), name: v[1],
-      line: { color: v[2], width: v[3] || 2 },
-      hovertemplate: "%{x|%d.%m.%Y}<br>%%{y:.2f}<extra>" + v[1] + "</extra>" };
+    const iz = { type: "scatter", mode: "lines", x: v[5] ? tail(v[5], W) : t, y: tail(v[0], W), name: v[1],
+      line: { color: v[2], width: v[3] || 2 }, connectgaps: true,
+      hovertemplate: "%{x|%d.%m.%Y}<br>" + hoverBirim + "<extra>" + v[1] + "</extra>" };
+    return v[4] ? Object.assign(iz, v[4]) : iz;
   });
-  return draw(id, izler, { height: yukseklik, margin: { l: 54, r: 74, t: 26, b: 44 } }, acik)
+  return draw(id, izler, Object.assign({ height: yukseklik, margin: { l: 54, r: 74, t: 26, b: 44 } }, secenek.layout || {}), acik)
     .then(function (gd) {
+      if (secenek.fmt) gd.__fmt = secenek.fmt;
       annGuncelle(gd);
       gd.on("plotly_restyle", function () { annGuncelle(gd); });  // lejant aç/kapa
       return gd;
