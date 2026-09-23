@@ -19,8 +19,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=21">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=22">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -73,7 +74,7 @@
       ikisi arasındaki makas yeniden fiyatlama hızının göstergesidir.</footer>
   </main>
 
-  <script src="assets/app.js?v=21"></script>
+  <script src="assets/app.js?v=22"></script>
   <script>
     (async () => {
       const D = await getJSON("data/kredi.json");
@@ -107,15 +108,15 @@
           [S.tasit, "Taşıt", C.dolayli], [S.ticari, "Ticari", C.euro],
         ], S.tarih, N, 420, TEMA.sec1),
         sec2: () => cokSerili("ch2", [
-          [S.ticari_usd, "Ticari (USD)", C.green], [S.ticari_eur, "Ticari (EUR)", "#B98AFF"],
+          [S.ticari_usd, "Ticari (USD)", C.green], [S.ticari_eur, "Ticari (EUR)", PAL.mor],
         ], S.tarih, N, 320, TEMA.sec2),
         sec3: () => K && cokSerili("ch3", [
-          [K.ihtiyac, "İhtiyaç", C.amber, 2.5], [K.ihtiyac_kmh, "İhtiyaç (KMH dahil)", "#B98AFF"],
+          [K.ihtiyac, "İhtiyaç", C.amber, 2.5], [K.ihtiyac_kmh, "İhtiyaç (KMH dahil)", PAL.mor],
           [K.konut, "Konut", C.toplam], [K.tasit, "Taşıt", C.dolayli],
         ], K.tarih, ayPenceresi(), 420, TEMA.sec3),
         sec4: () => K && cokSerili("ch4", [
           [K.ticari, "Ticari (TL)", C.euro, 2.5], [K.ticari_usd, "Ticari (USD)", C.green],
-          [K.ticari_eur, "Ticari (EUR)", "#B98AFF"],
+          [K.ticari_eur, "Ticari (EUR)", PAL.mor],
         ], K.tarih, ayPenceresi(), 360, TEMA.sec4),
       };
       // akım penceresi hafta cinsinden; stok aylık — yaklaşık karşılığı

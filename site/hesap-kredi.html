@@ -19,8 +19,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=21">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=22">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -127,7 +128,7 @@
       BDDK 10099 · 11152 · 11158 · 11364, TCMB 2020/7.</footer>
   </main>
 
-  <script src="assets/app.js?v=21"></script>
+  <script src="assets/app.js?v=22"></script>
   <script>
     const TURLER = {
       ihtiyac: { ad: "İhtiyaç", kkdf: 0.15, bsmv: 0.15 },
@@ -231,7 +232,7 @@
           hovertemplate: "%{x}. ay<br>Anapara: %{y:,.2f} TL<extra></extra>" },
         { type: "bar", x: ay, y: p.rows.map(r => r[3]), name: "Faiz", marker: { color: C.amber },
           hovertemplate: "%{x}. ay<br>Faiz: %{y:,.2f} TL<extra></extra>" },
-        { type: "bar", x: ay, y: p.rows.map(r => r[4] + r[5]), name: "Vergi (KKDF+BSMV)", marker: { color: "#B98AFF" },
+        { type: "bar", x: ay, y: p.rows.map(r => r[4] + r[5]), name: "Vergi (KKDF+BSMV)", marker: { color: PAL.mor },
           hovertemplate: "%{x}. ay<br>Vergi: %{y:,.2f} TL<extra></extra>" },
       ], { barmode: "stack", height: 360, bargap: 0.15,
            xaxis: { title: { text: "Ay", font: { size: 12 } } } });

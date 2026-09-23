@@ -433,3 +433,70 @@ table.heat th.sortable.sorted { color: var(--amber); }
 .one-cikan li { margin-bottom: 7px; }
 .card .d ol { margin: 0; padding-left: 18px; }
 .card .d ol li { margin-bottom: 4px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AÇIK TEMA (varsayılan) — TCMB sunum dili: beyaz zemin, Open Sans,
+   kırmızı (#D40031) + lacivert (#1C3044) ikili palet, ince gri ayraçlar.
+   Koyu (Bloomberg) tema html[data-theme="koyu"] ile seçilir; yukarıdaki
+   kurallar onun için kalır, aşağısı açık temada üstüne yazar.
+   ═══════════════════════════════════════════════════════════════════════ */
+html:not([data-theme="koyu"]) {
+  --bg: #FFFFFF; --side: #F7F8FA; --panel: #FFFFFF; --panel2: #F7F8FA;
+  --border: #E3E6EB; --text: #1C3044; --muted: #5B6779;
+  --amber: #D40031; --green: #2E7D5B; --red: #D40031; --blue: #2F5E9E;
+  --kirmizi: #D40031; --lacivert: #1C3044; --acik-kirmizi: #FFF4F3;
+}
+html:not([data-theme="koyu"]) body { font-family: 'Open Sans', 'IBM Plex Sans', -apple-system, sans-serif; }
+html:not([data-theme="koyu"]) .brand { font-family: 'Open Sans', sans-serif; color: var(--kirmizi); font-weight: 700; letter-spacing: 0; }
+html:not([data-theme="koyu"]) .nav a, html:not([data-theme="koyu"]) .nav .soon { background: transparent; color: var(--lacivert); }
+html:not([data-theme="koyu"]) .nav a:hover { background: #EEF1F5; border-color: transparent; }
+html:not([data-theme="koyu"]) .nav a.active { background: var(--acik-kirmizi); border-color: var(--kirmizi); color: var(--kirmizi); }
+html:not([data-theme="koyu"]) .nav-head, html:not([data-theme="koyu"]) .side-foot { color: #8A93A6; }
+html:not([data-theme="koyu"]) .tema-btn { background: #FFFFFF; border-color: #D9DEE5; color: var(--muted); }
+html:not([data-theme="koyu"]) .page-title { color: var(--lacivert); font-size: 27px; }
+html:not([data-theme="koyu"]) .info-box {
+  background: var(--acik-kirmizi); border: 1px solid #F3D6DC; border-left: 4px solid var(--kirmizi); color: var(--lacivert);
+}
+html:not([data-theme="koyu"]) .info-box b { color: var(--kirmizi); }
+html:not([data-theme="koyu"]) .metric .val, html:not([data-theme="koyu"]) .metric .dlt,
+html:not([data-theme="koyu"]) table.heat td, html:not([data-theme="koyu"]) .haber .meta,
+html:not([data-theme="koyu"]) input.inp, html:not([data-theme="koyu"]) .tablo-imza {
+  font-family: 'Open Sans', sans-serif; font-variant-numeric: tabular-nums;
+}
+html:not([data-theme="koyu"]) .metric .val { color: var(--lacivert); }
+html:not([data-theme="koyu"]) .range button { background: #FFFFFF; }
+html:not([data-theme="koyu"]) .range button.active, html:not([data-theme="koyu"]) .chip.active,
+html:not([data-theme="koyu"]) .pl-reset { background: var(--acik-kirmizi); color: var(--kirmizi); border-color: var(--kirmizi); }
+html:not([data-theme="koyu"]) .chip { background: #FFFFFF; border-color: #D9DEE5; }
+html:not([data-theme="koyu"]) .chart-card h3 { color: #111418; font-size: 16.5px; font-weight: 700; }
+html:not([data-theme="koyu"]) .chart-card .cap { color: #4A5568; }
+html:not([data-theme="koyu"]) .hero { background: #F7F8FA; }
+html:not([data-theme="koyu"]) .hero h1 { color: var(--lacivert); }
+html:not([data-theme="koyu"]) .card .d b { color: var(--lacivert); }
+html:not([data-theme="koyu"]) .card .go { color: var(--kirmizi); }
+html:not([data-theme="koyu"]) .filter-box { background: #F7F8FA; }
+html:not([data-theme="koyu"]) select.sel, html:not([data-theme="koyu"]) input.inp,
+html:not([data-theme="koyu"]) .btn, html:not([data-theme="koyu"]) #menuBtn { background: #FFFFFF; border-color: #D9DEE5; color: var(--lacivert); }
+html:not([data-theme="koyu"]) .btn:hover { border-color: var(--kirmizi); color: var(--kirmizi); }
+html:not([data-theme="koyu"]) .warn-line { color: #B86E00; }
+html:not([data-theme="koyu"]) .check input { accent-color: var(--kirmizi); }
+html:not([data-theme="koyu"]) table.heat th { color: var(--muted); border-bottom-color: #C9D2E0; }
+html:not([data-theme="koyu"]) table.heat th.grp, html:not([data-theme="koyu"]) table.heat th.sortable.sorted { color: var(--kirmizi); }
+html:not([data-theme="koyu"]) table.heat td { color: var(--lacivert); border-bottom-color: #EDF0F4; }
+html:not([data-theme="koyu"]) table.heat td.lbl { color: var(--lacivert); }
+html:not([data-theme="koyu"]) table.heat tr.sec td.lbl, html:not([data-theme="koyu"]) table.heat tr.sec td.num { color: var(--lacivert); }
+html:not([data-theme="koyu"]) table.heat td.bos { color: #97A1B5; }
+html:not([data-theme="koyu"]) .table-scroll table.heat thead th { background: #FFFFFF; }
+html:not([data-theme="koyu"]) .tablo-imza { color: #B9C2D0; }
+html:not([data-theme="koyu"]) .apko-btn { display: none; }   /* zemin zaten beyaz */
+html:not([data-theme="koyu"]) .haber a.baslik { color: var(--lacivert); }
+html:not([data-theme="koyu"]) .haber a.baslik:hover, html:not([data-theme="koyu"]) .haber .meta a:hover { color: var(--kirmizi); }
+html:not([data-theme="koyu"]) .haber .onem { background: var(--kirmizi); }
+
+/* Tema düğmesi (kenar çubuğu altı) */
+.tema-btn {
+  display: block; width: 100%; margin-top: 16px; padding: 7px 10px;
+  background: #141926; border: 1px solid var(--border); color: var(--muted);
+  border-radius: 9px; font: 12.5px inherit; font-family: inherit; cursor: pointer;
+}
+.tema-btn:hover { border-color: var(--amber); color: var(--amber); }

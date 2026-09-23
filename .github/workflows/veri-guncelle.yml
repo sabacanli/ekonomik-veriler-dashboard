@@ -71,6 +71,7 @@ jobs:
           calistir "Hazine İhale — analiz"   "hazine ihale /hazine_analiz.py"
           calistir "Hazine İhale — ödeme"    "hazine ihale /hazine_odeme.py"
           calistir "TCMB Doğrudan Alım"      "tcmb dogrudan alım/guncelle.py"
+          calistir "Para Politikası"         "tcmb faiz/tcmb_faiz_fetch.py"
           echo ""
           echo "Başarısız modüller:${FAILS:- (yok — hepsi güncellendi)}"
 
@@ -83,7 +84,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "tcmb haftalık stok/output" "net rezerv" "enflasyon" "kredi mevduat" \
                   "yabanci para hareketi" "cari acik" "butce" "hazine nakit" \
-                  "hazine ihale " "tcmb dogrudan alım" site
+                  "hazine ihale " "tcmb dogrudan alım" "tcmb faiz" site
           if git diff --cached --quiet; then
             echo "Yeni veri yok — commit atlanıyor."
           else

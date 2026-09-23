@@ -19,8 +19,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=21">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=22">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -80,7 +81,7 @@
     <footer>Kaynak: TCMB EVDS (TP.MKNETHAR serileri) · Tüm veriler yurt dışı yerleşiklerin Türkiye menkul kıymet yatırımıdır.</footer>
   </main>
 
-  <script src="assets/app.js?v=21"></script>
+  <script src="assets/app.js?v=22"></script>
   <script>
     (async () => {
       const D = await getJSON("data/tcmb_stok.json");
@@ -171,7 +172,7 @@
       draw("ch7", YSER.map(([nm, key, renk]) => ({
         type: "bar", x: Y.yil, y: Y[key], name: nm, marker: { color: renk },
         text: Y[key].map(v => trNum(v, 1)), textposition: "inside",
-        insidetextfont: { size: 12, color: "#FFFFFF", family: "'IBM Plex Mono', monospace" },
+        insidetextfont: Object.assign({ size: 12, color: "#FFFFFF" }, ANN_FONT),
         hovertemplate: "%{x}<br>" + nm + ": %{y:.1f} milyar USD<extra></extra>",
       })), { height: 460, barmode: "relative", bargap: 0.45 });
     })().catch(e => setOzet("Veri yüklenemedi: " + e.message));

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Para Politikası ve Enflasyon Beklentileri | Ekordion</title>
+  <meta name="description" content="TCMB politika faizi, ağırlıklı ortalama fonlama maliyeti, TLREF ve net fonlama; piyasa, reel sektör ve hanehalkı enflasyon beklentileri; kur etkisinden arındırılmış kredi büyümesi, TL mevduat payı, GSYH büyümesi ve reel efektif kur — her hafta güncellenir.">
+  <link rel="canonical" href="https://ekordion.com.tr/tcmb-faiz.html">
+  <meta property="og:title" content="Para Politikası ve Enflasyon Beklentileri | Ekordion">
+  <meta property="og:description" content="TCMB politika faizi, fonlama maliyeti, TLREF, net fonlama; enflasyon beklentileri; kur etkisinden arındırılmış kredi büyümesi, TL mevduat payı, GSYH ve reel efektif kur.">
+  <meta property="og:url" content="https://ekordion.com.tr/tcmb-faiz.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ekordion">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:image" content="https://ekordion.com.tr/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=22">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Para Politikası &amp; Beklentiler</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet">📋 22.09.2026 itibarıyla politika faizi %37,00, TCMB ağırlıklı ortalama fonlama maliyeti %37,00, TLREF %36,49 (21.09); TCMB net fonlaması -921 milyar TL (sterilizasyon). Ağustos anketinde 12 ay sonrası enflasyon beklentisi piyasa katılımcılarında %23,69, reel sektörde %32,8, hanehalkında %45,6. Kur etkisinden arındırılmış toplam kredi büyümesi (13 hafta, yıllıklandırılmış) %25,3, TL mevduat payı %61,3 (11.09.2026). GSYH 2026-Ç2 yıllık büyümesi %2,3.</div>
+    <div class="metrics" id="metrics"></div>
+    <div class="range" id="range"></div>
+
+    <section class="chart-card" id="sec1">
+      <h3>Politika Faizi, Fonlama Maliyeti ve Piyasa Faizleri</h3>
+      <p class="cap">% · İş günü — politika faizi (BIS aylık serisi), TCMB ağırlıklı ortalama fonlama maliyeti, BIST TLREF ve BIST gecelik repo ağırlıklı ortalama faizi</p>
+      <button class="btn apko-btn" data-sec="sec1">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec1">🖼 Resim olarak kopyala</button>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card" id="sec2">
+      <h3>TCMB Net Fonlaması</h3>
+      <p class="cap">Milyar TL · İş günü — APİ fonlaması eksi sterilizasyon; negatif değer piyasadan likidite çekildiğini (sterilizasyon) gösterir</p>
+      <button class="btn apko-btn" data-sec="sec2">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec2">🖼 Resim olarak kopyala</button>
+      <div id="ch2"></div>
+    </section>
+
+    <section class="chart-card" id="sec3">
+      <h3>12 Ay Sonrası Yıllık Enflasyon Beklentileri</h3>
+      <p class="cap">% · Aylık — Piyasa Katılımcıları Anketi, Sektörel Enflasyon Beklentileri (reel sektör ve hanehalkı)</p>
+      <button class="btn apko-btn" data-sec="sec3">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec3">🖼 Resim olarak kopyala</button>
+      <div id="ch3"></div>
+    </section>
+
+    <section class="chart-card" id="sec4">
+      <h3>Kredi Büyümesi — 13 Haftalık, Yıllıklandırılmış</h3>
+      <p class="cap">% · Haftalık — toplam krediler kur etkisinden arındırılmış (YP krediler 13 hafta önce bugünkü kurla değerlenir); TL ticari ve tüketici kredileri (kredi kartları dahil) nominal</p>
+      <button class="btn apko-btn" data-sec="sec4">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec4">🖼 Resim olarak kopyala</button>
+      <div id="ch4"></div>
+    </section>
+
+    <section class="chart-card" id="sec5">
+      <h3>TL Mevduat Payı</h3>
+      <p class="cap">% · Haftalık — TL mevduat ÷ (TL mevduat + USD/TL kuruyla değerlenmiş YP mevduat); yurt içi şubeler, resmi mevduat dahil, yatırım fonları hariç</p>
+      <button class="btn apko-btn" data-sec="sec5">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec5">🖼 Resim olarak kopyala</button>
+      <div id="ch5"></div>
+    </section>
+
+    <section class="chart-card" id="sec6">
+      <h3>GSYH ve Harcama Bileşenleri — Yıllık Büyüme</h3>
+      <p class="cap">% · Üç aylık, zincirlenmiş hacim, bir önceki yılın aynı çeyreğine göre — hanehalkı tüketimi (kâr amacı olmayan kuruluşlar dahil), devlet tüketimi, sabit sermaye yatırımı</p>
+      <button class="btn apko-btn" data-sec="sec6">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec6">🖼 Resim olarak kopyala</button>
+      <div id="ch6"></div>
+    </section>
+
+    <section class="chart-card" id="sec7">
+      <h3>Reel Efektif Döviz Kuru (TÜFE Bazlı)</h3>
+      <p class="cap">Endeks, 2025=100 · Aylık — yükseliş TL'nin reel değer kazandığını gösterir</p>
+      <button class="btn apko-btn" data-sec="sec7">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="sec7">🖼 Resim olarak kopyala</button>
+      <div id="ch7"></div>
+    </section>
+
+    <footer>Kaynak: TCMB EVDS — TCMB Net Fonlaması ve Ağırlıklı Ortalama Fonlama Maliyeti; BIST TLREF; Borsa İstanbul
+      Gecelik Repo Faiz Oranları; Piyasa Katılımcıları Anketi ve Sektörel Enflasyon Beklentileri; Bankacılık Sektörü
+      Seçilmiş Kredi Büyüklükleri ile TL/YP Mevduatı (yurt içi şubeler, haftalık); Reel Efektif Döviz Kuru (TÜFE bazlı).
+      Politika faizi: BIS merkez bankası politika faizleri (aylık; ay içi karar bir sonraki ayda görünür). GSYH: TÜİK.
+      Kredi büyümesi ve TL payı bu ham serilerden hesaplanır; TCMB'nin 5 günlük hareketli ortalamalı günlük
+      hesabından küçük farklar gösterebilir.</footer>
+  </main>
+
+  <script src="assets/app.js?v=22"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/tcmb_faiz.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+      const s = D.son;
+      setMetrics([
+        ["Politika Faizi", "%" + trNum(s.politika, 2), "BIS · aylık", "flat"],
+        ["Fonlama Maliyeti (AOFM)", "%" + trNum(s.aofm, 2), s.tarih, "flat"],
+        ["TLREF", "%" + trNum(s.tlref, 2), s.tlref_tarih, "flat"],
+        ["TCMB Net Fonlama", trNum(s.net_fonlama, 0), "milyar TL · " + (s.net_fonlama < 0 ? "sterilizasyon" : "fonlama"), s.net_fonlama < 0 ? "down" : "up"],
+        ["Enflasyon Beklentisi (12 Ay)", "%" + trNum(s.bek_piyasa, 2), "piyasa katılımcıları · " + s.bek_ay, "flat"],
+        ["TL Mevduat Payı", "%" + trNum(s.tl_pay, 1), s.hafta, "flat"],
+      ]);
+
+      const G = D.gunluk, A = D.aylik, H = D.haftalik, Q = D.ceyrek;
+      let N = 252;
+      const TEMA = { sec1: false, sec2: false, sec3: false, sec4: false, sec5: false, sec6: false, sec7: false };
+
+      // Politika faizi basamaklı çizgi; diğerleri düz çizgi — etiketler ortak takımdan (annGuncelle)
+      function faizler() {
+        const t = tail(G.tarih, N);
+        return draw("ch1", [
+          { type: "scatter", mode: "lines", x: t, y: tail(G.politika, N), name: "Politika Faizi",
+            line: { color: C.amber, width: 2.6, shape: "hv" }, hovertemplate: "%{x|%d.%m.%Y}<br>Politika: %%{y:.2f}<extra></extra>" },
+          { type: "scatter", mode: "lines", x: t, y: tail(G.aofm, N), name: "AOFM",
+            line: { color: C.toplam, width: 2 }, hovertemplate: "%{x|%d.%m.%Y}<br>AOFM: %%{y:.2f}<extra></extra>" },
+          { type: "scatter", mode: "lines", x: t, y: tail(G.tlref, N), name: "TLREF",
+            line: { color: C.kesin, width: 1.8 }, connectgaps: true, hovertemplate: "%{x|%d.%m.%Y}<br>TLREF: %%{y:.2f}<extra></extra>" },
+          { type: "scatter", mode: "lines", x: t, y: tail(G.on_repo, N), name: "BIST O/N Repo",
+            line: { color: C.ost, width: 1.4 }, connectgaps: true, hovertemplate: "%{x|%d.%m.%Y}<br>O/N repo: %%{y:.2f}<extra></extra>" },
+        ], { height: 420, margin: { l: 54, r: 74, t: 26, b: 44 } }, TEMA.sec1)
+          .then(gd => { annGuncelle(gd); gd.on("plotly_restyle", () => annGuncelle(gd)); return gd; });
+      }
+      const CIZ = {
+        sec1: faizler,
+        sec2: () => {
+          const t = tail(G.tarih, N), y = tail(G.net_fonlama, N);
+          return draw("ch2", [{ type: "bar", x: t, y: y,
+            marker: { color: y.map(v => (v !== null && v < 0) ? C.red : C.toplam) },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:,.0f} milyar TL<extra></extra>" }],
+            { height: 340, showlegend: false, bargap: 0 }, TEMA.sec2);
+        },
+        sec3: () => cokSerili("ch3", [
+          [A.bek_piyasa, "Piyasa Katılımcıları", C.amber, 2.6], [A.bek_reel, "Reel Sektör", C.toplam],
+          [A.bek_hane, "Hanehalkı", C.kesin],
+        ], A.tarih, 36, 400, TEMA.sec3),
+        sec4: () => cokSerili("ch4", [
+          [H.kredi13_toplam, "Toplam (kur etkisinden arındırılmış)", C.amber, 2.6],
+          [H.kredi13_ticari_tl, "TL Ticari", C.toplam], [H.kredi13_tuketici, "Tüketici", C.kesin],
+        ], H.tarih, 130, 400, TEMA.sec4),
+        sec5: () => cokSerili("ch5", [[H.tl_pay, "TL Mevduat Payı", C.toplam, 2.6]], H.tarih, 9999, 340, TEMA.sec5),
+        sec6: () => {
+          const seriler = [["gsyh", "GSYH", C.amber], ["hane_t", "Hanehalkı Tüketimi", C.toplam],
+                           ["yatirim", "Yatırım", C.kesin], ["devlet", "Devlet Tüketimi", C.ost]];
+          const k = Q.donem.slice(-8);
+          return draw("ch6", seriler.map(([kod, ad, renk]) => ({
+            type: "bar", x: k, y: Q[kod].slice(-8), name: ad, marker: { color: renk },
+            text: Q[kod].slice(-8).map(v => (v === null ? "" : trNum(v, 1))), textposition: "outside",
+            textfont: Object.assign({ size: 11.5, color: renk }, ANN_FONT), cliponaxis: false,
+            hovertemplate: "%{x}<br>" + ad + ": %%{y:.1f}<extra></extra>",
+          })), { height: 400, barmode: "group", bargap: 0.3, bargroupgap: 0.06 }, TEMA.sec6);
+        },
+        sec7: () => cokSerili("ch7", [[A.redk, "REDK (TÜFE bazlı)", C.toplam, 2.4]], A.tarih, 9999, 340, TEMA.sec7),
+      };
+      function render() { CIZ.sec1(); CIZ.sec2(); }
+      rangeCtl(document.getElementById("range"),
+        [["6 Ay", 126], ["1 Yıl", 252], ["Tümü", 9999]], 252, n => { N = n; render(); });
+      render();
+      CIZ.sec3(); CIZ.sec4(); CIZ.sec5(); CIZ.sec6(); CIZ.sec7();
+      sunumAraclariKur(TEMA, CIZ);
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>

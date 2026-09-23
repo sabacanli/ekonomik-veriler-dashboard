@@ -856,6 +856,93 @@ def _alim_islemler(d):
     }
 
 
+def _tcmb_faiz_hesapla():
+    """tcmb_faiz.xlsx → sayfa/kart için türetilmiş göstergeler.
+
+    - Kredi büyümesi: 13 haftalık, yıllıklandırılmış, kur etkisinden arındırılmış (YP krediler 13 hafta
+      önceki haftada bugünkü kurla değerlenir; TCMB'nin "kur etkisinden arındırılmış" yaklaşımı).
+    - TL mevduat payı: TL mevduat / (TL mevduat + YP mevduat × USD/TL) — TCMB sunumundaki TL payı.
+    - GSYH: zincirlenmiş hacimde yıllık % değişim (aynı çeyreğe göre).
+    - Politika faizi BIS'in aylık serisinden; ay içi değişim bir sonraki ay serisine yansır.
+    """
+    fp = BASE / "tcmb faiz" / "tcmb_faiz.xlsx"
+    g = pd.read_excel(fp, sheet_name="Gunluk"); g["tarih"] = pd.to_datetime(g["tarih"])
+    a = pd.read_excel(fp, sheet_name="Aylik"); a["tarih"] = pd.to_datetime(a["tarih"])
+    h = pd.read_excel(fp, sheet_name="Haftalik"); h["tarih"] = pd.to_datetime(h["tarih"])
+    c = pd.read_excel(fp, sheet_name="Ceyrek"); c["tarih"] = pd.to_datetime(c["tarih"])
+    g = g.sort_values("tarih").reset_index(drop=True)
+    h = h.sort_values("tarih").reset_index(drop=True)
+
+    # Haftalık kur: haftanın Cuma'sı veya öncesindeki son iş günü
+    kur = g[["tarih", "usd"]].dropna()
+    h = pd.merge_asof(h, kur.rename(columns={"usd": "kur"}), on="tarih", direction="backward")
+    tl = (h["kredi_tuketici"] - h["bkart_yp"] + h["ticari_tl"] + h["diger_tl"] + h["kkart_tl"]
+          + h["fin_banka_tl"] + h["fin_diger_tl"])
+    yp = h["bkart_yp"] + h["ticari_yp"] + h["diger_yp"] + h["kkart_yp"] + h["fin_banka_yp"] + h["fin_diger_yp"]
+    sapma = ((tl + yp) / h["kredi_toplam"] - 1).abs().max()
+    if sapma > 0.005:
+        print(f"  ~ tcmb_faiz: TL+YP kredi toplamı ile tablo toplamı arasında %{sapma*100:.2f} sapma")
+    k = 13
+    baz = tl.shift(k) + yp.shift(k) * (h["kur"] / h["kur"].shift(k))
+    h["kredi13_toplam"] = (((tl + yp) / baz) ** (52 / k) - 1) * 100
+    h["kredi13_ticari_tl"] = ((h["ticari_tl"] / h["ticari_tl"].shift(k)) ** (52 / k) - 1) * 100
+    h["kredi13_tuketici"] = ((h["kredi_tuketici"] / h["kredi_tuketici"].shift(k)) ** (52 / k) - 1) * 100
+    yp_tl = h["mevduat_yp_usd"] * 1000 * h["kur"]          # Milyon USD → Bin TL
+    h["tl_pay"] = h["mevduat_tl"] / (h["mevduat_tl"] + yp_tl) * 100
+
+    c = c.sort_values("tarih").reset_index(drop=True)
+    c["hane_t"] = c["hane"] + c["hhkak"]
+    for kol in ["gsyh", "hane_t", "devlet", "yatirim"]:
+        c[kol + "_y"] = (c[kol] / c[kol].shift(4) - 1) * 100
+    c["donem"] = c["tarih"].map(lambda t: f"{t.year}-Ç{(t.month - 1) // 3 + 1}")
+
+    def son(df, kol):
+        s = df[kol].dropna()
+        return (None, None) if s.empty else (float(s.iloc[-1]), df.loc[s.index[-1], "tarih"])
+    return {"fp": fp, "g": g, "a": a, "h": h, "c": c, "son": son}
+
+
+def build_tcmb_faiz():
+    T = _tcmb_faiz_hesapla()
+    g, a, h, c, son = T["g"], T["a"], T["h"], T["c"], T["son"]
+    pol, pol_t = son(g, "politika"); aofm, aofm_t = son(g, "aofm"); tlref, tlref_t = son(g, "tlref")
+    onr, onr_t = son(g, "on_repo"); nf, nf_t = son(g, "net_fonlama")
+    bp, bp_t = son(a, "bek_piyasa"); br, _ = son(a, "bek_reel"); bh, _ = son(a, "bek_hane"); redk, redk_t = son(a, "redk")
+    k13, k13_t = son(h, "kredi13_toplam"); k13t, _ = son(h, "kredi13_ticari_tl"); k13k, _ = son(h, "kredi13_tuketici")
+    pay, pay_t = son(h, "tl_pay"); gy, gy_t = son(c, "gsyh_y")
+    cL = c.dropna(subset=["gsyh_y"]).iloc[-1]
+    ozet = (f"<b>{nf_t.strftime('%d.%m.%Y')}</b> itibarıyla politika faizi <b>%{ht(pol, 2)}</b>, TCMB ağırlıklı "
+            f"ortalama fonlama maliyeti %{ht(aofm, 2)}, TLREF %{ht(tlref, 2)} ({tlref_t.strftime('%d.%m')}); TCMB net "
+            f"fonlaması <b>{ht(nf, 0)} milyar TL</b> ({'sterilizasyon' if nf < 0 else 'fonlama'}). "
+            f"{AY[bp_t.month]} anketinde 12 ay sonrası enflasyon beklentisi piyasa katılımcılarında <b>%{ht(bp, 2)}</b>, "
+            f"reel sektörde %{ht(br, 1)}, hanehalkında %{ht(bh, 1)}. Kur etkisinden arındırılmış toplam kredi büyümesi "
+            f"(13 hafta, yıllıklandırılmış) <b>%{ht(k13, 1)}</b>, TL mevduat payı <b>%{ht(pay, 1)}</b> "
+            f"({pay_t.strftime('%d.%m.%Y')}). GSYH {cL['donem']} yıllık büyümesi %{ht(gy, 1)}.")
+    g2 = g[g["tarih"] >= "2023-01-01"]
+    a2 = a[a["tarih"] >= "2020-01-01"]
+    h2 = h[h["tarih"] >= "2023-01-01"]
+    c2 = c.dropna(subset=["gsyh_y"]).tail(12)
+    dump("tcmb_faiz.json", {
+        "updated": mtime(T["fp"]),
+        "ozet_html": ozet,
+        "son": {"tarih": nf_t.strftime("%d.%m.%Y"), "politika": pol, "aofm": aofm, "tlref": tlref,
+                "tlref_tarih": tlref_t.strftime("%d.%m.%Y"), "on_repo": onr, "net_fonlama": nf,
+                "bek_piyasa": bp, "bek_reel": br, "bek_hane": bh, "bek_ay": f"{AY[bp_t.month]} {bp_t.year}",
+                "kredi13": k13, "kredi13_ticari_tl": k13t, "kredi13_tuketici": k13k,
+                "tl_pay": pay, "hafta": pay_t.strftime("%d.%m.%Y"), "gsyh_y": gy, "gsyh_donem": cL["donem"],
+                "redk": redk, "redk_ay": f"{AY[redk_t.month]} {redk_t.year}"},
+        "gunluk": {"tarih": [t.strftime("%Y-%m-%d") for t in g2["tarih"]],
+                   **{k: col(g2, k, 2) for k in ["politika", "aofm", "tlref", "on_repo"]},
+                   "net_fonlama": col(g2, "net_fonlama", 1)},
+        "aylik": {"tarih": [t.strftime("%Y-%m-%d") for t in a2["tarih"]],
+                  **{k: col(a2, k, 2) for k in ["bek_piyasa", "bek_reel", "bek_hane", "redk"]}},
+        "haftalik": {"tarih": [t.strftime("%Y-%m-%d") for t in h2["tarih"]],
+                     **{k: col(h2, k, 2) for k in ["kredi13_toplam", "kredi13_ticari_tl", "kredi13_tuketici", "tl_pay"]}},
+        "ceyrek": {"donem": list(c2["donem"]),
+                   **{k: col(c2, k + "_y", 1) for k in ["gsyh", "hane_t", "devlet", "yatirim"]}},
+    })
+
+
 def build_bddk():
     import bddk_analiz as ba
     tl_b, usd_b, kaynak = ba.load_latest(BASE / "bddk_data")
@@ -1122,6 +1209,17 @@ def build_home():
     except Exception:
         pass
 
+    try:
+        T = _tcmb_faiz_hesapla(); son = T["son"]
+        pol, _ = son(T["g"], "politika"); nf, nf_t = son(T["g"], "net_fonlama"); tlref, _ = son(T["g"], "tlref")
+        bp, bp_t = son(T["a"], "bek_piyasa"); k13, _ = son(T["h"], "kredi13_toplam"); pay, _ = son(T["h"], "tl_pay")
+        add("🏛️", "Para Politikası",
+            f"Politika faizi <b>%{ht(pol, 2)}</b>, TLREF %{ht(tlref, 2)}; TCMB net fonlaması "
+            f"<b>{ht(nf, 0)} milyar TL</b> ({nf_t.strftime('%d.%m.%Y')}). Piyasa katılımcılarının 12 ay sonrası "
+            f"enflasyon beklentisi <b>%{ht(bp, 2)}</b> ({AY[bp_t.month]}). Kur etkisinden arındırılmış kredi "
+            f"büyümesi (13 hafta, yıllık.) <b>%{ht(k13, 1)}</b>, TL mevduat payı %{ht(pay, 1)}.", "tcmb-faiz.html")
+    except Exception:
+        pass
     dump("home.json", {
         "updated": datetime.now().strftime("%d.%m.%Y %H:%M"),
         "cards": cards,
@@ -1130,7 +1228,7 @@ def build_home():
 
 def build_sitemap():
     """site/sitemap.xml — her export'ta taze lastmod ile yazılır (SEO)."""
-    sayfalar = ["", "gundem.html", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
+    sayfalar = ["", "gundem.html", "tcmb-faiz.html", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
                 "cari.html", "kredi.html", "mevduat.html", "butce.html", "nakit.html",
                 "bddk.html", "hazine.html", "tcmb-alim.html",
                 "hesap-kredi.html", "hesap-mevduat.html"]
@@ -1155,7 +1253,8 @@ def ozet_gom():
             "cari.html": "cari.json", "kredi.html": "kredi.json",
             "mevduat.html": "mevduat.json", "butce.html": "butce.json",
             "nakit.html": "nakit.json", "bddk.html": "bddk.json",
-            "hazine.html": "hazine.json", "tcmb-alim.html": "tcmb_alim.json"}
+            "hazine.html": "hazine.json", "tcmb-alim.html": "tcmb_alim.json",
+            "tcmb-faiz.html": "tcmb_faiz.json"}
     for sayfa, js in esle.items():
         try:
             d = json.loads((DATA / js).read_text(encoding="utf-8"))
@@ -1182,7 +1281,7 @@ def main():
                      ("rezerv", build_rezerv), ("kredi", build_kredi),
                      ("mevduat", build_mevduat), ("cari", build_cari),
                      ("bddk", build_bddk), ("hazine", build_hazine),
-                     ("tcmb_alim", build_tcmb_alim)]:
+                     ("tcmb_alim", build_tcmb_alim), ("tcmb_faiz", build_tcmb_faiz)]:
         try:
             fn()
             ok += 1

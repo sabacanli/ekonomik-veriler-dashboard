@@ -1,11 +1,26 @@
 /* Ekonomik Veriler — ortak yardımcılar */
 
+/* ── Tema: "acik" (TCMB sunum dili — varsayılan) / "koyu" (Bloomberg) ──
+   Tercih localStorage'da; sayfa <head>'indeki küçük betik koyu temayı boyamadan önce uygular. */
+const TEMA_AD = (function () {
+  try { const t = localStorage.getItem("ekordion-tema"); if (t === "koyu" || t === "acik") return t; } catch (e) {}
+  return "acik";
+})();
+if (TEMA_AD === "koyu") document.documentElement.setAttribute("data-theme", "koyu");
+else document.documentElement.removeAttribute("data-theme");
+const ACIK_TEMA = TEMA_AD === "acik";
+function temaDegistir() {
+  try { localStorage.setItem("ekordion-tema", ACIK_TEMA ? "koyu" : "acik"); } catch (e) {}
+  location.reload();
+}
+
 const NAV = [
   { href: "index.html", label: "Ana Sayfa" },
   { href: "gundem.html", label: "Finans Gündemi" },
   { href: "tcmb-stok.html", label: "TCMB Haftalık Stok" },
   { href: "dth.html", label: "Yabancı Para Hareketi" },
   { href: "enflasyon.html", label: "TÜFE Enflasyon" },
+  { href: "tcmb-faiz.html", label: "Para Politikası & Beklentiler" },
   { href: "net-rezerv.html", label: "TCMB Rezervleri" },
   { href: "cari.html", label: "Cari Denge" },
   { href: "kredi.html", label: "Kredi Faizleri" },
@@ -20,12 +35,29 @@ const NAV = [
   { href: "hesap-mevduat.html", label: "Mevduat / Stopaj" },
 ];
 
-const C = {
+/* Seri renkleri — temaya göre. Açık tema TCMB paleti: kırmızı ana seri, lacivert ikinci seri,
+   açık mavi / bej / gri yardımcı; yeşil yalnız "fazla/artış" anlamı için. */
+const C = ACIK_TEMA ? {
+  toplam: "#1C3044", hisse: "#D40031", kesin: "#5E8BC5", dolayli: "#A7C0E0",
+  ost: "#9AA4B2", euro: "#B99464", line: "#9AA4B2",
+  altin: "#B99464", doviz: "#1C3044", tuzel: "#5E8BC5", gercek: "#D40031",
+  amber: "#D40031", green: "#2E7D5B", red: "#D40031",
+} : {
   toplam: "#4C9AFF", hisse: "#ED7D31", kesin: "#3D7BE0", dolayli: "#6FD1FF",
   ost: "#9AA4B2", euro: "#4CAF7D", line: "#9AA4B2",
   altin: "#FF9E1B", doviz: "#26C281", tuzel: "#4FC3F7", gercek: "#E64980",
   amber: "#FF9E1B", green: "#26C281", red: "#FF5A5F",
 };
+/* Sayfalarda ad verilerek kullanılan ek kategorik renkler (tür/yöntem kırılımları) */
+const PAL = ACIK_TEMA ? {
+  mavi: "#1C3044", mor: "#5E8BC5", cyan: "#A7C0E0", yesil: "#2E7D5B", turuncu: "#B99464",
+  sari: "#C9A227", pembe: "#D40031", lacivert: "#1C3044", gri: "#9AA4B2", kirmizi: "#D40031", amber: "#D40031",
+} : {
+  mavi: "#4C9AFF", mor: "#B98AFF", cyan: "#6FD1FF", yesil: "#4CAF7D", turuncu: "#ED7D31",
+  sari: "#E8C468", pembe: "#FF7A80", lacivert: "#3D7BE0", gri: "#9AA4B2", kirmizi: "#FF5A5F", amber: "#FF9E1B",
+};
+/* Etiket yazı tipi: açık temada Open Sans kalın (TCMB değer etiketleri), koyuda Plex Mono */
+const ANN_FONT = ACIK_TEMA ? { family: "'Open Sans', sans-serif", weight: 700 } : { family: "'IBM Plex Mono', monospace" };
 
 /* ── Kenar çubuğu ── */
 function renderShell() {
@@ -45,7 +77,10 @@ function renderShell() {
       return '<span class="soon">' + n.label + "</span>";
     }).join("") +
     "</nav>" +
+    '<button class="tema-btn" type="button" id="temaBtn">' + (ACIK_TEMA ? "● Koyu tema" : "○ Açık tema (TCMB)") + "</button>" +
     '<div class="side-foot">v3.0 · statik site</div>';
+  const tb = document.getElementById("temaBtn");
+  if (tb) tb.onclick = temaDegistir;
 
   const btn = document.getElementById("menuBtn");
   const ovl = document.getElementById("overlay");
@@ -86,22 +121,25 @@ function deepMerge(base, over) {
 function imzaAnn(acik) {
   return { text: "bacanlı", xref: "paper", yref: "paper", x: 1, y: 0,
     xanchor: "right", yanchor: "bottom", xshift: -6, yshift: 5, showarrow: false,
-    font: { size: 10, color: acik ? "#C3CBD9" : "#39445A", family: "'IBM Plex Mono', monospace" } };
+    font: { size: 10, color: acik ? "#C3CBD9" : "#39445A", family: acik ? "'Open Sans', sans-serif" : "'IBM Plex Mono', monospace" } };
 }
 
 function plLayout(over, acik) {
   const base = acik ? {
-    // Açık tema — sunum/beyaz zemin görünümü
+    // Açık tema — TCMB sunum dili: beyaz zemin, x'te kılavuz yok, y'de çok açık kılavuz,
+    // ince lacivert eksen çizgileri, lejant grafiğin üstünde ortada
     paper_bgcolor: "#FFFFFF",
     plot_bgcolor: "#FFFFFF",
-    font: { family: "'IBM Plex Sans', sans-serif", color: "#1A2233", size: 13 },
+    font: { family: "'Open Sans', 'IBM Plex Sans', sans-serif", color: "#1C3044", size: 13 },
     separators: ",.",
     margin: { l: 54, r: 18, t: 10, b: 44 },
-    xaxis: { gridcolor: "#E4E9F2", zerolinecolor: "#C9D2E0", linecolor: "#C9D2E0" },
-    yaxis: { gridcolor: "#E4E9F2", zerolinecolor: "#C9D2E0", linecolor: "#C9D2E0" },
-    legend: { orientation: "h", y: -0.22, font: { size: 12 } },
-    hoverlabel: { bgcolor: "#FFFFFF", bordercolor: "#C9D2E0", font: { color: "#1A2233", family: "'IBM Plex Sans', sans-serif" } },
-    bargap: 0.25,
+    xaxis: { showgrid: false, zeroline: false, showline: true, linecolor: "#1C3044", linewidth: 1.2,
+             ticks: "outside", tickcolor: "#1C3044", ticklen: 4, tickfont: { color: "#1C3044" } },
+    yaxis: { gridcolor: "#EDEFF3", zerolinecolor: "#1C3044", zerolinewidth: 1.2, showline: true,
+             linecolor: "#1C3044", linewidth: 1.2, tickfont: { color: "#1C3044" } },
+    legend: { orientation: "h", x: 0.5, xanchor: "center", y: 1.02, yanchor: "bottom", font: { size: 12.5 } },
+    hoverlabel: { bgcolor: "#FFFFFF", bordercolor: "#1C3044", font: { color: "#1C3044", family: "'Open Sans', sans-serif" } },
+    bargap: 0.3,
     height: 380,
   } : {
     paper_bgcolor: "rgba(0,0,0,0)",
@@ -117,6 +155,8 @@ function plLayout(over, acik) {
     height: 380,
   };
   const out = deepMerge(base, over || {});
+  // Açık temada lejant veri alanının ÜSTÜNDE durur (TCMB düzeni); üst kenar boşluğu ona yer açar
+  if (acik && out.showlegend !== false) out.margin = Object.assign({}, out.margin, { t: Math.max(out.margin.t || 0, 42) });
   out.annotations = (out.annotations || []).concat([imzaAnn(!!acik)]);
   return out;
 }
@@ -125,7 +165,7 @@ const PCFG = { displayModeBar: false, responsive: true };
 
 function draw(id, traces, layoutOver, acik) {
   const gd = document.getElementById(id);
-  return Plotly.newPlot(gd, traces, plLayout(layoutOver, acik), PCFG).then(function () {
+  return Plotly.newPlot(gd, traces, plLayout(layoutOver, acik || ACIK_TEMA), PCFG).then(function () {
     zoomSifirlaKur(gd);
     return gd;
   });
@@ -134,7 +174,7 @@ function draw(id, traces, layoutOver, acik) {
 /* ── Faiz/oran grafikleri için ortak takım ──
    Etiketler grafiğin O ANKİ görünür serilerinden hesaplanır (lejant aç/kapa dahil):
    sağ kenarda seri başına son değer, ▲/▼ pencere uçları (kenardaysa içeri bakar). */
-const ANN_MONO = { size: 12.5, family: "'IBM Plex Mono', monospace" };
+const ANN_MONO = Object.assign({ size: 12.5 }, ANN_FONT);
 
 function annGuncelle(gd) {
   const gorunur = gd.data.filter(function (tr) { return tr.visible === undefined || tr.visible === true; });
@@ -323,7 +363,7 @@ function annLast(x, y, text, color) {
   return {
     x: x, y: y, text: text, showarrow: false,
     yshift: y >= 0 ? 14 : -14,
-    font: { size: 13, color: color, family: "'IBM Plex Mono', monospace" },
+    font: Object.assign({ size: 13, color: color }, ANN_FONT),
   };
 }
 
@@ -344,7 +384,7 @@ function annStack(x, items) {
     const ust = v >= 0;
     out.push({ x: x, y: ust ? posT : negT, text: txt, showarrow: false,
                yshift: ust ? 14 + 17 * pi++ : -14 - 17 * ni++,
-               font: { size: 13, color: color, family: "'IBM Plex Mono', monospace" } });
+               font: Object.assign({ size: 13, color: color }, ANN_FONT) });
   }
   return out;
 }

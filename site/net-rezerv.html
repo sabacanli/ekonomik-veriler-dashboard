@@ -19,8 +19,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=21">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=22">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -66,7 +67,7 @@
       II.3 kalemleri); likidite tablosu haftalık yayımlandığından bu satır tablo tarihiyle etiketlenir.</footer>
   </main>
 
-  <script src="assets/app.js?v=21"></script>
+  <script src="assets/app.js?v=22"></script>
   <script>
     (async () => {
       const D = await getJSON("data/rezerv.json");
@@ -135,7 +136,7 @@
         draw("ch4", [
           { type: "scatter", mode: "lines+markers", x: LK.tarih,
             y: LK.swap_toplam.map(v => Math.abs(v) / 1000),
-            name: "Toplam Swap/Forward Pozisyonu", line: { color: "#B98AFF", width: 2.2 },
+            name: "Toplam Swap/Forward Pozisyonu", line: { color: PAL.mor, width: 2.2 },
             marker: { size: 6 },
             hovertemplate: "%{x|%d.%m.%Y}<br>Swap pozisyonu: %{y:.1f} milyar USD<extra></extra>" },
           { type: "scatter", mode: "lines+markers", x: LK.tarih,

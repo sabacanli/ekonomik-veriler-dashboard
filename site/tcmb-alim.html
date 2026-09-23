@@ -19,8 +19,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=21">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=22">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -106,7 +107,7 @@
       itfaya kalan süredir. PY = piyasa yapıcı ihaleleri.</footer>
   </main>
 
-  <script src="assets/app.js?v=21"></script>
+  <script src="assets/app.js?v=22"></script>
   <script>
     (async () => {
       const D = await getJSON("data/tcmb_alim.json");
@@ -117,10 +118,10 @@
       const N = I.t.length;
 
       const YONTEMLER = [
-        ["Geleneksel", "#3D7BE0"],
-        ["PY Geleneksel", "#6FD1FF"],
-        ["Miktar", "#4CAF7D"],
-        ["PY Miktar", "#ED7D31"],
+        ["Geleneksel", PAL.lacivert],
+        ["PY Geleneksel", PAL.cyan],
+        ["Miktar", PAL.yesil],
+        ["PY Miktar", PAL.turuncu],
       ];
       const RENK = Object.fromEntries(YONTEMLER);
 
@@ -318,10 +319,10 @@
         draw("chStok", [{
           type: "bar", orientation: "h",
           y: sPairs.map(p => p[0]), x: sPairs.map(p => p[1] / 1e6),
-          marker: { color: "#4C9AFF" },
+          marker: { color: PAL.mavi },
           text: sPairs.map(p => trNum(p[1] / 1e6, 0)), textposition: "outside",
           cliponaxis: false,
-          textfont: { family: "'IBM Plex Mono', monospace", size: 12 },
+          textfont: Object.assign({ size: 12 }, ANN_FONT),
           hovertemplate: "%{y}<br>%{x:,.0f} milyar TL<extra></extra>",
         }], { height: 300, showlegend: false, margin: { l: 110, r: 95 } });
 
@@ -334,9 +335,9 @@
         const iYillar = Object.keys(itfaYil).sort();
         draw("chItfa", [{
           type: "bar", x: iYillar, y: iYillar.map(y => itfaYil[y] / 1e6),
-          marker: { color: "#B98AFF" },
+          marker: { color: PAL.mor },
           text: iYillar.map(y => trNum(itfaYil[y] / 1e6, 0)), textposition: "outside",
-          cliponaxis: false, textfont: { family: "'IBM Plex Mono', monospace", size: 11 },
+          cliponaxis: false, textfont: Object.assign({ size: 11 }, ANN_FONT),
           hovertemplate: "%{x}<br>%{y:,.0f} milyar TL<extra></extra>",
         }], { height: 340, showlegend: false, bargap: 0.3 });
 
@@ -391,9 +392,9 @@
         draw("chVade", [{
           type: "bar", x: BANT.map(b => b[0]),
           y: bandNom.map(v => bandTop ? v / bandTop * 100 : 0),
-          marker: { color: "#4C9AFF" },
+          marker: { color: PAL.mavi },
           text: bandNom.map(v => bandTop ? trNum(v / bandTop * 100, 1) + "%" : ""),
-          textposition: "outside", textfont: { size: 12, family: "'IBM Plex Mono', monospace" },
+          textposition: "outside", textfont: Object.assign({ size: 12 }, ANN_FONT),
           hovertemplate: "%{x}<br>%%{y:.1f}<extra></extra>",
         }], { height: 320, showlegend: false, yaxis: { title: "%" } });
 
@@ -410,7 +411,7 @@
           h += "<tr>" +
             '<td class="lbl">' + tarih + "</td>" +
             '<td class="lbl"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;background:' +
-              (RENK[I.yontem[i]] || "#9AA4B2") + '"></span>' + I.yontem[i] + "</td>" +
+              (RENK[I.yontem[i]] || PAL.gri) + '"></span>' + I.yontem[i] + "</td>" +
             "<td>" + (I.isin[i] || "—") + "</td>" +
             '<td class="num">' + (I.vg[i] === null ? "—" : trNum(I.vg[i] / 365, 1) + " yıl") + "</td>" +
             '<td class="num">' + (I.nom[i] === null ? "—" : trNum(I.nom[i] / 1000, 0)) + "</td>" +

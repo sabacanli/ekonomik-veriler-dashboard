@@ -19,8 +19,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css?v=21">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=22">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
 <body>
@@ -80,7 +81,7 @@
       vadesiz hariç). Akım yeni fiyatlamayı, stok mevcut portföyün ortalama maliyetini gösterir.</footer>
   </main>
 
-  <script src="assets/app.js?v=21"></script>
+  <script src="assets/app.js?v=22"></script>
   <script>
     (async () => {
       const D = await getJSON("data/mevduat.json");
@@ -115,16 +116,16 @@
         [g.v3ay, "3 Aya Kadar", C.toplam],
         [g.v6ay, "6 Aya Kadar", C.dolayli],
         [g.v1yil, "1 Yıla Kadar", C.euro],
-        [g.uzun, "1 Yıl+", "#B98AFF"],
+        [g.uzun, "1 Yıl+", PAL.mor],
       ];
       const CIZ = {
         sec1: () => cokSerili("ch1", [
           [S.toplam, "Toplam", C.amber, 3], [S.v1ay, "1 Aya Kadar", C.ost],
           [S.v3ay, "3 Aya Kadar", C.toplam], [S.v6ay, "6 Aya Kadar", C.dolayli],
-          [S.v1yil, "1 Yıla Kadar", C.euro], [S.uzun, "1 Yıl+", "#B98AFF"],
+          [S.v1yil, "1 Yıla Kadar", C.euro], [S.uzun, "1 Yıl+", PAL.mor],
         ], S.tarih, N, 430, TEMA.sec1),
         sec2: () => cokSerili("ch2", [
-          [S.toplam_usd, "USD", C.green], [S.toplam_eur, "EUR", "#B98AFF"],
+          [S.toplam_usd, "USD", C.green], [S.toplam_eur, "EUR", PAL.mor],
         ], S.tarih, N, 320, TEMA.sec2),
         sec3: () => K && cokSerili("ch3", stokSeri(K.tl), K.tarih, ayPenceresi(), 430, TEMA.sec3),
         sec4: () => K && cokSerili("ch4", stokSeri(K.usd), K.tarih, ayPenceresi(), 380, TEMA.sec4),
