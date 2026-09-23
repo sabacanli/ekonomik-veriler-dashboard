@@ -139,25 +139,36 @@
         n => { N = n; render(); });
       render();
 
-      // ── Bileşenler: yığılmış alan (altın / enerji / diğer) + cari denge çizgisi, GSYH'ye oran ──
+      // ── Bileşenler (Moody's görünümü): pozitifler sıfırdan yukarı, negatifler sıfırdan aşağı
+      //    AYRI yığılır; cari denge çizgisi alanların içinden geçer. Her bileşen artı/eksi
+      //    parçaya bölünür (aynı renk, tek lejant girişi); hover yalnız işaretli parçada gösterilir.
       const B = D.bilesen;
       if (B && B.tarih && B.tarih.length) {
         document.getElementById("secBil").style.display = "";
         const TEMA = { secBil: false };
-        const alan = (y, ad, renk) => ({ type: "scatter", mode: "lines", x: B.tarih, y: y, name: ad,
-          stackgroup: "b", line: { color: renk, width: 0.6 }, fillcolor: renk, opacity: 0.85,
-          hovertemplate: "%{x|%m.%Y}<br>" + ad + ": %{y:.1f}% GSYH<extra></extra>" });
+        const parca = (y, isaret) => y.map(v => (v === null ? null : isaret > 0 ? Math.max(v, 0) : Math.min(v, 0)));
+        const alan = (y, ad, renk, isaret) => ({
+          type: "scatter", mode: "lines", x: B.tarih, y: parca(y, isaret), name: ad,
+          stackgroup: isaret > 0 ? "poz" : "neg", legendgroup: ad, showlegend: isaret > 0,
+          line: { color: renk, width: 0.5, shape: "spline", smoothing: 0.6 }, fillcolor: renk,
+          customdata: y,
+          hoverinfo: y.map(v => (v === null || (isaret > 0 ? v < 0 : v >= 0)) ? "skip" : "all"),
+          hovertemplate: "%{x|%m.%Y}<br>" + ad + ": %{customdata:.1f}% GSYH<extra></extra>",
+        });
+        const BIL = [[B.altin_gsyh, "Altın (net)", ACIK_TEMA ? "#C9A227" : PAL.sari],
+                     [B.enerji_gsyh, "Enerji (net)", ACIK_TEMA ? "#5E8BC5" : PAL.mavi],
+                     [B.diger_gsyh, "Diğer cari akımlar (net)", ACIK_TEMA ? "#3E8E6E" : PAL.yesil]];
         const CIZ = {
           secBil: () => draw("chBil", [
-            alan(B.altin_gsyh, "Altın (net)", PAL.sari),
-            alan(B.enerji_gsyh, "Enerji (net)", C.kesin),
-            alan(B.diger_gsyh, "Diğer cari akımlar (net)", C.toplam),
+            ...BIL.map(([y, ad, r]) => alan(y, ad, r, 1)),
+            ...BIL.map(([y, ad, r]) => alan(y, ad, r, -1)),
             { type: "scatter", mode: "lines", x: B.tarih, y: B.cari_gsyh, name: "Cari denge (% GSYH)",
-              line: { color: C.amber, width: 2.8 },
+              line: { color: ACIK_TEMA ? "#1C3044" : C.amber, width: 3 },
               hovertemplate: "%{x|%m.%Y}<br>Cari denge: %{y:.1f}% GSYH<extra></extra>" },
-          ], { height: 420, yaxis: { title: "% GSYH", zeroline: true },
+          ], { height: 440, yaxis: { title: "% GSYH", zeroline: true, zerolinewidth: 1.6 },
+               hovermode: "x",
                annotations: [annLast(B.tarih[B.tarih.length - 1], B.cari_gsyh[B.cari_gsyh.length - 1],
-                                     trNum(B.cari_gsyh[B.cari_gsyh.length - 1], 1) + "%", C.amber)] }, TEMA.secBil),
+                                     trNum(B.cari_gsyh[B.cari_gsyh.length - 1], 1) + "%", ACIK_TEMA ? "#1C3044" : C.amber)] }, TEMA.secBil),
         };
         document.getElementById("capBil").textContent += " · Son: " + B.son_ay + " — 12 aylık cari denge " +
           trNum(B.son_cari_12, 1) + " milyar USD, GSYH'nin %" + trNum(B.oran.cari, 1) +
