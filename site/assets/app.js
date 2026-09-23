@@ -77,7 +77,7 @@ function renderShell() {
       return '<span class="soon">' + n.label + "</span>";
     }).join("") +
     "</nav>" +
-    '<button class="tema-btn" type="button" id="temaBtn">' + (ACIK_TEMA ? "● Koyu tema" : "○ Açık tema (TCMB)") + "</button>" +
+    '<button class="tema-btn" type="button" id="temaBtn">' + (ACIK_TEMA ? "● Koyu tema" : "○ Açık tema") + "</button>" +
     '<div class="side-foot">v3.0 · statik site</div>';
   const tb = document.getElementById("temaBtn");
   if (tb) tb.onclick = temaDegistir;
