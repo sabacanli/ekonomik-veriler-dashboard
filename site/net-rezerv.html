@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TCMB Rezervleri — Net UR ve Swap Hariç | Ekordion</title>
-  <meta name="description" content="TCMB uluslararası rezervleri: brüt döviz, altın, net uluslararası rezervler (NUR) ve 2022'ye uzanan swap hariç net rezerv serisi. Haftalık güncel grafiklerle.">
+  <title>TCMB Rezervleri — Brüt, Altın, Net ve Swap Hariç | Ekordion</title>
+  <meta name="description" content="TCMB uluslararası rezervleri: resmî haftalık altın ve döviz rezervleri, günlük brüt dış varlıklar, analitik bilanço net rezervi ve 2022'ye uzanan swap hariç net rezerv serisi. Haftalık güncel grafiklerle.">
   <link rel="canonical" href="https://ekordion.com.tr/net-rezerv.html">
-  <meta property="og:title" content="TCMB Rezervleri — Net UR ve Swap Hariç | Ekordion">
-  <meta property="og:description" content="TCMB uluslararası rezervleri: brüt döviz, altın, net uluslararası rezervler (NUR) ve 2022'ye uzanan swap hariç net rezerv serisi. Haftalık güncel grafiklerle.">
+  <meta property="og:title" content="TCMB Rezervleri — Brüt, Altın, Net ve Swap Hariç | Ekordion">
+  <meta property="og:description" content="TCMB uluslararası rezervleri: resmî haftalık altın ve döviz rezervleri, günlük brüt dış varlıklar, analitik bilanço net rezervi ve 2022'ye uzanan swap hariç net rezerv serisi. Haftalık güncel grafiklerle.">
   <meta property="og:url" content="https://ekordion.com.tr/net-rezerv.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Ekordion">
@@ -32,47 +32,52 @@
   <main>
     <h1 class="page-title">TCMB Uluslararası Rezervler</h1>
     <div class="update-info" id="updated"></div>
-    <div class="info-box" id="ozet">📋 21.09.2026 itibarıyla TCMB'nin brüt döviz rezervleri 176,5 milyar USD (haftalık -0,6), altın rezervleri 79,4 milyar USD (haftalık -2,0). Net uluslararası rezervler (swap dahil) bir önceki haftaya göre 2,0 milyar USD azalışla 55,0 milyar USD seviyesinde. Yıl başından beri net UR değişimi +0,2 milyar USD. Swap hariç net rezerv 47,7 milyar USD (11.09.2026 likidite tablosu; toplam swap/forward pozisyonu -12,3 milyar USD).</div>
+    <div class="info-box" id="ozet">📋 21.09.2026 itibarıyla TCMB'nin brüt rezervleri (analitik bilanço dış varlıkları, altın dahil) 176,5 milyar USD (haftalık -0,6). Resmî haftalık tablo (11.09.2026): toplam rezerv 178,7 milyar USD = altın 110,3 (haftalık -3,6) + döviz 68,4 milyar USD (haftalık -2,0). Net rezerv (dış varlıklar − toplam döviz yükümlülükleri; swap dahil) bir önceki haftaya göre 0,8 milyar USD azalışla 51,8 milyar USD seviyesinde; yıl başından beri -14,3 milyar USD. Swap hariç net rezerv 46,2 milyar USD (11.09.2026 likidite tablosu; toplam swap/forward pozisyonu -12,3 milyar USD).</div>
     <div class="metrics" id="metrics"></div>
     <div class="range" id="range"></div>
 
     <section class="chart-card" id="secTampon">
       <h3>Rezerv Tamponları — Brüt, Döviz ve Swap Hariç Net</h3>
-      <p class="cap">Milyar USD · 2022'den bugüne — brüt rezerv (döviz + altın) ve döviz rezervi günlük; net UR (swap dahil) günlük;
-        swap hariç net rezerv haftalık likidite tablosu noktaları</p>
+      <p class="cap">Milyar USD · 2022'den bugüne — brüt rezerv (altın + döviz) ve döviz rezervi: resmî haftalık tablo (Cuma);
+        net rezerv (swap dahil): günlük analitik bilanço; swap hariç net rezerv: haftalık likidite tablosu noktaları</p>
       <button class="btn apko-btn" data-sec="secTampon">🖨 Beyaz zemin (sunum)</button>
       <button class="btn resim-btn" data-sec="secTampon">🖼 Resim olarak kopyala</button>
       <div id="chTampon"></div>
     </section>
 
     <section class="chart-card">
-      <h3>Net Uluslararası Rezervler (Swap Dahil)</h3>
-      <p class="cap">Milyar USD · Günlük — TCMB haftalık vaziyet "2A Net Uluslararası Rezervler" kalemi (analitik bilanço)</p>
+      <h3>Net Rezerv (Swap Dahil)</h3>
+      <p class="cap">Milyar USD · Günlük — analitik bilanço: dış varlıklar − toplam döviz yükümlülükleri
+        (dış yükümlülükler + kamu ve bankaların döviz mevduatı)</p>
       <div id="ch1"></div>
     </section>
 
     <section class="chart-card">
-      <h3>Haftalık Değişim — Net Uluslararası Rezervler</h3>
+      <h3>Haftalık Değişim — Net Rezerv</h3>
       <p class="cap">Milyar USD · Cuma kapanışına göre haftalık fark (son nokta devam eden haftadır)</p>
       <div id="ch2"></div>
     </section>
 
     <section class="chart-card">
-      <h3>Brüt Rezervler — Döviz &amp; Altın</h3>
-      <p class="cap">Milyar USD · Günlük</p>
+      <h3>Brüt Rezervler — Altın, Döviz ve Toplam</h3>
+      <p class="cap">Milyar USD · Haftalık (Cuma) — TCMB "Merkez Bankası Rezervleri" tablosu; noktalı çizgi: günlük brüt
+        dış varlıklar (analitik bilanço, altın dahil)</p>
       <div id="ch3"></div>
     </section>
 
     <section class="chart-card" id="secLk" style="display:none">
-      <h3>Swap Pozisyonu &amp; Swap Hariç Net UR — Haftalık</h3>
+      <h3>Swap Pozisyonu &amp; Swap Hariç Net Rezerv — Haftalık</h3>
       <p class="cap" id="capLk">Milyar USD · URDL şablonları — geçmiş noktalar web arşivinden geri dolduruldu, her haftalık
         güncellemede yeni nokta eklenir (noktalar arası boşluklar arşivde kayıt bulunmayan dönemlerdir)</p>
       <div id="ch4"></div>
     </section>
 
-    <footer>Kaynak: TCMB EVDS — Analitik Bilanço (Dış Varlıklar, Altın, Net Uluslararası Rezervler;
-      günlük, USD karşılıkları gün sonu kuruyla) + TCMB "Uluslararası Rezervler ve Döviz Likiditesi"
-      haftalık şablonu · <b>Swap hariç</b> = Net UR − toplam swap/forward pozisyonu (şablonun II.2 +
+    <footer>Kaynak: TCMB EVDS — Analitik Bilanço (günlük; USD karşılıkları gün sonu kuruyla), "Merkez Bankası
+      Rezervleri" haftalık tablosu (altın, döviz, toplam) ve "Uluslararası Rezervler ve Döviz Likiditesi" şablonu ·
+      <b>Brüt rezerv (günlük)</b> = A.1 Dış Varlıklar; altın bu kalemin içindedir, üstüne eklenmez. Resmî haftalık
+      toplamla arasındaki küçük fark tarih ve kapsam farkından kaynaklanır · <b>Net rezerv</b> = dış varlıklar −
+      (dış yükümlülükler + kamu döviz mevduatı + bankalar döviz mevduatı); swap yoluyla alınan döviz dış varlıklarda
+      olduğundan "swap dahil"dir · <b>Swap hariç</b> = net rezerv − toplam swap/forward pozisyonu (şablonun II.2 +
       II.3 kalemleri); likidite tablosu haftalık yayımlandığından bu satır tablo tarihiyle etiketlenir.</footer>
   </main>
 
@@ -83,25 +88,28 @@
       setUpdated(D.updated);
       setOzet(D.ozet_html);
 
-      const s = D.son;
-      const dcls = v => (v === null ? "flat" : (v >= 0 ? "up" : "down"));
-      const dtxt = v => (v === null ? null : trNum(v / 1000, 1, true) + " (hafta)");
+      const s = D.son, R = s.resmi;
+      const yok = v => (v === null || v === undefined);
+      const dcls = v => (yok(v) ? "flat" : (v >= 0 ? "up" : "down"));
+      const dtxt = (v, tarih) => (yok(v) ? tarih : trNum(v / 1000, 1, true) + " (hafta) · " + tarih);
       const mler = [
-        ["Brüt Döviz Rezervi", trNum(s.brut_doviz / 1000, 1), dtxt(s.d_brut_doviz), dcls(s.d_brut_doviz)],
-        ["Altın Rezervi", trNum(s.altin / 1000, 1), dtxt(s.d_altin), dcls(s.d_altin)],
-        ["Toplam Brüt Rezerv", trNum(s.brut_toplam / 1000, 1), "döviz + altın", "flat"],
-        ["Net Uluslararası Rezervler", trNum(s.net_ur / 1000, 1), dtxt(s.d_net_ur), dcls(s.d_net_ur)],
-        ["Yıl Başından Beri (Net UR)", s.ytd_net_ur === null ? "—" : trNum(s.ytd_net_ur, 1, true),
+        ["Toplam Rezerv (resmî)", trNum(R.toplam / 1000, 1), dtxt(R.d_toplam, R.tarih), dcls(R.d_toplam)],
+        ["Altın (resmî)", trNum(R.altin / 1000, 1), dtxt(R.d_altin, R.tarih), dcls(R.d_altin)],
+        ["Döviz (resmî)", trNum(R.doviz / 1000, 1), dtxt(R.d_doviz, R.tarih), dcls(R.d_doviz)],
+        ["Brüt Rezerv — Günlük (altın dahil)", trNum(s.brut / 1000, 1), dtxt(s.d_brut, s.tarih), dcls(s.d_brut)],
+        ["Net Rezerv (swap dahil)", trNum(s.net_ur / 1000, 1), dtxt(s.d_net_ur, s.tarih), dcls(s.d_net_ur)],
+        ["Yıl Başından Beri (net rezerv)", yok(s.ytd_net_ur) ? "—" : trNum(s.ytd_net_ur, 1, true),
           "milyar USD", s.ytd_net_ur >= 0 ? "up" : "down"],
       ];
-      if (s.swap_haric !== null && s.swap_haric !== undefined) {
-        mler.splice(4, 0, ["Net UR — Swap Hariç", trNum(s.swap_haric / 1000, 1),
+      if (!yok(s.swap_haric)) {
+        mler.splice(5, 0, ["Net Rezerv — Swap Hariç", trNum(s.swap_haric / 1000, 1),
           "likidite tablosu " + s.swap_tarih, "flat"]);
       }
       setMetrics(mler);
 
-      const S = D.seri;
-      const W = D.haftalik;
+      const S = D.seri;      // günlük: brut (dış varlıklar), net_ur
+      const RS = D.resmi;    // haftalık resmî: altin, doviz, toplam
+      const W = D.haftalik;  // haftalık net rezerv değişimi
       const bn = v => (v === null ? null : v / 1000);
 
       let N = 252;
@@ -113,7 +121,7 @@
             hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra></extra>" },
         ], { height: 400, showlegend: false });
 
-        // Haftalık değişim: aynı pencereye denk gelen haftalar
+        // Haftalık seriler: aynı pencereye denk gelen haftalar
         const wN = Math.max(8, Math.round(N / 5));
         const wt = tail(W.tarih, wN);
         const wv = tail(W.net_ur_d, wN).map(bn);
@@ -123,14 +131,21 @@
             hovertemplate: "%{x|%d.%m.%Y} haftası<br>%{y:+.1f} milyar USD<extra></extra>" },
         ], { height: 340, showlegend: false });
 
+        const rt = tail(RS.tarih, wN);
         draw("ch3", [
-          { type: "scatter", mode: "lines", x: t, y: tail(S.brut_doviz, N).map(bn),
-            name: "Brüt Döviz", line: { color: C.toplam, width: 2.2 },
-            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Döviz</extra>" },
-          { type: "scatter", mode: "lines", x: t, y: tail(S.altin, N).map(bn),
-            name: "Altın", line: { color: C.amber, width: 2 },
+          { type: "scatter", mode: "lines", x: rt, y: tail(RS.toplam, wN).map(bn),
+            name: "Toplam rezerv (resmî)", line: { color: C.toplam, width: 2.6 },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Toplam</extra>" },
+          { type: "scatter", mode: "lines", x: rt, y: tail(RS.altin, wN).map(bn),
+            name: "Altın", line: { color: PAL.sari, width: 2 },
             hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Altın</extra>" },
-        ], { height: 380 });
+          { type: "scatter", mode: "lines", x: rt, y: tail(RS.doviz, wN).map(bn),
+            name: "Döviz", line: { color: C.kesin, width: 2 },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Döviz</extra>" },
+          { type: "scatter", mode: "lines", x: t, y: tail(S.brut, N).map(bn),
+            name: "Dış varlıklar (günlük)", line: { color: C.ost, width: 1.4, dash: "dot" },
+            hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Dış varlıklar</extra>" },
+        ], { height: 400 });
       }
 
       rangeCtl(document.getElementById("range"),
@@ -138,20 +153,19 @@
         n => { N = n; render(); });
       render();
 
-      // ── Rezerv tamponları (Moody's görünümü): brüt / döviz / net UR / swap hariç net ──
+      // ── Rezerv tamponları (Moody's görünümü): brüt / döviz (resmî haftalık) · net rezerv (günlük) · swap hariç (haftalık) ──
       const LK0 = D.likidite;
       {
         const TEMA = { secTampon: false };
-        const brut = S.brut_doviz.map((v, i) => (v === null || S.altin[i] === null) ? null : (v + S.altin[i]) / 1000);
         const mlr = v => trNum(v, 1) + " mlr $";
         const CIZ = {
           secTampon: () => cokSerili("chTampon", [
-            [brut, "Brüt rezerv (döviz + altın)", C.toplam, 2.4],
-            [S.brut_doviz.map(bn), "Döviz rezervi", C.kesin, 2],
-            [S.net_ur.map(bn), "Net UR (swap dahil)", C.ost, 1.8],
+            [RS.toplam.map(bn), "Brüt rezerv (altın + döviz)", C.toplam, 2.4, null, RS.tarih],
+            [RS.doviz.map(bn), "Döviz rezervi", C.kesin, 2, null, RS.tarih],
+            [S.net_ur.map(bn), "Net rezerv (swap dahil)", C.ost, 1.8],
             (LK0 && LK0.tarih && LK0.tarih.length)
               ? [LK0.swap_haric.map(bn), "Swap hariç net rezerv", C.amber, 2.6, { mode: "lines+markers", marker: { size: 5 } }, LK0.tarih]
-              : [S.net_ur.map(bn), "Net UR", C.amber, 2.6],
+              : [S.net_ur.map(bn), "Net rezerv", C.amber, 2.6],
           ], S.tarih, 99999, 440, TEMA.secTampon, { fmt: mlr, hoverBirim: "%{y:.1f} milyar USD" }),
         };
         CIZ.secTampon();
@@ -170,7 +184,7 @@
             hovertemplate: "%{x|%d.%m.%Y}<br>Swap pozisyonu: %{y:.1f} milyar USD<extra></extra>" },
           { type: "scatter", mode: "lines+markers", x: LK.tarih,
             y: LK.swap_haric.map(v => v / 1000),
-            name: "Net UR — Swap Hariç", line: { color: C.amber, width: 2.5 }, marker: { size: 6 },
+            name: "Net Rezerv — Swap Hariç", line: { color: C.amber, width: 2.5 }, marker: { size: 6 },
             hovertemplate: "%{x|%d.%m.%Y}<br>Swap hariç: %{y:.1f} milyar USD<extra></extra>" },
         ], { height: 380 });
       }

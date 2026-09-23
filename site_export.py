@@ -325,88 +325,124 @@ def build_nakit():
     })
 
 
-def build_rezerv():
+def _rezerv_hesapla():
+    """Rezerv modülünün ortak hesabı (rezerv sayfası + ana sayfa kartı). Birim: milyon USD.
+    Günlük (analitik bilanço): brüt = A.1 Dış Varlıklar (ALTIN DAHİL — üstüne altın eklenmez);
+    net rezerv = dış varlıklar − (dış yükümlülükler + kamu döviz mevduatı + bankalar döviz mevduatı);
+    swap dövizi dış varlıklarda olduğundan "swap dahil". Haftalık (Cuma, resmî "Merkez Bankası
+    Rezervleri" tablosu): altın / döviz / toplam. Swap hariç = aynı günkü net rezerv + likidite
+    şablonu II.2+II.3 (negatif)."""
     fp = BASE / "net rezerv" / "net_rezerv.xlsx"
-    r = pd.read_excel(fp)
+    r = pd.read_excel(fp, sheet_name="Gunluk")
     r["tarih"] = pd.to_datetime(r["tarih"])
-    r = r.sort_values("tarih").reset_index(drop=True)
+    r = r.dropna(subset=["dis_varliklar", "net_ur"]).sort_values("tarih").reset_index(drop=True)
     L = r.iloc[-1]
+    h = pd.read_excel(fp, sheet_name="Haftalik")
+    h["tarih"] = pd.to_datetime(h["tarih"])
+    h = h.dropna(subset=["toplam_resmi"]).sort_values("tarih").reset_index(drop=True)
+    H = h.iloc[-1]
+    rk = ["altin_resmi", "doviz_resmi", "toplam_resmi"]
+    dH = (h.iloc[-1][rk] - h.iloc[-2][rk]) if len(h) > 1 else None
 
-    # Haftalık (Cuma kapanışlı) değişimler — analist çerçevesi
-    ri = r.set_index("tarih")[["dis_varliklar", "altin", "brut_toplam", "net_ur"]]
-    w = ri.resample("W-FRI").last().dropna(how="all")
+    def f(v):
+        return None if v is None or pd.isna(v) else float(v)
+
+    def ytd(df, kol, son):
+        """Yıl başından beri değişim (milyar USD): önceki yıl sonu gözlemine göre, yoksa yılın ilk gözlemine."""
+        yb = pd.Timestamp(son["tarih"].year, 1, 1)
+        onceki = df[df["tarih"] < yb]
+        taban = onceki.iloc[-1] if len(onceki) else df[df["tarih"] >= yb].iloc[0]
+        return (float(son[kol]) - float(taban[kol])) / 1000
+
+    # Haftalık (Cuma kapanışlı) değişimler — günlük seriler; son nokta devam eden haftadır
+    w = r.set_index("tarih")[["dis_varliklar", "net_ur"]].resample("W-FRI").last().dropna(how="all")
     wd = w.diff()
     dW = wd.iloc[-1]
 
-    ys = r[r["tarih"] >= pd.Timestamp(L["tarih"].year, 1, 1)]
-    ytd_nur = (float(L["net_ur"]) - float(ys.iloc[0]["net_ur"])) / 1000 if len(ys) else None
-
-    # Swap hariç: haftalık URDL şablonundaki toplam swap/forward pozisyonuyla
-    # (likidite.xlsx — II.2 + II.3, negatif). Aynı tarihli günlük Net UR ile eşlenir.
-    # Tarihsel seri de üretilir (her likidite tarihi için eşleşen NUR + swap).
-    swap_haric = swap_tarih = swap_toplam = None
+    # Swap hariç: likidite şablonu (II.2 + II.3, negatif) + aynı tarihli günlük net rezerv — tarihsel seri
     lk_seri = None
     try:
         lk = pd.read_excel(BASE / "net rezerv" / "likidite.xlsx")
         lk["tarih"] = pd.to_datetime(lk["tarih"])
         lk = lk.dropna(subset=["swap_toplam"]).sort_values("tarih")
-        if len(lk):
-            seri_t, seri_swap, seri_haric = [], [], []
-            for _, Lk_ in lk.iterrows():
-                es_ = r[r["tarih"] <= Lk_["tarih"]]
-                if not len(es_):
-                    continue
-                seri_t.append(Lk_["tarih"].strftime("%Y-%m-%d"))
-                seri_swap.append(round(float(Lk_["swap_toplam"]), 0))
-                seri_haric.append(round(float(es_.iloc[-1]["net_ur"]) + float(Lk_["swap_toplam"]), 0))
-            if seri_t:
-                lk_seri = {"tarih": seri_t, "swap_toplam": seri_swap, "swap_haric": seri_haric}
-                swap_toplam = seri_swap[-1]
-                swap_haric = seri_haric[-1]
-                swap_tarih = pd.Timestamp(seri_t[-1]).strftime("%d.%m.%Y")
+        seri_t, seri_swap, seri_haric = [], [], []
+        for _, Lk_ in lk.iterrows():
+            es_ = r[r["tarih"] <= Lk_["tarih"]]
+            if not len(es_):
+                continue
+            seri_t.append(Lk_["tarih"].strftime("%Y-%m-%d"))
+            seri_swap.append(round(float(Lk_["swap_toplam"]), 0))
+            seri_haric.append(round(float(es_.iloc[-1]["net_ur"]) + float(Lk_["swap_toplam"]), 0))
+        if seri_t:
+            lk_seri = {"tarih": seri_t, "swap_toplam": seri_swap, "swap_haric": seri_haric}
     except Exception:
         pass
 
-    yon = "artışla" if dW["net_ur"] >= 0 else "azalışla"
-    ozet = (f"<b>{L['tarih'].strftime('%d.%m.%Y')}</b> itibarıyla TCMB'nin brüt döviz rezervleri "
-            f"<b>{ht(L['dis_varliklar'] / 1000)} milyar USD</b> "
-            f"(haftalık {ht(dW['dis_varliklar'] / 1000, 1, True)}), altın rezervleri "
-            f"<b>{ht(L['altin'] / 1000)} milyar USD</b> "
-            f"(haftalık {ht(dW['altin'] / 1000, 1, True)}). "
-            f"<b>Net uluslararası rezervler (swap dahil)</b> bir önceki haftaya göre "
-            f"<b>{ht(abs(dW['net_ur']) / 1000)} milyar USD {yon} "
-            f"{ht(L['net_ur'] / 1000)} milyar USD</b> seviyesinde. "
-            f"Yıl başından beri net UR değişimi {ht(ytd_nur, 1, True)} milyar USD.")
-    if swap_haric is not None:
-        ozet += (f" <b>Swap hariç net rezerv {ht(swap_haric / 1000)} milyar USD</b> "
-                 f"({swap_tarih} likidite tablosu; toplam swap/forward pozisyonu "
-                 f"{ht(swap_toplam / 1000, 1)} milyar USD).")
+    return {
+        "fp": fp, "r": r, "h": h, "wd": wd,
+        "tarih": L["tarih"], "brut": float(L["dis_varliklar"]), "net_ur": float(L["net_ur"]),
+        "d_brut": f(dW["dis_varliklar"]), "d_net_ur": f(dW["net_ur"]),
+        "ytd_net_ur": ytd(r, "net_ur", L),
+        "resmi": {"tarih": H["tarih"], "altin": float(H["altin_resmi"]), "doviz": float(H["doviz_resmi"]),
+                  "toplam": float(H["toplam_resmi"]),
+                  "d_altin": None if dH is None else f(dH["altin_resmi"]),
+                  "d_doviz": None if dH is None else f(dH["doviz_resmi"]),
+                  "d_toplam": None if dH is None else f(dH["toplam_resmi"]),
+                  "ytd_toplam": ytd(h, "toplam_resmi", H)},
+        "likidite": lk_seri,
+        "swap_haric": lk_seri["swap_haric"][-1] if lk_seri else None,
+        "swap_toplam": lk_seri["swap_toplam"][-1] if lk_seri else None,
+        "swap_tarih": pd.Timestamp(lk_seri["tarih"][-1]).strftime("%d.%m.%Y") if lk_seri else None,
+    }
+
+
+def build_rezerv():
+    R = _rezerv_hesapla()
+    fp, r, h, wd, rs = R["fp"], R["r"], R["h"], R["wd"], R["resmi"]
+    m = lambda v: None if v is None else v / 1000
+
+    yon = "artışla" if (R["d_net_ur"] or 0) >= 0 else "azalışla"
+    ozet = (f"<b>{R['tarih'].strftime('%d.%m.%Y')}</b> itibarıyla TCMB'nin brüt rezervleri "
+            f"(analitik bilanço dış varlıkları, altın dahil) <b>{ht(R['brut'] / 1000)} milyar USD</b> "
+            f"(haftalık {ht(m(R['d_brut']), 1, True)}). "
+            f"Resmî haftalık tablo ({rs['tarih'].strftime('%d.%m.%Y')}): toplam rezerv "
+            f"<b>{ht(rs['toplam'] / 1000)} milyar USD</b> = altın {ht(rs['altin'] / 1000)} "
+            f"(haftalık {ht(m(rs['d_altin']), 1, True)}) + döviz {ht(rs['doviz'] / 1000)} milyar USD "
+            f"(haftalık {ht(m(rs['d_doviz']), 1, True)}). "
+            f"<b>Net rezerv</b> (dış varlıklar − toplam döviz yükümlülükleri; swap dahil) bir önceki haftaya göre "
+            f"<b>{ht(abs(R['d_net_ur'] or 0) / 1000)} milyar USD {yon} {ht(R['net_ur'] / 1000)} milyar USD</b> "
+            f"seviyesinde; yıl başından beri {ht(R['ytd_net_ur'], 1, True)} milyar USD.")
+    if R["swap_haric"] is not None:
+        ozet += (f" <b>Swap hariç net rezerv {ht(R['swap_haric'] / 1000)} milyar USD</b> "
+                 f"({R['swap_tarih']} likidite tablosu; toplam swap/forward pozisyonu "
+                 f"{ht(R['swap_toplam'] / 1000, 1)} milyar USD).")
 
     dump("rezerv.json", {
         "updated": mtime(fp),
         "ozet_html": ozet,
-        "son": {"tarih": L["tarih"].strftime("%d.%m.%Y"),
-                "brut_doviz": float(L["dis_varliklar"]), "altin": float(L["altin"]),
-                "brut_toplam": float(L["brut_toplam"]), "net_ur": float(L["net_ur"]),
-                "d_brut_doviz": None if pd.isna(dW["dis_varliklar"]) else float(dW["dis_varliklar"]),
-                "d_altin": None if pd.isna(dW["altin"]) else float(dW["altin"]),
-                "d_net_ur": None if pd.isna(dW["net_ur"]) else float(dW["net_ur"]),
-                "ytd_net_ur": ytd_nur,
-                "swap_haric": swap_haric, "swap_tarih": swap_tarih,
-                "swap_toplam": swap_toplam},
+        "son": {"tarih": R["tarih"].strftime("%d.%m.%Y"),
+                "brut": R["brut"], "net_ur": R["net_ur"],
+                "d_brut": R["d_brut"], "d_net_ur": R["d_net_ur"], "ytd_net_ur": R["ytd_net_ur"],
+                "resmi": dict(rs, tarih=rs["tarih"].strftime("%d.%m.%Y")),
+                "swap_haric": R["swap_haric"], "swap_tarih": R["swap_tarih"],
+                "swap_toplam": R["swap_toplam"]},
         "seri": {
             "tarih": [t.strftime("%Y-%m-%d") for t in r["tarih"]],
-            "brut_doviz": col(r, "dis_varliklar", 0),
-            "altin": col(r, "altin", 0),
+            "brut": col(r, "dis_varliklar", 0),
             "net_ur": col(r, "net_ur", 0),
+        },
+        "resmi": {
+            "tarih": [t.strftime("%Y-%m-%d") for t in h["tarih"]],
+            "altin": col(h, "altin_resmi", 0),
+            "doviz": col(h, "doviz_resmi", 0),
+            "toplam": col(h, "toplam_resmi", 0),
         },
         "haftalik": {
             "tarih": [t.strftime("%Y-%m-%d") for t in wd.index],
             "net_ur_d": [None if pd.isna(v) else round(float(v), 0) for v in wd["net_ur"]],
         },
-        "likidite": lk_seri,
+        "likidite": R["likidite"],
     })
-
 
 def build_kredi():
     fp = BASE / "kredi mevduat" / "kredi_mevduat.xlsx"
@@ -1077,18 +1113,17 @@ def build_home():
     except Exception:
         pass
     try:
-        r = pd.read_excel(BASE / "net rezerv" / "net_rezerv.xlsx")
-        r["tarih"] = pd.to_datetime(r["tarih"]); r = r.sort_values("tarih"); L = r.iloc[-1]
-        ri = r.set_index("tarih")[["dis_varliklar", "altin", "net_ur"]]
-        wd = ri.resample("W-FRI").last().dropna(how="all").diff().iloc[-1]
-        ys = r[r["tarih"] >= pd.Timestamp(L["tarih"].year, 1, 1)]
-        ytd_nur = (float(L["net_ur"]) - float(ys.iloc[0]["net_ur"])) / 1000 if len(ys) else None
-        add("💵", "TCMB Rezervleri",
-            f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla brüt döviz rezervleri "
-            f"<b>{ht(L['dis_varliklar'] / 1000)} milyar USD</b> (haftalık {ht(wd['dis_varliklar'] / 1000, 1, True)}), "
-            f"altın {ht(L['altin'] / 1000)} milyar USD. Net uluslararası rezervler (swap dahil) "
-            f"<b>{ht(L['net_ur'] / 1000)} milyar USD</b> (haftalık {ht(wd['net_ur'] / 1000, 1, True)}); "
-            f"yıl başından beri {ht(ytd_nur, 1, True)} milyar USD.", "net-rezerv.html")
+        R = _rezerv_hesapla(); rs = R["resmi"]
+        m = lambda v: None if v is None else v / 1000
+        metin = (f"{R['tarih'].strftime('%d.%m.%Y')} itibarıyla brüt rezervler (dış varlıklar, altın dahil) "
+                 f"<b>{ht(R['brut'] / 1000)} milyar USD</b> (haftalık {ht(m(R['d_brut']), 1, True)}); "
+                 f"resmî tablo ({rs['tarih'].strftime('%d.%m.%Y')}): altın {ht(rs['altin'] / 1000)} + döviz "
+                 f"{ht(rs['doviz'] / 1000)} = {ht(rs['toplam'] / 1000)} milyar USD. Net rezerv (swap dahil) "
+                 f"<b>{ht(R['net_ur'] / 1000)} milyar USD</b> (haftalık {ht(m(R['d_net_ur']), 1, True)}); "
+                 f"yıl başından beri {ht(R['ytd_net_ur'], 1, True)} milyar USD.")
+        if R["swap_haric"] is not None:
+            metin += f" Swap hariç net rezerv {ht(R['swap_haric'] / 1000)} milyar USD ({R['swap_tarih']})."
+        add("💵", "TCMB Rezervleri", metin, "net-rezerv.html")
     except Exception:
         pass
     try:

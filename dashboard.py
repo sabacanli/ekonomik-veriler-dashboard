@@ -879,7 +879,7 @@ if selected == "ana_sayfa":
             out.append(("💱 Yabancı Para Hareketi", base + analiz))
         except Exception:
             pass
-        # ── 4) TCMB Rezervleri (analist çerçevesi: brüt döviz + altın + net UR) ──
+        # ── 4) TCMB Rezervleri (brüt = dış varlıklar, altın dahil; altın resmî haftalık; net rezerv analitik bilanço) ──
         try:
             r = pd.read_excel(BASE_DIR / "net rezerv" / "net_rezerv.xlsx")
             r["tarih"] = pd.to_datetime(r["tarih"]); r = r.sort_values("tarih"); L = r.iloc[-1]
@@ -889,9 +889,9 @@ if selected == "ana_sayfa":
                 ys = r[r["tarih"] >= pd.Timestamp(L["tarih"].year, 1, 1)]
                 ytd_nur = (float(L["net_ur"]) - float(ys.iloc[0]["net_ur"])) / 1000 if len(ys) else None
                 out.append(("💵 TCMB Rezervleri",
-                    f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla brüt döviz rezervleri "
+                    f"{L['tarih'].strftime('%d.%m.%Y')} itibarıyla brüt rezervleri (dış varlıklar, altın dahil) "
                     f"<b>{_ht(L['dis_varliklar']/1000)} milyar USD</b> (haftalık {_ht(wd['dis_varliklar']/1000, 1, sign=True)}), "
-                    f"altın {_ht(L['altin']/1000)} milyar USD. Net uluslararası rezervler (swap dahil) "
+                    f"altın (resmî haftalık) {_ht(L['altin']/1000)} milyar USD. Net rezerv (swap dahil) "
                     f"<b>{_ht(L['net_ur']/1000)} milyar USD</b> (haftalık {_ht(wd['net_ur']/1000, 1, sign=True)}); "
                     f"yıl başından beri {_ht(ytd_nur, 1, sign=True)} milyar USD."))
             else:
@@ -4037,10 +4037,10 @@ elif selected == "net_rezerv":
             pass
 
     yon = "artışla" if dW["net_ur"] >= 0 else "azalışla"
-    ozet = (f"📋 **{son_t.strftime('%d.%m.%Y')}** itibarıyla brüt döviz rezervleri "
+    ozet = (f"📋 **{son_t.strftime('%d.%m.%Y')}** itibarıyla brüt rezervleri (dış varlıklar, altın dahil) "
             f"**{_b1(last['dis_varliklar'])} milyar USD** (haftalık {_b1(dW['dis_varliklar'], True)}), "
-            f"altın **{_b1(last['altin'])} milyar USD** (haftalık {_b1(dW['altin'], True)}). "
-            f"**Net uluslararası rezervler (swap dahil)** bir önceki haftaya göre "
+            f"altın (resmî haftalık) **{_b1(last['altin'])} milyar USD** (haftalık {_b1(dW['altin'], True)}). "
+            f"**Net rezerv (swap dahil)** bir önceki haftaya göre "
             f"**{_b1(abs(dW['net_ur']))} milyar USD {yon} {_b1(last['net_ur'])} milyar USD** seviyesinde; "
             f"yıl başından beri {_b1(ytd_nur, True)} milyar USD.")
     if swap_haric is not None:
@@ -4051,16 +4051,24 @@ elif selected == "net_rezerv":
     st.markdown(f"#### {son_t.strftime('%d.%m.%Y')} itibarıyla  ·  USD/TRY = {last['usdtry']:.4f}  ·  Milyar USD")
     k1, k2, k3, k4, k5 = st.columns(5)
     with k1:
-        st.metric("Brüt Döviz Rezervi", _b1(last["dis_varliklar"]), _b1(dW["dis_varliklar"], True))
+        st.metric("Brüt Rezerv (altın dahil)", _b1(last["dis_varliklar"]), _b1(dW["dis_varliklar"], True),
+                  help="Analitik bilanço A.1 Dış Varlıklar — günlük; altın bu kalemin içindedir.")
     with k2:
-        st.metric("Altın Rezervi", _b1(last["altin"]), _b1(dW["altin"], True))
+        st.metric("Altın (resmî haftalık)", _b1(last["altin"]), _b1(dW["altin"], True),
+                  help="TCMB 'Merkez Bankası Rezervleri' haftalık tablosu — son Cuma değeri.")
     with k3:
-        st.metric("Toplam Brüt Rezerv", _b1(last["brut_toplam"]), help="Döviz + altın.")
+        try:
+            _h = pd.read_excel(data_file, sheet_name="Haftalik").dropna(subset=["toplam_resmi"]).iloc[-1]
+            st.metric("Resmî Toplam Rezerv", _b1(_h["toplam_resmi"]),
+                      help=(f"TCMB haftalık rezerv tablosu ({pd.Timestamp(_h['tarih']).strftime('%d.%m.%Y')}): "
+                            f"altın {_b1(_h['altin_resmi'])} + döviz {_b1(_h['doviz_resmi'])} milyar USD."))
+        except Exception:
+            st.metric("Resmî Toplam Rezerv", "—")
     with k4:
-        st.metric("Net UR (Swap Dahil)", _b1(last["net_ur"]), _b1(dW["net_ur"], True),
-                  help="TCMB haftalık vaziyet '2A Net Uluslararası Rezervler' kalemi (analitik bilanço).")
+        st.metric("Net Rezerv (Swap Dahil)", _b1(last["net_ur"]), _b1(dW["net_ur"], True),
+                  help="Analitik bilanço: dış varlıklar − (dış yükümlülükler + kamu ve bankaların döviz mevduatı).")
     with k5:
-        st.metric("Net UR — Swap Hariç", "—" if swap_haric is None else _b1(swap_haric),
+        st.metric("Net Rezerv — Swap Hariç", "—" if swap_haric is None else _b1(swap_haric),
                   help=(f"Likidite tablosu ({swap_tarih}): Net UR − toplam swap/forward pozisyonu "
                         f"(URDL II.2 + II.3)." if swap_haric is not None
                         else "Likidite tablosu verisi için 'Güncelle'ye tıklayın."))
@@ -4074,14 +4082,14 @@ elif selected == "net_rezerv":
             lk_son = load_likidite(str(likidite_file), int(likidite_file.stat().st_mtime)).iloc[-1]
             _f = lambda v: "—" if v is None or pd.isna(v) else f"{v:,.0f}".replace(",", ".")
             st.dataframe(pd.DataFrame([
-                {"Kalem": "Net Uluslararası Rezervler (A20, aynı tarih)", "Değer (mn USD)": _f(nur_es)},
+                {"Kalem": "Net rezerv (analitik bilanço, aynı tarih)", "Değer (mn USD)": _f(nur_es)},
                 {"Kalem": "II.2 Forward/Swap açık pozisyonları", "Değer (mn USD)": _f(lk_son.get("swap_forward"))},
                 {"Kalem": "II.3 Diğer (repo vb.)", "Değer (mn USD)": _f(lk_son.get("diger"))},
-                {"Kalem": "= Net UR — Swap Hariç", "Değer (mn USD)": _f(swap_haric)},
+                {"Kalem": "= Net rezerv — Swap hariç", "Değer (mn USD)": _f(swap_haric)},
             ]), hide_index=True, use_container_width=True)
 
     # ── Grafikler ──
-    st.subheader("Net Uluslararası Rezervler (Swap Dahil)")
+    st.subheader("Net Rezerv (Swap Dahil)")
     f1 = go.Figure()
     f1.add_scatter(x=rez["tarih"], y=rez["net_ur"] / 1000, mode="lines",
                    line=dict(color="#FF9E1B", width=2.5),
@@ -4089,7 +4097,7 @@ elif selected == "net_rezerv":
     f1.update_layout(height=400, separators=",.", showlegend=False)
     styled_chart(f1)
 
-    st.subheader("Haftalık Değişim — Net UR (Milyar USD)")
+    st.subheader("Haftalık Değişim — Net Rezerv (Milyar USD)")
     wser = wd["net_ur"].dropna() / 1000
     f2 = go.Figure()
     f2.add_bar(x=wser.index, y=wser.values,
@@ -4098,12 +4106,12 @@ elif selected == "net_rezerv":
     f2.update_layout(height=340, separators=",.", showlegend=False)
     styled_chart(f2)
 
-    st.subheader("Brüt Rezervler — Döviz & Altın (Milyar USD)")
+    st.subheader("Brüt Rezervler — Dış Varlıklar (altın dahil) & Altın (Milyar USD)")
     f3 = go.Figure()
-    f3.add_scatter(x=rez["tarih"], y=rez["dis_varliklar"] / 1000, mode="lines", name="Brüt Döviz",
+    f3.add_scatter(x=rez["tarih"], y=rez["dis_varliklar"] / 1000, mode="lines", name="Brüt (altın dahil)",
                    line=dict(color="#4C9AFF", width=2.2),
-                   hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Döviz</extra>")
-    f3.add_scatter(x=rez["tarih"], y=rez["altin"] / 1000, mode="lines", name="Altın",
+                   hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Brüt</extra>")
+    f3.add_scatter(x=rez["tarih"], y=rez["altin"] / 1000, mode="lines", name="Altın (resmî)",
                    line=dict(color="#FF9E1B", width=2),
                    hovertemplate="%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Altın</extra>")
     f3.update_layout(height=380, separators=",.", legend_title_text="")
@@ -4125,7 +4133,7 @@ elif selected == "net_rezerv":
                 seri_swap.append(abs(float(Lk_["swap_toplam"])) / 1000)
                 seri_haric.append((float(es_.iloc[-1]["net_ur"]) + float(Lk_["swap_toplam"])) / 1000)
             if seri_t:
-                st.subheader("Swap Pozisyonu & Swap Hariç Net UR — Haftalık (Milyar USD)")
+                st.subheader("Swap Pozisyonu & Swap Hariç Net Rezerv — Haftalık (Milyar USD)")
                 st.caption("URDL şablonları — geçmiş noktalar web arşivinden geri dolduruldu, her haftalık "
                            "güncellemede yeni nokta eklenir (boşluklar arşivde kayıt bulunmayan dönemlerdir).")
                 f4 = go.Figure()
@@ -4133,7 +4141,7 @@ elif selected == "net_rezerv":
                                name="Toplam Swap/Forward Pozisyonu",
                                line=dict(color="#B98AFF", width=2.2), marker=dict(size=6),
                                hovertemplate="%{x|%d.%m.%Y}<br>Swap pozisyonu: %{y:.1f} milyar USD<extra></extra>")
-                f4.add_scatter(x=seri_t, y=seri_haric, mode="lines+markers", name="Net UR — Swap Hariç",
+                f4.add_scatter(x=seri_t, y=seri_haric, mode="lines+markers", name="Net Rezerv — Swap Hariç",
                                line=dict(color="#FF9E1B", width=2.5), marker=dict(size=6),
                                hovertemplate="%{x|%d.%m.%Y}<br>Swap hariç: %{y:.1f} milyar USD<extra></extra>")
                 f4.update_layout(height=380, separators=",.", legend_title_text="")
