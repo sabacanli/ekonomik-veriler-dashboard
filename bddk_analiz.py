@@ -92,6 +92,12 @@ def _parse_blocks(fp):
     """Dosyayı grup bloklarına ayırır: {'sektor': df, 'kamu': df, ...}"""
     raw = pd.read_excel(fp, header=None)
     beklenen = 1 + 3 * len(ITEMS)
+    basliklar = " ".join(str(x) for x in raw.iloc[0].tolist())
+    if raw.shape[1] == beklenen - 3 and "Kur Korumalı" not in basliklar:
+        # 25.09.2026: BDDK, bakiyesi sıfırlanan KKM satırını haftalık tablodan kaldırdı.
+        # Kalem ITEMS'ın sonunda — üç boş (NaN) kolonla tamamlanır; hesapla() boş kalemi atlar.
+        for k in range(3):
+            raw[beklenen - 3 + k] = float("nan")
     if raw.shape[1] != beklenen:
         raise ValueError(
             f"{Path(fp).name}: {raw.shape[1]} kolon var, {beklenen} bekleniyordu — "
@@ -147,6 +153,8 @@ def hesapla(tl_blocks, usd_blocks):
             sek = blocks["sektor"]
             c = _col(item, part)
             s, t = sek[c], sek[0]
+            if s.isna().all():
+                continue  # kalem kaynak tabloda artık yok (ör. KKM, 25.09.2026'dan itibaren)
             last = s.iloc[-1]
             prev = s.iloc[-2] if len(s) >= 2 else None
             cy = t.iloc[-1].year
