@@ -11,17 +11,24 @@
 # Variable'lar: HABER_MODEL (varsayılan claude-opus-5), BULTEN_GONDEREN (varsayılan bulten@ekordion.com.tr)
 #
 # Tetikleme: GitHub zamanlayıcısı bu depoda saatlerce gecikebildiğinden asıl tetik Cloudflare Worker'dır
-#   (cloudflare/gundem-tetik.js → workflow_dispatch, 07:50 TR). Aşağıdaki schedule yalnız YEDEKTİR: o gün
-#   Claude seçkili gündem zaten üretilmişse hiçbir şey yapmadan çıkar. Yine de iki koşu olursa Resend'in
-#   Idempotency-Key'i sayesinde kimseye ikinci e-posta gitmez.
-# Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow" (bülten: hayir / test / evet).
+#   (cloudflare/gundem-tetik.js → workflow_dispatch: her gün 07:50 TR günlük; Pazar 19:00 TR haftalık).
+#   Aşağıdaki schedule'lar yalnız YEDEKTİR: o günün/haftanın Claude'lu çıktısı zaten üretilmişse hiçbir şey
+#   yapmadan çıkar. Yine de iki koşu olursa Resend'in Idempotency-Key'i sayesinde kimseye ikinci e-posta gitmez.
+# İki tür: gunluk (Finans Gündemi, hafta içi e-posta) · haftalik (Pazar "Haftaya Bakış": geçen hafta + gelecek hafta).
+# Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow" (tür + bülten: hayir / test / evet).
 name: Finans Gündemi (günlük)
 
 on:
   schedule:
-    - cron: "30 6 * * *"   # YEDEK: 06:30 UTC = 09:30 TR (asıl tetik: cloudflare/gundem-tetik.js, 07:50 TR)
+    - cron: "30 6 * * *"   # YEDEK günlük: 06:30 UTC = 09:30 TR (asıl tetik: Cloudflare, 07:50 TR)
+    - cron: "30 17 * * 0"  # YEDEK haftalık: Pazar 17:30 UTC = 20:30 TR (asıl tetik: Cloudflare, 19:00 TR)
   workflow_dispatch:
     inputs:
+      tur:
+        description: "Bülten türü: gunluk = Finans Gündemi · haftalik = Pazar Haftaya Bakış"
+        type: choice
+        options: ["gunluk", "haftalik"]
+        default: "gunluk"
       saat:
         description: "Geriye dönük pencere (saat) — boş: otomatik (Pazartesi 72, diğer günler 24)"
         default: ""
@@ -51,17 +58,28 @@ jobs:
       - name: Kodu al
         uses: actions/checkout@v4
 
-      - name: Yedek koşu gerekli mi?
+      - name: Tür ve yedek koşu kontrolü
         id: kontrol
         run: |
-          BUGUN=$(TZ=Europe/Istanbul date +%Y-%m-%d)
-          DOSYA="site/data/haber/$BUGUN.json"
+          TUR="${{ github.event.inputs.tur }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # Pazar 17:00 TR sonrası zamanlanmış koşu haftalık yedektir; diğerleri günlük yedek
+            if [ "$(TZ=Europe/Istanbul date +%u)" = "7" ] && [ "$(TZ=Europe/Istanbul date +%H)" -ge 17 ]; then TUR=haftalik; else TUR=gunluk; fi
+          fi
+          TUR="${TUR:-gunluk}"
+          echo "tur=$TUR" >> "$GITHUB_OUTPUT"
+          if [ "$TUR" = "haftalik" ]; then
+            DOSYA="site/data/haber/hafta-$(TZ=Europe/Istanbul date +%G-W%V).json"
+          else
+            DOSYA="site/data/haber/$(TZ=Europe/Istanbul date +%Y-%m-%d).json"
+          fi
           if [ "${{ github.event_name }}" = "schedule" ] && [ -f "$DOSYA" ] && grep -q '"mod":"ai"' "$DOSYA"; then
-            echo "Bugünün Claude seçkili gündemi zaten üretilmiş (harici tetik çalışmış) — yedek koşu atlanıyor."
+            echo "Bu $TUR çıktı zaten Claude ile üretilmiş (harici tetik çalışmış) — yedek koşu atlanıyor."
             echo "atla=true" >> "$GITHUB_OUTPUT"
           else
             echo "atla=false" >> "$GITHUB_OUTPUT"
           fi
+          echo "Tür: $TUR · dosya: $DOSYA"
 
       - name: Python kur
         if: steps.kontrol.outputs.atla != 'true'
@@ -79,8 +97,9 @@ jobs:
         run: |
           MOD="${{ github.event.inputs.bulten }}"
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            # zamanlanmış koşu: hafta içi (Pzt–Cum, TR saatiyle) tüm listeye gönder
-            if [ "$(TZ=Europe/Istanbul date +%u)" -le 5 ]; then MOD=evet; else MOD=hayir; fi
+            # zamanlanmış koşu: günlük bülten hafta içi (Pzt–Cum, TR saatiyle), haftalık bülten Pazar tüm listeye
+            if [ "${{ steps.kontrol.outputs.tur }}" = "haftalik" ]; then MOD=evet
+            elif [ "$(TZ=Europe/Istanbul date +%u)" -le 5 ]; then MOD=evet; else MOD=hayir; fi
           fi
           echo "mod=${MOD:-hayir}" >> "$GITHUB_OUTPUT"
           echo "Bülten modu: ${MOD:-hayir}"
@@ -94,7 +113,7 @@ jobs:
           python piyasa/piyasa_fetch.py || echo "::warning::piyasa verisi alınamadı — rakam tablosu eksik kalabilir"
 
       - name: Haberleri topla
-        if: steps.kontrol.outputs.atla != 'true'
+        if: steps.kontrol.outputs.atla != 'true' && steps.kontrol.outputs.tur == 'gunluk'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
@@ -108,6 +127,15 @@ jobs:
           if [ "${{ steps.mod.outputs.mod }}" = "evet" ]; then BULTEN=--bulten; else BULTEN=""; fi
           python haberler/haber_topla.py --saat "$SAAT" $BULTEN
 
+      - name: Haftaya Bakış (Pazar)
+        if: steps.kontrol.outputs.atla != 'true' && steps.kontrol.outputs.tur == 'haftalik'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
+        run: |
+          if [ "${{ steps.mod.outputs.mod }}" = "evet" ]; then BULTEN=--bulten; else BULTEN=""; fi
+          python haberler/hafta_ozeti.py $BULTEN
+
       - name: Değişiklikleri commit + push
         if: steps.kontrol.outputs.atla != 'true'
         run: |
@@ -117,7 +145,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "Yeni haber yok — commit atlanıyor."
           else
-            git commit -m "Finans gündemi ($(TZ=Europe/Istanbul date '+%d.%m.%Y %H:%M'))"
+            git commit -m "$([ "${{ steps.kontrol.outputs.tur }}" = "haftalik" ] && echo "Haftaya Bakış" || echo "Finans gündemi") ($(TZ=Europe/Istanbul date '+%d.%m.%Y %H:%M'))"
             git pull --rebase origin main || true
             git push origin main
           fi
@@ -147,7 +175,7 @@ jobs:
         run: |
           MOD="${{ steps.mod.outputs.mod }}"
           if [ "$MOD" = "evet" ] || [ "$MOD" = "test" ]; then
-            python haberler/bulten_gonder.py --mod "$MOD"
+            python haberler/bulten_gonder.py --mod "$MOD" --tur "${{ steps.kontrol.outputs.tur }}"
           else
             echo "Bülten gönderilmiyor (mod: ${MOD:-hayir})."
           fi

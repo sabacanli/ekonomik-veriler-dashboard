@@ -353,7 +353,7 @@ def sec(kumeler, finans_kaynak):
     return "anahtar", [], secim
 
 
-def veri_bolumu(bulten):
+def veri_bolumu(bulten, durum_dosyasi=None):
     """'Yeni açıklanan veriler': ana sayfa kartlarından (home.json) son bültenden bu yana metni değişen
     modüller — yeni veri açıklanınca site_export kart cümlesini yeniler, imzası (metin özeti) değişir.
     Durum dosyası yalnız bülten koşusunda (--bulten) güncellenir; böylece Pazartesi bülteni Cuma ve hafta
@@ -363,8 +363,9 @@ def veri_bolumu(bulten):
         kartlar = json.loads(HOME_JSON.read_text(encoding="utf-8")).get("cards", [])
     except Exception:
         return []
+    durum_dosyasi = durum_dosyasi or DURUM_JSON
     try:
-        eski = json.loads(DURUM_JSON.read_text(encoding="utf-8")).get("imza", {})
+        eski = json.loads(durum_dosyasi.read_text(encoding="utf-8")).get("imza", {})
     except Exception:
         eski = None
     yeni, degisen = {}, []
@@ -378,8 +379,8 @@ def veri_bolumu(bulten):
         if eski is not None and eski.get(link) != imza:
             degisen.append({"ikon": k.get("icon") or "", "baslik": k.get("title") or "", "ozet": metin, "link": link})
     if bulten or eski is None:
-        DURUM_JSON.write_text(json.dumps({"imza": yeni, "guncelleme": dt.datetime.now(TR).strftime("%d.%m.%Y %H:%M")},
-                                         ensure_ascii=False, indent=0), encoding="utf-8")
+        durum_dosyasi.write_text(json.dumps({"imza": yeni, "guncelleme": dt.datetime.now(TR).strftime("%d.%m.%Y %H:%M")},
+                                            ensure_ascii=False, indent=0), encoding="utf-8")
     return degisen
 
 
@@ -428,9 +429,14 @@ def yaz(gun, simdi, saat, mod, ozet, secim, sayilar, ek=None):
     gunler = sorted((p.stem for p in OUT_DIR.glob("20??-??-??.json")), reverse=True)
     for eski in gunler[ARSIV_GUN:]:
         (OUT_DIR / f"{eski}.json").unlink()
+    try:  # haftalık bülten listesi (hafta_ozeti.py yazar) korunur
+        haftalik = json.loads((OUT_DIR / "index.json").read_text(encoding="utf-8")).get("haftalik", [])
+    except Exception:
+        haftalik = []
     (OUT_DIR / "index.json").write_text(json.dumps({
         "son": gunler[0], "gunler": gunler[:ARSIV_GUN], "updated": simdi.strftime("%d.%m.%Y %H:%M"),
         "mod": mod, "ozet": ozet, "ozet_html": ozet_html, "one_cikan": one_cikan, "sayilar": sayilar,
+        "haftalik": haftalik,
     }, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     # Arama motorları JS beklemeden taze içerik görsün: özeti sayfaya düz metin olarak göm

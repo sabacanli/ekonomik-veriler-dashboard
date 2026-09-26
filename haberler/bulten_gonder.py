@@ -14,6 +14,7 @@ aynı gün ikinci koşuda Resend aynı alıcıya ikinci kez göndermez.
 
 Kullanım:
   python haberler/bulten_gonder.py --mod test      # yalnız listedeki İLK alıcıya
+  python haberler/bulten_gonder.py --tur haftalik  # Pazar "Haftaya Bakış" bülteni (hafta_ozeti.py çıktısı)
   python haberler/bulten_gonder.py --mod evet      # tüm listeye
   python haberler/bulten_gonder.py --kuru out.html # göndermeden HTML önizleme yaz
   python haberler/bulten_gonder.py --denetle       # göndermeden alıcı listesini denetle (adres yazdırmaz)
@@ -212,6 +213,142 @@ def metin_yap(D):
     return "\n".join(S)
 
 
+def rakam_tablo_html(satirlar, haftalik):
+    """Piyasa tablosu (e-posta): günlük → Son/Değişim; haftalık → Son/Hafta/Ay/Yılbaşı."""
+    hucre = 'padding:6px 0 6px 12px;border-bottom:1px solid #EEF1F6;white-space:nowrap;text-align:right;'
+    def renkli(v, metin):
+        renk = "#8A93A6" if not v else ("#2E7D5B" if v > 0 else "#C0392B")
+        return f'<td style="{hucre}color:{renk};">{metin}</td>'
+    P = ['<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13.5px;">']
+    if haftalik:
+        P.append('<tr>' + ''.join(f'<th style="{hucre}color:#8A93A6;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;'
+                                  f'{"text-align:left;padding-left:0;" if i == 0 else ""}">{b}</th>'
+                                  for i, b in enumerate(["Gösterge", "Son", "Hafta", "Ay", "Yılbaşı"])) + '</tr>')
+    for r in satirlar:
+        faiz = r.get("tur") == "faiz"
+        birim = f' <span style="color:#8A93A6;font-size:12px;">{esc(r["birim"])}</span>' if r.get("birim") else ""
+        satir = (f'<tr><td style="padding:6px 0;border-bottom:1px solid #EEF1F6;color:#1A2233;">{esc(r["ad"])}</td>'
+                 f'<td style="{hucre}color:#1A2233;font-weight:700;">{trn(r["deger"], r.get("ondalik", 2))}{birim}</td>')
+        if haftalik:
+            hp = r.get("hafta_puan") if faiz else None
+            hafta = ("—" if hp is None else trn(hp, 2, True) + " p") if faiz else ("—" if r.get("hafta_pct") is None else trn(r["hafta_pct"], 2, True) + "%")
+            satir += renkli(hp if faiz else r.get("hafta_pct"), hafta)
+            satir += renkli(r.get("ay_pct"), "—" if r.get("ay_pct") is None else trn(r["ay_pct"], 1, True) + "%")
+            satir += renkli(r.get("ytd_pct"), "—" if r.get("ytd_pct") is None else trn(r["ytd_pct"], 1, True) + "%")
+        else:
+            v = r.get("degisim") if faiz else r.get("degisim_pct")
+            satir += renkli(v, "—" if v is None else (trn(v, 2, True) + (" puan" if faiz else "%")))
+        P.append(satir + "</tr>")
+    P.append("</table>")
+    return "".join(P)
+
+
+def veri_html(veriler, baslik, alt):
+    P = [f'<div style="font-size:16px;font-weight:700;color:#1A2233;margin:18px 0 2px;">{baslik}</div>'
+         f'<div style="font-size:12.5px;color:#8A93A6;margin:0 0 6px;">{alt}</div>']
+    for v in veriler:
+        P.append(f'<div style="padding:8px 0;border-bottom:1px solid #EEF1F6;">'
+                 f'<a href="{KOK}{esc(v["link"])}" style="color:#1A2233;font-size:14.5px;font-weight:700;text-decoration:none;">'
+                 f'{esc(v.get("ikon", ""))} {esc(v["baslik"])}</a>'
+                 f'<div style="color:#55627A;font-size:13.5px;line-height:1.55;margin-top:3px;">{esc(v["ozet"])}</div></div>')
+    return "".join(P)
+
+
+def html_hafta(H):
+    """Pazar 'Haftaya Bakış' e-postası."""
+    P = [f"""<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Haftaya Bakış</title></head>
+<body style="margin:0;padding:0;background:#F3F5F9;">
+<span style="display:none;max-height:0;overflow:hidden;opacity:0;color:#F3F5F9;">{esc(H["baslik"])[:140]}</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3F5F9;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;background:#FFFFFF;border-radius:10px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+<tr><td style="background:#0B0E14;padding:22px 28px;">
+  <div style="color:#FF9E1B;font-size:20px;font-weight:700;letter-spacing:.2px;">Ekordion · Haftaya Bakış</div>
+  <div style="color:#9AA4B2;font-size:13px;margin-top:5px;">{esc(H["aralik"])} · geçen haftanın özeti ve gelecek hafta neler bekliyor</div>
+</td></tr>
+<tr><td style="padding:24px 28px 8px;">
+<div style="font-size:19px;font-weight:700;color:#1A2233;line-height:1.35;margin:0 0 14px;">{esc(H["baslik"])}</div>
+<div style="font-size:16px;font-weight:700;color:#1A2233;margin:0 0 8px;">Haftanın Özeti</div>
+<ol style="margin:0 0 6px;padding-left:20px;color:#1A2233;font-size:14.5px;line-height:1.6;">"""]
+    P += [f'<li style="margin-bottom:8px;">{esc(m)}</li>' for m in H["hafta_ozeti"]]
+    P.append("</ol>")
+    PZ = H.get("piyasa")
+    if PZ and PZ.get("satirlar"):
+        P.append('<div style="font-size:16px;font-weight:700;color:#1A2233;margin:18px 0 6px;">Piyasalarda Hafta</div>')
+        P.append(rakam_tablo_html(PZ["satirlar"], True))
+        if H.get("piyasa_yorumu"):
+            P.append(f'<div style="font-size:13.5px;color:#55627A;line-height:1.55;margin:8px 0 0;">{esc(H["piyasa_yorumu"])}</div>')
+        P.append('<div style="font-size:11.5px;color:#8A93A6;margin:6px 0 0;">Cuma kapanışı; faizlerde hafta sütunu puan, diğerleri yüzde değişim. Kaynak: TradingView, TCMB EVDS, Yahoo Finance.</div>')
+    if H.get("veriler"):
+        P.append(veri_html(H["veriler"], "Bu Hafta Açıklanan Veriler", "Hafta içinde güncellenen Ekordion serileri — rakamlar sitedeki grafiklerle aynı"))
+    P.append(f'<div style="font-size:16px;font-weight:700;color:#1A2233;margin:18px 0 2px;">Gelecek Hafta: {esc(H["sonraki_aralik"])}</div>')
+    if H.get("gelecek_hafta"):
+        P.append('<ul style="margin:6px 0 10px;padding-left:20px;color:#1A2233;font-size:14px;line-height:1.6;">'
+                 + "".join(f'<li style="margin-bottom:6px;">{esc(m)}</li>' for m in H["gelecek_hafta"]) + "</ul>")
+    gun_onceki = None
+    for o in H.get("takvim", []):
+        if o["tarih"] != gun_onceki:
+            d = dt.date.fromisoformat(o["tarih"])
+            P.append(f'<div style="font-size:12.5px;font-weight:700;color:#B86E00;letter-spacing:.5px;text-transform:uppercase;margin:10px 0 2px;">{GUNLER[d.weekday()]} {d.day:02d}.{d.month:02d}</div>')
+            gun_onceki = o["tarih"]
+        P.append(takvim_satir_html(o))
+    if H.get("one_cikan"):
+        P.append('<div style="font-size:16px;font-weight:700;color:#1A2233;margin:20px 0 4px;">Haftanın Öne Çıkan Haberleri</div>')
+        for h in H["one_cikan"][:8]:
+            P.append(f'<div style="padding:8px 0;border-bottom:1px solid #EEF1F6;">'
+                     f'<a href="{guvenli_link(h["link"])}" style="color:#1A2233;font-size:14.5px;font-weight:700;line-height:1.4;text-decoration:none;">{esc(h["baslik"])}</a>'
+                     + (f'<div style="color:#55627A;font-size:13.5px;line-height:1.55;margin-top:3px;">{esc(h["ozet"])}</div>' if h.get("ozet") else "")
+                     + f'<div style="color:#8A93A6;font-size:12px;margin-top:3px;">{esc(h["kaynak"])} · {h["gun"][8:]}.{h["gun"][5:7]} · {esc(h["kategori"])}</div></div>')
+    P.append(f"""</td></tr>
+<tr><td align="center" style="padding:20px 28px 26px;">
+  <a href="{SITE}?hafta={esc(H["hafta"])}" style="display:inline-block;background:#FF9E1B;color:#0B0E14;font-size:14px;font-weight:700;text-decoration:none;padding:11px 22px;border-radius:7px;">Haftaya Bakış'ı sitede aç →</a>
+</td></tr>
+<tr><td style="background:#F8F9FC;padding:16px 28px;color:#8A93A6;font-size:11.5px;line-height:1.6;">
+  Başlıklar ilgili yayıncılara aittir; bağlantılar haberin kaynağına gider. Özet ve yorumlar otomatik
+  üretilir — yatırım tavsiyesi değildir. Veriler ve grafikler: <a href="https://ekordion.com.tr" style="color:#8A93A6;">ekordion.com.tr</a><br>
+  Bu bülteni almak istemiyorsanız bu e-postayı yanıtlayarak bildirmeniz yeterli.
+</td></tr>
+</table></td></tr></table></body></html>""")
+    return "".join(P)
+
+
+def metin_hafta(H):
+    S = [f"EKORDION · HAFTAYA BAKIŞ — {H['aralik']}", "", H["baslik"], "", "HAFTANIN ÖZETİ"]
+    S += [f"  {i}. {m}" for i, m in enumerate(H["hafta_ozeti"], 1)]
+    PZ = H.get("piyasa")
+    if PZ and PZ.get("satirlar"):
+        S += ["", "PİYASALARDA HAFTA (son · hafta · ay · yılbaşı)"]
+        for r in PZ["satirlar"]:
+            faiz = r.get("tur") == "faiz"
+            hafta = (trn(r["hafta_puan"], 2, True) + " p") if faiz and r.get("hafta_puan") is not None else \
+                    (trn(r["hafta_pct"], 2, True) + "%" if r.get("hafta_pct") is not None else "—")
+            S.append(f"  {r['ad']}: {trn(r['deger'], r.get('ondalik', 2))} {r.get('birim', '')} · {hafta} · "
+                     f"{'—' if r.get('ay_pct') is None else trn(r['ay_pct'], 1, True) + '%'} · "
+                     f"{'—' if r.get('ytd_pct') is None else trn(r['ytd_pct'], 1, True) + '%'}".replace("  ·", " ·"))
+        if H.get("piyasa_yorumu"):
+            S += ["", f"  {H['piyasa_yorumu']}"]
+    if H.get("veriler"):
+        S += ["", "BU HAFTA AÇIKLANAN VERİLER (Ekordion)"]
+        for v in H["veriler"]:
+            S += [f"  • {v['baslik']}: {v['ozet']}", f"    {KOK}{v['link']}"]
+    S += ["", f"GELECEK HAFTA: {H['sonraki_aralik']}"]
+    S += [f"  • {m}" for m in H.get("gelecek_hafta", [])]
+    gun_onceki = None
+    for o in H.get("takvim", []):
+        if o["tarih"] != gun_onceki:
+            d = dt.date.fromisoformat(o["tarih"]); S.append(f"  {GUNLER[d.weekday()]} {d.day:02d}.{d.month:02d}"); gun_onceki = o["tarih"]
+        S.append(f"    {o.get('saat') or '—'} · {o['kurum']} · {o['baslik']}" + (f" — {o['donem']}" if o.get("donem") else ""))
+    if H.get("one_cikan"):
+        S += ["", "HAFTANIN ÖNE ÇIKAN HABERLERİ"]
+        for h in H["one_cikan"][:8]:
+            S += [f"  • {h['baslik']} ({h['kaynak']}, {h['gun'][8:]}.{h['gun'][5:7]})", f"    {h['link']}"]
+    S += ["", f"Sitede: {SITE}?hafta={H['hafta']}", "",
+          "Özet ve yorumlar otomatik üretilir — yatırım tavsiyesi değildir.",
+          "Bu bülteni almak istemiyorsanız bu e-postayı yanıtlayarak bildirmeniz yeterli."]
+    return "\n".join(S)
+
+
 def alicilari_oku():
     ham = [x.strip() for x in re.split(r"[,;\s]+", os.environ.get("BULTEN_ALICILAR", "")) if x.strip()]
     return ham
@@ -245,6 +382,8 @@ def denetle():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mod", choices=["test", "evet"], default="test")
+    ap.add_argument("--tur", choices=["gunluk", "haftalik"], default="gunluk", help="günlük gündem veya Pazar 'Haftaya Bakış'")
+    ap.add_argument("--hafta", help="haftalık bülten için ISO hafta (ör. 2026-W39); varsayılan: içinde bulunulan hafta")
     ap.add_argument("--gun", default=dt.datetime.now(TR).strftime("%Y-%m-%d"))
     ap.add_argument("--kuru", metavar="DOSYA", help="göndermeden HTML önizlemeyi bu dosyaya yaz")
     ap.add_argument("--denetle", action="store_true", help="göndermeden alıcı listesini denetle")
@@ -253,13 +392,25 @@ def main():
         denetle()
         return
 
-    fp = HABER_DIR / f"{a.gun}.json"
-    if not fp.exists():
-        print(f"Bülten atlandı: {a.gun} için gündem verisi yok.")
-        return
-    D = json.loads(fp.read_text(encoding="utf-8"))
-    govde, duz = html_yap(D), metin_yap(D)
-    konu = f"Finans Gündemi · {tarih_yazi(a.gun)}"
+    if a.tur == "haftalik":
+        yil, w, _ = dt.datetime.now(TR).date().isocalendar()
+        kimlik = a.hafta or f"{yil}-W{w:02d}"
+        fp = HABER_DIR / f"hafta-{kimlik}.json"
+        if not fp.exists():
+            print(f"Bülten atlandı: {kimlik} için Haftaya Bakış verisi yok (hafta_ozeti.py çalışmamış).")
+            return
+        H = json.loads(fp.read_text(encoding="utf-8"))
+        govde, duz = html_hafta(H), metin_hafta(H)
+        konu = f"Haftaya Bakış · {H['aralik']}"
+    else:
+        kimlik = a.gun
+        fp = HABER_DIR / f"{a.gun}.json"
+        if not fp.exists():
+            print(f"Bülten atlandı: {a.gun} için gündem verisi yok.")
+            return
+        D = json.loads(fp.read_text(encoding="utf-8"))
+        govde, duz = html_yap(D), metin_yap(D)
+        konu = f"Finans Gündemi · {tarih_yazi(a.gun)}"
 
     if a.kuru:
         Path(a.kuru).write_text(govde, encoding="utf-8")
@@ -283,11 +434,11 @@ def main():
         yuk = {"from": gonderen, "to": [alici], "subject": konu, "html": govde, "text": duz}
         if yanit:
             yuk["reply_to"] = yanit
-        iz = hashlib.sha256(f"{a.gun}|{a.mod}|{alici.lower()}".encode()).hexdigest()[:32]
+        iz = hashlib.sha256(f"{kimlik}|{a.mod}|{alici.lower()}".encode()).hexdigest()[:32]
         try:
             r = requests.post("https://api.resend.com/emails", json=yuk, timeout=30,
                               headers={"Authorization": f"Bearer {anahtar}",
-                                       "Idempotency-Key": f"gundem-{a.gun}-{iz}"})
+                                       "Idempotency-Key": f"gundem-{kimlik}-{iz}"})
             if r.status_code in (200, 201):
                 tamam += 1
                 print(f"  ✓ alıcı {i}: gönderildi")

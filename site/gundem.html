@@ -46,28 +46,29 @@
     <div class="chips" id="gunler"></div>
 
     <section class="chart-card" id="secOne" style="display:none">
-      <h3>⭐ Günün Öne Çıkanları</h3>
+      <h3 id="h3One">⭐ Günün Öne Çıkanları</h3>
       <p class="cap" id="capOne"></p>
       <ol class="one-cikan" id="oneCikan"></ol>
     </section>
 
     <section class="chart-card" id="secPiyasa" style="display:none">
-      <h3>💹 Günün Rakamları</h3>
+      <h3 id="h3Piyasa">💹 Günün Rakamları</h3>
       <p class="cap" id="capPiyasa"></p>
       <div class="table-wrap"><table class="heat rakam" id="tblPiyasa"></table></div>
     </section>
 
     <section class="chart-card" id="secTakvim" style="display:none">
-      <h3>📅 Bugün Takvimde</h3>
+      <h3 id="h3Takvim">📅 Bugün Takvimde</h3>
       <p class="cap" id="capTakvim"></p>
+      <div id="takvimYorum"></div>
       <ul class="haber-liste" id="takvimBugun"></ul>
       <h4 id="hTakvimHafta" style="display:none;margin:14px 0 4px;">Haftanın kalanı</h4>
       <ul class="haber-liste" id="takvimHafta"></ul>
     </section>
 
     <section class="chart-card" id="secVeri" style="display:none">
-      <h3>📊 Yeni Açıklanan Veriler</h3>
-      <p class="cap">Son bültenden bu yana güncellenen Ekordion serileri — her satır ilgili sayfaya gider</p>
+      <h3 id="h3Veri">📊 Yeni Açıklanan Veriler</h3>
+      <p class="cap" id="capVeri">Son bültenden bu yana güncellenen Ekordion serileri — her satır ilgili sayfaya gider</p>
       <ul class="haber-liste" id="veriler"></ul>
     </section>
 
@@ -83,79 +84,117 @@
   <script>
     (async () => {
       const AYK = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+      const GUNK = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+      const GUNU = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
       // Akışlardan gelen metinler güvenilmez: sayfaya yalnız kaçışlanmış olarak girer
       const esc = s => String(s === null || s === undefined ? "" : s)
         .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
       const guvenliLink = u => (/^https?:\/\//i.test(u || "") ? esc(u) : "#");
       const gunEtiket = g => +g.slice(8, 10) + " " + AYK[+g.slice(5, 7) - 1];
-      const GUNK = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
-      const gunKisa = t => GUNK[(new Date(t + "T00:00:00").getDay() + 6) % 7] + " " + t.slice(8, 10) + "." + t.slice(5, 7);
+      const haftaGunu = t => (new Date(t + "T00:00:00").getDay() + 6) % 7;
+      const gunKisa = t => GUNK[haftaGunu(t)] + " " + t.slice(8, 10) + "." + t.slice(5, 7);
       const takvimSatir = (o, tarihli) => '<li class="haber"><span class="meta">' + (tarihli ? gunKisa(o.tarih) + " " : "") +
         (o.saat || "—") + " · " + esc(o.kurum) + "</span> " + (o.onem >= 3 ? "<b>" : "") + esc(o.baslik) +
         (o.onem >= 3 ? "</b>" : "") + (o.donem ? ' <span class="oz">' + esc(o.donem) + "</span>" : "") + "</li>";
+      const $ = id => document.getElementById(id);
+
+      function rakamTablo(satirlar, haftalik) {
+        const bas = haftalik ? ["Gösterge", "Son", "Hafta", "Ay", "Yılbaşı"] : ["Gösterge", "Son", "Değişim"];
+        const hucre = (v, metin) => '<td class="num' + (!v ? "" : (v > 0 ? " up" : " down")) + '">' + metin + "</td>";
+        const pct = (v, d) => (v === null || v === undefined ? "—" : trNum(v, d, true) + "%");
+        return "<tr>" + bas.map(b => "<th>" + b + "</th>").join("") + "</tr>" + satirlar.map(s => {
+          const faiz = s.tur === "faiz";
+          let h = '<tr><td class="lbl">' + esc(s.ad) + '</td><td class="num">' + trNum(s.deger, s.ondalik) +
+            (s.birim ? ' <span class="birim">' + esc(s.birim) + "</span>" : "") + "</td>";
+          if (haftalik) {
+            const hp = faiz ? s.hafta_puan : s.hafta_pct;
+            h += hucre(hp, faiz ? (hp === null || hp === undefined ? "—" : trNum(hp, 2, true) + " p") : pct(hp, 2));
+            h += hucre(s.ay_pct, pct(s.ay_pct, 1)) + hucre(s.ytd_pct, pct(s.ytd_pct, 1));
+          } else {
+            const v = faiz ? s.degisim : s.degisim_pct;
+            h += hucre(v, v === null || v === undefined ? "—" : trNum(v, 2, true) + (faiz ? " puan" : "%"));
+          }
+          return h + "</tr>";
+        }).join("");
+      }
+      function veriListe(veriler) {
+        return (veriler || []).map(v => '<li class="haber"><a class="baslik" href="' + esc(v.link) + '">' + esc(v.ikon) + " " +
+          esc(v.baslik) + '</a><div class="oz">' + esc(v.ozet) + "</div></li>").join("");
+      }
 
       const IDX = await getJSON("data/haber/index.json");
-      const istenen = new URLSearchParams(location.search).get("gun");
+      const params = new URLSearchParams(location.search);
+      const istenen = params.get("gun"), istHafta = params.get("hafta");
+      const haftalar = IDX.haftalik || [];
       let gun = IDX.gunler.includes(istenen) ? istenen : IDX.son;
+      let hafta = haftalar.some(h => h.id === istHafta) ? istHafta : null;
 
-      const gEl = document.getElementById("gunler");
+      const gEl = $("gunler");
       gEl.innerHTML = IDX.gunler.slice(0, 14).map(g =>
-        '<span class="chip" data-v="' + g + '">' + gunEtiket(g) + "</span>").join("");
+        '<span class="chip" data-v="' + g + '">' + gunEtiket(g) + "</span>").join("") +
+        haftalar.slice(0, 4).map(h =>
+          '<span class="chip" data-h="' + esc(h.id) + '" title="' + esc(h.baslik) + '">📅 Haftaya Bakış · ' + esc(h.aralik) + "</span>").join("");
       gEl.querySelectorAll(".chip").forEach(c => c.onclick = () => {
-        gun = c.dataset.v;
-        history.replaceState(null, "", gun === IDX.son ? "gundem.html" : "gundem.html?gun=" + gun);
-        yukle();
+        if (c.dataset.h) {
+          hafta = c.dataset.h;
+          history.replaceState(null, "", "gundem.html?hafta=" + hafta);
+          yukleHafta();
+        } else {
+          hafta = null; gun = c.dataset.v;
+          history.replaceState(null, "", gun === IDX.son ? "gundem.html" : "gundem.html?gun=" + gun);
+          yukle();
+        }
       });
+      function aktifChip() {
+        gEl.querySelectorAll(".chip").forEach(c => c.classList.toggle("active",
+          hafta ? c.dataset.h === hafta : c.dataset.v === gun));
+      }
 
       async function yukle() {
-        gEl.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.v === gun));
+        aktifChip();
         const D = await getJSON("data/haber/" + gun + ".json");
         setUpdated(D.updated);
         const s = D.sayilar;
-        document.getElementById("ozet").innerHTML = "📰 <b>" + gunEtiket(gun) + " " + gun.slice(0, 4) +
+        $("ozet").innerHTML = "📰 <b>" + gunEtiket(gun) + " " + gun.slice(0, 4) +
           "</b> · son " + D.pencere_saat + " saatte " + s.kaynak + " kaynaktan taranan " + s.pencere +
           " haberden <b>" + s.secilen + "</b> finans haberi seçildi" +
           (D.mod === "ai" ? " · seçki ve özetler Claude ile hazırlandı." : " · seçki anahtar kelime filtresiyle yapıldı.");
 
-        const one = document.getElementById("secOne");
-        one.style.display = D.ozet && D.ozet.length ? "" : "none";
-        document.getElementById("capOne").textContent = D.mod === "ai"
+        $("h3One").textContent = "⭐ Günün Öne Çıkanları";
+        $("secOne").style.display = D.ozet && D.ozet.length ? "" : "none";
+        $("capOne").textContent = D.mod === "ai"
           ? "Günün gelişmelerinin kısa özeti" : "En çok kaynakta yer alan ve en yüksek puanlı başlıklar";
-        document.getElementById("oneCikan").innerHTML = (D.ozet || []).map(m => "<li>" + esc(m) + "</li>").join("");
+        $("oneCikan").innerHTML = (D.ozet || []).map(m => "<li>" + esc(m) + "</li>").join("");
 
         const P = D.piyasa;
-        document.getElementById("secPiyasa").style.display = P && P.satirlar && P.satirlar.length ? "" : "none";
+        $("h3Piyasa").textContent = "💹 Günün Rakamları";
+        $("secPiyasa").style.display = P && P.satirlar && P.satirlar.length ? "" : "none";
         if (P && P.satirlar && P.satirlar.length) {
-          document.getElementById("capPiyasa").textContent = "Sabah itibarıyla son değerler; tahvil faizleri önceki gün kapanışı · " +
+          $("capPiyasa").textContent = "Sabah itibarıyla son değerler; tahvil faizleri önceki gün kapanışı · " +
             P.updated + " · Kaynak: TradingView, TCMB EVDS, Yahoo Finance";
-          document.getElementById("tblPiyasa").innerHTML = "<tr><th>Gösterge</th><th>Son</th><th>Değişim</th></tr>" +
-            P.satirlar.map(s => {
-              const faiz = s.tur === "faiz";
-              const v = faiz ? s.degisim : s.degisim_pct;
-              const dg = v === null || v === undefined ? "—" : trNum(v, 2, true) + (faiz ? " puan" : "%");
-              const cls = !v ? "" : (v > 0 ? " up" : " down");
-              return '<tr><td class="lbl">' + esc(s.ad) + '</td><td class="num">' + trNum(s.deger, s.ondalik) +
-                (s.birim ? ' <span class="birim">' + esc(s.birim) + "</span>" : "") + '</td><td class="num' + cls + '">' + dg + "</td></tr>";
-            }).join("");
+          $("tblPiyasa").innerHTML = rakamTablo(P.satirlar, false);
         }
+
         const T = D.takvim;
-        document.getElementById("secTakvim").style.display = T ? "" : "none";
+        $("h3Takvim").textContent = "📅 Bugün Takvimde";
+        $("secTakvim").style.display = T ? "" : "none";
+        $("takvimYorum").innerHTML = "";
         if (T) {
-          document.getElementById("capTakvim").textContent = "Resmî yayın takvimleri (TÜİK, TCMB, HMB, BDDK), Hazine ihraç takvimi, Fed, ECB ve ABD verileri · saatler TR";
-          document.getElementById("takvimBugun").innerHTML = T.bugun.length ? T.bugun.map(o => takvimSatir(o, false)).join("")
+          $("capTakvim").textContent = "Resmî yayın takvimleri (TÜİK, TCMB, HMB, BDDK), Hazine ihraç takvimi, Fed, ECB ve ABD verileri · saatler TR";
+          $("takvimBugun").innerHTML = T.bugun.length ? T.bugun.map(o => takvimSatir(o, false)).join("")
             : '<li class="haber"><span class="oz">Bugün takvimde önemli bir veri açıklaması yok.</span></li>';
-          const hafta = T.hafta || [];
-          document.getElementById("hTakvimHafta").style.display = hafta.length ? "" : "none";
-          document.getElementById("takvimHafta").innerHTML = hafta.map(o => takvimSatir(o, true)).join("");
+          const h = T.hafta || [];
+          $("hTakvimHafta").style.display = h.length ? "" : "none";
+          $("hTakvimHafta").textContent = "Haftanın kalanı";
+          $("takvimHafta").innerHTML = h.map(o => takvimSatir(o, true)).join("");
         }
 
-        const vSec = document.getElementById("secVeri");
-        vSec.style.display = D.veriler && D.veriler.length ? "" : "none";
-        document.getElementById("veriler").innerHTML = (D.veriler || []).map(v =>
-          '<li class="haber"><a class="baslik" href="' + esc(v.link) + '">' + esc(v.ikon) + " " + esc(v.baslik) +
-          '</a><div class="oz">' + esc(v.ozet) + "</div></li>").join("");
+        $("h3Veri").textContent = "📊 Yeni Açıklanan Veriler";
+        $("capVeri").textContent = "Son bültenden bu yana güncellenen Ekordion serileri — her satır ilgili sayfaya gider";
+        $("secVeri").style.display = D.veriler && D.veriler.length ? "" : "none";
+        $("veriler").innerHTML = veriListe(D.veriler);
 
-        document.getElementById("kategoriler").innerHTML = D.kategoriler.map(k =>
+        $("kategoriler").innerHTML = D.kategoriler.map(k =>
           '<section class="chart-card"><h3>' + esc(k.ad) + '</h3><p class="cap">' + k.haberler.length +
           ' haber</p><ul class="haber-liste">' + k.haberler.map(h =>
             '<li class="haber">' + (h.onem >= 4 ? '<span class="onem" title="Öne çıkan"></span>' : "") +
@@ -168,7 +207,57 @@
               esc(d.kaynak) + "</a>").join(", ") : "") +
             "</div></li>").join("") + "</ul></section>").join("");
       }
-      yukle();
+
+      async function yukleHafta() {
+        aktifChip();
+        const H = await getJSON("data/haber/hafta-" + hafta + ".json");
+        setUpdated(H.updated);
+        $("ozet").innerHTML = "📅 <b>Haftaya Bakış · " + esc(H.aralik) + "</b> — " + esc(H.baslik) +
+          (H.mod === "ai" ? " · özet ve yorumlar Claude ile hazırlandı." : " · günlük özetlerden derlendi.");
+
+        $("h3One").textContent = "⭐ Haftanın Özeti";
+        $("secOne").style.display = H.hafta_ozeti && H.hafta_ozeti.length ? "" : "none";
+        $("capOne").textContent = "Geçen haftanın en önemli gelişmeleri, önem sırasıyla";
+        $("oneCikan").innerHTML = (H.hafta_ozeti || []).map(m => "<li>" + esc(m) + "</li>").join("");
+
+        const P = H.piyasa;
+        $("h3Piyasa").textContent = "💹 Piyasalarda Hafta";
+        $("secPiyasa").style.display = P && P.satirlar && P.satirlar.length ? "" : "none";
+        if (P && P.satirlar && P.satirlar.length) {
+          $("capPiyasa").textContent = (H.piyasa_yorumu ? H.piyasa_yorumu + " · " : "") +
+            "Cuma kapanışı; faizlerde hafta sütunu puan, diğerleri yüzde değişim · Kaynak: TradingView, TCMB EVDS, Yahoo Finance";
+          $("tblPiyasa").innerHTML = rakamTablo(P.satirlar, true);
+        }
+
+        $("h3Takvim").textContent = "📅 Gelecek Hafta · " + H.sonraki_aralik;
+        $("secTakvim").style.display = "";
+        $("capTakvim").textContent = "Neler bekleniyor ve resmî takvim · saatler TR";
+        $("takvimYorum").innerHTML = (H.gelecek_hafta && H.gelecek_hafta.length)
+          ? '<ol class="one-cikan">' + H.gelecek_hafta.map(m => "<li>" + esc(m) + "</li>").join("") + "</ol>" : "";
+        let onceki = null;
+        $("takvimBugun").innerHTML = (H.takvim || []).map(o => {
+          let h = "";
+          if (o.tarih !== onceki) { h += '<li class="haber"><b>' + GUNU[haftaGunu(o.tarih)] + " " + o.tarih.slice(8, 10) + "." + o.tarih.slice(5, 7) + "</b></li>"; onceki = o.tarih; }
+          return h + takvimSatir(o, false);
+        }).join("") || '<li class="haber"><span class="oz">Gelecek hafta için takvimde kayıt yok.</span></li>';
+        $("hTakvimHafta").style.display = "none";
+        $("takvimHafta").innerHTML = "";
+
+        $("h3Veri").textContent = "📊 Bu Hafta Açıklanan Veriler";
+        $("capVeri").textContent = "Hafta içinde güncellenen Ekordion serileri — her satır ilgili sayfaya gider";
+        $("secVeri").style.display = H.veriler && H.veriler.length ? "" : "none";
+        $("veriler").innerHTML = veriListe(H.veriler);
+
+        $("kategoriler").innerHTML = '<section class="chart-card"><h3>Haftanın Öne Çıkan Haberleri</h3><p class="cap">' +
+          (H.one_cikan || []).length + ' haber · önem ve kaynak sayısına göre</p><ul class="haber-liste">' +
+          (H.one_cikan || []).map(h =>
+            '<li class="haber"><a class="baslik" href="' + guvenliLink(h.link) + '" target="_blank" rel="noopener nofollow">' +
+            esc(h.baslik) + "</a>" + (h.ozet ? '<div class="oz">' + esc(h.ozet) + "</div>" : "") +
+            '<div class="meta">' + esc(h.kaynak) + " · " + gunKisa(h.gun) + " · " + esc(h.kategori) + "</div></li>").join("") +
+          "</ul></section>";
+      }
+
+      if (hafta) yukleHafta(); else yukle();
     })().catch(e => {
       document.getElementById("ozet").textContent = "Gündem yüklenemedi: " + e.message;
     });
