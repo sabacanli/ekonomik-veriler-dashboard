@@ -25,10 +25,10 @@ on:
   workflow_dispatch:
     inputs:
       tur:
-        description: "Bülten türü: gunluk = Finans Gündemi · haftalik = Pazar Haftaya Bakış"
+        description: "Bülten türü: otomatik = saate göre (Pazar 17:00 TR sonrası haftalik ve bülten gönderilir, diğer zamanlar gunluk) · gunluk = Finans Gündemi · haftalik = Haftaya Bakış"
         type: choice
-        options: ["gunluk", "haftalik"]
-        default: "gunluk"
+        options: ["otomatik", "gunluk", "haftalik"]
+        default: "otomatik"
       saat:
         description: "Geriye dönük pencere (saat) — boş: otomatik (Pazartesi 72, diğer günler 24)"
         default: ""
@@ -62,12 +62,14 @@ jobs:
         id: kontrol
         run: |
           TUR="${{ github.event.inputs.tur }}"
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            # Pazar 17:00 TR sonrası zamanlanmış koşu haftalık yedektir; diğerleri günlük yedek
+          OTOMATIK=false
+          if [ "${{ github.event_name }}" = "schedule" ] || [ -z "$TUR" ] || [ "$TUR" = "otomatik" ]; then
+            # Zamanlayıcı ya da tür belirtmeyen tetik (Cloudflare Worker): Pazar 17:00 TR sonrası haftalık, diğerleri günlük
+            OTOMATIK=true
             if [ "$(TZ=Europe/Istanbul date +%u)" = "7" ] && [ "$(TZ=Europe/Istanbul date +%H)" -ge 17 ]; then TUR=haftalik; else TUR=gunluk; fi
           fi
-          TUR="${TUR:-gunluk}"
           echo "tur=$TUR" >> "$GITHUB_OUTPUT"
+          echo "otomatik=$OTOMATIK" >> "$GITHUB_OUTPUT"
           if [ "$TUR" = "haftalik" ]; then
             DOSYA="site/data/haber/hafta-$(TZ=Europe/Istanbul date +%G-W%V).json"
           else
@@ -100,6 +102,10 @@ jobs:
             # zamanlanmış koşu: günlük bülten hafta içi (Pzt–Cum, TR saatiyle), haftalık bülten Pazar tüm listeye
             if [ "${{ steps.kontrol.outputs.tur }}" = "haftalik" ]; then MOD=evet
             elif [ "$(TZ=Europe/Istanbul date +%u)" -le 5 ]; then MOD=evet; else MOD=hayir; fi
+          elif [ "${{ steps.kontrol.outputs.otomatik }}" = "true" ] && [ "${{ steps.kontrol.outputs.tur }}" = "haftalik" ]; then
+            # Otomatik tetikle gelen Pazar akşamı koşusu: Haftaya Bakış her zaman tüm listeye gider
+            # (eski Worker kodu Pazar günü bulten=hayir gönderir; tür belirtmediği için burada düzeltilir)
+            MOD=evet
           fi
           echo "mod=${MOD:-hayir}" >> "$GITHUB_OUTPUT"
           echo "Bülten modu: ${MOD:-hayir}"

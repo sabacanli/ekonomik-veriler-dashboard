@@ -14,6 +14,10 @@
 //
 // Günlük bülten hafta içi (TR saatiyle Pzt–Cum) tüm listeye gönderilir; hafta sonu yalnız site güncellenir.
 // Haftalık bülten Pazar akşamı tüm listeye gönderilir.
+//
+// NOT: Worker'daki kod ESKİ sürümse de (tur göndermeyen) sistem çalışır: gundem.yml, tür belirtilmeyen
+// Pazar 17:00 TR sonrası tetikleri "haftalik" sayar ve bülteni gönderir. Yani panoda yapılması şart olan
+// tek şey ikinci cron tetiğini (0 16 * * 0) eklemektir; kod güncellemesi isteğe bağlıdır.
 
 const DISPATCH_URL =
   "https://api.github.com/repos/sabacanli/ekonomik-veriler-dashboard/actions/workflows/gundem.yml/dispatches";
