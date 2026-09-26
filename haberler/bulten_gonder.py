@@ -35,12 +35,38 @@ BASE = Path(__file__).resolve().parent.parent
 HABER_DIR = BASE / "site" / "data" / "haber"
 TR = dt.timezone(dt.timedelta(hours=3))
 SITE = "https://ekordion.com.tr/gundem.html"
+KOK = "https://ekordion.com.tr/"
 GUNLER = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
 AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim",
          "Kasım", "Aralık"]
 KATEGORI_BASINA = 6       # e-postada kategori başına en çok haber; tamamı sitede
 
 esc = lambda s: html.escape(str(s or ""), quote=True)
+GUN_KISA = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+
+
+def trn(v, ond=2, isaret=False):
+    """Türkçe sayı biçimi: 1.234,56 (isaret=True → +/−)."""
+    if v is None:
+        return "—"
+    s = f"{v:+,.{ond}f}" if isaret else f"{v:,.{ond}f}"
+    return s.replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+
+def gun_kisa(t):
+    d = dt.date.fromisoformat(t)
+    return f"{GUN_KISA[d.weekday()]} {d.day:02d}.{d.month:02d}"
+
+
+def takvim_satir_html(o, tarihli=False):
+    on = (gun_kisa(o["tarih"]) + " ") if tarihli else ""
+    saat = o.get("saat") or "—"
+    b = esc(o["baslik"])
+    if o.get("onem", 1) >= 3:
+        b = f"<b>{b}</b>"
+    donem = f' <span style="color:#8A93A6;">— {esc(o["donem"])}</span>' if o.get("donem") else ""
+    return (f'<div style="padding:6px 0;border-bottom:1px solid #EEF1F6;font-size:13.5px;line-height:1.5;color:#1A2233;">'
+            f'<span style="color:#8A93A6;font-size:12.5px;">{esc(on)}{esc(saat)} · {esc(o["kurum"])}</span> · {b}{donem}</div>')
 
 
 def guvenli_link(u):
@@ -74,6 +100,43 @@ def html_yap(D):
                  '<ol style="margin:0 0 6px;padding-left:20px;color:#1A2233;font-size:14.5px;line-height:1.6;">')
         P += [f'<li style="margin-bottom:8px;">{esc(m)}</li>' for m in D["ozet"]]
         P.append("</ol>")
+    PZ = D.get("piyasa")
+    if PZ and PZ.get("satirlar"):
+        P.append('<div style="font-size:16px;font-weight:700;color:#1A2233;margin:18px 0 6px;">Günün Rakamları</div>'
+                 '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13.5px;">')
+        for s in PZ["satirlar"]:
+            if s.get("tur") == "faiz":
+                dg = "—" if s.get("degisim") is None else trn(s["degisim"], 2, True) + " puan"
+                yon = s.get("degisim")
+            else:
+                dg = "—" if s.get("degisim_pct") is None else trn(s["degisim_pct"], 2, True) + "%"
+                yon = s.get("degisim_pct")
+            renk = "#8A93A6" if not yon else ("#2E7D5B" if yon > 0 else "#C0392B")
+            birim = f' <span style="color:#8A93A6;font-size:12px;">{esc(s["birim"])}</span>' if s.get("birim") else ""
+            P.append(f'<tr><td style="padding:6px 0;border-bottom:1px solid #EEF1F6;color:#1A2233;">{esc(s["ad"])}</td>'
+                     f'<td align="right" style="padding:6px 0;border-bottom:1px solid #EEF1F6;color:#1A2233;font-weight:700;white-space:nowrap;">{trn(s["deger"], s.get("ondalik", 2))}{birim}</td>'
+                     f'<td align="right" style="padding:6px 0 6px 14px;border-bottom:1px solid #EEF1F6;color:{renk};white-space:nowrap;width:84px;">{dg}</td></tr>')
+        P.append('</table><div style="font-size:11.5px;color:#8A93A6;margin:6px 0 0;">Sabah itibarıyla son değerler; tahvil faizleri önceki gün kapanışı, değişim bir önceki kapanışa göre. '
+                 'Kaynak: TradingView, TCMB EVDS, Yahoo Finance.</div>')
+    T = D.get("takvim")
+    if T is not None:
+        P.append('<div style="font-size:16px;font-weight:700;color:#1A2233;margin:18px 0 6px;">Bugün Takvimde</div>')
+        if T.get("bugun"):
+            P += [takvim_satir_html(o) for o in T["bugun"]]
+        else:
+            P.append('<div style="font-size:13.5px;color:#8A93A6;padding:4px 0;">Bugün takvimde önemli bir veri açıklaması yok.</div>')
+        if dt.date.fromisoformat(D["tarih"]).weekday() == 0 and T.get("hafta"):
+            P.append('<div style="font-size:13px;font-weight:700;color:#55627A;margin:12px 0 2px;">Haftanın kalanı</div>')
+            P += [takvim_satir_html(o, tarihli=True) for o in T["hafta"]]
+    if D.get("veriler"):
+        P.append('<div style="font-size:16px;font-weight:700;color:#1A2233;margin:18px 0 2px;">Yeni Açıklanan Veriler</div>'
+                 '<div style="font-size:12.5px;color:#8A93A6;margin:0 0 6px;">Son bültenden bu yana güncellenen Ekordion serileri — rakamlar sitedeki grafiklerle aynı</div>')
+        for v in D["veriler"]:
+            P.append(
+                f'<div style="padding:8px 0;border-bottom:1px solid #EEF1F6;">'
+                f'<a href="{KOK}{esc(v["link"])}" style="color:#1A2233;font-size:14.5px;font-weight:700;text-decoration:none;">'
+                f'{esc(v.get("ikon", ""))} {esc(v["baslik"])}</a>'
+                f'<div style="color:#55627A;font-size:13.5px;line-height:1.55;margin-top:3px;">{esc(v["ozet"])}</div></div>')
     for k in D["kategoriler"]:
         P.append(f'<div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;'
                  f'color:#B86E00;border-bottom:2px solid #F1E3CC;padding:18px 0 6px;margin-bottom:4px;">'
@@ -111,6 +174,29 @@ def metin_yap(D):
     if D.get("ozet"):
         S.append("GÜNÜN ÖNE ÇIKANLARI")
         S += [f"  {i}. {m}" for i, m in enumerate(D["ozet"], 1)]
+        S.append("")
+    PZ = D.get("piyasa")
+    if PZ and PZ.get("satirlar"):
+        S.append("GÜNÜN RAKAMLARI")
+        for s in PZ["satirlar"]:
+            dg = (trn(s["degisim"], 2, True) + " puan") if s.get("tur") == "faiz" and s.get("degisim") is not None else \
+                 (trn(s["degisim_pct"], 2, True) + "%" if s.get("degisim_pct") is not None else "—")
+            S.append(f"  {s['ad']}: {trn(s['deger'], s.get('ondalik', 2))} {s.get('birim', '')} ({dg})".rstrip())
+        S.append("")
+    T = D.get("takvim")
+    if T is not None:
+        S.append("BUGÜN TAKVİMDE")
+        S += [f"  {o.get('saat') or '—'} · {o['kurum']} · {o['baslik']}" + (f" — {o['donem']}" if o.get("donem") else "")
+              for o in T.get("bugun", [])] or ["  Bugün takvimde önemli bir veri açıklaması yok."]
+        if dt.date.fromisoformat(D["tarih"]).weekday() == 0 and T.get("hafta"):
+            S.append("  Haftanın kalanı:")
+            S += [f"    {gun_kisa(o['tarih'])} {o.get('saat') or ''} · {o['kurum']} · {o['baslik']}" for o in T["hafta"]]
+        S.append("")
+    if D.get("veriler"):
+        S.append("YENİ AÇIKLANAN VERİLER (Ekordion)")
+        for v in D["veriler"]:
+            S.append(f"  • {v['baslik']}: {v['ozet']}")
+            S.append(f"    {KOK}{v['link']}")
         S.append("")
     for k in D["kategoriler"]:
         S.append(k["ad"].upper())

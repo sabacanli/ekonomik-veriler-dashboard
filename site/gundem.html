@@ -22,6 +22,16 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
   <link rel="stylesheet" href="assets/style.css?v=22">
+  <style>
+    table.rakam { width: auto; min-width: 0; max-width: 100%; }
+    table.rakam th:first-child { text-align: left; }
+    table.rakam td.lbl { min-width: 200px; }
+    table.rakam td.num { white-space: nowrap; }
+    table.rakam td.up { color: #2E7D5B; font-weight: 600; }
+    table.rakam td.down { color: #D40031; font-weight: 600; }
+    table.rakam .birim { color: var(--muted); font-size: 12px; font-weight: 400; }
+    #takvimBugun li b, #takvimHafta li b { font-weight: 700; }
+  </style>
 </head>
 <body>
   <button id="menuBtn">☰</button>
@@ -41,6 +51,26 @@
       <ol class="one-cikan" id="oneCikan"></ol>
     </section>
 
+    <section class="chart-card" id="secPiyasa" style="display:none">
+      <h3>💹 Günün Rakamları</h3>
+      <p class="cap" id="capPiyasa"></p>
+      <div class="table-wrap"><table class="heat rakam" id="tblPiyasa"></table></div>
+    </section>
+
+    <section class="chart-card" id="secTakvim" style="display:none">
+      <h3>📅 Bugün Takvimde</h3>
+      <p class="cap" id="capTakvim"></p>
+      <ul class="haber-liste" id="takvimBugun"></ul>
+      <h4 id="hTakvimHafta" style="display:none;margin:14px 0 4px;">Haftanın kalanı</h4>
+      <ul class="haber-liste" id="takvimHafta"></ul>
+    </section>
+
+    <section class="chart-card" id="secVeri" style="display:none">
+      <h3>📊 Yeni Açıklanan Veriler</h3>
+      <p class="cap">Son bültenden bu yana güncellenen Ekordion serileri — her satır ilgili sayfaya gider</p>
+      <ul class="haber-liste" id="veriler"></ul>
+    </section>
+
     <div id="kategoriler"></div>
 
     <footer>Başlıklar ilgili yayıncılara aittir; her başlık haberin kaynağına gider ve haber metni bu
@@ -58,6 +88,11 @@
         .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
       const guvenliLink = u => (/^https?:\/\//i.test(u || "") ? esc(u) : "#");
       const gunEtiket = g => +g.slice(8, 10) + " " + AYK[+g.slice(5, 7) - 1];
+      const GUNK = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+      const gunKisa = t => GUNK[(new Date(t + "T00:00:00").getDay() + 6) % 7] + " " + t.slice(8, 10) + "." + t.slice(5, 7);
+      const takvimSatir = (o, tarihli) => '<li class="haber"><span class="meta">' + (tarihli ? gunKisa(o.tarih) + " " : "") +
+        (o.saat || "—") + " · " + esc(o.kurum) + "</span> " + (o.onem >= 3 ? "<b>" : "") + esc(o.baslik) +
+        (o.onem >= 3 ? "</b>" : "") + (o.donem ? ' <span class="oz">' + esc(o.donem) + "</span>" : "") + "</li>";
 
       const IDX = await getJSON("data/haber/index.json");
       const istenen = new URLSearchParams(location.search).get("gun");
@@ -87,6 +122,38 @@
         document.getElementById("capOne").textContent = D.mod === "ai"
           ? "Günün gelişmelerinin kısa özeti" : "En çok kaynakta yer alan ve en yüksek puanlı başlıklar";
         document.getElementById("oneCikan").innerHTML = (D.ozet || []).map(m => "<li>" + esc(m) + "</li>").join("");
+
+        const P = D.piyasa;
+        document.getElementById("secPiyasa").style.display = P && P.satirlar && P.satirlar.length ? "" : "none";
+        if (P && P.satirlar && P.satirlar.length) {
+          document.getElementById("capPiyasa").textContent = "Sabah itibarıyla son değerler; tahvil faizleri önceki gün kapanışı · " +
+            P.updated + " · Kaynak: TradingView, TCMB EVDS, Yahoo Finance";
+          document.getElementById("tblPiyasa").innerHTML = "<tr><th>Gösterge</th><th>Son</th><th>Değişim</th></tr>" +
+            P.satirlar.map(s => {
+              const faiz = s.tur === "faiz";
+              const v = faiz ? s.degisim : s.degisim_pct;
+              const dg = v === null || v === undefined ? "—" : trNum(v, 2, true) + (faiz ? " puan" : "%");
+              const cls = !v ? "" : (v > 0 ? " up" : " down");
+              return '<tr><td class="lbl">' + esc(s.ad) + '</td><td class="num">' + trNum(s.deger, s.ondalik) +
+                (s.birim ? ' <span class="birim">' + esc(s.birim) + "</span>" : "") + '</td><td class="num' + cls + '">' + dg + "</td></tr>";
+            }).join("");
+        }
+        const T = D.takvim;
+        document.getElementById("secTakvim").style.display = T ? "" : "none";
+        if (T) {
+          document.getElementById("capTakvim").textContent = "Resmî yayın takvimleri (TÜİK, TCMB, HMB, BDDK), Hazine ihraç takvimi, Fed, ECB ve ABD verileri · saatler TR";
+          document.getElementById("takvimBugun").innerHTML = T.bugun.length ? T.bugun.map(o => takvimSatir(o, false)).join("")
+            : '<li class="haber"><span class="oz">Bugün takvimde önemli bir veri açıklaması yok.</span></li>';
+          const hafta = T.hafta || [];
+          document.getElementById("hTakvimHafta").style.display = hafta.length ? "" : "none";
+          document.getElementById("takvimHafta").innerHTML = hafta.map(o => takvimSatir(o, true)).join("");
+        }
+
+        const vSec = document.getElementById("secVeri");
+        vSec.style.display = D.veriler && D.veriler.length ? "" : "none";
+        document.getElementById("veriler").innerHTML = (D.veriler || []).map(v =>
+          '<li class="haber"><a class="baslik" href="' + esc(v.link) + '">' + esc(v.ikon) + " " + esc(v.baslik) +
+          '</a><div class="oz">' + esc(v.ozet) + "</div></li>").join("");
 
         document.getElementById("kategoriler").innerHTML = D.kategoriler.map(k =>
           '<section class="chart-card"><h3>' + esc(k.ad) + '</h3><p class="cap">' + k.haberler.length +

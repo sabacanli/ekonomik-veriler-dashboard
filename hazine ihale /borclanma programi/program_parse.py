@@ -155,6 +155,49 @@ def parse_program(page):
     return out, aylar
 
 
+TARIH_RE = re.compile(r"^\d{1,2}\.\d{2}\.\d{4}$")
+
+
+def _iso(t):
+    g, a, y = t.split(".")
+    return f"{y}-{int(a):02d}-{int(g):02d}"
+
+
+def parse_ihale_takvimi(doc):
+    """Sayfa 3'ten itibaren 'C. İÇ BORÇ İHRAÇ TAKVİMİ' tabloları → satır listesi.
+
+    Kolonlar x konumuna göre ayrılır: ihale tarihi (<120) · valör (120–170) · itfa (170–215) ·
+    senet türü (215–360) · vade (360–460) · ihraç yöntemi (>460). Senet satırının altındaki
+    '6 ayda bir kupon ödemeli' notu senet adına eklenir. '2026 Yılı Ekim Ayı İhraç Takvimi' başlığı
+    sonraki satırların ayını belirler (Ekim/Kasım takvimleri geçicidir; sonraki baskı günceller)."""
+    out, ay = [], None
+    for pi in range(2, len(doc)):
+        ls = sorted(satirlar(doc[pi]), key=lambda l: (l["y0"], l["x0"]))
+        rows = []
+        for l in ls:
+            if rows and abs(rows[-1]["y"] - l["y0"]) <= 3:
+                rows[-1]["p"].append(l)
+            else:
+                rows.append({"y": l["y0"], "p": [l]})
+        for r in rows:
+            parts = sorted(r["p"], key=lambda q: q["x0"])
+            metin = " ".join(q["t"] for q in parts)
+            m = re.search(r"(\d{4}) Yılı (\S+) Ayı İhraç Takvimi", metin)
+            if m and m.group(2) in AY_NO:
+                ay = f"{m.group(1)}-{AY_NO[m.group(2)]:02d}"
+                continue
+            tarihler = [q for q in parts if TARIH_RE.match(q["t"])]
+            if ay and len(tarihler) >= 3:
+                def kol(a, b):
+                    return " ".join(q["t"] for q in parts if a <= q["x0"] < b and not TARIH_RE.match(q["t"])).strip()
+                out.append({"ay": ay, "ihale": _iso(tarihler[0]["t"]), "valor": _iso(tarihler[1]["t"]),
+                            "itfa": _iso(tarihler[2]["t"]), "senet": kol(215, 360), "vade": kol(360, 460),
+                            "yontem": kol(460, 999)})
+            elif ay and out and len(parts) == 1 and 215 <= parts[0]["x0"] < 360 and "ödemeli" in parts[0]["t"]:
+                out[-1]["senet"] += ", " + parts[0]["t"]
+    return out
+
+
 def yayin_tarihi(page):
     for l in satirlar(page):
         m = re.match(r"^(\d{1,2}) (\S+) (\d{4})$", l["t"])
@@ -179,7 +222,8 @@ def main():
                 print(f"UYARI: {f.name} {a}: sayfa1 toplam {s1:.1f} ≠ sayfa2 servis {s2:.1f}",
                       file=sys.stderr)
         baskilar.append({"dosya": f.name, "yayin": yayin_tarihi(doc[0]),
-                         "aylar": aylar, "odeme": od, "program": pr})
+                         "aylar": aylar, "odeme": od, "program": pr,
+                         "takvim": parse_ihale_takvimi(doc)})
 
     aylik, revizyon = {}, {}
     for b in baskilar:
@@ -194,13 +238,23 @@ def main():
     for ay in revizyon:
         revizyon[ay].sort(key=lambda r: -r["ufuk"])   # en eski öngörüden kesine
 
+    # İhraç takvimi: her ay için en yeni baskı geçerli (Ekim/Kasım geçici takvimleri sonraki baskı günceller)
+    takvim = {}
+    for b in baskilar:
+        for ay in {r["ay"] for r in b["takvim"]}:
+            if ay not in takvim or (b["yayin"] or "") > (takvim[ay][0] or ""):
+                takvim[ay] = (b["yayin"], [dict(r, kaynak=b["dosya"], yayin=b["yayin"])
+                                           for r in b["takvim"] if r["ay"] == ay])
+    ihale_takvimi = sorted((r for _, rows in takvim.values() for r in rows), key=lambda r: (r["ihale"], r["itfa"]))
+
     OUT.write_text(json.dumps({
         "aylar": dict(sorted(aylik.items())),
         "revizyon": dict(sorted(revizyon.items())),
         "baski_sayisi": len(baskilar),
+        "ihale_takvimi": ihale_takvimi,
     }, ensure_ascii=False, indent=1), encoding="utf-8")
 
-    print(f"{len(baskilar)} baskı → {len(aylik)} ay · {OUT.name}")
+    print(f"{len(baskilar)} baskı → {len(aylik)} ay · ihraç takvimi {len(ihale_takvimi)} satır ({len(takvim)} ay) · {OUT.name}")
     for ay, r in sorted(aylik.items()):
         p, o = r["program"] or {}, r["odeme"] or {}
         print(f"  {ay}  ufuk={r['ufuk']}  ihale={p.get('ihale', '—'):>6}  servis={p.get('ic_servis', '—'):>6}"

@@ -42,13 +42,14 @@ calistir "Hazine İhale — analiz"   "hazine ihale /hazine_analiz.py"
 calistir "Hazine İhale — ödeme"    "hazine ihale /hazine_odeme.py"
 calistir "TCMB Doğrudan Alım"      "tcmb dogrudan alım/guncelle.py"
 calistir "Para Politikası"         "tcmb faiz/tcmb_faiz_fetch.py"
+calistir "Ekonomik Takvim"         "takvim/takvim_uret.py"
 calistir "Gündem (haberler)"       "haberler/haber_topla.py"
 
 "$PY" site_export.py >> "$LOG" 2>&1 && echo "OK: site_export" || echo "FAIL: site_export"
 
 git add "tcmb haftalık stok/output" "net rezerv" "enflasyon" "kredi mevduat" \
         "yabanci para hareketi" "cari acik" "butce" "hazine nakit" \
-        "hazine ihale " "tcmb dogrudan alım" "tcmb faiz" haberler site 2>> "$LOG"
+        "hazine ihale " "tcmb dogrudan alım" "tcmb faiz" haberler takvim site 2>> "$LOG"
 if git diff --cached --quiet; then
   echo "Yeni veri yok — commit atlandı."
 else

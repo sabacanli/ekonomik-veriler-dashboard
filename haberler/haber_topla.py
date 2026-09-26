@@ -19,6 +19,7 @@ Kullanım:  python haberler/haber_topla.py [--saat 24] [--zorla]
 import argparse
 import datetime as dt
 import email.utils
+import hashlib
 import html
 import json
 import os
@@ -32,6 +33,10 @@ import requests
 BASE = Path(__file__).resolve().parent.parent
 OUT_DIR = BASE / "site" / "data" / "haber"
 GUNDEM_HTML = BASE / "site" / "gundem.html"
+HOME_JSON = BASE / "site" / "data" / "home.json"        # modül özet kartları (site_export üretir)
+DURUM_JSON = OUT_DIR / "veri_durum.json"                 # son bültende görülen kart imzaları
+TAKVIM_JSON = BASE / "site" / "data" / "takvim.json"     # ekonomik takvim (takvim/takvim_uret.py)
+PIYASA_JSON = BASE / "site" / "data" / "piyasa.json"     # günün rakamları (piyasa/piyasa_fetch.py)
 TR = dt.timezone(dt.timedelta(hours=3))
 ARSIV_GUN = 60
 MODEL = os.environ.get("HABER_MODEL", "claude-opus-5")
@@ -348,7 +353,56 @@ def sec(kumeler, finans_kaynak):
     return "anahtar", [], secim
 
 
-def yaz(gun, simdi, saat, mod, ozet, secim, sayilar):
+def veri_bolumu(bulten):
+    """'Yeni açıklanan veriler': ana sayfa kartlarından (home.json) son bültenden bu yana metni değişen
+    modüller — yeni veri açıklanınca site_export kart cümlesini yeniler, imzası (metin özeti) değişir.
+    Durum dosyası yalnız bülten koşusunda (--bulten) güncellenir; böylece Pazartesi bülteni Cuma ve hafta
+    sonu açıklanan verileri de kapsar, yerel/hafta sonu koşuları listeyi tüketmez. İlk koşuda (durum
+    dosyası yokken) liste boş döner, yalnız imzalar kaydedilir."""
+    try:
+        kartlar = json.loads(HOME_JSON.read_text(encoding="utf-8")).get("cards", [])
+    except Exception:
+        return []
+    try:
+        eski = json.loads(DURUM_JSON.read_text(encoding="utf-8")).get("imza", {})
+    except Exception:
+        eski = None
+    yeni, degisen = {}, []
+    for k in kartlar:
+        link = k.get("link") or ""
+        metin = re.sub(r"<[^>]+>", "", k.get("html") or "").strip()
+        if not link or link.startswith("gundem") or not metin:
+            continue
+        imza = hashlib.sha1(metin.encode("utf-8")).hexdigest()[:12]
+        yeni[link] = imza
+        if eski is not None and eski.get(link) != imza:
+            degisen.append({"ikon": k.get("icon") or "", "baslik": k.get("title") or "", "ozet": metin, "link": link})
+    if bulten or eski is None:
+        DURUM_JSON.write_text(json.dumps({"imza": yeni, "guncelleme": dt.datetime.now(TR).strftime("%d.%m.%Y %H:%M")},
+                                         ensure_ascii=False, indent=0), encoding="utf-8")
+    return degisen
+
+
+def takvim_bolumu(simdi):
+    """Bugünün olayları + haftanın kalanındaki önemli (önem ≥ 2) olaylar (Pazar'a kadar)."""
+    try:
+        ol = json.loads(TAKVIM_JSON.read_text(encoding="utf-8"))["olaylar"]
+    except Exception:
+        return None
+    bugun = simdi.date()
+    hafta_son = bugun + dt.timedelta(days=6 - bugun.weekday())
+    return {"bugun": [o for o in ol if o["tarih"] == bugun.isoformat()],
+            "hafta": [o for o in ol if bugun.isoformat() < o["tarih"] <= hafta_son.isoformat() and o["onem"] >= 2]}
+
+
+def piyasa_bolumu():
+    try:
+        return json.loads(PIYASA_JSON.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def yaz(gun, simdi, saat, mod, ozet, secim, sayilar, ek=None):
     kats = []
     for kod in KATEGORI_SIRA:
         hs = sorted((s for s in secim if s[1] == kod), key=lambda s: (-s[2], -s[0]["tarih"].timestamp()))
@@ -368,7 +422,7 @@ def yaz(gun, simdi, saat, mod, ozet, secim, sayilar):
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUT_DIR / f"{gun}.json").write_text(json.dumps({
         "tarih": gun, "updated": simdi.strftime("%d.%m.%Y %H:%M"), "pencere_saat": saat, "mod": mod,
-        "ozet": ozet, "ozet_html": ozet_html, "kategoriler": kats, "sayilar": sayilar,
+        "ozet": ozet, "ozet_html": ozet_html, "kategoriler": kats, "sayilar": sayilar, **(ek or {}),
     }, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     gunler = sorted((p.stem for p in OUT_DIR.glob("20??-??-??.json")), reverse=True)
@@ -393,6 +447,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--saat", type=int, default=24, help="geriye dönük pencere (saat)")
     ap.add_argument("--zorla", action="store_true", help="bugünün yapay zekâ seçkisini anahtar moduyla ez")
+    ap.add_argument("--bulten", action="store_true",
+                    help="bülten koşusu: 'yeni açıklanan veriler' durum dosyasını bu koşuda ilerlet")
     a = ap.parse_args()
 
     simdi = dt.datetime.now(TR)
@@ -429,7 +485,12 @@ def main():
             pass
 
     sayilar = {"kaynak": calisan, "pencere": len(hepsi), "kume": len(kumeler), "secilen": len(secim)}
-    yaz(gun, simdi, a.saat, mod, ozet, secim, sayilar)
+    veriler = veri_bolumu(a.bulten)
+    print(f"  yeni açıklanan veri: {len(veriler)} modül" + (" (durum ilerletildi)" if a.bulten else ""))
+    takvim, piyasa = takvim_bolumu(simdi), piyasa_bolumu()
+    print(f"  takvim: {'yok' if takvim is None else str(len(takvim['bugun'])) + ' olay bugün'} · "
+          f"piyasa: {'yok' if piyasa is None else str(len(piyasa['satirlar'])) + ' satır'}")
+    yaz(gun, simdi, a.saat, mod, ozet, secim, sayilar, ek={"veriler": veriler, "takvim": takvim, "piyasa": piyasa})
     print(f"  {len(hepsi)} haber → {len(kumeler)} küme → {len(secim)} seçildi · mod: {mod}")
     print(f"Kaydedildi: site/data/haber/{gun}.json + index.json")
     print("BAŞARILI")

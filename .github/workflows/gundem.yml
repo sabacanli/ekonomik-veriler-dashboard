@@ -71,7 +71,27 @@ jobs:
 
       - name: Kütüphaneleri kur
         if: steps.kontrol.outputs.atla != 'true'
-        run: pip install --quiet requests anthropic
+        run: pip install --quiet requests anthropic yfinance
+
+      - name: Bülten modunu belirle
+        if: steps.kontrol.outputs.atla != 'true'
+        id: mod
+        run: |
+          MOD="${{ github.event.inputs.bulten }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # zamanlanmış koşu: hafta içi (Pzt–Cum, TR saatiyle) tüm listeye gönder
+            if [ "$(TZ=Europe/Istanbul date +%u)" -le 5 ]; then MOD=evet; else MOD=hayir; fi
+          fi
+          echo "mod=${MOD:-hayir}" >> "$GITHUB_OUTPUT"
+          echo "Bülten modu: ${MOD:-hayir}"
+
+      - name: Ekonomik takvim ve günün rakamları
+        if: steps.kontrol.outputs.atla != 'true'
+        env:
+          EVDS_API_KEY: ${{ secrets.EVDS_API_KEY }}
+        run: |
+          python takvim/takvim_uret.py || echo "::warning::takvim üretilemedi — mevcut takvim.json kullanılacak"
+          python piyasa/piyasa_fetch.py || echo "::warning::piyasa verisi alınamadı — rakam tablosu eksik kalabilir"
 
       - name: Haberleri topla
         if: steps.kontrol.outputs.atla != 'true'
@@ -84,14 +104,16 @@ jobs:
             # Pazartesi bülteni hafta sonunu da kapsar
             if [ "$(TZ=Europe/Istanbul date +%u)" = "1" ]; then SAAT=72; else SAAT=24; fi
           fi
-          python haberler/haber_topla.py --saat "$SAAT"
+          # Bülten tüm listeye gidiyorsa 'yeni açıklanan veriler' durumu bu koşuda ilerletilir
+          if [ "${{ steps.mod.outputs.mod }}" = "evet" ]; then BULTEN=--bulten; else BULTEN=""; fi
+          python haberler/haber_topla.py --saat "$SAAT" $BULTEN
 
       - name: Değişiklikleri commit + push
         if: steps.kontrol.outputs.atla != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site
+          git add site takvim
           if git diff --cached --quiet; then
             echo "Yeni haber yok — commit atlanıyor."
           else
@@ -123,11 +145,7 @@ jobs:
           BULTEN_YANIT: ${{ secrets.BULTEN_YANIT }}
           BULTEN_GONDEREN: ${{ vars.BULTEN_GONDEREN }}
         run: |
-          MOD="${{ github.event.inputs.bulten }}"
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            # zamanlanmış koşu: hafta içi (Pzt–Cum, TR saatiyle) tüm listeye gönder
-            if [ "$(TZ=Europe/Istanbul date +%u)" -le 5 ]; then MOD=evet; else MOD=hayir; fi
-          fi
+          MOD="${{ steps.mod.outputs.mod }}"
           if [ "$MOD" = "evet" ] || [ "$MOD" = "test" ]; then
             python haberler/bulten_gonder.py --mod "$MOD"
           else
