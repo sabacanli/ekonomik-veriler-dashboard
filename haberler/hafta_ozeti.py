@@ -47,8 +47,8 @@ def hafta_gunleri(hafta_id):
 
 
 def gunluk_topla(gunler):
-    """Haftanın günlük dosyaları → (gün → özet maddeleri), öne çıkan haberler (önem ≥ 4)."""
-    ozetler, haberler = {}, []
+    """Haftanın günlük dosyaları → (gün → özet maddeleri), öne çıkan haberler (önem ≥ 4), yabancı basın."""
+    ozetler, haberler, yabanci = {}, [], []
     for g in gunler:
         fp = OUT_DIR / f"{g.isoformat()}.json"
         if not fp.exists():
@@ -56,6 +56,9 @@ def gunluk_topla(gunler):
         D = json.loads(fp.read_text(encoding="utf-8"))
         if D.get("ozet"):
             ozetler[g.isoformat()] = D["ozet"]
+        for y in D.get("yabanci") or []:
+            if y["link"] not in {x["link"] for x in yabanci}:
+                yabanci.append(dict(y, gun=g.isoformat()))
         for k in D.get("kategoriler", []):
             for h in k["haberler"]:
                 if int(h.get("onem") or 0) >= 4:
@@ -63,7 +66,8 @@ def gunluk_topla(gunler):
                                      "kaynak": h["kaynak"], "ozet": h.get("ozet"), "onem": int(h["onem"]),
                                      "kaynak_sayisi": 1 + len(h.get("diger") or [])})
     haberler.sort(key=lambda h: (-h["onem"], -h["kaynak_sayisi"], h["gun"]))
-    return ozetler, haberler
+    yabanci.sort(key=lambda y: (-len(y.get("diger") or []), y["gun"]))
+    return ozetler, haberler, yabanci[:7]
 
 
 def gelecek_hafta(gunler_sonraki):
@@ -169,7 +173,7 @@ def main():
     sonraki = [g + dt.timedelta(days=7) for g in gunler]
     print(f"Haftaya Bakış — {hafta_id}: {aralik_yazi(gunler[0], gunler[-1])} → gelecek hafta {aralik_yazi(sonraki[0], sonraki[-1])}")
 
-    ozetler, haberler = gunluk_topla(gunler)
+    ozetler, haberler, yabanci = gunluk_topla(gunler)
     veriler = ht.veri_bolumu(a.bulten, DURUM_HAFTA)
     piyasa = ht.piyasa_bolumu()
     takvim = gelecek_hafta(sonraki)
@@ -196,7 +200,7 @@ def main():
         "baslik": yazi["baslik"].strip(), "hafta_ozeti": [m.strip() for m in yazi["hafta_ozeti"] if m.strip()][:7],
         "piyasa_yorumu": yazi.get("piyasa_yorumu", "").strip(),
         "gelecek_hafta": [m.strip() for m in yazi["gelecek_hafta"] if m.strip()][:5],
-        "one_cikan": haberler[:12], "veriler": veriler, "piyasa": piyasa, "takvim": takvim,
+        "one_cikan": haberler[:12], "yabanci": yabanci, "veriler": veriler, "piyasa": piyasa, "takvim": takvim,
         "gunluk_ozetler": ozetler,
     }
     OUT_DIR.mkdir(parents=True, exist_ok=True)

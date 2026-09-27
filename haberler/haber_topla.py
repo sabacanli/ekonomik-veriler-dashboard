@@ -92,6 +92,40 @@ KATEGORILER = {
         "halka arz", "bedelli", "bedelsiz", "temettü", "kap", "spk", "birleşme", "satın al", "konkordato",
         "iflas", "yatırım", "otomotiv", "enerji", "turizm", "havayolu", "sanayi", "kâr açıkla", "bilanço"]),
 }
+# Yabancı finans basını (İngilizce akışlar) — "Yabancı Basın" bölümü: son 24 saatte en çok yankı bulan 5 haber.
+# Sıra = küme temsilcisi önceliği. Reuters'ın açık RSS'i olmadığından Google News araması üzerinden alınır
+# (bağlantılar Google yönlendirmesiyle reuters.com'a gider). Yahoo Finance akışı güncellenmediği için listede yok.
+YABANCI = [
+    ("Reuters", "https://news.google.com/rss/search?q=site:reuters.com+(markets+OR+economy+OR+fed+OR+treasury)&hl=en-US&gl=US&ceid=US:en"),
+    ("Bloomberg", "https://feeds.bloomberg.com/markets/news.rss"),
+    ("Bloomberg", "https://feeds.bloomberg.com/economics/news.rss"),
+    ("CNBC", "https://www.cnbc.com/id/100003114/device/rss/rss.html"),
+    ("CNBC", "https://www.cnbc.com/id/20910258/device/rss/rss.html"),
+    ("CNBC", "https://www.cnbc.com/id/10000664/device/rss/rss.html"),
+    ("WSJ", "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain"),
+    ("WSJ", "https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness"),
+    ("WSJ", "https://feeds.content.dowjones.io/public/rss/RSSWorldNews"),
+    ("Financial Times", "https://www.ft.com/rss/home"),
+    ("Financial Times", "https://www.ft.com/markets?format=rss"),
+    ("MarketWatch", "https://feeds.content.dowjones.io/public/rss/mw_topstories"),
+    ("BBC", "https://feeds.bbci.co.uk/news/business/rss.xml"),
+    ("The Guardian", "https://www.theguardian.com/uk/business/rss"),
+    ("Investing.com", "https://www.investing.com/rss/news.rss"),
+    ("Investing.com", "https://www.investing.com/rss/news_25.rss"),
+    ("Seeking Alpha", "https://seekingalpha.com/market_currents.xml"),
+]
+YABANCI_ONCELIK = {}
+for _i, (_ad, _u) in enumerate(YABANCI):
+    YABANCI_ONCELIK.setdefault(_ad, _i)
+YABANCI_ANAHTAR = ["fed", "fomc", "powell", "treasury", "treasuries", "yield", "yields", "bond", "bonds", "inflation",
+                   "cpi", "pce", "rate", "rates", "central bank", "ecb", "boj", "boe", "dollar", "euro", "yen",
+                   "oil", "opec", "brent", "crude", "gold", "emerging", "turkey", "turkish", "lira", "erdogan",
+                   "china", "tariff", "tariffs", "trade war", "recession", "gdp", "jobs", "payrolls", "unemployment",
+                   "stocks", "s&p", "nasdaq", "wall street", "imf", "world bank", "debt", "deficit", "default",
+                   "sanction", "sanctions", "iran", "israel", "russia", "ukraine", "trump", "geopolit"]
+YABANCI_EKSI = ["celebrit", "recipe", "horoscope", "sport", "football", "nfl", "nba", "movie", "tv show", "royal",
+                "my friend", "my husband", "my wife", "dear ", "how to ", "best ", "quiz", "podcast", "opinion:",
+                "obituar", "crossword"]
 KATEGORI_SIRA = list(KATEGORILER)
 # Yalnız kategori belirlemede kullanılır (ilgi puanına girmez): yurt dışı işaretleri ve yerel işaretler
 YURTDISI = ["trump", "abd", "çin", "japonya", "almanya", "rusya", "avrupa", "ingiltere", "küresel",
@@ -122,6 +156,8 @@ KAT_DESEN = {kod: [_desen(k) for k in kokler] for kod, (_, kokler) in KATEGORILE
 EKSI_DESEN = [_desen(k) for k in EKSI]
 YURTDISI_DESEN = [_desen(k) for k in YURTDISI]
 YEREL_DESEN = [_desen(k) for k in YEREL]
+YABANCI_ANAHTAR_DESEN = [_desen(k) for k in YABANCI_ANAHTAR]
+YABANCI_EKSI_DESEN = [_desen(k) for k in YABANCI_EKSI]
 
 
 def tarih_coz(s, simdi):
@@ -182,7 +218,7 @@ def belirtecler(baslik):
     return {w[:6] for w in t.split() if w not in DURAK and len(w) > 1}
 
 
-def kumele(haberler):
+def kumele(haberler, oncelik=None):
     """Aynı haberin farklı sitelerdeki kopyalarını birleştirir (başlık belirteç benzerliği)."""
     kumeler = []
     for h in haberler:
@@ -206,7 +242,8 @@ def kumele(haberler):
             yer["uyeler"].append(h)
         else:
             kumeler.append({"uyeler": [h]})
-    oncelik = {ad: i for i, (ad, _, _) in enumerate(KAYNAKLAR)}
+    if oncelik is None:
+        oncelik = {ad: i for i, (ad, _, _) in enumerate(KAYNAKLAR)}
     out = []
     for k in kumeler:
         uy = sorted(k["uyeler"], key=lambda h: (oncelik.get(h["kaynak"], 99), h["tarih"]))
@@ -312,6 +349,98 @@ def ai_sec(kumeler):
     print(f"  Claude ({r.model}): {len(veri['secilenler'])} haber seçildi · "
           f"girdi {r.usage.input_tokens} / çıktı {r.usage.output_tokens} token")
     return veri
+
+
+YABANCI_SISTEM = """Türkiye'de bir bankanın sabit getirili menkul kıymetler masası için günlük bültenin "Yabancı Basın" \
+bölümünü hazırlıyorsun. Sana uluslararası finans basınından (Reuters, Bloomberg, CNBC, WSJ, FT, MarketWatch, BBC, \
+Guardian, Investing.com, Seeking Alpha) son 24 saatin İngilizce haber başlıkları numaralı liste olarak verilecek; \
+"+N kaynak" o haberin başka kaynaklarda da yer aldığını gösterir.
+
+Görevin: son 24 saatte uluslararası finans basınında EN ÇOK YANKI BULAN ve masayı ilgilendiren TAM 5 haberi seç \
+(kriterler: birden çok kaynakta yer alma, piyasa etkisi — Fed ve ABD tahvilleri, dolar, petrol, gelişen piyasalar \
+ve Türkiye, küresel büyüme/enflasyon, jeopolitik, büyük şirket/sektör kırılmaları). Kişisel finans, tüketici \
+rehberi, magazin, spor ve köşe yazısı niteliğindeki içerikleri alma. Her seçim için "baslik_tr": haberin Türkçe \
+kısa başlığı (en çok 12 kelime) ve "ozet": haberin ne söylediğini kendi cümlenle anlatan tek cümlelik Türkçe özet \
+(en çok 30 kelime; başlık ve açıklamada olmayan bilgiyi uydurma). Sıralama: en çok yankı bulandan başla."""
+
+YABANCI_SEMA = {
+    "type": "object",
+    "properties": {"secilenler": {"type": "array", "items": {
+        "type": "object",
+        "properties": {"id": {"type": "integer"}, "baslik_tr": {"type": "string"}, "ozet": {"type": "string"}},
+        "required": ["id", "baslik_tr", "ozet"], "additionalProperties": False}}},
+    "required": ["secilenler"], "additionalProperties": False,
+}
+
+
+def yabanci_puan(k):
+    bas, snip = kucuk(k["baslik"]), kucuk(k["snippet"])
+    p = sum(2 for d in YABANCI_ANAHTAR_DESEN if d.search(bas)) + sum(1 for d in YABANCI_ANAHTAR_DESEN if d.search(snip))
+    p -= 5 * sum(1 for d in YABANCI_EKSI_DESEN if d.search(bas))
+    return p + 3 * len(k["diger"])
+
+
+def yabanci_sec(kumeler):
+    """→ (mod, [(kume, baslik_tr, ozet)]) — en çok yankı bulan 5 yabancı haber."""
+    aday = sorted(kumeler, key=lambda k: (-len(k["diger"]), -yabanci_puan(k)))
+    aday = [k for k in aday if yabanci_puan(k) > -3][:120]
+    if aday and ai_kullanilabilir():
+        try:
+            import anthropic
+            client = anthropic.Anthropic()
+            liste = "\n".join(
+                f"[{i}] ({k['kaynak']}" + (f", +{len(k['diger'])} kaynak" if k["diger"] else "") + f") {k['baslik']}"
+                + (f" — {k['snippet'][:160]}" if k["snippet"] else "") for i, k in enumerate(aday))
+            istek = dict(model=MODEL, max_tokens=3000, system=YABANCI_SISTEM,
+                         messages=[{"role": "user", "content": "Haber listesi:\n\n" + liste}],
+                         output_config={"effort": "medium", "format": {"type": "json_schema", "schema": YABANCI_SEMA}})
+            try:
+                r = client.beta.messages.create(betas=["server-side-fallback-2026-06-01"],
+                                                fallbacks=[{"model": "claude-opus-4-8"}], **istek)
+            except anthropic.BadRequestError:
+                r = client.messages.create(**istek)
+            if r.stop_reason in ("refusal", "max_tokens"):
+                raise RuntimeError(f"yanıt tamamlanmadı (stop_reason={r.stop_reason})")
+            v = json.loads(next(b.text for b in r.content if b.type == "text"))
+            secim, gorulen = [], set()
+            for s in v["secilenler"]:
+                i = s["id"]
+                if 0 <= i < len(aday) and i not in gorulen:
+                    gorulen.add(i)
+                    secim.append((aday[i], s["baslik_tr"].strip(), s["ozet"].strip()))
+            print(f"  Claude yabancı basın ({r.model}): {len(secim)} haber · girdi {r.usage.input_tokens} / çıktı {r.usage.output_tokens} token")
+            if secim:
+                return "ai", secim[:5]
+        except Exception as e:
+            print(f"  ~ yabancı basın seçkisi başarısız ({type(e).__name__}: {str(e)[:70]}) — anahtar kelime moduna düşülüyor")
+    return "anahtar", [(k, "", "") for k in sorted(aday, key=lambda k: -yabanci_puan(k))[:5]]
+
+
+def yabanci_topla(simdi, esik):
+    """Yabancı akışları okur, kümeler, seçer. Dönüş: (liste, sayılar) — hata akışı bozmaz."""
+    hepsi, calisan = [], 0
+    for ad, url in YABANCI:
+        try:
+            ogeler = akis_oku(ad, url, simdi)
+            if ad == "Reuters":   # Google News başlıkları " - Reuters" ekiyle gelir
+                for o in ogeler:
+                    o["baslik"] = re.sub(r"\s+[-|–]\s+Reuters(\.com)?$", "", o["baslik"]).strip()
+            taze = [o for o in ogeler if o["tarih"] >= esik]
+            hepsi += taze
+            calisan += 1
+            print(f"  ✓ {ad:18s} {len(ogeler):3d} öğe · pencerede {len(taze):3d}  [yabancı]")
+        except Exception as e:
+            print(f"  ✗ {ad:18s} {type(e).__name__}: {str(e)[:70]}  [yabancı]")
+    if not hepsi:
+        return [], {"kaynak": calisan, "pencere": 0, "kume": 0}
+    hepsi.sort(key=lambda h: h["tarih"])
+    kumeler = kumele(hepsi, YABANCI_ONCELIK)
+    mod, secim = yabanci_sec(kumeler)
+    out = [{"baslik": bt or k["baslik"], "baslik_orj": k["baslik"], "ozet": oz or None, "link": k["link"],
+            "kaynak": k["kaynak"], "zaman": k["tarih"].astimezone(TR).strftime("%d.%m %H:%M"), "diger": k["diger"]}
+           for k, bt, oz in secim]
+    print(f"  yabancı basın: {len(hepsi)} haber → {len(kumeler)} küme → {len(out)} seçildi · mod: {mod}")
+    return out, {"kaynak": calisan, "pencere": len(hepsi), "kume": len(kumeler), "mod": mod}
 
 
 def ai_kullanilabilir():
@@ -494,9 +623,15 @@ def main():
     veriler = veri_bolumu(a.bulten)
     print(f"  yeni açıklanan veri: {len(veriler)} modül" + (" (durum ilerletildi)" if a.bulten else ""))
     takvim, piyasa = takvim_bolumu(simdi), piyasa_bolumu()
+    try:
+        yabanci, yabanci_sayilar = yabanci_topla(simdi, esik)
+    except Exception as e:
+        print(f"  ~ yabancı basın bölümü atlandı ({type(e).__name__}: {e})")
+        yabanci, yabanci_sayilar = [], None
     print(f"  takvim: {'yok' if takvim is None else str(len(takvim['bugun'])) + ' olay bugün'} · "
           f"piyasa: {'yok' if piyasa is None else str(len(piyasa['satirlar'])) + ' satır'}")
-    yaz(gun, simdi, a.saat, mod, ozet, secim, sayilar, ek={"veriler": veriler, "takvim": takvim, "piyasa": piyasa})
+    yaz(gun, simdi, a.saat, mod, ozet, secim, sayilar, ek={"veriler": veriler, "takvim": takvim, "piyasa": piyasa,
+                                                         "yabanci": yabanci, "yabanci_sayilar": yabanci_sayilar})
     print(f"  {len(hepsi)} haber → {len(kumeler)} küme → {len(secim)} seçildi · mod: {mod}")
     print(f"Kaydedildi: site/data/haber/{gun}.json + index.json")
     print("BAŞARILI")

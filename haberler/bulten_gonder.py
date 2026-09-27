@@ -157,6 +157,9 @@ def html_yap(D):
         if kalan > 0:
             P.append(f'<div style="font-size:12.5px;color:#8A93A6;padding:8px 0 0;">+{kalan} haber daha — '
                      f'<a href="{SITE}" style="color:#B86E00;">sitede</a></div>')
+    if D.get("yabanci"):
+        P.append(yabanci_html(D["yabanci"], "Yabancı Basın",
+                              "Son 24 saatte uluslararası finans basınında en çok yankı bulan 5 haber — Türkçe başlık ve özetler otomatik"))
     P.append(f"""</td></tr>
 <tr><td align="center" style="padding:20px 28px 26px;">
   <a href="{SITE}" style="display:inline-block;background:#FF9E1B;color:#0B0E14;font-size:14px;font-weight:700;text-decoration:none;padding:11px 22px;border-radius:7px;">Tüm gündemi sitede aç →</a>
@@ -207,6 +210,8 @@ def metin_yap(D):
                 S.append(f"    {h['ozet']}")
             S.append(f"    {h['link']}")
         S.append("")
+    if D.get("yabanci"):
+        yabanci_metin(S, D["yabanci"], "YABANCI BASIN (son 24 saatte en çok yankı bulan 5 haber)")
     S += [f"Tüm gündem: {SITE}", "",
           "Seçki ve özetler otomatik üretilir — yatırım tavsiyesi değildir.",
           "Bu bülteni almak istemiyorsanız bu e-postayı yanıtlayarak bildirmeniz yeterli."]
@@ -252,6 +257,31 @@ def veri_html(veriler, baslik, alt):
                  f'{esc(v.get("ikon", ""))} {esc(v["baslik"])}</a>'
                  f'<div style="color:#55627A;font-size:13.5px;line-height:1.55;margin-top:3px;">{esc(v["ozet"])}</div></div>')
     return "".join(P)
+
+
+def yabanci_html(liste, baslik, alt):
+    P = [f'<div style="font-size:16px;font-weight:700;color:#1A2233;margin:20px 0 2px;">{baslik}</div>'
+         f'<div style="font-size:12.5px;color:#8A93A6;margin:0 0 6px;">{alt}</div>']
+    for h in liste:
+        diger = f' · +{len(h["diger"])} kaynak' if h.get("diger") else ""
+        alt_baslik = (f'<div style="color:#8A93A6;font-size:12px;margin-top:2px;">{esc(h["baslik_orj"])}</div>'
+                      if h.get("baslik_orj") and h["baslik_orj"] != h["baslik"] else "")
+        P.append(f'<div style="padding:10px 0;border-bottom:1px solid #EEF1F6;">'
+                 f'<a href="{guvenli_link(h["link"])}" style="color:#1A2233;font-size:15px;font-weight:700;line-height:1.4;text-decoration:none;">{esc(h["baslik"])}</a>'
+                 + alt_baslik
+                 + (f'<div style="color:#55627A;font-size:13.5px;line-height:1.55;margin-top:4px;">{esc(h["ozet"])}</div>' if h.get("ozet") else "")
+                 + f'<div style="color:#8A93A6;font-size:12px;margin-top:4px;">{esc(h["kaynak"])} · {esc(h.get("zaman", ""))}{diger}</div></div>')
+    return "".join(P)
+
+
+def yabanci_metin(S, liste, baslik):
+    S.append(baslik)
+    for h in liste:
+        S.append(f"  • {h['baslik']} ({h['kaynak']}, {h.get('zaman', '')})")
+        if h.get("ozet"):
+            S.append(f"    {h['ozet']}")
+        S.append(f"    {h['link']}")
+    S.append("")
 
 
 def html_hafta(H):
@@ -300,6 +330,9 @@ def html_hafta(H):
                      f'<a href="{guvenli_link(h["link"])}" style="color:#1A2233;font-size:14.5px;font-weight:700;line-height:1.4;text-decoration:none;">{esc(h["baslik"])}</a>'
                      + (f'<div style="color:#55627A;font-size:13.5px;line-height:1.55;margin-top:3px;">{esc(h["ozet"])}</div>' if h.get("ozet") else "")
                      + f'<div style="color:#8A93A6;font-size:12px;margin-top:3px;">{esc(h["kaynak"])} · {h["gun"][8:]}.{h["gun"][5:7]} · {esc(h["kategori"])}</div></div>')
+    if H.get("yabanci"):
+        P.append(yabanci_html(H["yabanci"], "Haftanın Yabancı Basını",
+                              "Hafta boyunca uluslararası finans basınında en çok yankı bulan haberler"))
     P.append(f"""</td></tr>
 <tr><td align="center" style="padding:20px 28px 26px;">
   <a href="{SITE}?hafta={esc(H["hafta"])}" style="display:inline-block;background:#FF9E1B;color:#0B0E14;font-size:14px;font-weight:700;text-decoration:none;padding:11px 22px;border-radius:7px;">Haftaya Bakış'ı sitede aç →</a>
@@ -343,6 +376,9 @@ def metin_hafta(H):
         S += ["", "HAFTANIN ÖNE ÇIKAN HABERLERİ"]
         for h in H["one_cikan"][:8]:
             S += [f"  • {h['baslik']} ({h['kaynak']}, {h['gun'][8:]}.{h['gun'][5:7]})", f"    {h['link']}"]
+    if H.get("yabanci"):
+        S.append("")
+        yabanci_metin(S, H["yabanci"], "HAFTANIN YABANCI BASINI")
     S += ["", f"Sitede: {SITE}?hafta={H['hafta']}", "",
           "Özet ve yorumlar otomatik üretilir — yatırım tavsiyesi değildir.",
           "Bu bülteni almak istemiyorsanız bu e-postayı yanıtlayarak bildirmeniz yeterli."]

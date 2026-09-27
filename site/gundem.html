@@ -74,10 +74,18 @@
 
     <div id="kategoriler"></div>
 
+    <section class="chart-card" id="secYabanci" style="display:none">
+      <h3 id="h3Yabanci">🌐 Yabancı Basın</h3>
+      <p class="cap" id="capYabanci"></p>
+      <ul class="haber-liste" id="yabanci"></ul>
+    </section>
+
     <footer>Başlıklar ilgili yayıncılara aittir; her başlık haberin kaynağına gider ve haber metni bu
       sitede yayımlanmaz. Seçki ve kısa özetler otomatik üretilir — yatırım tavsiyesi değildir.
       Kaynaklar: AA, CNBC-e, Ekonomim, Dünya, Ekonomist, Borsa Gündem, Investing, Habertürk, TRT Haber,
-      Sabah, Milliyet, Sözcü, Hürriyet, Euronews, Cumhuriyet, BBC Türkçe, DW Türkçe.</footer>
+      Sabah, Milliyet, Sözcü, Hürriyet, Euronews, Cumhuriyet, BBC Türkçe, DW Türkçe. Yabancı basın: Reuters, Bloomberg,
+      CNBC, WSJ, Financial Times, MarketWatch, BBC, The Guardian, Investing.com, Seeking Alpha (Türkçe başlık ve
+      özetler otomatik çeviri/özettir).</footer>
   </main>
 
   <script src="assets/app.js?v=22"></script>
@@ -116,6 +124,14 @@
           }
           return h + "</tr>";
         }).join("");
+      }
+      function yabanciListe(liste) {
+        return (liste || []).map(h => '<li class="haber"><a class="baslik" href="' + guvenliLink(h.link) +
+          '" target="_blank" rel="noopener nofollow">' + esc(h.baslik) + "</a>" +
+          (h.baslik_orj && h.baslik_orj !== h.baslik ? '<div class="meta">' + esc(h.baslik_orj) + "</div>" : "") +
+          (h.ozet ? '<div class="oz">' + esc(h.ozet) + "</div>" : "") +
+          '<div class="meta">' + esc(h.kaynak) + " · " + esc(h.gun ? gunKisa(h.gun) + " " : "") + esc(h.zaman || "") +
+          (h.diger && h.diger.length ? " · +" + h.diger.length + " kaynak" : "") + "</div></li>").join("");
       }
       function veriListe(veriler) {
         return (veriler || []).map(v => '<li class="haber"><a class="baslik" href="' + esc(v.link) + '">' + esc(v.ikon) + " " +
@@ -206,6 +222,11 @@
               '<a href="' + guvenliLink(d.link) + '" target="_blank" rel="noopener nofollow">' +
               esc(d.kaynak) + "</a>").join(", ") : "") +
             "</div></li>").join("") + "</ul></section>").join("");
+
+        $("h3Yabanci").textContent = "🌐 Yabancı Basın";
+        $("capYabanci").textContent = "Son 24 saatte uluslararası finans basınında en çok yankı bulan 5 haber (Reuters, Bloomberg, CNBC, WSJ, FT…) — Türkçe başlık ve özetler otomatik";
+        $("secYabanci").style.display = D.yabanci && D.yabanci.length ? "" : "none";
+        $("yabanci").innerHTML = yabanciListe(D.yabanci);
       }
 
       async function yukleHafta() {
@@ -255,6 +276,11 @@
             esc(h.baslik) + "</a>" + (h.ozet ? '<div class="oz">' + esc(h.ozet) + "</div>" : "") +
             '<div class="meta">' + esc(h.kaynak) + " · " + gunKisa(h.gun) + " · " + esc(h.kategori) + "</div></li>").join("") +
           "</ul></section>";
+
+        $("h3Yabanci").textContent = "🌐 Haftanın Yabancı Basını";
+        $("capYabanci").textContent = "Hafta boyunca uluslararası finans basınında en çok yankı bulan haberler";
+        $("secYabanci").style.display = H.yabanci && H.yabanci.length ? "" : "none";
+        $("yabanci").innerHTML = yabanciListe(H.yabanci);
       }
 
       if (hafta) yukleHafta(); else yukle();
