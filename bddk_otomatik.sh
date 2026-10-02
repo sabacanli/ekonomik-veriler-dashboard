@@ -30,17 +30,33 @@ if [ $i -ge 16 ]; then
   log "UYARI: ağ 4 dakikada gelmedi — yine de deneniyor"
 fi
 
-if "$PY" "bddk veri çekme/enhanced_manual_scraper.py"; then
-  log "TL verisi çekildi"
-else
-  log "UYARI: TL scrape başarısız (mevcut veriyle devam)"
-fi
+# Scraper'lar süre sınırıyla çalışır: 02.10.2026'da uykudan uyanırken chromedriver indirmesi takıldı ve
+# süreç 6 saat askıda kaldı (çıkış kodu hiç gelmedi). 15 dk'da bitmeyen çekim sonlandırılır, bir kez yinelenir.
+cek() {   # $1 = etiket, $2 = script
+  for deneme in 1 2; do
+    if "$PY" - "$2" <<'PYEOF2'
+import subprocess, sys
+try:
+    r = subprocess.run([sys.executable, sys.argv[1]], timeout=900)
+    sys.exit(r.returncode)
+except subprocess.TimeoutExpired:
+    print("SURE ASIMI: 15 dakikada bitmedi, sonlandirildi", flush=True)
+    sys.exit(124)
+PYEOF2
+    then
+      log "$1 verisi çekildi (deneme $deneme)"
+      return 0
+    fi
+    log "UYARI: $1 scrape başarısız (deneme $deneme)"
+    pkill -f chromedriver 2>/dev/null
+    sleep 10
+  done
+  log "UYARI: $1 scrape iki denemede de başarısız (mevcut veriyle devam)"
+  return 1
+}
 
-if "$PY" "bddk veri çekme/enhanced_manual_scraperUSD.py"; then
-  log "USD verisi çekildi"
-else
-  log "UYARI: USD scrape başarısız (mevcut veriyle devam)"
-fi
+cek "TL"  "bddk veri çekme/enhanced_manual_scraper.py"
+cek "USD" "bddk veri çekme/enhanced_manual_scraperUSD.py"
 
 # Scraper exit 0 dese de indirme başarısız olabiliyor (14.08'de yaşandı):
 # bugünün damgasını taşıyan dosyalar gerçekten var mı doğrula
