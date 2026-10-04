@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """Bankacılık Monitörü — aylık PDF rapor (ekordion.com.tr tasarımı).
 Kullanım: python rapor.py <çıktı.pdf>   (önce fetch_bddk.py ve gorunum.py; veri calc.py'den gelir)
-Sayfa seti: kapak, ayın görünümü, özet tablo, grup karnesi, kârlılık (8), bilanço (5), krediler (8),
-aktif kalitesi, menkul kıymetler (2), fonlama (4), bilanço rasyoları, sermaye, şube-personel, metodoloji.
-Kompozisyon ve pazar payı sayfaları zaman serili %100 yığılmış alan grafikleridir (son 25 ay)."""
+Akış (ekordion çerçevesi): Görünüm → Büyüme ve ivme → Bilanço ve kredi yapısı → Kârlılık → Aktif kalitesi →
+Fonlama ve dolarizasyon → Sermaye → Ekler. Kendi analizlerimiz: kredi ivme haritası, segment ivmesi, reel büyüme,
+pazar payı değişimi, hacim–marj ayrıştırması, kârlılık kalitesi, NPL oluşum hızı, sermaye tamponu, haftalık köprü.
+Kompozisyon sayfaları zaman serili %100 yığılmış alan grafikleridir (son 25 ay)."""
 import warnings; warnings.filterwarnings('ignore')
 import json, sys, textwrap
 from pathlib import Path
 HERE = Path(__file__).resolve().parent; sys.path.insert(0, str(HERE))
 from calc import *  # noqa: E402,F401  (D, LAST, GROUPS, DEPG, GSHORT, GNAME, at, series, yoy)
+from analiz import *  # noqa: E402,F401  (ek göstergeler, hacim_marj, pay_degisim, haftalik_kopru, SEGMENTLER, PAY_KOL, ENF_SON)
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -233,8 +235,13 @@ def table_page(pdf, title, sub, rows, colgroups=GROUPS, note=None):
     for j, h in enumerate(hdr):
         ax.add_patch(Rectangle((x, 1 - rh), cw[j], rh, color=LACI, transform=ax.transAxes))
         ax.text(x + cw[j] / 2, 1 - rh / 2, h, ha='center', va='center', color='white', fontsize=9.5, fontweight='bold', transform=ax.transAxes); x += cw[j]
-    for i, (lab, vals) in enumerate(rows):
+    for i, row in enumerate(rows):
+        lab, vals = row[0], row[1]; dec = row[2] if len(row) > 2 else 1
         y = 1 - (i + 2) * rh; x = 0; bg = ACIK if i % 2 else 'white'
+        if vals is None:   # bölüm başlığı
+            ax.add_patch(Rectangle((0, y), 1, rh, facecolor='#E6EAF0', edgecolor='#D9DEE6', lw=0.5, transform=ax.transAxes))
+            ax.text(0.008, y + rh / 2, lab, ha='left', va='center', fontsize=8.5, color=LACI, fontweight='bold', transform=ax.transAxes)
+            continue
         for j in range(len(hdr)):
             ax.add_patch(Rectangle((x, y), cw[j], rh, facecolor=bg, edgecolor='#D9DEE6', lw=0.5, transform=ax.transAxes))
             if j == 0:
@@ -247,7 +254,7 @@ def table_page(pdf, title, sub, rows, colgroups=GROUPS, note=None):
                             color='#2E7D5B' if (not np.isnan(g) and g >= 0) else KIRMIZI, fontweight='bold', transform=ax.transAxes)
                     ax.text(x + cw[j] - 0.008, y + rh / 2, tr(amt, 0), ha='right', va='center', fontsize=9, color=METIN, transform=ax.transAxes)
                 else:
-                    ax.text(x + cw[j] / 2, y + rh / 2, tr(v, 1), ha='center', va='center', fontsize=9.2, color=METIN,
+                    ax.text(x + cw[j] / 2, y + rh / 2, tr(v, dec), ha='center', va='center', fontsize=9.2, color=METIN,
                             fontweight='bold' if colgroups[j - 1] == 'S' else 'normal', transform=ax.transAxes)
             x += cw[j]
     if note:
@@ -255,14 +262,16 @@ def table_page(pdf, title, sub, rows, colgroups=GROUPS, note=None):
     pdf.savefig(fig); plt.close(fig)
 
 
-OZET_SATIRLAR = [('Aktif Büyümesi', 'g_aktif'), ('Aktif TP Ağırlığı', 'aktifTPag'), ('TP Canlı Kredi Büyümesi', 'g_canliTP'),
-                 ('YP Canlı Kredi Büyümesi (USD)', 'g_canliYP_usd'), ('Tüketici Kredileri / Canlı Krediler', 'tukCanli'),
-                 ('NPL Oranı', 'npl'), ('Özel Karşılık Oranı', 'ozelKarsOran'), ('TP Toplanan Fon Büyümesi', 'g_mvTP'),
-                 ('YP Toplanan Fon Büyümesi (USD)', 'g_mvYP_usd'), ('Toplanan Fon TP Ağırlığı', 'fonTPag'),
-                 ('Standart SYR', 'syr'), ('Çekirdek SYR', 'cekSyr'), ('Aktif Kârlılığı (ROA)', 'roa'), ('Özkaynak Kârlılığı (ROE)', 'roe'),
-                 ('Brüt Faaliyet Kârı Artışı', 'gy_brutKar'), ('Net Kâr Artışı', 'gy_netKar'), ('Gider / Gelir Oranı', 'giderGelir'),
-                 ('Op-Ex / Aktifler', 'opexAktif')]
-GELIR_SATIRLAR = [('Faiz / Kâr Payı Gelirleri', 'faizGel'), ('Faiz / Kâr Payı Giderleri', 'faizGid'), ('Net Faiz / Kâr Payı Geliri', 'netFaiz'),
+OZET_SATIRLAR = [('BÜYÜME (yıllık %)', None, 1), ('Toplam aktif', 'g_aktif', 1), ('TP canlı krediler', 'g_canliTP', 1),
+                 ('TP canlı krediler, 3 aylık yıllıklandırılmış', 'g3_canliTP', 1), ('Reel TP canlı krediler (TÜFE arındırılmış)', 'gr_canliTP', 1),
+                 ('TP toplanan fonlar', 'g_mvTP', 1), ('YP toplanan fonlar (USD)', 'g_mvYP_usd', 1),
+                 ('KÂRLILIK (12 aylık yıllıklandırılmış, %)', None, 1), ('Aktif kârlılığı (ROA)', 'roa', 2), ('Özkaynak kârlılığı (ROE)', 'roe', 1),
+                 ('Net faiz marjı', 'nim', 2), ('Çekirdek kârlılık / ortalama aktif', 'cekirdekAktif', 2), ('Gider / gelir', 'giderGelir', 1),
+                 ('AKTİF KALİTESİ (%)', None, 1), ('NPL oranı', 'npl', 2), ('NPL oluşum hızı, 3 aylık ortalama (yıllıklandırılmış)', 'nplOlusum3', 2),
+                 ('Özel karşılık oranı', 'ozelKarsOran', 1), ('Risk maliyeti (karşılık / ortalama canlı kredi)', 'riskMaliyeti', 2),
+                 ('FONLAMA VE SERMAYE', None, 1), ('Toplanan fon TP ağırlığı (%)', 'fonTPag', 1), ('TL kredi / TL mevduat (%)', 'tlKrediMev', 1),
+                 ('Standart SYR (%)', 'syr', 1), ('Fazla sermaye, %12 hedefe göre (milyar ₺)', 'fazlaSermaye', 0)]
+GELIR_SATIRLAR = [('Faiz gelirleri', 'faizGel'), ('Faiz giderleri', 'faizGid'), ('Net faiz geliri', 'netFaiz'),
                   ('Ücret ve Komisyon Gelirleri', 'ucrGel'), ('Ücret ve Komisyon Giderleri', 'ucrGid'), ('Net Ücret ve Komisyon Geliri', 'netUcret'),
                   ('Ticari Kâr / Zarar', 'ticari'), ('Diğer Faaliyet Gelirleri', 'digGel'), ('Brüt Faaliyet Kârı', 'brutKar'),
                   ('Personel Giderleri', 'personel'), ('Diğer İşletme Giderleri', 'digIsl'), ('Faaliyet Giderleri (Op-Ex)', 'opex'),
@@ -272,10 +281,12 @@ GIDER_KALEMLERI = ['faizGid', 'ucrGid', 'personel', 'digIsl', 'opex', 'karsilik'
 
 def karne_page(pdf):
     fig = plt.figure(figsize=(PW, PH)); header(fig, 'Grup Karnesi', f'{DON} itibarıyla; hücre rengi grup sıralamasını gösterir (koyu yeşil = en iyi). Sektör sütunu referanstır.')
-    metrics = [('Aktif Büyümesi (%)', 'g_aktif', 1, 1), ('TP Canlı Kredi Büyümesi (%)', 'g_canliTP', 1, 1), ('NPL Oranı (%)', 'npl', 2, -1),
-               ('Tüketici NPL (%)', 'nplTuk', 2, -1), ('Özel Karşılık Oranı (%)', 'ozelKarsOran', 1, 1), ('Standart SYR (%)', 'syr', 1, 1),
-               ('ROA (%)', 'roa', 1, 1), ('ROE (%)', 'roe', 1, 1), ('Net Faiz Marjı (%)', 'nim', 1, 1), ('Gider / Gelir (%)', 'giderGelir', 1, -1),
-               ('Op-Ex / Aktifler (%)', 'opexAktif', 1, -1), ('Kaldıraç (Aktif/Özkaynak, x)', 'kaldirac', 1, -1)]
+    metrics = [('TP canlı kredi büyümesi, 12 aylık (%)', 'g_canliTP', 1, 1), ('TP canlı kredi, 3 aylık yıllıklandırılmış (%)', 'g3_canliTP', 1, 1),
+               ('Reel TP canlı kredi büyümesi (%)', 'gr_canliTP', 1, 1), ('TP mevduat büyümesi (%)', 'g_mvTP', 1, 1),
+               ('NPL oranı (%)', 'npl', 2, -1), ('NPL oluşum hızı, 3 aylık (%)', 'nplOlusum3', 2, -1), ('Özel karşılık oranı (%)', 'ozelKarsOran', 1, 1),
+               ('Risk maliyeti (%)', 'riskMaliyeti', 2, -1), ('Çekirdek kârlılık / aktif (%)', 'cekirdekAktif', 2, 1), ('ROE (%)', 'roe', 1, 1),
+               ('Net faiz marjı (%)', 'nim', 2, 1), ('Gider / gelir (%)', 'giderGelir', 1, -1), ('Standart SYR (%)', 'syr', 1, 1),
+               ('Fazla sermaye, %12 hedefe göre (milyar ₺)', 'fazlaSermaye', 0, 1), ('Toplanan fon TP ağırlığı (%)', 'fonTPag', 1, 1)]
     ax = fig.add_axes([0.03, 0.085, 0.94, 0.76]); ax.axis('off')
     cg = GROUPS; n = len(metrics); hdr = ['Gösterge'] + [GSHORT[g] for g in cg]
     cw = [0.24] + [0.76 / len(cg)] * len(cg); rh = 1 / (n + 1); x = 0
@@ -385,7 +396,7 @@ def syr_page(pdf):
     pdf.savefig(fig); plt.close(fig)
 
 
-ROA_ITEMS = [('roaNetFaiz', 'Net Faiz / Kâr Payı Geliri', LACI, 1), ('roaUcret', 'Net Ücret ve Komisyon', '#5E8BC5', 1), ('roaTicari', 'Ticari Kâr/Zarar', '#B99464', 1),
+ROA_ITEMS = [('roaNetFaiz', 'Net faiz geliri', LACI, 1), ('roaUcret', 'Net Ücret ve Komisyon', '#5E8BC5', 1), ('roaTicari', 'Ticari Kâr/Zarar', '#B99464', 1),
              ('roaDiger', 'Diğer Faaliyet Gelirleri', '#E3C9A0', 1), ('roaOpex', 'Faaliyet Giderleri', KIRMIZI, -1), ('roaKars', 'Karşılık Giderleri', '#E8A0AE', -1), ('roaVergi', 'Vergi', '#C9CED6', -1)]
 
 
@@ -415,7 +426,7 @@ def roa_comp_page(pdf):
 
 def marj_page(pdf):
     fig = plt.figure(figsize=(PW, PH)); header(fig, 'Kârlılık | Marj', '12 aylık yıllıklandırılmış; marj bileşenleri 13 aylık ortalama aktiflere oranla (%)')
-    ax = fig.add_axes([0.16, 0.12, 0.32, 0.62]); ax.set_title('Net faiz / kâr payı marjı bileşenleri', fontsize=10.5, color=METIN)
+    ax = fig.add_axes([0.16, 0.12, 0.32, 0.62]); ax.set_title('Net faiz marjı bileşenleri', fontsize=10.5, color=METIN)
     items = [('mKredi', 'Kredilerden alınan', LACI, 1), ('mMenkul', 'Menkul kıymetlerden alınan', '#5E8BC5', 1), ('mDigGel', 'Diğer kalemlerden alınan', '#B99464', 1),
              ('mFon', 'Toplanan fonlara verilen', KIRMIZI, -1), ('mToptan', 'Toptan fonlamaya verilen', '#E8A0AE', -1), ('mDigGid', 'Diğer kalemlere verilen', '#C9CED6', -1)]
     for i, g in enumerate(GROUPS):
@@ -447,7 +458,7 @@ def marj_page(pdf):
     ax2.set_xticks(range(len(GROUPS))); ax2.set_xticklabels([GSHORT[g].replace(' ', '\n') for g in GROUPS], fontsize=6.5, color='#444'); ax2.axhline(0, color='#666', lw=0.8)
     style(ax2)
     fig.text(0.79, 0.75, '● Kredi getirisi', fontsize=8, color=LACI); fig.text(0.88, 0.75, '● Fon maliyeti', fontsize=8, color=KIRMIZI)
-    ax3 = fig.add_axes([0.55, 0.11, 0.41, 0.28]); line_panel(ax3, 'nim', 'Net faiz / kâr payı marjı (%)', '2024-07-31', 'pct')
+    ax3 = fig.add_axes([0.55, 0.11, 0.41, 0.28]); line_panel(ax3, 'nim', 'Net faiz marjı (%)', '2024-07-31', 'pct')
     legend_bottom(fig, [(GC[g], t) for g, t in GLEG], y=0.05)
     pdf.savefig(fig); plt.close(fig)
 
@@ -484,8 +495,11 @@ def notes_page(pdf):
         "• 12 aylık kalemler yıl içi kümülatif tablodan türetilir (YTD(t) − YTD(t−12) + YTD(Aralık)); ROA/ROE/NIM/Op-Ex oranları 13 aylık ortalama aktif/özkaynağa bölünür.",
         "• Kredi getirisi = 12 aylık kredi + finansal kiralama gelirleri / 13 aylık ortalama canlı krediler; fon maliyeti = 12 aylık mevduata verilen faiz / 13 aylık ortalama mevduat.",
         "• YP büyümeleri (USD) BDDK USD tablosundan türetilen örtük USD/TL kuruyla hesaplanır; menkul kıymet büyümeleri HTM hariç, MK reeskontları dahil.",
-        "• Kompozisyon ve pazar payı sayfaları son 25 ayın %100 yığılmış alan grafikleridir; sağ uçtaki etiketler son ayın paylarıdır. Aylık net kâr yıl içi kümülatiften türetilir (Ocak = o ayın YTD değeri).",
-        "• Grup karnesinde sıralama Sektör hariç altı grup arasında yapılır; 'Ayın Görünümü' sayfasındaki yorum verilerden otomatik üretilir ve hata içerebilir.",
+        "• Kompozisyon sayfaları son 25 ayın %100 yığılmış alan grafikleridir; sağ uçtaki etiketler son ayın paylarıdır. Aylık net kâr yıl içi kümülatiften türetilir (Ocak = o ayın YTD değeri).",
+        "• İvme: 3 aylık yıllıklandırılmış büyüme ((X(t)/X(t−3))^4 − 1); reel büyümeler TÜFE yıllık enflasyonla arındırılır ((1+g)/(1+π) − 1). NPL oluşum hızı = takipteki alacak bakiyesindeki aylık net artış / önceki ay canlı krediler × 12 (satış ve silme sonrası net).",
+        "• Hacim–marj ayrıştırması: ΔNFG = (Δortalama aktif × önceki yıl NIM) + (ΔNIM × bu yıl ortalama aktif); çekirdek kârlılık = (net faiz + net komisyon − faaliyet gideri) / ortalama aktif; risk maliyeti = 12 aylık karşılık gideri / ortalama canlı kredi.",
+        "• Fazla sermaye = yasal özkaynak − %12 × risk ağırlıklı aktifler (BDDK hedef rasyosu); RAK yoğunluğu = RAK / aktif. Haftalık köprü sayfası sitedeki haftalık BDDK verisinden ay sonu sonrasını özetler.",
+        "• Grup karnesinde sıralama Sektör hariç altı grup arasında yapılır; 'Ayın Görünümü' sayfasındaki yorum verilerden otomatik üretilir ve hata içerebilir. Faiz kalemleri katılım bankaları için kâr payını kapsar.",
         "• Bu rapor BDDK kaynaklı verilerle ekordion.com.tr tarafından bilgilendirme amacıyla hazırlanmıştır; yatırım danışmanlığı niteliği taşımaz."]
     y = 0.80
     for t in txt:
@@ -537,56 +551,268 @@ def momentum_page(pdf):
         [[1, 1], [1, 1]], sub='3 aylık yıllıklandırılmış seri, kredi ivmesindeki dönüşleri 12 aylık seriden önce gösterir')
 
 
+# ---------- ekordion analiz sayfaları ----------
+def multi_panel(ax, items, title, start, fmt='pct', d=1, yfmt=None):
+    """items: [(g, col, etiket, renk)] — farklı serileri aynı panelde çizer."""
+    ends = []
+    for g, col, lab, color in items:
+        sr = series(g, col, start).dropna()
+        if len(sr) == 0:
+            continue
+        ax.plot(sr.index, sr.values, color=color, lw=1.9)
+        v = sr.iloc[-1]; ends.append((v, color, (trp(v, d) if fmt == 'pct' else tr(v, d)) + ' ' + lab))
+    ax.set_title(title, fontsize=10.5, pad=6, color=METIN); style(ax); ay_ekseni(ax)
+    if yfmt == 'pct':
+        ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, p: '%' + tr(v, 0 if abs(v) >= 10 else 1)))
+    ax.set_xlim(right=ax.get_xlim()[1] + (ax.get_xlim()[1] - ax.get_xlim()[0]) * 0.02)
+    line_end_labels(ax, ends, fs=7)
+
+
+def buyume_page(pdf):
+    line_page(pdf, 'Büyüme | Bilanço', [dict(col='g_akTP', title='TP aktif'), dict(col='g_akYP_usd', title='YP aktif (USD)', yfmt='pct'),
+                                        dict(col='g_canliTP', title='TP canlı krediler'), dict(col='g_canliYP_usd', title='YP canlı krediler (USD)', yfmt='pct'),
+                                        dict(col='g_mvTP', title='TP toplanan fonlar', groups=DEPG), dict(col='g_mvYP_usd', title='YP toplanan fonlar (USD)', yfmt='pct', groups=DEPG)],
+              [[1, 1, 1], [1, 1, 1]], sub='Yıllık büyüme (%); YP kalemler örtük USD/TL kuruyla dolar bazında')
+
+
+def ivme_page(pdf):
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Büyüme | Kredi İvme Haritası', 'Sol: yatay eksen 12 aylık, dikey eksen 3 aylık yıllıklandırılmış TP canlı kredi büyümesi; köşegenin üstü hızlanma · Sağ: sektör segmentleri')
+    ax = fig.add_axes([0.06, 0.14, 0.40, 0.64]); S = at('S'); xs, ys = [], []
+    for g in GROUPS:
+        a = at(g); x, y = a.g_canliTP, a.g3_canliTP
+        if np.isnan(x) or np.isnan(y):
+            continue
+        ax.scatter(x, y, s=170 if g == 'S' else 110, color=GC[g], zorder=3, edgecolor='white', lw=1)
+        ax.annotate(GSHORT[g], (x, y), xytext=(7, 6), textcoords='offset points', fontsize=8.5, color=GC[g], fontweight='bold')
+        xs.append(x); ys.append(y)
+    lo, hi = min(xs + ys) - 6, max(xs + ys) + 6
+    ax.plot([lo, hi], [lo, hi], color='#999', lw=0.9, ls='--'); ax.set_xlim(lo, hi); ax.set_ylim(lo, hi)
+    ax.axvline(S.g_canliTP, color=GRI, lw=0.6, ls=':'); ax.axhline(S.g3_canliTP, color=GRI, lw=0.6, ls=':')
+    ax.text(hi - 1, lo + 1.5, 'yavaşlıyor', ha='right', fontsize=8.5, color='#888'); ax.text(lo + 1, hi - 2.5, 'hızlanıyor', ha='left', fontsize=8.5, color='#888')
+    ax.set_xlabel('12 aylık büyüme (%)', fontsize=8.5, color='#444'); ax.set_ylabel('3 aylık yıllıklandırılmış büyüme (%)', fontsize=8.5, color='#444')
+    style(ax); ax.grid(True, axis='both', ls='-', color='#E3E7EE', lw=0.7)
+    ax2 = fig.add_axes([0.58, 0.14, 0.37, 0.64])
+    y = np.arange(len(SEGMENTLER))[::-1]
+    g12 = [S['g_' + c] for c, _ in SEGMENTLER]; g3 = [S['g3_' + c] for c, _ in SEGMENTLER]
+    ax2.barh(y + 0.18, g12, height=0.34, color=GRI, label='12 aylık'); ax2.barh(y - 0.18, g3, height=0.34, color=KIRMIZI, label='3 aylık yıllıklandırılmış')
+    for yi, a_, b_ in zip(y, g12, g3):
+        ax2.text(max(a_, b_) + 1, yi, trp(b_ - a_), va='center', fontsize=8, color=('#2E7D5B' if b_ >= a_ else KIRMIZI), fontweight='bold')
+    ax2.set_yticks(y); ax2.set_yticklabels([ad for _, ad in SEGMENTLER], fontsize=8.5); style(ax2); ax2.grid(True, axis='x', ls='-', color='#E3E7EE', lw=0.7); ax2.grid(False, axis='y')
+    ax2.set_xlim(0, max(g12 + g3) * 1.22)
+    ax2.set_title('Sektör segmentleri (%); sağdaki rakam ivme farkı (3 aylık − 12 aylık)', fontsize=9.5, color=METIN)
+    ax2.legend(loc='upper right', fontsize=8, frameon=False)
+    pdf.savefig(fig); plt.close(fig)
+
+
+def segment_page(pdf):
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Büyüme | Segment İvmesi', '3 aylık yıllıklandırılmış büyüme (%); 12 aylık seriden önce dönen eğilimi gösterir')
+    axes = grid_axes(fig, [[1, 1], [1, 1]])
+    multi_panel(axes[0], [('S', 'g3_tukKK', 'Tüketici + KK', LACI), ('S', 'g3_kobi', 'KOBİ', KIRMIZI), ('S', 'g3_ticKur', 'Ticari / kurumsal', '#2E7D5B'), ('S', 'g3_mvTP', 'TP mevduat', '#B99464')],
+                'Sektör: segmentler', '2024-07-31')
+    line_panel(axes[1], 'g3_tukKK', 'Tüketici + KK, gruplar', '2024-07-31', 'pct', DEPG)
+    line_panel(axes[2], 'g3_kobi', 'KOBİ, gruplar', '2024-07-31', 'pct')
+    line_panel(axes[3], 'g3_ticKur', 'Ticari / kurumsal, gruplar', '2024-07-31', 'pct')
+    legend_bottom(fig, [(GC[g], t) for g, t in GLEG])
+    pdf.savefig(fig); plt.close(fig)
+
+
+def reel_page(pdf):
+    alt = f"TÜFE yıllık enflasyonla arındırılmış ((1+g)/(1+π) − 1); TÜFE serisi {ENF_SON.strftime('%m.%Y') if ENF_SON is not None else '—'} dahil"
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Büyüme | Reel Büyüme', alt)
+    axes = grid_axes(fig, [[1, 1], [1, 1]])
+    multi_panel(axes[0], [('S', 'g_canliTP', 'nominal', GRI), ('S', 'gr_canliTP', 'reel', LACI), ('S', 'tufe', 'TÜFE', KIRMIZI)], 'Sektör: TP canlı krediler, nominal ve reel (%)', '2023-01-31')
+    line_panel(axes[1], 'gr_canliTP', 'Reel TP canlı kredi büyümesi, gruplar (%)', '2023-01-31', 'pct')
+    line_panel(axes[2], 'gr_mvTP', 'Reel TP mevduat büyümesi, gruplar (%)', '2023-01-31', 'pct', DEPG)
+    line_panel(axes[3], 'gr_akTP', 'Reel TP aktif büyümesi, gruplar (%)', '2023-01-31', 'pct')
+    legend_bottom(fig, [(GC[g], t) for g, t in GLEG])
+    pdf.savefig(fig); plt.close(fig)
+
+
+def pay_page(pdf):
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Büyüme | Pazar Payı Değişimi', f'Grupların sektör içindeki payının 12 aylık değişimi (puan); çubuk ucundaki rakam {DON} payı (%)')
+    P = pay_degisim(); gs = GROUPS[1:]
+    KISA = {'KB': 'Katılım', 'M': 'Mevduat', 'KA': 'Kamu', 'YO': 'Yerli Özel', 'YA': 'Yabancı', 'KY': 'Kalk.-Yat.'}
+    for ax, (col, ad) in zip(grid_axes(fig, [[1, 1, 1, 1], [1, 1, 1]], top=0.83, bottom=0.09), PAY_KOL):
+        y = np.arange(len(gs))[::-1]
+        vals = [P[g][col]['degisim'] if P[g][col] else np.nan for g in gs]
+        ax.barh(y, [0 if np.isnan(v) else v for v in vals], color=[GC[g] for g in gs], height=0.62)
+        for yi, g, v in zip(y, gs, vals):
+            if np.isnan(v):
+                ax.text(0, yi, ' —', va='center', fontsize=7.5, color='#888'); continue
+            ax.text(v + (0.05 if v >= 0 else -0.05), yi, f"{trp(v, 2).replace('%', '')}  (pay %{tr(P[g][col]['pay'], 1)})", va='center', ha='left' if v >= 0 else 'right', fontsize=6.5, color=METIN)
+        ax.set_yticks(y); ax.set_yticklabels([KISA[g] for g in gs], fontsize=7.5); ax.axvline(0, color='#666', lw=0.8)
+        m = max(abs(v) for v in vals if not np.isnan(v)) if any(not np.isnan(v) for v in vals) else 1
+        ax.set_xlim(-m * 2.6, m * 2.6); ax.set_title(ad, fontsize=10, color=METIN); style(ax); ax.grid(True, axis='x', ls='-', color='#E3E7EE', lw=0.7); ax.grid(False, axis='y')
+        ax.tick_params(labelsize=7)
+    pdf.savefig(fig); plt.close(fig)
+
+
+def hacim_marj_page(pdf):
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Kârlılık | Hacim–Marj Ayrıştırması', 'Net faiz gelirindeki (12 aylık) yıllık değişimin kaynağı: bilanço büyümesi (hacim) ve marj değişimi; önceki yılın net faiz gelirine oranla (%)')
+    ax = fig.add_axes([0.06, 0.13, 0.40, 0.64])
+    for i, g in enumerate(GROUPS):
+        h = hacim_marj(g)
+        if not h:
+            continue
+        pb = nb = 0
+        for v, c in [(h['hacim_pct'], LACI), (h['marj_pct'], KIRMIZI)]:
+            if v >= 0:
+                ax.bar(i, v, bottom=pb, color=c, width=0.55); pb += v
+            else:
+                ax.bar(i, v, bottom=nb, color=c, width=0.55); nb += v
+        ax.plot(i, h['toplam_pct'], marker='D', color='#222', ms=6, zorder=4)
+        ax.text(i, max(pb, h['toplam_pct']) + 2.5, trp(h['toplam_pct'], 0), ha='center', fontsize=8.5, fontweight='bold', color=METIN)
+    ax.set_xticks(range(len(GROUPS))); ax.set_xticklabels([GSHORT[g].replace(' ', '\n') for g in GROUPS], fontsize=7.5, color='#444')
+    ax.axhline(0, color='#666', lw=0.8); style(ax); ax.set_title(f'{DON}: gruplar (lacivert hacim, kırmızı marj, elmas toplam)', fontsize=10, color=METIN)
+    ax2 = fig.add_axes([0.54, 0.13, 0.42, 0.64])
+    ser = hacim_marj_seri('S', 24)
+    if ser:
+        xs = [t for t, _, _, _ in ser]; h_ = [a for _, a, _, _ in ser]; m_ = [b for _, _, b, _ in ser]; t_ = [c for _, _, _, c in ser]
+        ax2.bar(xs, h_, width=20, color=LACI, label='Hacim etkisi')
+        ax2.bar(xs, m_, width=20, bottom=[x if x > 0 and y > 0 or x < 0 and y < 0 else 0 for x, y in zip(h_, m_)], color=KIRMIZI, label='Marj etkisi')
+        ax2.plot(xs, t_, color='#222', lw=1.8, marker='o', ms=3, label='Net faiz geliri değişimi')
+        ax2.axhline(0, color='#666', lw=0.8); style(ax2); ax2.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 7])); ax2.xaxis.set_major_formatter(mdates.DateFormatter('%m.%y'))
+        ax2.set_title('Sektör: son 24 ay (%)', fontsize=10, color=METIN); ax2.legend(fontsize=8, frameon=False, loc='upper left')
+    pdf.savefig(fig); plt.close(fig)
+
+
+def kalite_page(pdf):
+    line_page(pdf, 'Kârlılık | Kârlılık Kalitesi', [dict(col='cekirdekAktif', title='Çekirdek kârlılık / ortalama aktif (%)', fmt='num', d=2, start='2023-07-31'),
+                                                     dict(col='oynakPay', title='Oynak gelir payı: (ticari + diğer) / brüt faaliyet kârı (%)', fmt='num', start='2023-07-31'),
+                                                     dict(col='riskMaliyeti', title='Risk maliyeti: karşılık gideri / ortalama canlı kredi (%)', fmt='num', d=2, start='2023-07-31'),
+                                                     dict(col='efVergi', title='Efektif vergi oranı (%)', fmt='num', start='2023-07-31')],
+              [[1, 1], [1, 1]], sub='Çekirdek kârlılık = net faiz + net komisyon − faaliyet gideri; 12 aylık yıllıklandırılmış')
+
+
+def rasyolar_page(pdf):
+    line_page(pdf, 'Kârlılık | Rasyolar', [dict(col='roa', title='Aktif kârlılığı (ROA)', yfmt='pct'), dict(col='roe', title='Özkaynak kârlılığı (ROE)'), dict(col='nim', title='Net faiz marjı'),
+                                           dict(col='giderGelir', title='Gider / gelir (%)', start='2023-01-31', fmt='num'), dict(col='opexAktif', title='Faaliyet gideri / aktif (%)', start='2023-07-31', fmt='num'),
+                                           dict(col='g_opex_12', title='Faaliyet gideri artışı, 12 aylık (%)', fmt='num')],
+              [[1, 1, 1], [1, 1, 1]], sub='12 aylık yıllıklandırılmış')
+
+
+def npl_olusum_page(pdf):
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Aktif Kalitesi | NPL Oluşumu ve Karşılıklar', 'NPL oluşum hızı = takipteki alacak bakiyesindeki aylık net artış / önceki ay canlı krediler, yıllıklandırılmış (%)')
+    axes = grid_axes(fig, [[1, 1], [1, 1]])
+    s = series('S', 'nplOlusum', '2024-07-31'); s3 = series('S', 'nplOlusum3', '2024-07-31')
+    axes[0].bar(s.index, s.values, width=20, color=LACI, alpha=0.85); axes[0].plot(s3.index, s3.values, color=KIRMIZI, lw=1.8)
+    axes[0].set_title('Sektör: aylık (çubuk) ve 3 aylık ortalama (çizgi), %', fontsize=10.5, color=METIN); style(axes[0]); ay_ekseni(axes[0]); axes[0].axhline(0, color='#666', lw=0.6)
+    ax = axes[1]; vals = [at(g).nplOlusum12 for g in GROUPS]
+    ax.bar(range(len(GROUPS)), vals, color=[GC[g] for g in GROUPS], width=0.6)
+    for i, v in enumerate(vals):
+        ax.text(i, v + 0.05, tr(v, 2), ha='center', fontsize=8, color=METIN)
+    ax.set_xticks(range(len(GROUPS))); ax.set_xticklabels([GSHORT[g].replace(' ', '\n') for g in GROUPS], fontsize=7, color='#444'); style(ax); ax.set_title('Son 12 ayın ortalama NPL oluşum hızı, gruplar (%)', fontsize=10.5, color=METIN)
+    line_panel(axes[2], 'ozelKarsOran', 'Özel karşılık oranı (%)', '2023-07-31', 'num', d=1)
+    line_panel(axes[3], 'nplMakas', 'NPL makası: tüketici − ticari/kurumsal (puan)', '2023-07-31', 'num', DEPG, d=2)
+    legend_bottom(fig, [(GC[g], t) for g, t in GLEG])
+    pdf.savefig(fig); plt.close(fig)
+
+
+def dolarizasyon_page(pdf):
+    line_page(pdf, 'Fonlama | Dolarizasyon ve Likidite', [dict(col='fonTPag', title='Toplanan fonlarda TP ağırlığı (%)', start='2023-01-31', groups=DEPG), dict(col='ypMevPay', title='YP mevduat payı, kıymetli maden dahil (%)', start='2023-01-31', groups=DEPG),
+                                                           dict(col='kmPay', title='Kıymetli maden hesaplarının payı (%)', start='2023-01-31', groups=DEPG, fmt='num', d=1), dict(col='g_mvYP_usd', title='YP mevduat büyümesi, USD (%)', yfmt='pct', groups=DEPG),
+                                                           dict(col='tlKrediMev', title='TL kredi / TL mevduat (%)', start='2023-01-31', groups=DEPG), dict(col='ypGap', title='Bilanço içi YP açığı: (YP kredi − YP fon) / aktif (%)', start='2023-01-31', fmt='num', d=1, groups=DEPG)],
+              [[1, 1, 1], [1, 1, 1]], sub='Mevduat kabul eden gruplar')
+
+
+def sermaye_page(pdf):
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Sermaye | Yeterlilik ve Tampon', 'Fazla sermaye = yasal özkaynak − %12 × risk ağırlıklı aktifler (BDDK hedef rasyosu); kapasite = aynı rasyoyla RAK\'ın büyüyebileceği oran')
+    ax = fig.add_axes([0.06, 0.50, 0.90, 0.29])
+    vals = [at(g).fazlaSermaye for g in GROUPS]
+    ax.bar(range(len(GROUPS)), vals, color=[GC[g] for g in GROUPS], width=0.6)
+    for i, g in enumerate(GROUPS):
+        a = at(g); ax.text(i, a.fazlaSermaye + max(vals) * 0.02, f"{tr(a.fazlaSermaye, 0)} mlr ₺\nkapasite %{tr(a.buyumeKapasite, 0)}", ha='center', fontsize=8, color=METIN)
+    ax.set_xticks(range(len(GROUPS))); ax.set_xticklabels([GSHORT[g] for g in GROUPS], fontsize=8.5, color='#444'); style(ax); ax.set_ylim(0, max(vals) * 1.3)
+    ax.set_title(f'{DON}: %12 hedef rasyoya göre fazla sermaye (milyar ₺) ve RAK büyüme kapasitesi', fontsize=10.5, color=METIN)
+    axes = [fig.add_axes([0.05, 0.11, 0.27, 0.29]), fig.add_axes([0.37, 0.11, 0.27, 0.29]), fig.add_axes([0.69, 0.11, 0.27, 0.29])]
+    for ax_, (col, t, fm) in zip(axes, [('syr', 'Standart SYR (%)', 'pct'), ('cekSyr', 'Çekirdek SYR (%)', 'pct'), ('rakYogunluk', 'RAK yoğunluğu: RAK / aktif (%)', 'num')]):
+        line_panel(ax_, col, t, '2024-01-31', fm)
+    legend_bottom(fig, [(GC[g], t) for g, t in GLEG], y=0.045)
+    pdf.savefig(fig); plt.close(fig)
+
+
+def kopru_page(pdf):
+    K = haftalik_kopru()
+    if not K:
+        return
+    baz = pd.Timestamp(K['baz']); son = pd.Timestamp(K['son'])
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Ek | Ay Sonrası Haftalık Köprü', f"BDDK haftalık bülteninden: {baz.strftime('%d.%m.%Y')} → {son.strftime('%d.%m.%Y')} ({K['hafta']} hafta) birikimli değişim (%); kaynak ekordion haftalık BDDK modülü")
+    gs = [g for g in ['S', 'KA', 'YO', 'YA', 'KB'] if g in K['gruplar']]
+    satirlar = [('Toplam krediler (TL + YP)', 'kredi'), ('Tüketici kredileri ve kredi kartları', 'tuketici'), ('Ticari ve diğer krediler', 'ticari'),
+                ('Toplam mevduat (TL karşılığı)', 'mevduat'), ('TL mevduat', 'mevduatTP'), ('YP mevduat (USD)', 'ypMevduatUsd')]
+    ax = fig.add_axes([0.04, 0.47, 0.92, 0.33]); ax.axis('off')
+    hdr = ['Kalem'] + [GSHORT[g] for g in gs]; cw = [0.34] + [0.66 / len(gs)] * len(gs); rh = 1 / (len(satirlar) + 1); x = 0
+    for j, h in enumerate(hdr):
+        ax.add_patch(Rectangle((x, 1 - rh), cw[j], rh, color=LACI, transform=ax.transAxes))
+        ax.text(x + cw[j] / 2, 1 - rh / 2, h, ha='center', va='center', color='white', fontsize=9, fontweight='bold', transform=ax.transAxes); x += cw[j]
+    for i, (lab, key) in enumerate(satirlar):
+        y = 1 - (i + 2) * rh; x = 0
+        for j in range(len(hdr)):
+            ax.add_patch(Rectangle((x, y), cw[j], rh, facecolor=ACIK if i % 2 else 'white', edgecolor='#D9DEE6', lw=0.5, transform=ax.transAxes))
+            if j == 0:
+                ax.text(x + 0.008, y + rh / 2, lab, ha='left', va='center', fontsize=9, color=METIN, transform=ax.transAxes)
+            else:
+                v = K['gruplar'][gs[j - 1]].get(key)
+                ax.text(x + cw[j] / 2, y + rh / 2, '—' if v is None else trp(v, 2), ha='center', va='center', fontsize=9, color=('#2E7D5B' if (v or 0) >= 0 else KIRMIZI), fontweight='bold' if gs[j - 1] == 'S' else 'normal', transform=ax.transAxes)
+            x += cw[j]
+    sr = K['seri']; xs = [pd.Timestamp(t) for t in sr['tarih']]
+    ax2 = fig.add_axes([0.06, 0.10, 0.40, 0.30]); ax2.plot(xs, sr['kredi'], color=LACI, lw=2, marker='o', ms=3); ax2.axhline(100, color='#999', lw=0.7, ls='--'); ax2.axvline(baz, color=KIRMIZI, lw=0.8, ls=':')
+    ax2.set_title('Sektör toplam krediler, ay sonu = 100', fontsize=10, color=METIN); style(ax2); ax2.xaxis.set_major_formatter(mdates.DateFormatter('%d.%m'))
+    ax3 = fig.add_axes([0.55, 0.10, 0.40, 0.30]); ax3.plot(xs, sr['mevduat'], color=KIRMIZI, lw=2, marker='o', ms=3); ax3.axhline(100, color='#999', lw=0.7, ls='--'); ax3.axvline(baz, color=KIRMIZI, lw=0.8, ls=':')
+    ax3.set_title('Sektör toplam mevduat, ay sonu = 100', fontsize=10, color=METIN); style(ax3); ax3.xaxis.set_major_formatter(mdates.DateFormatter('%d.%m'))
+    fig.text(0.04, 0.045, 'Haftalık bülten grupları: Sektör, Kamu, Yerli Özel, Yabancı, Katılım. Haftalık veri aylık bültenle tanım farkları içerir; yön ve büyüklük için kullanılır.', fontsize=8, color='#555')
+    pdf.savefig(fig); plt.close(fig)
+
+
 # ---------- kurulum ----------
 def build(path):
     SAYFA[0] = 0
     pdf = PdfPages(path)
     cover(pdf)
     gorunum_page(pdf)
-    table_page(pdf, 'Özet Tablo', 'Yüzde; büyümeler yıllık, kârlılık ve Op-Ex rasyoları 12 aylık yıllıklandırılmış',
-               [(lab, [at(g)[col] for g in GROUPS]) for lab, col in OZET_SATIRLAR],
-               note='Mevduat göstergeleri Kalkınma-Yatırım grubu için tanımsızdır.')
     karne_page(pdf)
+    table_page(pdf, 'Özet Göstergeler', 'Gruplar itibarıyla; büyümeler yıllık, kârlılık 12 aylık yıllıklandırılmış',
+               [(lab, None if col is None else [at(g)[col] for g in GROUPS], dec) for lab, col, dec in OZET_SATIRLAR],
+               note='Mevduat göstergeleri Kalkınma-Yatırım grubu için tanımsızdır. Faiz kalemleri katılım bankaları için kâr payını kapsar.')
+    # Büyüme ve ivme
+    buyume_page(pdf)
+    ivme_page(pdf)
+    segment_page(pdf)
+    reel_page(pdf)
+    pay_page(pdf)
+    # Bilanço ve kredi yapısı
+    area_page(pdf, 'Bilanço | Aktif Yapısı', 'Aktif kalemlerinin payı (%), son 25 ay; panel başlığı: toplam aktif ve yıllık büyüme', AKTIF)
+    area_page(pdf, 'Bilanço | Pasif Yapısı', 'Pasif kalemlerinin payı (%), son 25 ay', PASIF)
+    kaldirac_page(pdf)
+    area_page(pdf, 'Krediler | Canlı Kredi Yapısı', 'Canlı kredi bileşenlerinin payı (%), son 25 ay', CANLI)
+    area_page(pdf, 'Krediler | Tüketici Kredisi Yapısı', 'Tüketici kredisi bileşenlerinin payı (%), son 25 ay', TUK, groups=DEPG, totfmt=2)
+    line_page(pdf, 'Krediler | Tüketici Büyümesi', [dict(col='g_tukKK', title='Tüketici kredileri ve kredi kartları', start='2023-01-31', groups=DEPG), dict(col='g_konut', title='Konut', groups=DEPG), dict(col='g_tasit', title='Taşıt', groups=DEPG), dict(col='g_ihtiyac', title='İhtiyaç', groups=DEPG), dict(col='g_kk', title='Bireysel kredi kartları', groups=DEPG)], [[2, 1], [1, 1, 1]], sub='Yıllık büyüme (%)')
+    area_page(pdf, 'Krediler | Tüzel Kredi Yapısı', 'Tüzel kredi bileşenlerinin payı (%), son 25 ay', TUZEL)
+    line_page(pdf, 'Krediler | Tüzel Büyümesi', [dict(col='g_tuzel', title='Tüzel krediler', start='2023-01-31'), dict(col='g_ticKur', title='Ticari / kurumsal'), dict(col='g_kobi', title='KOBİ'), dict(col='g_fk', title='Finansal kiralama', groups=['S', 'KB', 'KY'])], [[1], [1, 1, 1]], sub='Yıllık büyüme (%)')
     # Kârlılık
     netkar_page(pdf)
+    hacim_marj_page(pdf)
+    kalite_page(pdf)
+    marj_page(pdf)
+    roa_comp_page(pdf)
+    rasyolar_page(pdf)
+    # Aktif kalitesi
+    line_page(pdf, 'Aktif Kalitesi | Takipteki Alacaklar', [dict(col='npl', title='NPL oranı', start='2023-01-31', fmt='num', d=2), dict(col='nplTuk', title='Tüketici NPL', start='2023-01-31', fmt='num', d=2, groups=DEPG), dict(col='nplKobi', title='KOBİ NPL', start='2023-01-31', fmt='num', d=2), dict(col='nplTic', title='Ticari / kurumsal NPL', start='2023-01-31', fmt='num', d=2)], [[1, 1], [1, 1]], sub='Yüzde')
+    npl_olusum_page(pdf)
+    # Fonlama
+    area_page(pdf, 'Fonlama | Toplanan Fon Yapısı', 'Toplanan fon bileşenlerinin payı (%), son 25 ay', FON, groups=DEPG)
+    dolarizasyon_page(pdf)
+    share_page(pdf, 'Fonlama | Grup Payları', [('Toplam vadesiz', 'vadesiz', 1), ('Toplam vadeli', 'vadeli', 1), ('TP mevduat', 'mvTP', 1), ('YP mevduat', 'mvYP', 1)])
+    # Sermaye
+    sermaye_page(pdf)
+    # Ekler
+    kopru_page(pdf)
     rows = []
     for lab, col in GELIR_SATIRLAR:
         sg = -1 if col in GIDER_KALEMLERI else 1
         rows.append((lab, [(at(g)['gy_' + col], at(g)[col] * sg) for g in GROUPS]))
-    table_page(pdf, 'Kârlılık | Gelir Tablosu', 'Milyon ₺, yıl içi kümülatif; renkli rakamlar yıllık yüzde değişim', rows)
-    line_page(pdf, 'Kârlılık | Rasyolar', [dict(col='roa', title='Aktif kârlılığı (ROA)', yfmt='pct'), dict(col='roe', title='Özkaynak kârlılığı (ROE)'), dict(col='nim', title='Net faiz / kâr payı marjı')], [[1, 1, 1]], sub='12 aylık yıllıklandırılmış')
-    roa_comp_page(pdf)
-    line_page(pdf, 'Kârlılık | ROA Bileşenleri', [dict(col='roaNetFaiz', title='Net faiz / kâr payı geliri (%)', fmt='num'), dict(col='roaUcret', title='Net ücret ve komisyon (%)', fmt='num'), dict(col='roaTicari', title='Ticari kâr / zarar (%)', fmt='num'), dict(col='roaDiger', title='Diğer faaliyet gelirleri (%)', fmt='num'), dict(col='roaOpexN', title='Faaliyet giderleri (%)', fmt='num'), dict(col='roaKarsN', title='Karşılık giderleri (%)', fmt='num'), dict(col='roaVergiN', title='Vergi (%)', fmt='num')], [[1, 1, 1, 1], [1, 1, 1]], sub='12 aylık gelir tablosu kalemi / 13 aylık ortalama aktifler')
-    marj_page(pdf)
-    line_page(pdf, 'Kârlılık | Gelir Rasyoları', [dict(col='netFaizBrut', title='Net faiz geliri / brüt faaliyet kârı'), dict(col='netFaizOpex', title='Net faiz geliri / Op-Ex'), dict(col='ucrGelAk', title='Ücret, komisyon ve hizmet gelirleri / aktifler'), dict(col='ucrBrut', title='Ücret ve komisyon / brüt faaliyet kârı'), dict(col='ucrOpex', title='Ücret ve komisyon / Op-Ex'), dict(col='giderGelir', title='Gider / gelir oranı', start='2023-01-31', fmt='num')], [[1, 1, 1], [1, 1, 1]], sub='12 aylık yıllıklandırılmış')
-    line_page(pdf, 'Kârlılık | Faaliyet Giderleri', [dict(col='opexAktif', title='Op-Ex / aktifler', start='2023-07-31', fmt='num'), dict(col='g_personel_12', title='Personel giderleri artışı (12 aylık, %)', fmt='num'), dict(col='g_digIsl_12', title='Diğer işletme giderleri artışı (12 aylık, %)', fmt='num'), dict(col='g_opex_12', title='Toplam Op-Ex artışı (12 aylık, %)', fmt='num')], [[1, 1], [1, 1]], sub='12 aylık yıllıklandırılmış')
-    # Bilanço
-    area_page(pdf, 'Bilanço | Aktif Yapısı', 'Aktif kalemlerinin payı (%), son 25 ay; panel başlığı: toplam aktif ve yıllık büyüme', AKTIF)
-    line_page(pdf, 'Bilanço | Aktif Büyümesi', [dict(col='aktifTPag', title='Aktif TP ağırlığı', start='2023-01-31'), dict(col='aktifPay', title='Aktif pazar payı', start='2023-07-31', yfmt='pct', groups=['M', 'KA', 'YO', 'YA', 'KB', 'KY']), dict(col='g_akTP', title='TP aktif büyümesi'), dict(col='g_akYP_usd', title='YP aktif büyümesi (USD)', yfmt='pct'), dict(col='g_aktif', title='Toplam aktif büyümesi')], [[1, 1], [1, 1, 1]])
-    area_page(pdf, 'Bilanço | Pasif Yapısı', 'Pasif kalemlerinin payı (%), son 25 ay', PASIF)
-    line_page(pdf, 'Bilanço | Pasif Büyümesi', [dict(col='pasifTPag', title='Pasif TP ağırlığı', start='2023-01-31'), dict(col='g_pasTP', title='TP pasif büyümesi'), dict(col='g_pasYP_usd', title='YP pasif büyümesi (USD)', yfmt='pct')], [[1, 1, 1]])
-    kaldirac_page(pdf)
-    # Krediler
-    area_page(pdf, 'Krediler | Canlı Kredi Yapısı', 'Canlı kredi bileşenlerinin payı (%), son 25 ay', CANLI)
-    momentum_page(pdf)
-    line_page(pdf, 'Krediler | Tüketici Büyümesi', [dict(col='g_tukKK', title='Tüketici kredileri ve kredi kartları', start='2023-01-31', groups=DEPG), dict(col='g_konut', title='Konut', groups=DEPG), dict(col='g_tasit', title='Taşıt', groups=DEPG), dict(col='g_ihtiyac', title='İhtiyaç', groups=DEPG), dict(col='g_kk', title='Bireysel kredi kartları', groups=DEPG)], [[2, 1], [1, 1, 1]], sub='Yıllık büyüme (%)')
-    area_page(pdf, 'Krediler | Tüketici Kredisi Yapısı', 'Tüketici kredisi bileşenlerinin payı (%), son 25 ay', TUK, groups=DEPG, totfmt=2)
-    share_page(pdf, 'Krediler | Tüketici Pazar Payı', [('Tüketici + kredi kartı', 'tukKK', 2), ('Konut', 'konut', 2), ('Taşıt', 'tasit', 2), ('İhtiyaç', 'ihtiyac', 2), ('Bireysel kredi kartları', 'kk', 2)])
-    area_page(pdf, 'Krediler | Tüzel Kredi Yapısı', 'Tüzel kredi bileşenlerinin payı (%), son 25 ay', TUZEL)
-    share_page(pdf, 'Krediler | Tüzel Pazar Payı', [('Tüzel krediler', 'tuzel', 1), ('Ticari / kurumsal', 'ticKur', 1), ('KOBİ', 'kobi', 1), ('Finansal kiralama', 'fk', 1)], groups=('KA', 'YO', 'YA', 'KB', 'KY'))
-    line_page(pdf, 'Krediler | Tüzel Büyümesi', [dict(col='g_tuzel', title='Tüzel krediler', start='2023-01-31'), dict(col='g_ticKur', title='Ticari / kurumsal'), dict(col='g_kobi', title='KOBİ'), dict(col='g_fk', title='Finansal kiralama', groups=['S', 'KB', 'KY'])], [[1], [1, 1, 1]], sub='Yıllık büyüme (%)')
-    # Aktif kalitesi
-    line_page(pdf, 'Aktif Kalitesi | Takipteki Alacaklar', [dict(col='npl', title='NPL oranı', start='2023-01-31', fmt='num', d=2), dict(col='ozelKarsOran', title='Özel karşılık oranı', start='2023-07-31', fmt='num', d=1), dict(col='nplTuk', title='Tüketici NPL', start='2023-01-31', fmt='num', d=2, yr_only=True, groups=DEPG), dict(col='nplKobi', title='KOBİ NPL', start='2022-07-31', fmt='num', d=2, yr_only=True), dict(col='nplTic', title='Ticari / kurumsal NPL', start='2022-07-31', fmt='num', d=2, yr_only=True)], [[1, 1], [1, 1, 1]], sub='Yüzde')
-    # Menkul
-    area_page(pdf, 'Menkul Kıymetler | Portföy Yapısı', 'Menkul kıymet portföyünün sınıflandırma ve para birimine göre payı (%), son 25 ay', MENKUL)
-    line_page(pdf, 'Menkul Kıymetler | Büyüme ve Pay', [dict(col='g_mkGrTP', title='TP menkul kıymet büyümesi'), dict(col='g_mkGrYP', title='YP menkul kıymet büyümesi (TL)'), dict(col='g_mkGr', title='Toplam menkul kıymet büyümesi'), dict(col='mkTPak', title='TP menkul / TP aktif'), dict(col='mkYPak', title='YP menkul / YP aktif'), dict(col='mkAk', title='Menkul / toplam aktif')], [[1, 1, 1], [1, 1, 1]], sub='Büyümeler HTM hariç, reeskont dahil; yüzde')
-    # Fonlama
-    area_page(pdf, 'Fonlama | Toplanan Fon Yapısı', 'Toplanan fon bileşenlerinin payı (%), son 25 ay', FON, groups=DEPG)
-    share_page(pdf, 'Fonlama | Pazar Payı', [('Toplam vadesiz', 'vadesiz', 1), ('Toplam vadeli', 'vadeli', 1), ('TP vadesiz', 'vdsTP', 1), ('TP vadeli', 'vadeliTP', 1), ('YP vadesiz', 'vdsYP', 1), ('YP vadeli', 'vadeliYP', 1)])
-    line_page(pdf, 'Fonlama | Büyüme', [dict(col='g_vadeliTP', title='TP vadeli', groups=DEPG), dict(col='g_vadeliYP', title='YP vadeli (TL)', groups=DEPG), dict(col='g_vadeli', title='Toplam vadeli', groups=DEPG), dict(col='g_vdsTP', title='TP vadesiz', groups=DEPG), dict(col='g_vdsYP', title='YP vadesiz (TL)', groups=DEPG), dict(col='g_vadesiz', title='Toplam vadesiz', groups=DEPG)], [[1, 1, 1], [1, 1, 1]], sub='Yıllık büyüme (%)')
-    line_page(pdf, 'Fonlama | Yükümlülük Payları', [dict(col='tlVdlYuk', title='TP vadeli fonlar / toplam yükümlülükler', yfmt='pct', groups=DEPG), dict(col='ypVdlYuk', title='YP vadeli fonlar / toplam yükümlülükler', yfmt='pct', groups=DEPG), dict(col='vdlYuk', title='Toplam vadeli / toplam yükümlülükler', yfmt='pct', groups=DEPG), dict(col='tlVdsYuk', title='TP vadesiz / toplam yükümlülükler', yfmt='pct', groups=DEPG), dict(col='ypVdsYuk', title='YP vadesiz / toplam yükümlülükler', yfmt='pct', groups=DEPG), dict(col='vdsYuk', title='Toplam vadesiz / toplam yükümlülükler', yfmt='pct', groups=DEPG)], [[1, 1, 1], [1, 1, 1]])
-    line_page(pdf, 'Bilanço Rasyoları', [dict(col='tlKrediMev', title='TL kredi / TL mevduat', groups=DEPG), dict(col='ypKrediMev', title='YP kredi / YP mevduat', groups=DEPG), dict(col='krediMev', title='Toplam kredi / mevduat', groups=DEPG), dict(col='tlMkMev', title='TL menkul kıymet / TL mevduat', groups=DEPG), dict(col='ypMkMev', title='YP menkul kıymet / YP mevduat', groups=DEPG), dict(col='mkMev', title='Toplam menkul kıymet / mevduat', groups=DEPG)], [[1, 1, 1], [1, 1, 1]], sub='Yüzde; mevduat = toplanan fonlar (katılım fonu dahil)')
-    syr_page(pdf)
+    table_page(pdf, 'Ek | Gelir Tablosu', 'Milyon ₺, yıl içi kümülatif; renkli rakamlar yıllık yüzde değişim', rows)
+    area_page(pdf, 'Ek | Menkul Kıymet Portföyü', 'Menkul kıymet portföyünün sınıflandırma ve para birimine göre payı (%), son 25 ay', MENKUL)
     sube_page(pdf)
     notes_page(pdf)
     pdf.close()

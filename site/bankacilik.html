@@ -31,6 +31,8 @@
     table.karne td.lbl { min-width: 230px; }
     table.karne { min-width: 760px; }
     table.karne td.isi { font-weight: 600; }
+    table.karne td.up { color: #2E7D5B; font-weight: 600; }
+    table.karne td.down { color: #D40031; font-weight: 600; }
     .arsiv li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
     .arsiv li:last-child { border-bottom: none; }
     .arsiv a { margin-right: 10px; }
@@ -77,31 +79,78 @@
       <div id="chBuyume"></div>
     </section>
 
+    <section class="chart-card" id="secIvme">
+      <h3>Kredi İvme Haritası</h3>
+      <p class="cap">Yatay eksen 12 aylık, dikey eksen 3 aylık yıllıklandırılmış TP canlı kredi büyümesi (%); köşegenin üstündeki gruplar hızlanıyor. Sağda sektör segmentleri.</p>
+      <div id="chIvme"></div>
+      <div id="chSegment"></div>
+    </section>
+
+    <section class="chart-card" id="secReel">
+      <h3>Reel Büyüme</h3>
+      <p class="cap" id="capReel">TÜFE yıllık enflasyonla arındırılmış TP canlı kredi büyümesi (%) · tüm gruplar; kesikli çizgi: sektör nominal büyüme</p>
+      <div id="chReel"></div>
+    </section>
+
+    <section class="chart-card" id="secPay">
+      <h3>Pazar Payı Değişimi</h3>
+      <p class="cap">Grupların sektör içindeki payının 12 aylık değişimi (puan) · kategori seçin</p>
+      <div class="chips" id="payChips"></div>
+      <div id="chPay"></div>
+    </section>
+
     <section class="chart-card" id="secNetKar">
       <h3>Aylık Net Kâr — Sektör</h3>
       <p class="cap">Milyar ₺ · yıl içi kümülatiften türetilmiş aylık net kâr (Ocak = o ayın yıl içi değeri); çizgi: 3 aylık ortalama</p>
       <div id="chNetKar"></div>
     </section>
 
+    <section class="chart-card" id="secHacimMarj">
+      <h3>Hacim–Marj Ayrıştırması</h3>
+      <p class="cap">Net faiz gelirindeki yıllık değişimin kaynağı: bilanço büyümesi (hacim) ve marj değişimi; önceki yılın net faiz gelirine oranla (%). Solda gruplar, sağda sektörün son 24 ayı.</p>
+      <div id="chHacim"></div>
+      <div id="chHacimSeri"></div>
+    </section>
+
     <section class="chart-card" id="secKalite">
-      <h3>Aktif Kalitesi ve Sermaye</h3>
-      <p class="cap">NPL oranı ve standart SYR (%) · tüm gruplar</p>
+      <h3>Kârlılık Kalitesi</h3>
+      <p class="cap">Çekirdek kârlılık (net faiz + net komisyon − faaliyet gideri) / ortalama aktif ve risk maliyeti (karşılık / ortalama canlı kredi), % · tüm gruplar</p>
+      <div id="chCekirdek"></div>
+      <div id="chRisk"></div>
+    </section>
+
+    <section class="chart-card" id="secNpl">
+      <h3>Aktif Kalitesi — NPL ve Oluşum Hızı</h3>
+      <p class="cap">NPL oranı (%) ve NPL oluşum hızı (takipteki alacak bakiyesindeki aylık net artış / canlı krediler, yıllıklandırılmış %; çubuk aylık, çizgi 3 aylık ortalama)</p>
       <div id="chNpl"></div>
+      <div id="chNplOlusum"></div>
+    </section>
+
+    <section class="chart-card" id="secSermaye">
+      <h3>Sermaye Tamponu</h3>
+      <p class="cap">%12 hedef rasyoya göre fazla sermaye (milyar ₺) ve risk ağırlıklı aktiflerin bu rasyoyu koruyarak büyüyebileceği oran; altta standart SYR serisi</p>
+      <div id="chSermaye"></div>
       <div id="chSyr"></div>
     </section>
 
     <section class="chart-card" id="secKarlilik">
       <h3>Kârlılık</h3>
-      <p class="cap">ROE ve net faiz / kâr payı marjı (%) · 12 aylık yıllıklandırılmış · tüm gruplar</p>
+      <p class="cap">ROE ve net faiz marjı (%) · 12 aylık yıllıklandırılmış · tüm gruplar</p>
       <div id="chRoe"></div>
       <div id="chNim"></div>
     </section>
 
     <section class="chart-card" id="secFon">
-      <h3>Fonlama</h3>
-      <p class="cap">Toplanan fonlarda TP ağırlığı ve TL kredi / TL mevduat oranı (%) · mevduat kabul eden gruplar</p>
+      <h3>Fonlama ve Dolarizasyon</h3>
+      <p class="cap">Toplanan fonlarda TP ağırlığı ve YP mevduat büyümesi (USD, yıllık %) · mevduat kabul eden gruplar</p>
       <div id="chTPag"></div>
-      <div id="chKrediMev"></div>
+      <div id="chYpMev"></div>
+    </section>
+
+    <section class="chart-card" id="secKopru" style="display:none">
+      <h3 id="h3Kopru">Ay Sonrası Haftalık Köprü</h3>
+      <p class="cap" id="capKopru"></p>
+      <div class="table-wrap"><table class="heat karne" id="tblKopru"></table></div>
     </section>
 
     <section class="chart-card">
@@ -144,7 +193,9 @@
         ["Aylık Net Kâr", trNum(S.netKar_m, 1) + " milyar ₺", "önceki ay " + trNum(S.netKar_m_onceki, 1) + " · yıl içi " + trNum(S.netKar, 0), dcls(d1(S.netKar_m, S.netKar_m_onceki))],
         ["NPL Oranı", trNum(S.npl, 2) + "%", dtx(d1(S.npl, S.npl_onceki), 2, "aylık"), d1(S.npl, S.npl_onceki) > 0 ? "down" : "up"],
         ["Standart SYR", trNum(S.syr, 1) + "%", dtx(d1(S.syr, S.syr_onceki), 1, "aylık"), dcls(d1(S.syr, S.syr_onceki))],
-        ["ROE / NIM", trNum(S.roe, 1) + "% / " + trNum(S.nim, 2) + "%", "12 aylık yıllıklandırılmış", "flat"],
+        ["ROE / NIM", trNum(S.roe, 1) + "% / " + trNum(S.nim, 2) + "%", "çekirdek kârlılık / aktif " + trNum(S.cekirdekAktif, 2) + "%", "flat"],
+        ["Reel TP Kredi Büyümesi", trNum(S.gr_canliTP, 1) + "%", "TÜFE arındırılmış · NPL oluşum hızı " + trNum(S.nplOlusum3, 2) + "%", dcls(S.gr_canliTP)],
+        ["Fazla Sermaye", trNum(S.fazlaSermaye, 0) + " milyar ₺", "%12 hedef rasyoya göre", "flat"],
       ]);
 
       // Ayın görünümü
@@ -224,7 +275,85 @@
       basit("chRoe", "roe", KOD, 1);
       basit("chNim", "nim", KOD, 2);
       basit("chTPag", "fonTPag", D.mevduat_gruplari, 1);
-      basit("chKrediMev", "tlKrediMev", D.mevduat_gruplari, 1);
+      basit("chYpMev", "g_mvYP_usd", D.mevduat_gruplari, 1);
+      basit("chCekirdek", "cekirdekAktif", KOD, 2);
+      basit("chRisk", "riskMaliyeti", KOD, 2);
+
+      const A = D.analiz || {};
+      // İvme haritası (saçılım) + segmentler
+      if (A.ivme) {
+        const pts = KOD.filter(k => A.ivme.gruplar[k] && A.ivme.gruplar[k].g12 !== null);
+        const xs = pts.map(k => A.ivme.gruplar[k].g12), ys = pts.map(k => A.ivme.gruplar[k].g3);
+        const lo = Math.min(...xs, ...ys) - 6, hi = Math.max(...xs, ...ys) + 6;
+        draw("chIvme", [
+          { type: "scatter", mode: "lines", x: [lo, hi], y: [lo, hi], line: { color: C.ost, dash: "dash", width: 1 }, hoverinfo: "skip", showlegend: false },
+          { type: "scatter", mode: "markers+text", x: xs, y: ys, text: pts.map(k => KISA[k]), textposition: "top right",
+            marker: { size: pts.map(k => k === "S" ? 16 : 12), color: pts.map(k => RENK[k]) }, textfont: { size: 11 },
+            hovertemplate: "%{text}<br>12 aylık %{x:.1f}% · 3 aylık yıllık. %{y:.1f}%<extra></extra>", showlegend: false },
+        ], { height: 400, xaxis: { title: { text: "12 aylık büyüme (%)" }, range: [lo, hi] }, yaxis: { title: { text: "3 aylık yıllıklandırılmış (%)" }, range: [lo, hi] },
+             annotations: [{ x: hi - 1, y: lo + 2, text: "yavaşlıyor", showarrow: false, font: { color: C.ost, size: 11 }, xanchor: "right" },
+                           { x: lo + 1, y: hi - 2, text: "hızlanıyor", showarrow: false, font: { color: C.ost, size: 11 }, xanchor: "left" }] });
+        const seg = A.ivme.segmentler;
+        draw("chSegment", [
+          { type: "bar", orientation: "h", y: seg.map(s => s.ad), x: seg.map(s => s.g12), name: "12 aylık", marker: { color: C.ost }, hovertemplate: "%{y}: %{x:.1f}%<extra>12 aylık</extra>" },
+          { type: "bar", orientation: "h", y: seg.map(s => s.ad), x: seg.map(s => s.g3), name: "3 aylık yıllıklandırılmış", marker: { color: C.hisse }, hovertemplate: "%{y}: %{x:.1f}%<extra>3 aylık</extra>" },
+        ], { height: 340, barmode: "group", margin: { l: 170, r: 30, t: 42, b: 40 }, yaxis: { autorange: "reversed" }, xaxis: { ticksuffix: "%" } });
+      }
+      // Reel büyüme
+      cokSerili("chReel", serileri("gr_canliTP", KOD).concat([[D.seri.S.g_canliTP, "Sektör nominal", C.ost, 1.4, { line: { dash: "dot", color: C.ost, width: 1.4 } }]]),
+        T, 99999, 360, false, { fmt: v => "%" + trNum(v, 1), hoverBirim: "%{y:.1f}%" });
+      if (A.tufe_son) document.getElementById("capReel").textContent += " · TÜFE serisi " + A.tufe_son + " dahil";
+      // Pazar payı değişimi
+      if (A.pay) {
+        const pEl = document.getElementById("payChips"); let payKol = A.pay.kategoriler[0].kol;
+        pEl.innerHTML = A.pay.kategoriler.map((k, i) => '<span class="chip' + (i === 0 ? " active" : "") + '" data-v="' + k.kol + '">' + esc(k.ad) + "</span>").join("");
+        const cizPay = () => {
+          const gs = KOD.filter(k => k !== "S" && A.pay.gruplar[k] && A.pay.gruplar[k][payKol]);
+          draw("chPay", [{ type: "bar", orientation: "h", y: gs.map(k => KISA[k]), x: gs.map(k => A.pay.gruplar[k][payKol].degisim),
+            marker: { color: gs.map(k => RENK[k]) }, customdata: gs.map(k => A.pay.gruplar[k][payKol].pay),
+            text: gs.map(k => trNum(A.pay.gruplar[k][payKol].degisim, 2, true) + " p · pay %" + trNum(A.pay.gruplar[k][payKol].pay, 1)), textposition: "outside",
+            hovertemplate: "%{y}: %{x:+.2f} puan · pay %{customdata:.1f}%<extra></extra>", showlegend: false }],
+            { height: 330, margin: { l: 150, r: 150, t: 30, b: 40 }, yaxis: { autorange: "reversed" }, xaxis: { title: { text: "puan" }, zeroline: true } });
+        };
+        pEl.querySelectorAll(".chip").forEach(c => c.onclick = () => { payKol = c.dataset.v; pEl.querySelectorAll(".chip").forEach(x => x.classList.toggle("active", x === c)); cizPay(); });
+        cizPay();
+      }
+      // Hacim–marj
+      if (A.hacim_marj) {
+        const gs = KOD.filter(k => A.hacim_marj.gruplar[k]);
+        draw("chHacim", [
+          { type: "bar", x: gs.map(k => KISA[k]), y: gs.map(k => A.hacim_marj.gruplar[k].hacim_pct), name: "Hacim etkisi", marker: { color: C.toplam }, hovertemplate: "%{x}: %{y:.1f} p<extra>hacim</extra>" },
+          { type: "bar", x: gs.map(k => KISA[k]), y: gs.map(k => A.hacim_marj.gruplar[k].marj_pct), name: "Marj etkisi", marker: { color: C.hisse }, hovertemplate: "%{x}: %{y:.1f} p<extra>marj</extra>" },
+          { type: "scatter", mode: "markers", x: gs.map(k => KISA[k]), y: gs.map(k => A.hacim_marj.gruplar[k].toplam_pct), name: "Net faiz geliri değişimi", marker: { color: "#222", symbol: "diamond", size: 10 }, hovertemplate: "%{x}: %{y:.1f}%<extra>toplam</extra>" },
+        ], { height: 340, barmode: "relative", yaxis: { ticksuffix: "%" } });
+        const sr = A.hacim_marj.seri;
+        draw("chHacimSeri", [
+          { type: "bar", x: sr.map(r => r.tarih + "-01"), y: sr.map(r => r.hacim), name: "Hacim", marker: { color: C.toplam } },
+          { type: "bar", x: sr.map(r => r.tarih + "-01"), y: sr.map(r => r.marj), name: "Marj", marker: { color: C.hisse } },
+          { type: "scatter", mode: "lines+markers", x: sr.map(r => r.tarih + "-01"), y: sr.map(r => r.toplam), name: "Toplam", line: { color: "#222", width: 2 }, marker: { size: 4 } },
+        ], { height: 320, barmode: "relative", yaxis: { ticksuffix: "%" } });
+      }
+      // NPL oluşum hızı (sektör)
+      draw("chNplOlusum", [
+        { type: "bar", x: T, y: D.seri.S.nplOlusum, name: "Aylık (yıllıklandırılmış)", marker: { color: C.toplam }, hovertemplate: "%{x|%m.%Y}<br>%{y:.2f}%<extra></extra>" },
+        { type: "scatter", mode: "lines", x: T, y: D.seri.S.nplOlusum3, name: "3 aylık ortalama", line: { color: C.hisse, width: 2 }, hovertemplate: "%{x|%m.%Y}<br>%{y:.2f}%<extra>3 aylık</extra>" },
+      ], { height: 320, yaxis: { ticksuffix: "%" } });
+      // Sermaye tamponu
+      if (A.sermaye) {
+        draw("chSermaye", [{ type: "bar", x: KOD.map(k => KISA[k]), y: KOD.map(k => A.sermaye[k].fazla), marker: { color: KOD.map(k => RENK[k]) },
+          text: KOD.map(k => trNum(A.sermaye[k].fazla, 0) + " mlr · kapasite %" + trNum(A.sermaye[k].kapasite, 0)), textposition: "outside",
+          hovertemplate: "%{x}<br>fazla sermaye %{y:,.0f} milyar ₺<extra></extra>", showlegend: false }],
+          { height: 320, yaxis: { title: { text: "milyar ₺" } }, margin: { t: 40 } });
+      }
+      // Haftalık köprü
+      if (A.kopru && A.kopru.gruplar) {
+        const K = A.kopru; const gs = Object.keys(K.gruplar);
+        document.getElementById("secKopru").style.display = "";
+        document.getElementById("capKopru").textContent = "BDDK haftalık bülteninden ay sonu (" + K.baz.slice(8, 10) + "." + K.baz.slice(5, 7) + ") sonrası " + K.hafta + " haftada birikimli değişim (%), son hafta " + K.son.slice(8, 10) + "." + K.son.slice(5, 7) + " · kaynak: sitedeki haftalık BDDK modülü";
+        const satir = [["kredi", "Toplam krediler (TL + YP)"], ["tuketici", "Tüketici kredileri ve kredi kartları"], ["ticari", "Ticari ve diğer krediler"], ["mevduat", "Toplam mevduat (TL karşılığı)"], ["mevduatTP", "TL mevduat"], ["ypMevduatUsd", "YP mevduat (USD)"]];
+        document.getElementById("tblKopru").innerHTML = "<tr><th>Kalem</th>" + gs.map(k => "<th>" + esc(KISA[k] || k) + "</th>").join("") + "</tr>" +
+          satir.map(([key, ad]) => '<tr><td class="lbl">' + ad + "</td>" + gs.map(k => { const v = K.gruplar[k][key]; return '<td class="num' + (v === null || v === undefined ? " bos" : (v >= 0 ? " up" : " down")) + '">' + (v === null || v === undefined ? "—" : trNum(v, 2, true) + "%") + "</td>"; }).join("") + "</tr>").join("");
+      }
 
       document.getElementById("arsiv").innerHTML = (D.arsiv || []).map(r =>
         "<li><b>" + esc(r.ad) + "</b> · <a href=\"" + esc(r.pdf) + "\" target=\"_blank\">PDF (" + r.boyut_kb + " KB)</a>" +

@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 HERE = Path(__file__).resolve().parent; sys.path.insert(0, str(HERE))
 from calc import D, LAST, GROUPS, DEPG, GSHORT, GNAME, at  # noqa: E402
+from analiz import hacim_marj, hacim_marj_seri, pay_degisim, haftalik_kopru, SEGMENTLER, PAY_KOL, ENF_SON  # noqa: E402
 
 BASE = HERE.parent
 OUT = BASE / 'site' / 'data' / 'bankacilik.json'
@@ -24,14 +25,19 @@ SERILER = {
     'syr': 'Standart SYR (%)', 'cekSyr': 'Çekirdek SYR (%)', 'roa': 'ROA (%)', 'roe': 'ROE (%)', 'nim': 'Net faiz marjı (%)', 'giderGelir': 'Gider / gelir (%)',
     'krediGetiri': 'Kredi getirisi (%)', 'fonMaliyet': 'Fon maliyeti (%)', 'kaldirac': 'Kaldıraç (x)', 'netKar_m': 'Aylık net kâr (milyon ₺)', 'aktifPay': 'Aktif pazar payı (%)',
     'tlKrediMev': 'TL kredi / mevduat (%)', 'krediMev': 'Kredi / mevduat (%)',
+    'g3_tukKK': 'Tüketici + KK, 3 aylık yıllıklandırılmış (%)', 'g3_kobi': 'KOBİ, 3 aylık yıllıklandırılmış (%)', 'g3_ticKur': 'Ticari/kurumsal, 3 aylık yıllıklandırılmış (%)',
+    'gr_canliTP': 'Reel TP canlı kredi büyümesi (%)', 'gr_mvTP': 'Reel TP mevduat büyümesi (%)', 'gr_akTP': 'Reel TP aktif büyümesi (%)', 'tufe': 'TÜFE yıllık (%)',
+    'cekirdekAktif': 'Çekirdek kârlılık / aktif (%)', 'oynakPay': 'Oynak gelir payı (%)', 'riskMaliyeti': 'Risk maliyeti (%)', 'efVergi': 'Efektif vergi oranı (%)',
+    'nplOlusum': 'NPL oluşum hızı, aylık yıllıklandırılmış (%)', 'nplOlusum3': 'NPL oluşum hızı, 3 aylık ortalama (%)', 'nplMakas': 'NPL makası tüketici − ticari (puan)',
+    'fazlaSermaye': 'Fazla sermaye, %12 hedefe göre (milyar ₺)', 'rakYogunluk': 'RAK / aktif (%)', 'buyumeKapasite': 'RAK büyüme kapasitesi (%)',
+    'kmPay': 'Kıymetli maden payı (%)', 'ypMevPay': 'YP mevduat payı (%)', 'ypGap': 'YP açığı / aktif (%)',
 }
-KARNE = [('Aktif büyümesi', 'g_aktif', 1, 1), ('Aktif TP ağırlığı', 'aktifTPag', 1, 0), ('TP canlı kredi büyümesi', 'g_canliTP', 1, 1),
-         ('YP canlı kredi büyümesi (USD)', 'g_canliYP_usd', 1, 1), ('Tüketici kredileri / canlı krediler', 'tukCanli', 1, 0),
-         ('NPL oranı', 'npl', 2, -1), ('Özel karşılık oranı', 'ozelKarsOran', 1, 1), ('TP toplanan fon büyümesi', 'g_mvTP', 1, 1),
-         ('YP toplanan fon büyümesi (USD)', 'g_mvYP_usd', 1, 1), ('Toplanan fon TP ağırlığı', 'fonTPag', 1, 0),
-         ('Standart SYR', 'syr', 1, 1), ('Çekirdek SYR', 'cekSyr', 1, 1), ('ROA', 'roa', 1, 1), ('ROE', 'roe', 1, 1), ('Net faiz marjı', 'nim', 1, 1),
-         ('Brüt faaliyet kârı artışı', 'gy_brutKar', 1, 1), ('Net kâr artışı', 'gy_netKar', 1, 1), ('Gider / gelir oranı', 'giderGelir', 1, -1),
-         ('Op-Ex / aktifler', 'opexAktif', 1, -1), ('Kaldıraç (x)', 'kaldirac', 1, -1)]
+KARNE = [('TP canlı kredi büyümesi, 12 aylık (%)', 'g_canliTP', 1, 1), ('TP canlı kredi, 3 aylık yıllıklandırılmış (%)', 'g3_canliTP', 1, 1),
+         ('Reel TP canlı kredi büyümesi (%)', 'gr_canliTP', 1, 1), ('TP mevduat büyümesi (%)', 'g_mvTP', 1, 1), ('YP mevduat büyümesi, USD (%)', 'g_mvYP_usd', 1, 1),
+         ('NPL oranı (%)', 'npl', 2, -1), ('NPL oluşum hızı, 3 aylık (%)', 'nplOlusum3', 2, -1), ('Özel karşılık oranı (%)', 'ozelKarsOran', 1, 1),
+         ('Risk maliyeti (%)', 'riskMaliyeti', 2, -1), ('Çekirdek kârlılık / aktif (%)', 'cekirdekAktif', 2, 1), ('ROA (%)', 'roa', 2, 1), ('ROE (%)', 'roe', 1, 1),
+         ('Net faiz marjı (%)', 'nim', 2, 1), ('Gider / gelir (%)', 'giderGelir', 1, -1), ('Standart SYR (%)', 'syr', 1, 1),
+         ('Fazla sermaye, %12 hedefe göre (milyar ₺)', 'fazlaSermaye', 0, 1), ('RAK / aktif (%)', 'rakYogunluk', 1, 0), ('Toplanan fon TP ağırlığı (%)', 'fonTPag', 1, 1)]
 KOMP = {
     'aktif': ('Aktif yapısı', [('TP Krediler', lambda r: r.krediTP), ('YP Krediler', lambda r: r.krediYP), ('TP Menkul', lambda r: r.mkTP), ('YP Menkul', lambda r: r.mkYP),
                                ('TP Nakit', lambda r: r.nakTP), ('YP Nakit', lambda r: r.nakYP), ('Diğer', lambda r: r.aktif - r.krediTP - r.krediYP - r.mkTP - r.mkYP - r.nakTP - r.nakYP)]),
@@ -59,7 +65,8 @@ def main():
     kpi = {}
     for g in GROUPS:
         s, p = at(g), at(g, ONCEKI)
-        kpi[g] = {'aktif': f(s.aktif / 1e6, 2), 'g_aktif': f(s.g_aktif, 1), 'canli': f(s.canli / 1e6, 2), 'g_canliTP': f(s.g_canliTP, 1), 'g_canliTP_onceki': f(p.g_canliTP, 1),
+        kpi[g] = {'gr_canliTP': f(s.gr_canliTP, 1), 'cekirdekAktif': f(s.cekirdekAktif, 2), 'nplOlusum3': f(s.nplOlusum3, 2), 'fazlaSermaye': f(s.fazlaSermaye, 0),
+                  'aktif': f(s.aktif / 1e6, 2), 'g_aktif': f(s.g_aktif, 1), 'canli': f(s.canli / 1e6, 2), 'g_canliTP': f(s.g_canliTP, 1), 'g_canliTP_onceki': f(p.g_canliTP, 1),
                   'g3_canliTP': f(s.g3_canliTP, 1), 'mevduat': f(s.mevduat / 1e6, 2), 'g_mvTP': f(s.g_mvTP, 1), 'fonTPag': f(s.fonTPag, 1), 'fonTPag_onceki': f(p.fonTPag, 1),
                   'netKar': f(s.netKar / 1e3, 1), 'gy_netKar': f(s.gy_netKar, 1), 'netKar_m': f(s.netKar_m / 1e3, 1), 'netKar_m_onceki': f(p.netKar_m / 1e3, 1),
                   'npl': f(s.npl, 2), 'npl_onceki': f(p.npl, 2), 'syr': f(s.syr, 1), 'syr_onceki': f(p.syr, 1), 'roa': f(s.roa, 2), 'roe': f(s.roe, 1), 'nim': f(s.nim, 2), 'nim_onceki': f(p.nim, 2)}
@@ -95,6 +102,18 @@ def main():
             x = RAPOR_DIR / p.name.replace('.pdf', '-veri.xlsx')
             arsiv.append({'donem': f"{m.group(1)}-{m.group(2)}", 'ad': f"{AYLAR[int(m.group(2)) - 1]} {m.group(1)}", 'pdf': f"raporlar/{p.name}",
                           'xlsx': f"raporlar/{x.name}" if x.exists() else None, 'boyut_kb': p.stat().st_size // 1024})
+    # ekordion analizleri (anlık görüntü)
+    analiz = {
+        'ivme': {'gruplar': {g: {'g12': f(at(g).g_canliTP, 1), 'g3': f(at(g).g3_canliTP, 1)} for g in GROUPS},
+                 'segmentler': [{'ad': ad, 'kol': c, 'g12': f(at('S')['g_' + c], 1), 'g3': f(at('S')['g3_' + c], 1)} for c, ad in SEGMENTLER]},
+        'hacim_marj': {'gruplar': {g: ({k: f(v, 1) for k, v in hacim_marj(g).items()} if hacim_marj(g) else None) for g in GROUPS},
+                       'seri': [{'tarih': t.strftime('%Y-%m'), 'hacim': f(h, 1), 'marj': f(m, 1), 'toplam': f(tt, 1)} for t, h, m, tt in hacim_marj_seri('S', 24)]},
+        'pay': {'kategoriler': [{'kol': c, 'ad': ad} for c, ad in PAY_KOL], 'gruplar': {g: {c: (None if v is None else {'pay': f(v['pay'], 2), 'degisim': f(v['degisim'], 2)}) for c, v in d_.items()} for g, d_ in pay_degisim().items()}},
+        'sermaye': {g: {'fazla': f(at(g).fazlaSermaye, 0), 'kapasite': f(at(g).buyumeKapasite, 0), 'rak': f(at(g).rakYogunluk, 1), 'syr': f(at(g).syr, 1)} for g in GROUPS},
+        'npl_olusum12': {g: f(at(g).nplOlusum12, 2) for g in GROUPS},
+        'kopru': haftalik_kopru(),
+        'tufe_son': ENF_SON.strftime('%Y-%m') if ENF_SON is not None else None,
+    }
     pdf = a.pdf or (arsiv[0]['pdf'] if arsiv else None)
     xlsx = a.xlsx or (arsiv[0]['xlsx'] if arsiv else None)
 
@@ -109,7 +128,7 @@ def main():
     OUT.write_text(json.dumps({
         'updated': dt.datetime.now().strftime('%d.%m.%Y %H:%M'), 'donem': donem, 'donem_ad': donem_ad, 'pdf': pdf, 'xlsx': xlsx,
         'ozet_html': ozet, 'gorunum': gor, 'gruplar': [{'kod': g, 'ad': GNAME[g], 'kisa': GSHORT[g]} for g in GROUPS], 'mevduat_gruplari': DEPG,
-        'kpi': kpi, 'karne': karne, 'seri': seri, 'kompozisyon': komp, 'arsiv': arsiv,
+        'kpi': kpi, 'karne': karne, 'seri': seri, 'kompozisyon': komp, 'arsiv': arsiv, 'analiz': analiz,
     }, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     print(f"site/data/bankacilik.json yazıldı · dönem {donem_ad} · seri {len(tarihler)} ay · arşiv {len(arsiv)} rapor · {OUT.stat().st_size // 1024} KB")
 
