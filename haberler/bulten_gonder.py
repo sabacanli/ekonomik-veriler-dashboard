@@ -15,11 +15,13 @@ aynı gün ikinci koşuda Resend aynı alıcıya ikinci kez göndermez.
 Kullanım:
   python haberler/bulten_gonder.py --mod test      # yalnız listedeki İLK alıcıya
   python haberler/bulten_gonder.py --tur haftalik  # Pazar "Haftaya Bakış" bülteni (hafta_ozeti.py çıktısı)
+  python haberler/bulten_gonder.py --tur aylik     # Bankacılık Monitörü (aylık; PDF ekli; site/data/bankacilik.json)
   python haberler/bulten_gonder.py --mod evet      # tüm listeye
   python haberler/bulten_gonder.py --kuru out.html # göndermeden HTML önizleme yaz
   python haberler/bulten_gonder.py --denetle       # göndermeden alıcı listesini denetle (adres yazdırmaz)
 """
 import argparse
+import base64
 import datetime as dt
 import hashlib
 import html
@@ -385,6 +387,83 @@ def metin_hafta(H):
     return "\n".join(S)
 
 
+def html_aylik(B):
+    """Bankacılık Monitörü aylık e-postası (PDF ekte)."""
+    k = B["kpi"]["S"]; G = B.get("gorunum") or {}
+    kutu = lambda ad, deger, alt: (f'<td style="padding:6px 6px;width:33%;vertical-align:top;"><div style="background:#F8F9FC;border-left:4px solid #1C3044;padding:10px 12px;border-radius:6px;">'
+                                   f'<div style="font-size:11px;color:#8A93A6;text-transform:uppercase;letter-spacing:.4px;">{esc(ad)}</div>'
+                                   f'<div style="font-size:18px;font-weight:700;color:#1A2233;margin-top:2px;">{esc(deger)}</div>'
+                                   f'<div style="font-size:11.5px;color:#55627A;margin-top:2px;">{esc(alt)}</div></div></td>')
+    kart = [("Toplam aktif", f"{trn(k['aktif'], 1)} trilyon ₺", f"yıllık {trn(k['g_aktif'], 1, True)}%"),
+            ("TP canlı kredi büyümesi", f"{trn(k['g_canliTP'], 1)}%", f"3 aylık yıllıklandırılmış {trn(k['g3_canliTP'], 1)}%"),
+            ("Toplanan fonlar", f"{trn(k['mevduat'], 1)} trilyon ₺", f"TP ağırlığı {trn(k['fonTPag'], 1)}%"),
+            ("Aylık net kâr", f"{trn(k['netKar_m'], 1)} milyar ₺", f"önceki ay {trn(k['netKar_m_onceki'], 1)} · yıl içi {trn(k['netKar'], 0)}"),
+            ("NPL / SYR", f"{trn(k['npl'], 2)}% / {trn(k['syr'], 1)}%", f"önceki ay {trn(k['npl_onceki'], 2)}% / {trn(k['syr_onceki'], 1)}%"),
+            ("ROE / NIM", f"{trn(k['roe'], 1)}% / {trn(k['nim'], 2)}%", "12 aylık yıllıklandırılmış")]
+    P = [f"""<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Bankacılık Monitörü</title></head>
+<body style="margin:0;padding:0;background:#F3F5F9;">
+<span style="display:none;max-height:0;overflow:hidden;opacity:0;color:#F3F5F9;">{esc(G.get("baslik", B["donem_ad"]))[:140]}</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3F5F9;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;background:#FFFFFF;border-radius:10px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+<tr><td style="background:#1C3044;padding:22px 28px;border-bottom:4px solid #D40031;">
+  <div style="color:#FFFFFF;font-size:20px;font-weight:700;letter-spacing:.2px;">Ekordion · Bankacılık Monitörü</div>
+  <div style="color:#C9D3E0;font-size:13px;margin-top:5px;">{esc(B["donem_ad"])} · BDDK Aylık Bülten verileriyle yedi banka grubunun görünümü · PDF rapor ekte</div>
+</td></tr>
+<tr><td style="padding:24px 28px 8px;">"""]
+    if G.get("baslik"):
+        P.append(f'<div style="font-size:19px;font-weight:700;color:#1A2233;line-height:1.35;margin:0 0 12px;">{esc(G["baslik"])}</div>')
+    P.append('<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' + "".join(kutu(*kart[i]) for i in range(3)) + "</tr><tr>" + "".join(kutu(*kart[i]) for i in range(3, 6)) + "</tr></table>")
+    if G.get("maddeler"):
+        P.append('<div style="font-size:16px;font-weight:700;color:#1A2233;margin:18px 0 8px;">Ayın Görünümü</div>'
+                 '<ol style="margin:0 0 6px;padding-left:20px;color:#1A2233;font-size:14.5px;line-height:1.6;">'
+                 + "".join(f'<li style="margin-bottom:8px;">{esc(m)}</li>' for m in G["maddeler"]) + "</ol>")
+    P.append('<div style="font-size:16px;font-weight:700;color:#1A2233;margin:18px 0 8px;">Grup Karnesi (seçili göstergeler)</div>'
+             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12.5px;">')
+    gruplar = [g for g in B["gruplar"]]
+    P.append('<tr><th style="text-align:left;padding:5px 4px;border-bottom:2px solid #E3E7EE;color:#8A93A6;font-size:11px;">Gösterge</th>'
+             + "".join(f'<th style="text-align:right;padding:5px 4px;border-bottom:2px solid #E3E7EE;color:#8A93A6;font-size:11px;">{esc(g["kisa"])}</th>' for g in gruplar) + "</tr>")
+    secili = {"g_aktif", "g_canliTP", "npl", "syr", "roe", "nim", "fonTPag", "giderGelir"}
+    for r in B["karne"]:
+        if r["kol"] not in secili:
+            continue
+        P.append(f'<tr><td style="padding:5px 4px;border-bottom:1px solid #EEF1F6;color:#1A2233;">{esc(r["ad"])}</td>'
+                 + "".join(f'<td style="text-align:right;padding:5px 4px;border-bottom:1px solid #EEF1F6;color:#1A2233;{"font-weight:700;" if g["kod"] == "S" else ""}">'
+                           f'{"—" if r["deger"].get(g["kod"]) is None else trn(r["deger"][g["kod"]], r["ondalik"])}</td>' for g in gruplar) + "</tr>")
+    P.append("</table>")
+    P.append(f"""</td></tr>
+<tr><td align="center" style="padding:20px 28px 26px;">
+  <a href="{KOK}bankacilik.html" style="display:inline-block;background:#D40031;color:#FFFFFF;font-size:14px;font-weight:700;text-decoration:none;padding:11px 22px;border-radius:7px;">İnteraktif paneli aç →</a>
+  &nbsp; <a href="{KOK}{esc(B.get("pdf") or "bankacilik.html")}" style="display:inline-block;background:#1C3044;color:#FFFFFF;font-size:14px;font-weight:700;text-decoration:none;padding:11px 22px;border-radius:7px;">PDF raporu indir</a>
+</td></tr>
+<tr><td style="background:#F8F9FC;padding:16px 28px;color:#8A93A6;font-size:11.5px;line-height:1.6;">
+  Kaynak: BDDK Aylık Bülten. Yorumlar otomatik üretilir; bilgilendirme amaçlıdır, yatırım tavsiyesi değildir. Veriler ve grafikler:
+  <a href="https://ekordion.com.tr" style="color:#8A93A6;">ekordion.com.tr</a><br>
+  Bu bülteni almak istemiyorsanız bu e-postayı yanıtlayarak bildirmeniz yeterli.
+</td></tr>
+</table></td></tr></table></body></html>""")
+    return "".join(P)
+
+
+def metin_aylik(B):
+    k = B["kpi"]["S"]; G = B.get("gorunum") or {}
+    S = [f"EKORDION · BANKACILIK MONİTÖRÜ — {B['donem_ad']}", ""]
+    if G.get("baslik"):
+        S += [G["baslik"], ""]
+    S += [f"Toplam aktif: {trn(k['aktif'], 1)} trilyon TL (yıllık {trn(k['g_aktif'], 1, True)}%)",
+          f"TP canlı kredi büyümesi: {trn(k['g_canliTP'], 1)}% (3 aylık yıllıklandırılmış {trn(k['g3_canliTP'], 1)}%)",
+          f"Toplanan fonlar: {trn(k['mevduat'], 1)} trilyon TL (TP ağırlığı {trn(k['fonTPag'], 1)}%)",
+          f"Aylık net kâr: {trn(k['netKar_m'], 1)} milyar TL (önceki ay {trn(k['netKar_m_onceki'], 1)})",
+          f"NPL {trn(k['npl'], 2)}% · SYR {trn(k['syr'], 1)}% · ROE {trn(k['roe'], 1)}% · NIM {trn(k['nim'], 2)}%", ""]
+    if G.get("maddeler"):
+        S += ["AYIN GÖRÜNÜMÜ"] + [f"  {i}. {m}" for i, m in enumerate(G["maddeler"], 1)] + [""]
+    S += [f"İnteraktif panel: {KOK}bankacilik.html", f"PDF: {KOK}{B.get('pdf') or ''}", "",
+          "Kaynak: BDDK Aylık Bülten. Yorumlar otomatik üretilir — yatırım tavsiyesi değildir.",
+          "Bu bülteni almak istemiyorsanız bu e-postayı yanıtlayarak bildirmeniz yeterli."]
+    return "\n".join(S)
+
+
 def alicilari_oku():
     ham = [x.strip() for x in re.split(r"[,;\s]+", os.environ.get("BULTEN_ALICILAR", "")) if x.strip()]
     return ham
@@ -418,7 +497,7 @@ def denetle():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mod", choices=["test", "evet"], default="test")
-    ap.add_argument("--tur", choices=["gunluk", "haftalik"], default="gunluk", help="günlük gündem veya Pazar 'Haftaya Bakış'")
+    ap.add_argument("--tur", choices=["gunluk", "haftalik", "aylik"], default="gunluk", help="günlük gündem, Pazar 'Haftaya Bakış' veya aylık Bankacılık Monitörü")
     ap.add_argument("--hafta", help="haftalık bülten için ISO hafta (ör. 2026-W39); varsayılan: içinde bulunulan hafta")
     ap.add_argument("--gun", default=dt.datetime.now(TR).strftime("%Y-%m-%d"))
     ap.add_argument("--kuru", metavar="DOSYA", help="göndermeden HTML önizlemeyi bu dosyaya yaz")
@@ -428,7 +507,21 @@ def main():
         denetle()
         return
 
-    if a.tur == "haftalik":
+    ekler = []
+    if a.tur == "aylik":
+        fp = BASE / "site" / "data" / "bankacilik.json"
+        if not fp.exists():
+            print("Bülten atlandı: bankacilik.json yok (bddk aylik/update.py çalışmamış).")
+            return
+        B = json.loads(fp.read_text(encoding="utf-8"))
+        kimlik = "bankacilik-" + B["donem"]
+        govde, duz = html_aylik(B), metin_aylik(B)
+        konu = f"Bankacılık Monitörü · {B['donem_ad']}"
+        pdf = BASE / "site" / (B.get("pdf") or "")
+        if B.get("pdf") and pdf.exists() and pdf.stat().st_size < 20_000_000:
+            ekler = [{"filename": f"Bankacilik_Monitoru_{B['donem']}.pdf",
+                      "content": base64.b64encode(pdf.read_bytes()).decode("ascii")}]
+    elif a.tur == "haftalik":
         yil, w, _ = dt.datetime.now(TR).date().isocalendar()
         kimlik = a.hafta or f"{yil}-W{w:02d}"
         fp = HABER_DIR / f"hafta-{kimlik}.json"
@@ -468,6 +561,8 @@ def main():
     tamam = atlanan = hata = 0
     for i, alici in enumerate(alicilar, 1):
         yuk = {"from": gonderen, "to": [alici], "subject": konu, "html": govde, "text": duz}
+        if ekler:
+            yuk["attachments"] = ekler
         if yanit:
             yuk["reply_to"] = yanit
         iz = hashlib.sha256(f"{kimlik}|{a.mod}|{alici.lower()}".encode()).hexdigest()[:32]

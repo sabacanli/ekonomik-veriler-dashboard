@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bankacılık Monitörü — Aylık BDDK Sektör Görünümü | Ekordion</title>
+  <meta name="description" content="BDDK Aylık Bülten verileriyle Türk bankacılık sektörünün aylık görünümü: yedi banka grubu için büyüme, kredi yapısı, aktif kalitesi, fonlama, sermaye ve kârlılık göstergeleri; grup karnesi ve indirilebilir PDF rapor.">
+  <link rel="canonical" href="https://ekordion.com.tr/bankacilik.html">
+  <meta property="og:title" content="Bankacılık Monitörü — Aylık BDDK Sektör Görünümü | Ekordion">
+  <meta property="og:description" content="BDDK Aylık Bülten verileriyle Türk bankacılık sektörünün aylık görünümü: yedi banka grubu için büyüme, kredi yapısı, aktif kalitesi, fonlama, sermaye ve kârlılık göstergeleri; grup karnesi ve indirilebilir PDF rapor.">
+  <meta property="og:url" content="https://ekordion.com.tr/bankacilik.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ekordion">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:image" content="https://ekordion.com.tr/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=23">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <style>
+    .rapor-kutu { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 6px 0 14px; }
+    .rapor-kutu .btn { text-decoration: none; }
+    .gorunum ol { margin: 6px 0 0; padding-left: 20px; line-height: 1.6; }
+    .gorunum li { margin-bottom: 7px; }
+    table.karne td.lbl { min-width: 230px; }
+    table.karne { min-width: 760px; }
+    table.karne td.isi { font-weight: 600; }
+    .arsiv li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .arsiv li:last-child { border-bottom: none; }
+    .arsiv a { margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Bankacılık Monitörü</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet">📋 Ağustos 2026 BDDK verileri: sektör aktifleri 55,75 trilyon TL (yıllık %33,1), TP canlı krediler yıllık %41,0 büyüdü; NPL %2,92, SYR %16,6, ROE %24,9. Aylık net kâr 80,0 milyar TL. Krediler %41 büyüdü, NPL %2,92, ROE %25.</div>
+    <div class="rapor-kutu" id="raporKutu"></div>
+    <div class="metrics" id="metrics"></div>
+
+    <section class="chart-card gorunum" id="secGorunum" style="display:none">
+      <h3 id="h3Gorunum">🧭 Ayın Görünümü</h3>
+      <p class="cap" id="capGorunum"></p>
+      <ol id="gorunumListe"></ol>
+    </section>
+
+    <section class="chart-card">
+      <h3>Grup Karnesi</h3>
+      <p class="cap" id="capKarne">Yüzde; büyümeler yıllık, kârlılık rasyoları 12 aylık yıllıklandırılmış. Hücre rengi altı grup arasındaki sıralamayı gösterir (yeşil = en iyi); Sektör sütunu referanstır.</p>
+      <div class="table-wrap"><table class="heat karne" id="tblKarne"></table></div>
+    </section>
+
+    <div class="chips" id="grupChips"></div>
+
+    <section class="chart-card" id="secKomp">
+      <h3 id="h3Komp">Bilanço Yapısı</h3>
+      <p class="cap">Seçili grup için aktif, pasif, canlı kredi ve toplanan fon bileşenlerinin payı (%) · son 25 ay</p>
+      <div class="chips" id="kompChips"></div>
+      <div id="chKomp"></div>
+    </section>
+
+    <section class="chart-card" id="secBuyume">
+      <h3>Büyüme — TP Canlı Krediler ve TP Mevduat</h3>
+      <p class="cap">Yıllık % · tüm gruplar; kesikli çizgi: 3 aylık yıllıklandırılmış TP canlı kredi büyümesi (sektör)</p>
+      <button class="btn apko-btn" data-sec="secBuyume">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secBuyume">🖼 Resim olarak kopyala</button>
+      <div id="chBuyume"></div>
+    </section>
+
+    <section class="chart-card" id="secNetKar">
+      <h3>Aylık Net Kâr — Sektör</h3>
+      <p class="cap">Milyar ₺ · yıl içi kümülatiften türetilmiş aylık net kâr (Ocak = o ayın yıl içi değeri); çizgi: 3 aylık ortalama</p>
+      <div id="chNetKar"></div>
+    </section>
+
+    <section class="chart-card" id="secKalite">
+      <h3>Aktif Kalitesi ve Sermaye</h3>
+      <p class="cap">NPL oranı ve standart SYR (%) · tüm gruplar</p>
+      <div id="chNpl"></div>
+      <div id="chSyr"></div>
+    </section>
+
+    <section class="chart-card" id="secKarlilik">
+      <h3>Kârlılık</h3>
+      <p class="cap">ROE ve net faiz / kâr payı marjı (%) · 12 aylık yıllıklandırılmış · tüm gruplar</p>
+      <div id="chRoe"></div>
+      <div id="chNim"></div>
+    </section>
+
+    <section class="chart-card" id="secFon">
+      <h3>Fonlama</h3>
+      <p class="cap">Toplanan fonlarda TP ağırlığı ve TL kredi / TL mevduat oranı (%) · mevduat kabul eden gruplar</p>
+      <div id="chTPag"></div>
+      <div id="chKrediMev"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Rapor Arşivi</h3>
+      <p class="cap">Aylık PDF raporlar ve veri dosyaları; her ay BDDK açıklamasını takiben eklenir</p>
+      <ul class="arsiv" id="arsiv"></ul>
+    </section>
+
+    <footer>Kaynak: BDDK Aylık Bülten (Temel Gösterim) · Krediler = krediler + takipteki alacaklar + finansal kiralama (brüt);
+      canlı krediler takip hariç · Toplanan fonlar = mevduat ve katılım fonu · 12 aylık kalemler yıl içi kümülatiften türetilir,
+      ROA/ROE/NIM 13 aylık ortalama aktif ve özkaynağa bölünür · YP büyümeleri örtük USD/TL kuruyla · Kalkınma-Yatırım grubu
+      mevduat kabul etmediğinden fonlama göstergelerinde yer almaz · Ayın görünümü otomatik üretilir; bilgilendirme amaçlıdır,
+      yatırım tavsiyesi değildir.</footer>
+  </main>
+
+  <script src="assets/app.js?v=23"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/bankacilik.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+      const esc = s => String(s === null || s === undefined ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      const GR = D.gruplar, KOD = GR.map(g => g.kod), KISA = Object.fromEntries(GR.map(g => [g.kod, g.kisa]));
+      const RENK = { S: C.toplam, M: C.kesin, KA: C.hisse, YO: C.green, YA: C.euro, KB: PAL.sari, KY: PAL.mor };
+      const S = D.kpi.S;
+      const d1 = (a, b, dec) => (a === null || b === null) ? null : a - b;
+      const dcls = v => (v === null || v === undefined ? "flat" : (v >= 0 ? "up" : "down"));
+      const dtx = (v, dec, son) => (v === null || v === undefined ? "" : trNum(v, dec, true) + " puan (" + son + ")");
+
+      // rapor düğmeleri
+      document.getElementById("raporKutu").innerHTML =
+        (D.pdf ? '<a class="btn" href="' + esc(D.pdf) + '" target="_blank">📄 ' + esc(D.donem_ad) + ' raporu (PDF)</a>' : "") +
+        (D.xlsx ? '<a class="btn" href="' + esc(D.xlsx) + '">📊 Veri dosyası (Excel)</a>' : "") +
+        '<span class="cap" style="margin:0">BDDK Aylık Bülten · dönem ' + esc(D.donem_ad) + '</span>';
+
+      setMetrics([
+        ["Toplam Aktif", trNum(S.aktif, 1) + " trilyon ₺", "yıllık " + trNum(S.g_aktif, 1, true) + "%", dcls(S.g_aktif)],
+        ["TP Canlı Kredi Büyümesi", trNum(S.g_canliTP, 1) + "%", "3 aylık yıllıklandırılmış " + trNum(S.g3_canliTP, 1) + "%", dcls(d1(S.g3_canliTP, S.g_canliTP))],
+        ["Toplanan Fonlar", trNum(S.mevduat, 1) + " trilyon ₺", "TP ağırlığı " + trNum(S.fonTPag, 1) + "% · " + dtx(d1(S.fonTPag, S.fonTPag_onceki), 1, "aylık"), dcls(d1(S.fonTPag, S.fonTPag_onceki))],
+        ["Aylık Net Kâr", trNum(S.netKar_m, 1) + " milyar ₺", "önceki ay " + trNum(S.netKar_m_onceki, 1) + " · yıl içi " + trNum(S.netKar, 0), dcls(d1(S.netKar_m, S.netKar_m_onceki))],
+        ["NPL Oranı", trNum(S.npl, 2) + "%", dtx(d1(S.npl, S.npl_onceki), 2, "aylık"), d1(S.npl, S.npl_onceki) > 0 ? "down" : "up"],
+        ["Standart SYR", trNum(S.syr, 1) + "%", dtx(d1(S.syr, S.syr_onceki), 1, "aylık"), dcls(d1(S.syr, S.syr_onceki))],
+        ["ROE / NIM", trNum(S.roe, 1) + "% / " + trNum(S.nim, 2) + "%", "12 aylık yıllıklandırılmış", "flat"],
+      ]);
+
+      // Ayın görünümü
+      if (D.gorunum && D.gorunum.maddeler && D.gorunum.maddeler.length) {
+        document.getElementById("secGorunum").style.display = "";
+        document.getElementById("h3Gorunum").textContent = "🧭 " + D.gorunum.baslik;
+        document.getElementById("capGorunum").textContent = (D.gorunum.mod === "ai" ? "Verilerden Claude ile üretilen kısa yorum" : "Verilerden kural tabanlı üretilen kısa yorum") + " · " + D.donem_ad;
+        document.getElementById("gorunumListe").innerHTML = D.gorunum.maddeler.map(m => "<li>" + esc(m) + "</li>").join("");
+      }
+
+      // Grup karnesi (ısı haritası: altı grup arasında sıralama)
+      const isiRenk = t => { // 0 = en kötü (kırmızı) → 1 = en iyi (yeşil)
+        const a = [224, 92, 87], b = [238, 210, 100], c = [80, 178, 110];
+        const mix = (p, q, k) => p.map((v, i) => Math.round(v + (q[i] - v) * k));
+        const r = t < 0.5 ? mix(a, b, t * 2) : mix(b, c, (t - 0.5) * 2);
+        return "rgb(" + r.join(",") + ")";
+      };
+      document.getElementById("tblKarne").innerHTML = "<tr><th>Gösterge</th>" + KOD.map(k => "<th>" + esc(KISA[k]) + "</th>").join("") + "</tr>" +
+        D.karne.map(r => {
+          const vals = KOD.filter(k => k !== "S").map(k => r.deger[k]).filter(v => v !== null);
+          const sirali = vals.slice().sort((x, y) => r.yon >= 0 ? y - x : x - y);
+          return '<tr><td class="lbl">' + esc(r.ad) + "</td>" + KOD.map(k => {
+            const v = r.deger[k];
+            if (v === null || v === undefined) return '<td class="num bos">—</td>';
+            if (k === "S" || r.yon === 0 || sirali.length < 2) return '<td class="num"' + (k === "S" ? ' style="font-weight:700"' : "") + ">" + trNum(v, r.ondalik) + "</td>";
+            const t = 1 - sirali.indexOf(v) / (sirali.length - 1);
+            return '<td class="num pct isi" style="background:' + isiRenk(t) + '">' + trNum(v, r.ondalik) + "</td>";
+          }).join("") + "</tr>";
+        }).join("");
+
+      // Grup ve kompozisyon seçiciler
+      let grup = "S", komp = "aktif";
+      const gEl = document.getElementById("grupChips");
+      gEl.innerHTML = GR.map(g => '<span class="chip' + (g.kod === "S" ? " active" : "") + '" data-v="' + g.kod + '">' + esc(g.kisa) + "</span>").join("");
+      const kEl = document.getElementById("kompChips");
+      kEl.innerHTML = Object.entries(D.kompozisyon).map(([k, v]) => '<span class="chip' + (k === "aktif" ? " active" : "") + '" data-v="' + k + '">' + esc(v.ad) + "</span>").join("");
+      gEl.querySelectorAll(".chip").forEach(c => c.onclick = () => { grup = c.dataset.v; gEl.querySelectorAll(".chip").forEach(x => x.classList.toggle("active", x === c)); cizKomp(); });
+      kEl.querySelectorAll(".chip").forEach(c => c.onclick = () => { komp = c.dataset.v; kEl.querySelectorAll(".chip").forEach(x => x.classList.toggle("active", x === c)); cizKomp(); });
+
+      const KRENK = [C.toplam, C.kesin, C.hisse, C.dolayli, C.green, PAL.sari, C.ost];
+      function cizKomp() {
+        const K = D.kompozisyon[komp]; const G = K.gruplar[grup];
+        document.getElementById("h3Komp").textContent = K.ad + " — " + KISA[grup];
+        if (!G) { document.getElementById("chKomp").innerHTML = '<p class="cap">Bu grup için tanımsız (mevduat kabul etmiyor).</p>'; return; }
+        const x = K.tarih.map(t => t + "-01");
+        const toplam = K.tarih.map((_, i) => G.reduce((s, dz) => s + (dz[i] || 0), 0));
+        draw("chKomp", G.map((dz, j) => ({
+          type: "scatter", mode: "lines", x, y: dz.map((v, i) => toplam[i] ? v / toplam[i] * 100 : null), name: K.etiketler[j],
+          stackgroup: "one", line: { width: 0.5, color: KRENK[j % KRENK.length] }, fillcolor: KRENK[j % KRENK.length], customdata: dz,
+          hovertemplate: "%{x|%m.%Y}<br>" + K.etiketler[j] + ": %{y:.1f}% (%{customdata:,.0f} milyar ₺)<extra></extra>",
+        })), { height: 400, hovermode: "x", yaxis: { range: [0, 100], ticksuffix: "%" } });
+      }
+      cizKomp();
+
+      // Çok serili büyüme grafiği (tüm gruplar)
+      const T = D.seri.tarih.map(t => t + "-01");
+      const serileri = (kol, gruplar) => gruplar.map(k => [D.seri[k][kol], KISA[k], RENK[k], k === "S" ? 2.6 : 1.6]);
+      const TEMA = { secBuyume: false };
+      const CIZ = {
+        secBuyume: () => cokSerili("chBuyume", serileri("g_canliTP", KOD).concat([[D.seri.S.g3_canliTP, "Sektör, 3 aylık yıllık.", C.hisse, 1.6, { line: { dash: "dot", color: C.hisse, width: 1.6 } }]]),
+          T, 99999, 420, TEMA.secBuyume, { fmt: v => "%" + trNum(v, 1), hoverBirim: "%{y:.1f}%" }),
+      };
+      CIZ.secBuyume();
+      sunumAraclariKur(TEMA, CIZ);
+
+      // Aylık net kâr (sektör)
+      const nk = D.seri.S.netKar_m.map(v => v === null ? null : v / 1000);
+      const ma = nk.map((_, i) => i >= 2 && nk[i] !== null && nk[i - 1] !== null && nk[i - 2] !== null ? (nk[i] + nk[i - 1] + nk[i - 2]) / 3 : null);
+      draw("chNetKar", [
+        { type: "bar", x: T, y: nk, marker: { color: C.toplam }, hovertemplate: "%{x|%m.%Y}<br>%{y:.1f} milyar ₺<extra></extra>", name: "Aylık net kâr" },
+        { type: "scatter", mode: "lines", x: T, y: ma, line: { color: C.hisse, width: 2 }, name: "3 aylık ortalama", hovertemplate: "%{x|%m.%Y}<br>ort. %{y:.1f}<extra></extra>" },
+      ], { height: 340 });
+
+      const basit = (id, kol, gruplar, fmt) => cokSerili(id, serileri(kol, gruplar), T, 99999, 330, false, { fmt: v => "%" + trNum(v, fmt), hoverBirim: "%{y:.2f}%" });
+      basit("chNpl", "npl", KOD, 2);
+      basit("chSyr", "syr", KOD, 1);
+      basit("chRoe", "roe", KOD, 1);
+      basit("chNim", "nim", KOD, 2);
+      basit("chTPag", "fonTPag", D.mevduat_gruplari, 1);
+      basit("chKrediMev", "tlKrediMev", D.mevduat_gruplari, 1);
+
+      document.getElementById("arsiv").innerHTML = (D.arsiv || []).map(r =>
+        "<li><b>" + esc(r.ad) + "</b> · <a href=\"" + esc(r.pdf) + "\" target=\"_blank\">PDF (" + r.boyut_kb + " KB)</a>" +
+        (r.xlsx ? '<a href="' + esc(r.xlsx) + '">Excel</a>' : "") + "</li>").join("") || "<li>Henüz rapor yok.</li>";
+    })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
+  </script>
+</body>
+</html>

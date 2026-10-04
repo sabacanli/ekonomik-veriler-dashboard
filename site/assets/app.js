@@ -28,6 +28,7 @@ const NAV = [
   { href: "butce.html", label: "Bütçe Dengesi" },
   { href: "nakit.html", label: "Hazine Nakit Gerçekleşmeleri" },
   { href: "bddk.html", label: "BDDK Bankacılık Verileri" },
+  { href: "bankacilik.html", label: "Bankacılık Monitörü" },
   { href: "hazine.html", label: "Hazine İhale Verileri" },
   { href: "tcmb-alim.html", label: "TCMB Doğrudan Alım" },
   { head: "Finansal Hesaplar" },

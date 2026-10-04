@@ -1126,6 +1126,16 @@ def build_home():
         add("💵", "TCMB Rezervleri", metin, "net-rezerv.html")
     except Exception:
         pass
+    try:   # Bankacılık Monitörü (aylık, bddk aylik/update.py üretir; export burada yalnız okur)
+        bm = json.loads((DATA / "bankacilik.json").read_text(encoding="utf-8"))
+        k = bm["kpi"]["S"]
+        add("🏦", "Bankacılık Monitörü",
+            f"{bm['donem_ad']} BDDK verileri: sektör aktifleri <b>{ht(k['aktif'], 1)} trilyon TL</b> (yıllık {ht(k['g_aktif'], 1, True)}%), "
+            f"TP canlı krediler yıllık {ht(k['g_canliTP'], 1, True)}% (3 aylık yıllıklandırılmış {ht(k['g3_canliTP'], 1)}%); "
+            f"NPL {ht(k['npl'], 2)}%, SYR {ht(k['syr'], 1)}%, ROE {ht(k['roe'], 1)}%. Aylık net kâr <b>{ht(k['netKar_m'], 1)} milyar TL</b>."
+            + (f" {bm['gorunum']['baslik']}." if bm.get("gorunum") else ""), "bankacilik.html")
+    except Exception:
+        pass
     try:
         c = pd.read_excel(BASE / "cari acik" / "cari_acik_son.xlsx")
         ccol = [x for x in c.columns if "Cari" in str(x)][0]
@@ -1287,7 +1297,7 @@ def build_sitemap():
     """site/sitemap.xml — her export'ta taze lastmod ile yazılır (SEO)."""
     sayfalar = ["", "gundem.html", "tcmb-faiz.html", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
                 "cari.html", "kredi.html", "mevduat.html", "butce.html", "nakit.html",
-                "bddk.html", "hazine.html", "tcmb-alim.html",
+                "bddk.html", "bankacilik.html", "hazine.html", "tcmb-alim.html",
                 "hesap-kredi.html", "hesap-mevduat.html"]
     bugun = datetime.now().strftime("%Y-%m-%d")
     satirlar = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -1309,7 +1319,7 @@ def ozet_gom():
             "enflasyon.html": "enflasyon.json", "net-rezerv.html": "rezerv.json",
             "cari.html": "cari.json", "kredi.html": "kredi.json",
             "mevduat.html": "mevduat.json", "butce.html": "butce.json",
-            "nakit.html": "nakit.json", "bddk.html": "bddk.json",
+            "nakit.html": "nakit.json", "bddk.html": "bddk.json", "bankacilik.html": "bankacilik.json",
             "hazine.html": "hazine.json", "tcmb-alim.html": "tcmb_alim.json",
             "tcmb-faiz.html": "tcmb_faiz.json"}
     for sayfa, js in esle.items():

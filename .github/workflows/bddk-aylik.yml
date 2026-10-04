@@ -1,0 +1,110 @@
+# Bankacılık Monitörü — aylık BDDK sektör raporu.
+# Her ayın 1–7'si sabah 10:30 TR'de BDDK'da yeni ay yayımlanmış mı diye bakar (tek istek); yeni ay varsa veriyi
+# çeker, Ayın Görünümü'nü (Claude) yazar, PDF + Excel + site verisini üretir, siteyi yayınlar ve bülten listesine
+# PDF ekli e-posta gönderir. Aynı ay zaten yayındaysa hiçbir şey yapmadan çıkar.
+# Elle: Actions → bu workflow → Run workflow (dönem boş = BDDK'daki son ay; bülten: hayir / test / evet).
+# Secret'lar: EVDS gerekmez; ANTHROPIC_API_KEY (yorum), RESEND_API_KEY, BULTEN_ALICILAR, BULTEN_YANIT (e-posta).
+name: Bankacılık Monitörü (aylık)
+
+on:
+  schedule:
+    - cron: "30 7 1-7 * *"   # 07:30 UTC = 10:30 TR, ayın ilk yedi günü
+  workflow_dispatch:
+    inputs:
+      donem:
+        description: "Dönem YYYY-AA (boş: BDDK'daki son yayımlanmış ay)"
+        default: ""
+      bulten:
+        description: "E-posta: hayir = gönderme · test = yalnız ilk alıcıya · evet = tüm listeye"
+        type: choice
+        options: ["hayir", "test", "evet"]
+        default: "hayir"
+      zorla:
+        description: "Aynı ay yayındaysa da yeniden üret"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Kodu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Kütüphaneleri kur
+        run: pip install --quiet requests pandas numpy matplotlib openpyxl anthropic
+
+      - name: Raporu üret (yeni ay varsa)
+        id: uret
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
+        run: |
+          ARGS="--otomatik"
+          if [ -n "${{ github.event.inputs.donem }}" ]; then ARGS="--donem ${{ github.event.inputs.donem }}"; fi
+          if [ "${{ github.event.inputs.zorla }}" = "true" ]; then ARGS="$ARGS --zorla"; fi
+          python "bddk aylik/update.py" $ARGS
+
+      - name: Değişiklikleri commit + push
+        if: steps.uret.outputs.yeni == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site "bddk aylik/raw" "bddk aylik/gorunum.json"
+          if git diff --cached --quiet; then
+            echo "Değişiklik yok."
+          else
+            git commit -m "Bankacılık Monitörü (${{ steps.uret.outputs.donem_ad }})"
+            git pull --rebase origin main || true
+            git push origin main
+          fi
+
+      - name: Pages'i yapılandır
+        if: steps.uret.outputs.yeni == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Site klasörünü paketle
+        if: steps.uret.outputs.yeni == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Yayınla
+        if: steps.uret.outputs.yeni == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: E-posta (PDF ekli)
+        if: steps.uret.outputs.yeni == 'true'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          BULTEN_ALICILAR: ${{ secrets.BULTEN_ALICILAR }}
+          BULTEN_YANIT: ${{ secrets.BULTEN_YANIT }}
+          BULTEN_GONDEREN: ${{ vars.BULTEN_GONDEREN }}
+        run: |
+          MOD="${{ github.event.inputs.bulten }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then MOD=evet; fi
+          if [ "$MOD" = "evet" ] || [ "$MOD" = "test" ]; then
+            pip install --quiet requests
+            python haberler/bulten_gonder.py --tur aylik --mod "$MOD"
+          else
+            echo "E-posta gönderilmiyor (mod: ${MOD:-hayir})."
+          fi
