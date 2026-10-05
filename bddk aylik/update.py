@@ -27,8 +27,9 @@ def main():
     ap.add_argument('--donem'); ap.add_argument('--otomatik', action='store_true'); ap.add_argument('--zorla', action='store_true'); ap.add_argument('--cekme', action='store_true')
     a = ap.parse_args()
     import fetch_bddk as F
-    donem = a.donem or F.latest_available()
-    y, m = map(int, donem.split('-'))
+    donem = (a.donem or '').strip() or F.latest_available()
+    y, m = map(int, donem.replace('/', '-').replace('.', '-').split('-')[:2])
+    donem = f"{y:04d}-{m:02d}"   # '2026-8' gibi girdileri YYYY-AA biçimine normalize et (dosya adları ve site verisi buna bağlı)
     mevcut = None
     js = BASE / 'site' / 'data' / 'bankacilik.json'
     if js.exists():

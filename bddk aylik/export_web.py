@@ -2,6 +2,7 @@
 """Bankacılık Monitörü site verisi → site/data/bankacilik.json (site/bankacilik.html, ana sayfa kartı, e-posta).
 Kullanım: python export_web.py [--pdf raporlar/x.pdf] [--xlsx raporlar/x.xlsx]"""
 import warnings; warnings.filterwarnings('ignore')
+from zoneinfo import ZoneInfo
 import argparse, datetime as dt, json, re, sys
 from pathlib import Path
 import numpy as np
@@ -135,7 +136,7 @@ def main():
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({
-        'updated': dt.datetime.now().strftime('%d.%m.%Y %H:%M'), 'donem': donem, 'donem_ad': donem_ad, 'pdf': pdf, 'xlsx': xlsx,
+        'updated': dt.datetime.now(ZoneInfo('Europe/Istanbul')).strftime('%d.%m.%Y %H:%M'), 'donem': donem, 'donem_ad': donem_ad, 'pdf': pdf, 'xlsx': xlsx,
         'ozet_html': ozet, 'gorunum': gor, 'gruplar': [{'kod': g, 'ad': GNAME[g], 'kisa': GSHORT[g]} for g in GROUPS], 'mevduat_gruplari': DEPG,
         'kpi': kpi, 'karne': karne, 'seri': seri, 'kompozisyon': komp, 'arsiv': arsiv, 'analiz': analiz,
     }, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
