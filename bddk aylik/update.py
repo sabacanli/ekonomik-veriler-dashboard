@@ -41,6 +41,7 @@ def main():
         print("Yeni ay yok — güncelleme atlandı."); cikti('yeni', 'false'); cikti('donem', donem); return
     if not a.cekme:
         subprocess.check_call([PY, str(HERE / 'fetch_bddk.py'), '--start', '2022-01', '--end', donem], cwd=HERE)
+    subprocess.call([PY, str(HERE / 'makro.py')], cwd=HERE)        # EVDS ek verileri (anahtar yoksa önbellek)
     subprocess.check_call([PY, str(HERE / 'gorunum.py')], cwd=HERE)
     rdir = BASE / 'site' / 'raporlar'; rdir.mkdir(parents=True, exist_ok=True)
     pdf = rdir / f"bankacilik-monitoru-{donem}.pdf"; xlsx = rdir / f"bankacilik-monitoru-{donem}-veri.xlsx"

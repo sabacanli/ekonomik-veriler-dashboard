@@ -266,9 +266,10 @@ OZET_SATIRLAR = [('BÜYÜME (yıllık %)', None, 1), ('Toplam aktif', 'g_aktif',
                  ('TP canlı krediler, 3 aylık yıllıklandırılmış', 'g3_canliTP', 1), ('Reel TP canlı krediler (TÜFE arındırılmış)', 'gr_canliTP', 1),
                  ('TP toplanan fonlar', 'g_mvTP', 1), ('YP toplanan fonlar (USD)', 'g_mvYP_usd', 1),
                  ('KÂRLILIK (12 aylık yıllıklandırılmış, %)', None, 1), ('Aktif kârlılığı (ROA)', 'roa', 2), ('Özkaynak kârlılığı (ROE)', 'roe', 1),
-                 ('Net faiz marjı', 'nim', 2), ('Çekirdek kârlılık / ortalama aktif', 'cekirdekAktif', 2), ('Gider / gelir', 'giderGelir', 1),
+                 ('Net faiz marjı', 'nim', 2), ('Swap etkisi dahil marj (net faiz + ticari kâr/zarar)', 'nimSwap', 2), ('Çekirdek kârlılık / ortalama aktif', 'cekirdekAktif', 2), ('Gider / gelir', 'giderGelir', 1),
                  ('AKTİF KALİTESİ (%)', None, 1), ('NPL oranı', 'npl', 2), ('NPL oluşum hızı, 3 aylık ortalama (yıllıklandırılmış)', 'nplOlusum3', 2),
-                 ('Özel karşılık oranı', 'ozelKarsOran', 1), ('Risk maliyeti (karşılık / ortalama canlı kredi)', 'riskMaliyeti', 2),
+                 ('Özel karşılık oranı', 'ozelKarsOran', 1), ('Risk maliyeti: kredi karşılık giderleri / ortalama brüt kredi', 'cor', 2),
+                 ('2. aşama karşılıkları / canlı krediler', 'ecl2Oran', 2), ('Teminatsız bireysel (ihtiyaç + kredi kartı) / canlı krediler', 'teminatsizPay', 1),
                  ('FONLAMA VE SERMAYE', None, 1), ('Toplanan fon TP ağırlığı (%)', 'fonTPag', 1), ('TL kredi / TL mevduat (%)', 'tlKrediMev', 1),
                  ('Standart SYR (%)', 'syr', 1), ('Fazla sermaye, %12 hedefe göre (milyar ₺)', 'fazlaSermaye', 0)]
 GELIR_SATIRLAR = [('Faiz gelirleri', 'faizGel'), ('Faiz giderleri', 'faizGid'), ('Net faiz geliri', 'netFaiz'),
@@ -284,8 +285,9 @@ def karne_page(pdf):
     metrics = [('TP canlı kredi büyümesi, 12 aylık (%)', 'g_canliTP', 1, 1), ('TP canlı kredi, 3 aylık yıllıklandırılmış (%)', 'g3_canliTP', 1, 1),
                ('Reel TP canlı kredi büyümesi (%)', 'gr_canliTP', 1, 1), ('TP mevduat büyümesi (%)', 'g_mvTP', 1, 1),
                ('NPL oranı (%)', 'npl', 2, -1), ('NPL oluşum hızı, 3 aylık (%)', 'nplOlusum3', 2, -1), ('Özel karşılık oranı (%)', 'ozelKarsOran', 1, 1),
-               ('Risk maliyeti (%)', 'riskMaliyeti', 2, -1), ('Çekirdek kârlılık / aktif (%)', 'cekirdekAktif', 2, 1), ('ROE (%)', 'roe', 1, 1),
-               ('Net faiz marjı (%)', 'nim', 2, 1), ('Gider / gelir (%)', 'giderGelir', 1, -1), ('Standart SYR (%)', 'syr', 1, 1),
+               ('Risk maliyeti, kredi karşılıkları (%)', 'cor', 2, -1), ('2. aşama karşılık / canlı kredi (%)', 'ecl2Oran', 2, -1),
+               ('Teminatsız bireysel payı (%)', 'teminatsizPay', 1, -1), ('Çekirdek kârlılık / aktif (%)', 'cekirdekAktif', 2, 1), ('ROE (%)', 'roe', 1, 1),
+               ('Net faiz marjı (%)', 'nim', 2, 1), ('Swap etkisi dahil marj (%)', 'nimSwap', 2, 1), ('Gider / gelir (%)', 'giderGelir', 1, -1), ('Standart SYR (%)', 'syr', 1, 1),
                ('Fazla sermaye, %12 hedefe göre (milyar ₺)', 'fazlaSermaye', 0, 1), ('Toplanan fon TP ağırlığı (%)', 'fonTPag', 1, 1)]
     ax = fig.add_axes([0.03, 0.085, 0.94, 0.76]); ax.axis('off')
     cg = GROUPS; n = len(metrics); hdr = ['Gösterge'] + [GSHORT[g] for g in cg]
@@ -499,11 +501,18 @@ def notes_page(pdf):
         "• İvme: 3 aylık yıllıklandırılmış büyüme ((X(t)/X(t−3))^4 − 1); reel büyümeler TÜFE yıllık enflasyonla arındırılır ((1+g)/(1+π) − 1). NPL oluşum hızı = takipteki alacak bakiyesindeki aylık net artış / önceki ay canlı krediler × 12 (satış ve silme sonrası net).",
         "• Hacim–marj ayrıştırması: ΔNFG = (Δortalama aktif × önceki yıl NIM) + (ΔNIM × bu yıl ortalama aktif); çekirdek kârlılık = (net faiz + net komisyon − faaliyet gideri) / ortalama aktif; risk maliyeti = 12 aylık karşılık gideri / ortalama canlı kredi.",
         "• Fazla sermaye = yasal özkaynak − %12 × risk ağırlıklı aktifler (BDDK hedef rasyosu); RAK yoğunluğu = RAK / aktif. Haftalık köprü sayfası sitedeki haftalık BDDK verisinden ay sonu sonrasını özetler.",
+        "• Risk maliyeti = 12 aylık özel + genel karşılık gideri / 13 aylık ortalama brüt kredi (net: takipteki alacaklardan alınan faizler düşülür); aşama karşılıkları BDDK bilançosundaki beklenen zarar karşılığı stoklarıdır (2. aşama kredi bakiyesi aylık bültende yoktur). Swap etkisi dahil marj: TL swap maliyetleri ticari kâr/zararda kaldığından net faiz + ticari kâr/zarar toplamı; analist raporlarındaki swap düzeltmeli marjın vekilidir.",
+        "• Reel sektör döviz pozisyonu TCMB'nin aylık 'Finansal Kesim Dışındaki Firmaların Döviz Varlık ve Yükümlülükleri' istatistiğidir (yaklaşık 2,5 ay gecikmeli).",
+        "• TL mevduat kur başabaş analizi: 3 aya kadar vadeli TL ve USD mevduat faizleri (akım, haftalık serinin aylık ortalaması, yıllık basit) ve Piyasa Katılımcıları Anketi 12 ay sonrası USD/TL beklentisi (aritmetik ortalama) / aylık ortalama kur. Başabaş TL faizi = (1 + USD faizi) × (beklenen kur / cari kur) − 1; faiz farkının karşıladığı kur artışı = (1 + TL faizi) / (1 + USD faizi) − 1; TL mevduatın beklenen USD getirisi = (1 + TL faizi) / (beklenen kur / cari kur) − 1. Mevduatın 12 ay boyunca aynı faizle yenilendiği varsayılır; risk primi içermez.",
         "• Grup karnesinde sıralama Sektör hariç altı grup arasında yapılır; 'Ayın Görünümü' sayfasındaki yorum verilerden otomatik üretilir ve hata içerebilir. Faiz kalemleri katılım bankaları için kâr payını kapsar.",
         "• Bu rapor BDDK kaynaklı verilerle ekordion.com.tr tarafından bilgilendirme amacıyla hazırlanmıştır; yatırım danışmanlığı niteliği taşımaz."]
     y = 0.80
     for t in txt:
-        for k, line in enumerate(textwrap.wrap(t, 150)):
+        satir = textwrap.wrap(t, 150)
+        if y - len(satir) * 0.028 < 0.05:   # madde sayfaya sığmıyor → devam sayfası
+            pdf.savefig(fig); plt.close(fig)
+            fig = plt.figure(figsize=(PW, PH)); header(fig, 'Metodoloji ve Notlar (devam)'); y = 0.80
+        for k, line in enumerate(satir):
             fig.text(0.04, y, line if k == 0 else '   ' + line, fontsize=9.2, va='top', color=METIN); y -= 0.028
         y -= 0.012
     pdf.savefig(fig); plt.close(fig)
@@ -678,10 +687,11 @@ def hacim_marj_page(pdf):
 
 def kalite_page(pdf):
     line_page(pdf, 'Kârlılık | Kârlılık Kalitesi', [dict(col='cekirdekAktif', title='Çekirdek kârlılık / ortalama aktif (%)', fmt='num', d=2, start='2023-07-31'),
+                                                     dict(col='nimSwap', title='Swap etkisi dahil marj: (net faiz + ticari kâr/zarar) / ort. aktif (%)', fmt='num', d=2, start='2023-07-31'),
                                                      dict(col='oynakPay', title='Oynak gelir payı: (ticari + diğer) / brüt faaliyet kârı (%)', fmt='num', start='2023-07-31'),
-                                                     dict(col='riskMaliyeti', title='Risk maliyeti: karşılık gideri / ortalama canlı kredi (%)', fmt='num', d=2, start='2023-07-31'),
+                                                     dict(col='karsilikPPI', title='Karşılık gideri / karşılık öncesi kâr (%)', fmt='num', start='2023-07-31'),
                                                      dict(col='efVergi', title='Efektif vergi oranı (%)', fmt='num', start='2023-07-31')],
-              [[1, 1], [1, 1]], sub='Çekirdek kârlılık = net faiz + net komisyon − faaliyet gideri; 12 aylık yıllıklandırılmış')
+              [[1, 1, 1], [1, 1]], sub='Çekirdek kârlılık = net faiz + net komisyon − faaliyet gideri; swap maliyetleri BDDK sunumunda ticari kâr/zararda kaldığından marj vekili; 12 aylık yıllıklandırılmış')
 
 
 def rasyolar_page(pdf):
@@ -764,6 +774,91 @@ def kopru_page(pdf):
     pdf.savefig(fig); plt.close(fig)
 
 
+def segment_risk_page(pdf):
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Aktif Kalitesi | Segment Riski', 'Sorunlu segmentlere maruziyet: teminatsız bireysel (ihtiyaç + kredi kartı), KOBİ ve YP kredi payları; segment NPL oranları')
+    axes = grid_axes(fig, [[1, 1], [1, 1]])
+    multi_panel(axes[0], [('S', 'nplKK', 'Kredi kartı', KIRMIZI), ('S', 'nplIhtiyac', 'İhtiyaç', '#E07B00'), ('S', 'nplKobi', 'KOBİ', '#7A5C9E'), ('S', 'nplTic', 'Ticari', LACI), ('S', 'nplKonut', 'Konut', '#2E7D5B')],
+                'Sektör: segment NPL oranları (%)', '2023-01-31', fmt='num', d=2)
+    line_panel(axes[1], 'teminatsizPay', 'Teminatsız bireysel krediler / canlı krediler (%)', '2023-01-31', 'num', DEPG, d=1)
+    line_panel(axes[2], 'kobiPay', 'KOBİ kredileri / canlı krediler (%)', '2023-01-31', 'num', d=1)
+    line_panel(axes[3], 'ypKrediPay', 'YP krediler / canlı krediler (%)', '2023-01-31', 'num', d=1)
+    legend_bottom(fig, [(GC[g], t) for g, t in GLEG])
+    pdf.savefig(fig); plt.close(fig)
+
+
+def karsilik_page(pdf):
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Aktif Kalitesi | Karşılıklar ve Risk Maliyeti', 'Risk maliyeti = 12 aylık kredi karşılık giderleri (özel + genel) / 13 aylık ortalama brüt kredi; aşama karşılıkları = beklenen zarar karşılığı stokları')
+    axes = grid_axes(fig, [[1, 1], [1, 1]])
+    line_panel(axes[0], 'cor', 'Risk maliyeti (%)', '2023-07-31', 'num', d=2)
+    multi_panel(axes[1], [('S', 'ecl1Oran', '1. aşama', '#2E7D5B'), ('S', 'ecl2Oran', '2. aşama', '#E07B00'), ('S', 'eclToplam', 'Toplam', LACI)],
+                'Sektör: beklenen zarar karşılığı stokları / krediler (%) — 1. ve 2. aşama canlı, toplam brüt krediye oranla', '2023-01-31', fmt='num', d=2)
+    line_panel(axes[2], 'ecl2Oran', '2. aşama karşılıkları / canlı krediler (%)', '2023-01-31', 'num', d=2)
+    line_panel(axes[3], 'corNet', 'Net risk maliyeti: takipteki alacaklardan alınan faizler düşülmüş (%)', '2023-07-31', 'num', d=2)
+    legend_bottom(fig, [(GC[g], t) for g, t in GLEG])
+    pdf.savefig(fig); plt.close(fig)
+
+
+def reel_fx_page(pdf):
+    fx = reel_sektor_fx()
+    if not fx:
+        return
+    xs = [pd.Timestamp(r['tarih'] + '-01') + pd.offsets.MonthEnd(0) for r in fx]
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Ek | Reel Sektör Döviz Pozisyonu', f"TCMB, finansal kesim dışındaki firmaların döviz varlık ve yükümlülükleri; son veri {fx[-1]['tarih']} (milyar USD)")
+    axes = grid_axes(fig, [[1, 1], [1, 1]])
+    net = [r['net'] / 1e3 for r in fx]
+    axes[0].fill_between(xs, net, 0, color=KIRMIZI, alpha=0.18); axes[0].plot(xs, net, color=KIRMIZI, lw=1.8)
+    axes[0].set_title('Net döviz pozisyonu (milyar USD)', fontsize=10.5, color=METIN); style(axes[0]); axes[0].axhline(0, color='#666', lw=0.6)
+    axes[0].text(xs[-1], net[-1], f" {tr(net[-1], 1)}", color=KIRMIZI, fontsize=8, fontweight='bold', va='center')
+    axes[1].plot(xs, [r['varlik'] / 1e3 for r in fx], color='#2E7D5B', lw=1.8, label='Döviz varlıkları'); axes[1].plot(xs, [r['yukumluluk'] / 1e3 for r in fx], color=LACI, lw=1.8, label='Döviz yükümlülükleri')
+    axes[1].set_title('Varlıklar ve yükümlülükler (milyar USD)', fontsize=10.5, color=METIN); style(axes[1]); axes[1].legend(fontsize=8, frameon=False, loc='upper left')
+    nk = [None if r.get('net_kisa') is None else r['net_kisa'] / 1e3 for r in fx]
+    axes[2].plot(xs, nk, color='#E07B00', lw=1.8); axes[2].axhline(0, color='#666', lw=0.6)
+    axes[2].set_title('Kısa vadeli net döviz pozisyonu (milyar USD)', fontsize=10.5, color=METIN); style(axes[2])
+    axes[3].plot(xs, [None if r.get('yurtici_kredi') is None else r['yurtici_kredi'] / 1e3 for r in fx], color=LACI, lw=1.8, label='Yurt içinden sağlanan krediler')
+    axes[3].plot(xs, [None if r.get('yurtdisi_kredi') is None else r['yurtdisi_kredi'] / 1e3 for r in fx], color='#5E8BC5', lw=1.8, label='Yurt dışından sağlanan krediler')
+    axes[3].set_title('Nakdi döviz kredileri (milyar USD)', fontsize=10.5, color=METIN); style(axes[3]); axes[3].legend(fontsize=8, frameon=False, loc='upper left')
+    for ax in axes:
+        ax.xaxis.set_major_locator(mdates.YearLocator(2)); ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+    fig.text(0.03, 0.05, 'Firmaların net kısa döviz pozisyonu bankaların YP kredi kalitesinin ve kur riskinin öncü göstergesidir; pozisyon büyüdükçe kur şoklarına duyarlılık artar.', fontsize=8, color='#555')
+    pdf.savefig(fig); plt.close(fig)
+
+
+def basabas_page(pdf):
+    B = [r for r in basabas() if r['tarih'] >= '2019-01']
+    if not B:
+        return
+    xs = [pd.Timestamp(r['tarih'] + '-01') + pd.offsets.MonthEnd(0) for r in B]; L = B[-1]
+    g = lambda k: [r.get(k) for r in B]
+    fig = plt.figure(figsize=(PW, PH)); header(fig, 'Ek | TL Mevduatın Kur Başabaşı', f"3 aya kadar vadeli TL ve USD mevduat faizleri (akım, aylık ortalama, yıllık basit) ile Piyasa Katılımcıları Anketi 12 ay sonrası USD/TL beklentisi; son veri {L['tarih']}")
+    axes = grid_axes(fig, [[1, 1], [1, 1]])
+    def uc(ax, v, c):
+        ax.text(xs[-1], v, f" {tr(v, 1)}", color=c, fontsize=8, fontweight='bold', va='center')
+    ax = axes[0]
+    ax.plot(xs, g('tl3'), color=LACI, lw=2, label='TL mevduat faizi (3 aya kadar)'); ax.plot(xs, g('basabas_tl'), color=KIRMIZI, lw=2, label='Başabaş TL faizi: USD faizi + beklenen kur artışı')
+    uc(ax, L['tl3'], LACI); uc(ax, L['basabas_tl'], KIRMIZI)
+    ax.set_title('TL mevduat faizi ve başabaş faiz (%)', fontsize=10.5, color=METIN); style(ax); ax.legend(fontsize=8, frameon=False, loc='upper left')
+    ax = axes[1]
+    ax.plot(xs, g('bek_dep'), color='#E07B00', lw=2, label='Beklenen 12 aylık kur artışı (PKA)'); ax.plot(xs, g('basabas_dep'), color=LACI, lw=2, label='Faiz farkının karşıladığı kur artışı')
+    uc(ax, L['bek_dep'], '#E07B00'); uc(ax, L['basabas_dep'], LACI)
+    ax.set_title('Beklenen kur artışı ve faiz farkının karşıladığı kur artışı (%)', fontsize=10.5, color=METIN); style(ax); ax.legend(fontsize=8, frameon=False, loc='upper left')
+    ax = axes[2]
+    v = np.array(g('usd_getiri'), dtype=float)
+    ax.fill_between(xs, v, 0, where=v >= 0, color='#2E7D5B', alpha=0.25, interpolate=True); ax.fill_between(xs, v, 0, where=v < 0, color=KIRMIZI, alpha=0.25, interpolate=True)
+    ax.plot(xs, v, color=METIN, lw=1.6); ax.axhline(0, color='#666', lw=0.6); uc(ax, L['usd_getiri'], METIN)
+    ax.set_title('TL mevduatın beklenen USD getirisi: (1 + TL faizi) / (beklenen kur / cari kur) − 1 (%)', fontsize=10.5, color=METIN); style(ax)
+    ax = axes[3]
+    ax.plot(xs, g('spot'), color=LACI, lw=2, label='USD/TL, aylık ortalama'); ax.plot(xs, g('pka12'), color='#E07B00', lw=2, label='12 ay sonrası beklentisi (PKA)')
+    uc(ax, L['spot'], LACI); uc(ax, L['pka12'], '#E07B00')
+    ax.set_title('USD/TL: cari kur ve 12 ay sonrası beklentisi', fontsize=10.5, color=METIN); style(ax); ax.legend(fontsize=8, frameon=False, loc='upper left')
+    for ax in axes:
+        ax.xaxis.set_major_locator(mdates.YearLocator()); ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+    t_tl, t_usd = 17.5, 25.0; k = L['pka12'] / L['spot']
+    gerekli = ((1 + L['usd3'] * (1 - t_usd / 100) / 100) * k - 1) / (1 - t_tl / 100) * 100
+    fig.text(0.03, 0.062, f"Vergi sonrası (hanehalkı) bakış, {L['tarih']}: TL stopajı %{tr(t_tl)} ve DTH stopajı %{tr(t_usd, 0)} varsayımıyla USD mevduata denk gelen brüt TL faizi %{tr(gerekli)}; fiili TL faizi %{tr(L['tl3'])} → marj {tr(L['tl3'] - gerekli)} puan.", fontsize=8, color='#555')
+    fig.text(0.03, 0.040, "Risk primi ve mevduat dışı alternatifler (Eurobond vb.) dahil değildir; mevduatın 12 ay boyunca aynı faizle yenilendiği varsayılır.", fontsize=8, color='#555')
+    pdf.savefig(fig); plt.close(fig)
+
+
 # ---------- kurulum ----------
 def build(path):
     SAYFA[0] = 0
@@ -799,6 +894,8 @@ def build(path):
     # Aktif kalitesi
     line_page(pdf, 'Aktif Kalitesi | Takipteki Alacaklar', [dict(col='npl', title='NPL oranı', start='2023-01-31', fmt='num', d=2), dict(col='nplTuk', title='Tüketici NPL', start='2023-01-31', fmt='num', d=2, groups=DEPG), dict(col='nplKobi', title='KOBİ NPL', start='2023-01-31', fmt='num', d=2), dict(col='nplTic', title='Ticari / kurumsal NPL', start='2023-01-31', fmt='num', d=2)], [[1, 1], [1, 1]], sub='Yüzde')
     npl_olusum_page(pdf)
+    segment_risk_page(pdf)
+    karsilik_page(pdf)
     # Fonlama
     area_page(pdf, 'Fonlama | Toplanan Fon Yapısı', 'Toplanan fon bileşenlerinin payı (%), son 25 ay', FON, groups=DEPG)
     dolarizasyon_page(pdf)
@@ -807,6 +904,8 @@ def build(path):
     sermaye_page(pdf)
     # Ekler
     kopru_page(pdf)
+    reel_fx_page(pdf)
+    basabas_page(pdf)
     rows = []
     for lab, col in GELIR_SATIRLAR:
         sg = -1 if col in GIDER_KALEMLERI else 1

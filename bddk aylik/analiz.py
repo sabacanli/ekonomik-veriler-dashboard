@@ -12,7 +12,7 @@
   Köprü     : ay sonundan sonraki haftalık BDDK verisi (bddk_data/) — ay bittikten sonra ne oldu
 """
 import warnings; warnings.filterwarnings('ignore')
-import sys
+import json, sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -51,6 +51,28 @@ D['buyumeKapasite'] = (D.yasalOzk / (0.12 * D.rak) - 1) * 100
 D['kmPay'] = D.kmTot / D.mevduat * 100
 D['ypMevPay'] = D.mvYP / D.mevduat * 100
 
+# ── karşılıklar ve risk maliyeti (HSBC/analist çerçevesine yakın tanımlar)
+D['cor'] = (D.ozelProv_12 + D.genelProv_12) / D.avgKredi * 100            # kredi karşılık giderleri (özel + genel) / ort. brüt kredi
+D['corNet'] = (D.ozelProv_12 + D.genelProv_12 - D.takipFaiz_12) / D.avgKredi * 100   # takipteki alacaklardan alınan faizler düşülerek
+D['karsilikPPI'] = D.karsilik_12 / (D.brutKar_12 - D.opex_12) * 100          # karşılık gideri / karşılık öncesi kâr
+D['ecl1Oran'] = D.ecl1 / D.canli * 100                                       # 1. aşama karşılık / canlı krediler
+D['ecl2Oran'] = D.ecl2 / D.canli * 100                                       # 2. aşama karşılık / canlı krediler (yakın izleme riski vekili)
+D['eclToplam'] = (D.ecl1 + D.ecl2 + D.ozelKars) / D.kredi * 100              # toplam beklenen zarar karşılığı / brüt kredi
+
+# ── segment riski: teminatsız bireysel, KOBİ, YP kredi payları ve segment NPL'leri
+D['teminatsizPay'] = (D.ihtiyac + D.kk) / D.canli * 100
+D['kobiPay'] = D.kobi / D.canli * 100
+D['ypKrediPay'] = D.canliYP / D.canli * 100
+D['nplKK'] = D.tkKK / (D.kk + D.tkKK) * 100
+D['nplIhtiyac'] = D.tkIhtiyac / (D.ihtiyac + D.tkIhtiyac) * 100
+D['nplKonut'] = D.tkKonut / (D.konut + D.tkKonut) * 100
+D['nplTasit'] = D.tkTasit / (D.tasit + D.tkTasit) * 100
+D['nplTP'] = D.tkTP / (D.krediTP) * 100
+D['nplYP'] = D.tkYP / (D.krediYP) * 100
+
+# ── swap etkisi dahil marj vekili: TL swap maliyetleri BDDK sunumunda ticari kâr/zarar içinde kalır
+D['nimSwap'] = (D.netFaiz_12 + D.ticari_12) / D.avgAktif * 100
+
 # ── reel büyüme (TÜFE yıllık)
 ENF_SON = None
 try:
@@ -66,6 +88,22 @@ except Exception as e:
     D['tufe'] = np.nan
     for c in ['canliTP', 'mvTP', 'akTP', 'tukKK', 'tuzel', 'canli', 'mevduat']:
         D['gr_' + c] = np.nan
+
+
+def basabas():
+    """TL mevduat kur başabaş girdileri (makro.json): [{tarih, tl3, usd3, pka12, spot, bek_dep, basabas_dep, basabas_tl, usd_getiri}]"""
+    try:
+        return json.loads((HERE / 'makro.json').read_text(encoding='utf-8')).get('basabas', [])
+    except Exception:
+        return []
+
+
+def reel_sektor_fx():
+    """TCMB reel sektör döviz pozisyonu (makro.json): [{tarih, varlik, yukumluluk, net, net_kisa, ...}] milyon USD."""
+    try:
+        return json.loads((HERE / 'makro.json').read_text(encoding='utf-8')).get('reel_sektor_fx', [])
+    except Exception:
+        return []
 
 
 def _at(g, d):
@@ -163,3 +201,7 @@ if __name__ == '__main__':
     k = haftalik_kopru(); print("köprü:", None if not k else (k['baz'], k['son'], k['hafta'], {g: round(v['kredi'], 2) for g, v in k['gruplar'].items()}))
     for s, ad in SEGMENTLER:
         print(f"  {ad:24s} 12a {S['g_'+s]:6.1f}  3a {S['g3_'+s]:6.1f}")
+    print(f"CoR {S.cor:.2f} (net {S.corNet:.2f}) · karşılık/PPI {S.karsilikPPI:.1f} · ECL1 {S.ecl1Oran:.2f} ECL2 {S.ecl2Oran:.2f} toplam {S.eclToplam:.2f} · teminatsız pay {S.teminatsizPay:.1f} · NPL KK {S.nplKK:.2f} ihtiyaç {S.nplIhtiyac:.2f} konut {S.nplKonut:.2f} · NIM {S.nim:.2f} swap dahil {S.nimSwap:.2f}")
+    for g in GROUPS:
+        a = at(g); print(f"   {GSHORT[g]:18s} CoR {a.cor:5.2f} · ECL2 {a.ecl2Oran:4.2f} · teminatsız {a.teminatsizPay:5.1f} · KOBİ {a.kobiPay:5.1f} · YP {a.ypKrediPay:5.1f} · NIM {a.nim:5.2f} / swap dahil {a.nimSwap:5.2f}")
+    fx = reel_sektor_fx(); print("reel sektör FX:", (fx[-1] if fx else None))

@@ -57,6 +57,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
+          EVDS_API_KEY: ${{ secrets.EVDS_API_KEY }}
         run: |
           ARGS="--otomatik"
           if [ -n "${{ github.event.inputs.donem }}" ]; then ARGS="--donem ${{ github.event.inputs.donem }}"; fi
@@ -68,7 +69,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site "bddk aylik/raw" "bddk aylik/gorunum.json"
+          git add site "bddk aylik/raw" "bddk aylik/gorunum.json" "bddk aylik/makro.json"
           if git diff --cached --quiet; then
             echo "Değişiklik yok."
           else

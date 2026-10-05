@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from calc import D, LAST, GROUPS, GSHORT, at  # noqa: E402
-from analiz import hacim_marj, pay_degisim, haftalik_kopru, SEGMENTLER, PAY_KOL  # noqa: E402
+from analiz import hacim_marj, pay_degisim, haftalik_kopru, reel_sektor_fx, basabas, SEGMENTLER, PAY_KOL  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "gorunum.json"
@@ -49,12 +49,15 @@ def ozet_metni():
          f"- NPL oluşum hızı (yıllıklandırılmış): son ay %{tr(S.nplOlusum, 2)}, 3 aylık ort. %{tr(S.nplOlusum3, 2)} (önceki ay 3 aylık %{tr(P.nplOlusum3, 2)}); risk maliyeti %{tr(S.riskMaliyeti, 2)}",
          f"- Kârlılık kalitesi: çekirdek kârlılık/aktif %{tr(S.cekirdekAktif, 2)} (önceki ay %{tr(P.cekirdekAktif, 2)}); oynak gelir payı %{tr(S.oynakPay)}; efektif vergi %{tr(S.efVergi)}",
          f"- Sermaye tamponu: %12 hedefe göre fazla sermaye {tr(S.fazlaSermaye, 0)} milyar TL, RAK/aktif %{tr(S.rakYogunluk)}, RAK büyüme kapasitesi %{tr(S.buyumeKapasite, 0)}",
+         f"- Karşılıklar: risk maliyeti (özel+genel karşılık / ort. brüt kredi, 12 aylık) %{tr(S.cor, 2)} (önceki ay %{tr(P.cor, 2)}); 2. aşama karşılık / canlı kredi %{tr(S.ecl2Oran, 2)}; karşılık gideri / karşılık öncesi kâr %{tr(S.karsilikPPI)}",
+         f"- Segment riski: teminatsız bireysel (ihtiyaç + KK) / canlı %{tr(S.teminatsizPay)}; NPL kredi kartı %{tr(S.nplKK, 2)}, ihtiyaç %{tr(S.nplIhtiyac, 2)}, KOBİ %{tr(S.nplKobi, 2)}, ticari/kurumsal %{tr(S.nplTic, 2)}",
+         f"- Swap etkisi dahil marj vekili (net faiz + ticari kâr/zarar / ort. aktif) %{tr(S.nimSwap, 2)} (önceki ay %{tr(P.nimSwap, 2)}); yalnız net faiz marjı %{tr(S.nim, 2)}",
          "", "GRUPLAR (aktif büyümesi / TP canlı kredi büyümesi / NPL / ROE / SYR / aylık net kâr milyar TL):"]
     for g in GROUPS:
         if g == "S":
             continue
         a = at(g)
-        L.append(f"- {GSHORT[g]}: %{tr(a.g_aktif)} / %{tr(a.g_canliTP)} / %{tr(a.npl, 2)} / %{tr(a.roe)} / %{tr(a.syr)} / {tr(a.netKar_m/1e3)}")
+        L.append(f"- {GSHORT[g]}: %{tr(a.g_aktif)} / %{tr(a.g_canliTP)} / %{tr(a.npl, 2)} / %{tr(a.roe)} / %{tr(a.syr)} / {tr(a.netKar_m/1e3)} · risk maliyeti %{tr(a.cor, 2)} · teminatsız pay %{tr(a.teminatsizPay)}")
     hm = hacim_marj("S")
     if hm:
         L.append(f"- Hacim–marj: sektör net faiz geliri yıllık %{tr(hm['toplam_pct'])} arttı; hacim etkisi %{tr(hm['hacim_pct'])}, marj etkisi %{tr(hm['marj_pct'])}")
@@ -62,6 +65,13 @@ def ozet_metni():
     kaz = sorted(((g, v['canli']['degisim']) for g, v in P_.items() if v.get('canli')), key=lambda x: -x[1])
     if kaz:
         L.append(f"- Canlı kredi pazar payı (12 ay, puan): kazanan {GSHORT[kaz[0][0]]} {tr(kaz[0][1], 2)}, kaybeden {GSHORT[kaz[-1][0]]} {tr(kaz[-1][1], 2)}")
+    fx = reel_sektor_fx()
+    if fx:
+        L.append(f"- Reel sektör net döviz pozisyonu ({fx[-1]['tarih']}): {tr(fx[-1]['net']/1e3)} milyar USD (12 ay önce {tr(fx[-13]['net']/1e3) if len(fx) > 13 else '—'})")
+    B = basabas()
+    if B:
+        b = B[-1]
+        L.append(f"- TL mevduat kur başabaşı ({b['tarih']}): 3 ay TL mevduat faizi %{tr(b['tl3'])}, USD %{tr(b['usd3'], 2)}; PKA 12 ay beklenen kur artışı %{tr(b['bek_dep'])}, faiz farkının karşıladığı kur artışı %{tr(b['basabas_dep'])}; TL mevduatın beklenen USD getirisi %{tr(b['usd_getiri'])} (başabaş TL faizi %{tr(b['basabas_tl'])})")
     K = haftalik_kopru()
     if K and K['gruplar'].get('S'):
         s_ = K['gruplar']['S']

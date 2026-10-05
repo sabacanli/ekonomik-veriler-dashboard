@@ -18,8 +18,8 @@ def load(name, cols):
     df=pd.DataFrame(rows,columns=['g','d']+cols)
     return df.set_index(['g','d']).sort_index()
 
-T1=load('T1',['nakTP','nakYP','mkTP','mkYP','krTP','krYP','tkTP','tkYP','fkTP','fkYP','ozelKars','akTP','akYP','mvTP','mvYP','vdsTP','vdsYP','topTP','topYP','sermBz','ozk'])
-T2=load('T2',['faizGel','faizGid','ucrGel','ucrGid','ticari','digGel','personel','digIsl','karsilik','vergi','netKar','krFaiz','mkFaiz','digFaizGel','mvFaiz','topFaiz','digFaizGid'])
+T1=load('T1',['nakTP','nakYP','mkTP','mkYP','krTP','krYP','tkTP','tkYP','fkTP','fkYP','ozelKars','akTP','akYP','mvTP','mvYP','vdsTP','vdsYP','topTP','topYP','sermBz','ozk','ecl1','ecl2'])
+T2=load('T2',['faizGel','faizGid','ucrGel','ucrGid','ticari','digGel','personel','digIsl','karsilik','vergi','netKar','krFaiz','mkFaiz','digFaizGel','mvFaiz','topFaiz','digFaizGid','ozelProv','genelProv','takipFaiz'])
 T4=load('T4',['tuk','konut','tasit','ihtiyac','kk','tukKK','tkTuk','tkKonut','tkTasit'])
 T4B=load('T4B',['tkIhtiyac','tkKK','tkTukKK'])
 T6=load('T6',['kobiTP','kobiYP','kobi','tkKobi'])

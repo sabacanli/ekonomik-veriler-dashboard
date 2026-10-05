@@ -114,7 +114,7 @@
 
     <section class="chart-card" id="secKalite">
       <h3>Kârlılık Kalitesi</h3>
-      <p class="cap">Çekirdek kârlılık (net faiz + net komisyon − faaliyet gideri) / ortalama aktif ve risk maliyeti (karşılık / ortalama canlı kredi), % · tüm gruplar</p>
+      <p class="cap">Çekirdek kârlılık (net faiz + net komisyon − faaliyet gideri) / ortalama aktif ve swap etkisi dahil marj vekili (net faiz + ticari kâr/zarar) / ortalama aktif, % · tüm gruplar</p>
       <div id="chCekirdek"></div>
       <div id="chRisk"></div>
     </section>
@@ -124,6 +124,33 @@
       <p class="cap">NPL oranı (%) ve NPL oluşum hızı (takipteki alacak bakiyesindeki aylık net artış / canlı krediler, yıllıklandırılmış %; çubuk aylık, çizgi 3 aylık ortalama)</p>
       <div id="chNpl"></div>
       <div id="chNplOlusum"></div>
+    </section>
+
+    <section class="chart-card" id="secSegment">
+      <h3>Segment Riski</h3>
+      <p class="cap">Sektörde segment NPL oranları (kredi kartı, ihtiyaç, KOBİ, ticari/kurumsal, konut) ve gruplarda teminatsız bireysel kredi (ihtiyaç + kredi kartı) payı (%)</p>
+      <div id="chSegNpl"></div>
+      <div id="chTeminatsiz"></div>
+    </section>
+
+    <section class="chart-card" id="secKarsilik">
+      <h3>Karşılıklar ve Risk Maliyeti</h3>
+      <p class="cap">Risk maliyeti = 12 aylık kredi karşılık giderleri (özel + genel) / ortalama brüt kredi (%) · gruplar; altta sektörün aşama karşılıkları (beklenen zarar karşılığı stokları / canlı krediler)</p>
+      <div id="chCor"></div>
+      <div id="chEcl"></div>
+    </section>
+
+    <section class="chart-card" id="secReelFx" style="display:none">
+      <h3>Reel Sektör Döviz Pozisyonu</h3>
+      <p class="cap" id="capReelFx"></p>
+      <div id="chReelFx"></div>
+    </section>
+
+    <section class="chart-card" id="secBasabas" style="display:none">
+      <h3>TL Mevduatın Kur Başabaşı</h3>
+      <p class="cap" id="capBasabas"></p>
+      <div id="chBasabasFaiz"></div>
+      <div id="chBasabasGetiri"></div>
     </section>
 
     <section class="chart-card" id="secSermaye">
@@ -277,7 +304,38 @@
       basit("chTPag", "fonTPag", D.mevduat_gruplari, 1);
       basit("chYpMev", "g_mvYP_usd", D.mevduat_gruplari, 1);
       basit("chCekirdek", "cekirdekAktif", KOD, 2);
-      basit("chRisk", "riskMaliyeti", KOD, 2);
+      basit("chRisk", "nimSwap", KOD, 2);
+      basit("chCor", "cor", KOD, 2);
+      basit("chTeminatsiz", "teminatsizPay", D.mevduat_gruplari, 1);
+      cokSerili("chSegNpl", [[D.seri.S.nplKK, "Kredi kartı", C.hisse, 2], [D.seri.S.nplIhtiyac, "İhtiyaç", PAL.sari, 2], [D.seri.S.nplKobi, "KOBİ", PAL.mor, 2],
+        [D.seri.S.nplTic, "Ticari / kurumsal", C.toplam, 2], [D.seri.S.nplKonut, "Konut", C.green, 2]], T, 99999, 330, false, { fmt: v => "%" + trNum(v, 2), hoverBirim: "%{y:.2f}%" });
+      cokSerili("chEcl", [[D.seri.S.ecl1Oran, "1. aşama / canlı", C.green, 2], [D.seri.S.ecl2Oran, "2. aşama / canlı", PAL.sari, 2], [D.seri.S.eclToplam, "Toplam karşılık / brüt kredi", C.toplam, 2]],
+        T, 99999, 300, false, { fmt: v => "%" + trNum(v, 2), hoverBirim: "%{y:.2f}%" });
+      const RFX = (D.analiz || {}).reel_fx;
+      if (RFX && RFX.length) {
+        document.getElementById("secReelFx").style.display = "";
+        const fx = RFX; const fxT = fx.map(r => r.tarih + "-01");
+        document.getElementById("capReelFx").textContent = "TCMB, finansal kesim dışındaki firmaların döviz varlık ve yükümlülükleri (milyar USD) · son veri " + fx[fx.length - 1].tarih + " · bankaların YP kredi kalitesi için öncü gösterge";
+        draw("chReelFx", [
+          { type: "scatter", mode: "lines", x: fxT, y: fx.map(r => r.net), name: "Net döviz pozisyonu", line: { color: C.hisse, width: 2.2 }, fill: "tozeroy", fillcolor: "rgba(212,0,49,0.10)", hovertemplate: "%{x|%m.%Y}<br>net %{y:.1f} milyar USD<extra></extra>" },
+          { type: "scatter", mode: "lines", x: fxT, y: fx.map(r => r.varlik), name: "Döviz varlıkları", line: { color: C.green, width: 1.4 }, hovertemplate: "%{x|%m.%Y}<br>varlık %{y:.1f}<extra></extra>" },
+          { type: "scatter", mode: "lines", x: fxT, y: fx.map(r => -r.yukumluluk), name: "Döviz yükümlülükleri (−)", line: { color: C.toplam, width: 1.4 }, hovertemplate: "%{x|%m.%Y}<br>yükümlülük %{y:.1f}<extra></extra>" },
+        ], { height: 380, yaxis: { zeroline: true, zerolinecolor: "#9AA4B2" } });
+      }
+      const BB = (D.analiz || {}).basabas;
+      if (BB && BB.length) {
+        document.getElementById("secBasabas").style.display = "";
+        const bt = BB.map(r => r.tarih + "-01"); const bl = BB[BB.length - 1];
+        document.getElementById("capBasabas").textContent = "3 aya kadar vadeli TL ve USD mevduat faizleri (akım, aylık ortalama) ile Piyasa Katılımcıları Anketi 12 ay sonrası USD/TL beklentisi · son veri " + bl.tarih + ": TL faizi %" + trNum(bl.tl3, 1) + ", beklenen 12 aylık kur artışı %" + trNum(bl.bek_dep, 1) + ", TL mevduatın beklenen USD getirisi %" + trNum(bl.usd_getiri, 1) + " · başabaş TL faizi = (1 + USD faizi) × (beklenen kur / cari kur) − 1";
+        draw("chBasabasFaiz", [
+          { type: "scatter", mode: "lines", x: bt, y: BB.map(r => r.tl3), name: "TL mevduat faizi (3 aya kadar)", line: { color: C.toplam, width: 2.2 }, hovertemplate: "%{x|%m.%Y}<br>TL faizi %{y:.1f}%<extra></extra>" },
+          { type: "scatter", mode: "lines", x: bt, y: BB.map(r => r.basabas_tl), name: "Başabaş TL faizi (USD faizi + beklenen kur artışı)", line: { color: C.hisse, width: 2 }, hovertemplate: "%{x|%m.%Y}<br>başabaş %{y:.1f}%<extra></extra>" },
+          { type: "scatter", mode: "lines", x: bt, y: BB.map(r => r.bek_dep), name: "Beklenen 12 aylık kur artışı (PKA)", line: { color: PAL.sari, width: 1.6, dash: "dot" }, hovertemplate: "%{x|%m.%Y}<br>beklenen kur artışı %{y:.1f}%<extra></extra>" },
+        ], { height: 360 });
+        draw("chBasabasGetiri", [
+          { type: "scatter", mode: "lines", x: bt, y: BB.map(r => r.usd_getiri), name: "TL mevduatın beklenen USD getirisi (%)", line: { color: C.green, width: 2.2 }, fill: "tozeroy", fillcolor: "rgba(46,125,91,0.12)", hovertemplate: "%{x|%m.%Y}<br>%{y:.1f}%<extra></extra>" },
+        ], { height: 300, yaxis: { zeroline: true, zerolinecolor: "#9AA4B2" } });
+      }
 
       const A = D.analiz || {};
       // İvme haritası (saçılım) + segmentler
