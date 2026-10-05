@@ -10,7 +10,10 @@ Gönderim Resend API'si üzerinden yapılır. Ortam değişkenleri (GitHub Actio
 GİZLİLİK: depo ve Actions logları herkese açıktır — bu script alıcı adreslerini ASLA yazdırmaz;
 hata çıktıları da adres içerebileceğinden yalnız durum kodu ve hata türü loglanır.
 Her alıcıya ayrı e-posta gider (alıcılar birbirini görmez). Idempotency-Key = gün + alıcı özeti:
-aynı gün ikinci koşuda Resend aynı alıcıya ikinci kez göndermez.
+aynı gün ikinci koşuda Resend aynı alıcıya ikinci kez göndermez. Aylık bültende anahtara PDF'in özeti de girer:
+rapor yeniden üretilip değiştiyse (güncellenmiş sürüm) aynı ay için tekrar gönderilebilir; aynı PDF 24 saat içinde
+ikinci kez gitmez. BULTEN_NOT (env) doluysa aylık e-postanın başına vurgulu bir not kutusu eklenir ve konuya
+"güncellenmiş rapor" ibaresi gelir (iş akışındaki "aciklama" girdisi).
 
 Kullanım:
   python haberler/bulten_gonder.py --mod test      # yalnız listedeki İLK alıcıya
@@ -387,8 +390,8 @@ def metin_hafta(H):
     return "\n".join(S)
 
 
-def html_aylik(B):
-    """Bankacılık Monitörü aylık e-postası (PDF ekte)."""
+def html_aylik(B, notu=""):
+    """Bankacılık Monitörü aylık e-postası (PDF ekte); notu: alıcılara vurgulu kısa açıklama (ör. güncellenmiş sürüm)."""
     k = B["kpi"]["S"]; G = B.get("gorunum") or {}
     kutu = lambda ad, deger, alt: (f'<td style="padding:6px 6px;width:33%;vertical-align:top;"><div style="background:#F8F9FC;border-left:4px solid #1C3044;padding:10px 12px;border-radius:6px;">'
                                    f'<div style="font-size:11px;color:#8A93A6;text-transform:uppercase;letter-spacing:.4px;">{esc(ad)}</div>'
@@ -412,6 +415,8 @@ def html_aylik(B):
   <div style="color:#C9D3E0;font-size:13px;margin-top:5px;">{esc(B["donem_ad"])} · BDDK Aylık Bülten verileriyle yedi banka grubunun görünümü · PDF rapor ekte</div>
 </td></tr>
 <tr><td style="padding:24px 28px 8px;">"""]
+    if notu:
+        P.append(f'<div style="background:#FFF4E5;border-left:4px solid #D40031;padding:10px 14px;border-radius:6px;font-size:13.5px;color:#1A2233;line-height:1.5;margin:0 0 16px;">{esc(notu)}</div>')
     if G.get("baslik"):
         P.append(f'<div style="font-size:19px;font-weight:700;color:#1A2233;line-height:1.35;margin:0 0 12px;">{esc(G["baslik"])}</div>')
     P.append('<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' + "".join(kutu(*kart[i]) for i in range(3)) + "</tr><tr>" + "".join(kutu(*kart[i]) for i in range(3, 6)) + "</tr></table>")
@@ -446,9 +451,11 @@ def html_aylik(B):
     return "".join(P)
 
 
-def metin_aylik(B):
+def metin_aylik(B, notu=""):
     k = B["kpi"]["S"]; G = B.get("gorunum") or {}
     S = [f"EKORDION · BANKACILIK MONİTÖRÜ — {B['donem_ad']}", ""]
+    if notu:
+        S += [f"NOT: {notu}", ""]
     if G.get("baslik"):
         S += [G["baslik"], ""]
     S += [f"Toplam aktif: {trn(k['aktif'], 1)} trilyon TL (yıllık {trn(k['g_aktif'], 1, True)}%)",
@@ -514,13 +521,16 @@ def main():
             print("Bülten atlandı: bankacilik.json yok (bddk aylik/update.py çalışmamış).")
             return
         B = json.loads(fp.read_text(encoding="utf-8"))
+        notu = os.environ.get("BULTEN_NOT", "").strip()
         kimlik = "bankacilik-" + B["donem"]
-        govde, duz = html_aylik(B), metin_aylik(B)
-        konu = f"Bankacılık Monitörü · {B['donem_ad']}"
+        govde, duz = html_aylik(B, notu), metin_aylik(B, notu)
+        konu = f"Bankacılık Monitörü · {B['donem_ad']}" + (" · güncellenmiş rapor" if notu else "")
         pdf = BASE / "site" / (B.get("pdf") or "")
         if B.get("pdf") and pdf.exists() and pdf.stat().st_size < 20_000_000:
+            veri = pdf.read_bytes()
+            kimlik += "-" + hashlib.sha256(veri).hexdigest()[:8]   # PDF değiştiyse yeni anahtar → güncellenmiş sürüm tekrar gönderilebilir
             ekler = [{"filename": f"Bankacilik_Monitoru_{B['donem']}.pdf",
-                      "content": base64.b64encode(pdf.read_bytes()).decode("ascii")}]
+                      "content": base64.b64encode(veri).decode("ascii")}]
     elif a.tur == "haftalik":
         yil, w, _ = dt.datetime.now(TR).date().isocalendar()
         kimlik = a.hafta or f"{yil}-W{w:02d}"

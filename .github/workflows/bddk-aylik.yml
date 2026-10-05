@@ -2,7 +2,8 @@
 # Her ayın 1–7'si sabah 10:30 TR'de BDDK'da yeni ay yayımlanmış mı diye bakar (tek istek); yeni ay varsa veriyi
 # çeker, Ayın Görünümü'nü (Claude) yazar, PDF + Excel + site verisini üretir, siteyi yayınlar ve bülten listesine
 # PDF ekli e-posta gönderir. Aynı ay zaten yayındaysa hiçbir şey yapmadan çıkar.
-# Elle: Actions → bu workflow → Run workflow (dönem boş = BDDK'daki son ay; bülten: hayir / test / evet).
+# Elle: Actions → bu workflow → Run workflow (dönem boş = BDDK'daki son ay; bülten: hayir / test / evet; aciklama doluysa
+# e-postanın başına not kutusu eklenir ve konu "güncellenmiş rapor" olur — aynı ayın raporunu yeniden göndermek için).
 # Secret'lar: EVDS gerekmez; ANTHROPIC_API_KEY (yorum), RESEND_API_KEY, BULTEN_ALICILAR, BULTEN_YANIT (e-posta).
 name: Bankacılık Monitörü (aylık)
 
@@ -23,6 +24,9 @@ on:
         description: "Aynı ay yayındaysa da yeniden üret"
         type: boolean
         default: false
+      aciklama:
+        description: "Alıcılara kısa not (ör. raporun neden yeniden gönderildiği); boş bırakılabilir"
+        default: ""
 
 permissions:
   contents: write
@@ -100,6 +104,7 @@ jobs:
           BULTEN_ALICILAR: ${{ secrets.BULTEN_ALICILAR }}
           BULTEN_YANIT: ${{ secrets.BULTEN_YANIT }}
           BULTEN_GONDEREN: ${{ vars.BULTEN_GONDEREN }}
+          BULTEN_NOT: ${{ github.event.inputs.aciklama }}
         run: |
           MOD="${{ github.event.inputs.bulten }}"
           if [ "${{ github.event_name }}" = "schedule" ]; then MOD=evet; fi
