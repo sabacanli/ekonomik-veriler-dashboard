@@ -48,6 +48,14 @@
       <div id="ch2"></div>
     </section>
 
+    <section class="chart-card" id="secK4">
+      <h3>4 Haftalık Birikimli Değişim — Yurt İçi Yerleşikler</h3>
+      <p class="cap">Milyar USD · parite ve kıymetli maden fiyat etkisinden arındırılmış 4 haftalık birikimli değişim; pozitif alan döviz/altına geçişi (dolarizasyon), negatif alan TL'ye dönüşü gösterir</p>
+      <button class="btn apko-btn" data-sec="secK4">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secK4">🖼 Resim olarak kopyala</button>
+      <div id="chK4"></div>
+    </section>
+
     <section class="chart-card">
       <h3>Yerleşikler DTH Hesapları Değer Değişimi — Toplam</h3>
       <p class="cap">Altın ve parite etkileri düzeltilmiş, milyar USD</p>
@@ -70,6 +78,7 @@
         ["Yerleşikler Toplam", trNum(h.toplam / 1000, 1, true), null],
         ["Gerçek Kişiler", trNum(h.gercek / 1000, 1, true), null],
         ["Tüzel Kişiler", trNum(h.tuzel / 1000, 1, true), null],
+        ["Son 4 Hafta (birikimli)", trNum(h.k4 / 1000, 1, true), h.k4_sira ? (h.k4_sira === 1 ? "son " + h.k4_adet + " haftanın en yükseği" : "son " + h.k4_adet + " haftada " + h.k4_sira + ". sırada") : "milyar USD", h.k4 >= 0 ? "up" : "down"],
         ["Yılbaşından Beri", trNum(h.ytd / 1000, 1, true), h.ytd >= 0 ? "dolarizasyon" : "de-dolarizasyon", h.ytd >= 0 ? "up" : "down"],
       ]);
 
@@ -112,6 +121,23 @@
         [["6 Ay", 27], ["1 Yıl", 52], ["3 Yıl", 156]], 27,
         n => { N = n; render(); });
       render();
+
+      // ── 4 haftalık birikimli değişim (alan): toplam; gerçek ve tüzel çizgi ──
+      if (W.k4_toplam) {
+        const TEMA = { secK4: false };
+        const x = W.tarih, k4 = W.k4_toplam.map(bn);
+        const CIZ = {
+          secK4: () => draw("chK4", [
+            { type: "scatter", mode: "lines", x, y: k4, name: "Toplam (4 haftalık birikimli)", line: { color: C.toplam, width: 2 }, fill: "tozeroy", fillcolor: "rgba(28,48,68,0.18)",
+              hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Toplam</extra>" },
+            { type: "scatter", mode: "lines", x, y: W.k4_gercek.map(bn), name: "Gerçek kişiler", line: { color: C.gercek, width: 1.4, dash: "dot" }, hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Gerçek</extra>" },
+            { type: "scatter", mode: "lines", x, y: W.k4_tuzel.map(bn), name: "Tüzel kişiler", line: { color: C.tuzel, width: 1.4, dash: "dot" }, hovertemplate: "%{x|%d.%m.%Y}<br>%{y:.1f} milyar USD<extra>Tüzel</extra>" },
+          ], { height: 400, hovermode: "x", yaxis: { zeroline: true, zerolinecolor: "#9AA4B2" },
+               annotations: [annLast(xL, k4[iL], trNum(k4[iL], 1, true), C.toplam)] }, TEMA.secK4),
+        };
+        CIZ.secK4();
+        sunumAraclariKur(TEMA, CIZ);
+      }
     })().catch(e => setOzet("Veri yüklenemedi: " + e.message));
   </script>
 </body>

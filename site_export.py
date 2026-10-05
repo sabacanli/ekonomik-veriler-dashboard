@@ -136,12 +136,18 @@ def build_dth():
             f"Son 4 haftada kümülatif {ht(abs(s4) / 1000)} milyar USD {yon4}; "
             f"yılbaşından beri <b>{ht(abs(ytd) / 1000)} milyar USD {yon_ytd}</b>.")
 
+    for c, k in [("yerlesik_toplam", "k4_toplam"), ("gercek_kisiler", "k4_gercek"), ("tuzel_kisiler", "k4_tuzel")]:
+        d[k] = d[c].rolling(4).sum()   # 4 haftalık birikimli değişim (parite etkisinden arındırılmış)
+    # son 4 haftalık toplamın bulunduğu yer: 2025'ten bu yana en yüksek mi? (bağlam cümlesi)
+    k4 = d["k4_toplam"]; k4_son = float(k4.iloc[-1])
+    k4_gecmis = d[d["tarih"] >= pd.Timestamp(L["tarih"].year - 1, 1, 1)]["k4_toplam"].dropna()
     dp = d.tail(156)
     dump("dth.json", {
         "updated": mtime(fp),
         "ozet_html": ozet,
         "hafta": {"toplam": float(L["yerlesik_toplam"]), "gercek": float(L["gercek_kisiler"]),
-                  "tuzel": float(L["tuzel_kisiler"]), "ytd": ytd},
+                  "tuzel": float(L["tuzel_kisiler"]), "ytd": ytd, "k4": k4_son,
+                  "k4_sira": int((k4_gecmis > k4_son).sum()) + 1, "k4_adet": int(len(k4_gecmis))},
         "haftalik": {
             "tarih": [t.strftime("%Y-%m-%d") for t in dp["tarih"]],
             "toplam": col(dp, "yerlesik_toplam", 1),
@@ -149,6 +155,9 @@ def build_dth():
             "tuzel": col(dp, "tuzel_kisiler", 1),
             "altin": col(dp, "gk_altin", 1),
             "doviz": col(dp, "gk_doviz", 1),
+            "k4_toplam": col(dp, "k4_toplam", 1),
+            "k4_gercek": col(dp, "k4_gercek", 1),
+            "k4_tuzel": col(dp, "k4_tuzel", 1),
         },
     })
 
@@ -359,7 +368,26 @@ def _rezerv_hesapla():
     wd = w.diff()
     dW = wd.iloc[-1]
 
-    # Swap hariç: likidite şablonu (II.2 + II.3, negatif) + aynı tarihli günlük net rezerv — tarihsel seri
+    # Günlük swap hariç net döviz pozisyonu (PCF/analist çerçevesi):
+    #   net rezerv (analitik) − yurt içi swap stoku (EVDS TOTALSTOK alım − satım, günlük)
+    #   − yabancı merkez bankası swapları (likidite tablosu II.2'den: −II.2 − yurt içi stok, URDL tarihleri arası sabit)
+    swap_g = None
+    try:
+        lk0 = pd.read_excel(BASE / "net rezerv" / "likidite.xlsx")
+        lk0["tarih"] = pd.to_datetime(lk0["tarih"]); lk0 = lk0.dropna(subset=["swap_forward"]).sort_values("tarih")
+        rr = r[["tarih", "net_ur", "net_swap"]].copy()
+        ik = pd.merge_asof(lk0[["tarih", "swap_forward"]], rr[["tarih", "net_swap"]], on="tarih")
+        ik["ikili"] = -ik["swap_forward"] - ik["net_swap"]
+        rr = pd.merge_asof(rr, ik[["tarih", "ikili"]], on="tarih")
+        rr["ikili"] = rr["ikili"].bfill().ffill()
+        rr["swap_haric_g"] = rr["net_ur"] - rr["net_swap"] - rr["ikili"]
+        r = r.merge(rr[["tarih", "ikili", "swap_haric_g"]], on="tarih", how="left")
+        L = r.iloc[-1]
+        swap_g = {"son": f(L["swap_haric_g"]), "ikili": f(L["ikili"]), "yurtici": f(L["net_swap"])}
+    except Exception as e:
+        print(f"  ~ günlük swap hariç seri üretilemedi: {e}")
+
+    # Swap hariç (likidite tablosu tarihli noktalar): II.2 + II.3 + aynı tarihli günlük net rezerv — tarihsel seri
     lk_seri = None
     try:
         lk = pd.read_excel(BASE / "net rezerv" / "likidite.xlsx")
@@ -378,8 +406,13 @@ def _rezerv_hesapla():
     except Exception:
         pass
 
+    wg = None
+    if swap_g is not None:
+        wsg = r.set_index("tarih")["swap_haric_g"].resample("W-FRI").last().dropna()
+        wg = {"d_hafta": f(wsg.diff().iloc[-1]) if len(wsg) > 1 else None, "ytd": ytd(r.dropna(subset=["swap_haric_g"]), "swap_haric_g", L)}
+        swap_g.update(wg)
     return {
-        "fp": fp, "r": r, "h": h, "wd": wd,
+        "fp": fp, "r": r, "h": h, "wd": wd, "swap_g": swap_g,
         "tarih": L["tarih"], "brut": float(L["dis_varliklar"]), "net_ur": float(L["net_ur"]),
         "d_brut": f(dW["dis_varliklar"]), "d_net_ur": f(dW["net_ur"]),
         "ytd_net_ur": ytd(r, "net_ur", L),
@@ -412,7 +445,12 @@ def build_rezerv():
             f"<b>Net rezerv</b> (dış varlıklar − toplam döviz yükümlülükleri; swap dahil) bir önceki haftaya göre "
             f"<b>{ht(abs(R['d_net_ur'] or 0) / 1000)} milyar USD {yon} {ht(R['net_ur'] / 1000)} milyar USD</b> "
             f"seviyesinde; yıl başından beri {ht(R['ytd_net_ur'], 1, True)} milyar USD.")
-    if R["swap_haric"] is not None:
+    if R.get("swap_g") and R["swap_g"].get("son") is not None:
+        sg = R["swap_g"]
+        ozet += (f" <b>Swap hariç net döviz pozisyonu {ht(sg['son'] / 1000)} milyar USD</b> (günlük; haftalık "
+                 f"{ht(m(sg.get('d_hafta')), 1, True)}, yıl başından beri {ht(sg.get('ytd'), 1, True)} milyar USD; "
+                 f"yurt içi ve yabancı merkez bankası swap pozisyonu toplam {ht((sg['yurtici'] + sg['ikili']) / 1000, 1)} milyar USD düşülerek).")
+    elif R["swap_haric"] is not None:
         ozet += (f" <b>Swap hariç net rezerv {ht(R['swap_haric'] / 1000)} milyar USD</b> "
                  f"({R['swap_tarih']} likidite tablosu; toplam swap/forward pozisyonu "
                  f"{ht(R['swap_toplam'] / 1000, 1)} milyar USD).")
@@ -425,11 +463,13 @@ def build_rezerv():
                 "d_brut": R["d_brut"], "d_net_ur": R["d_net_ur"], "ytd_net_ur": R["ytd_net_ur"],
                 "resmi": dict(rs, tarih=rs["tarih"].strftime("%d.%m.%Y")),
                 "swap_haric": R["swap_haric"], "swap_tarih": R["swap_tarih"],
-                "swap_toplam": R["swap_toplam"]},
+                "swap_toplam": R["swap_toplam"], "swap_g": R.get("swap_g")},
         "seri": {
             "tarih": [t.strftime("%Y-%m-%d") for t in r["tarih"]],
             "brut": col(r, "dis_varliklar", 0),
             "net_ur": col(r, "net_ur", 0),
+            "swap_haric_g": col(r, "swap_haric_g", 0) if "swap_haric_g" in r.columns else None,
+            "swap_yurtici": col(r, "net_swap", 0),
         },
         "resmi": {
             "tarih": [t.strftime("%Y-%m-%d") for t in h["tarih"]],
@@ -1121,7 +1161,9 @@ def build_home():
                  f"{ht(rs['doviz'] / 1000)} = {ht(rs['toplam'] / 1000)} milyar USD. Net rezerv (swap dahil) "
                  f"<b>{ht(R['net_ur'] / 1000)} milyar USD</b> (haftalık {ht(m(R['d_net_ur']), 1, True)}); "
                  f"yıl başından beri {ht(R['ytd_net_ur'], 1, True)} milyar USD.")
-        if R["swap_haric"] is not None:
+        if R.get("swap_g") and R["swap_g"].get("son") is not None:
+            metin += f" Swap hariç net döviz pozisyonu <b>{ht(R['swap_g']['son'] / 1000)} milyar USD</b> (haftalık {ht(m(R['swap_g'].get('d_hafta')), 1, True)})."
+        elif R["swap_haric"] is not None:
             metin += f" Swap hariç net rezerv {ht(R['swap_haric'] / 1000)} milyar USD ({R['swap_tarih']})."
         add("💵", "TCMB Rezervleri", metin, "net-rezerv.html")
     except Exception:
