@@ -32,7 +32,10 @@ const NAV = [
   { group: "Banka Bilanço Analizi", items: [      // katlanır grup: içindeki sayfadaysa açık, yoksa kullanıcının son tercihi
     { href: "bddk.html", label: "BDDK Haftalık Veriler" },
     { href: "bankacilik.html", label: "Bankacılık Monitörü" },
-    { href: "banka-kar.html", label: "Banka Kârlılık Analizi" },
+    { href: "banka-kar.html", label: "Banka Kârlılık Analizi", items: [   // sayfa içi sekmeler (hash)
+      { hash: "#genel", label: "Genel Bakış" }, { hash: "#rasyolar", label: "Rasyolar" }, { hash: "#karsilastirma", label: "Banka Karşılaştırma" },
+      { hash: "#odak", label: "Banka Odak" }, { hash: "#bolumler", label: "Faaliyet Bölümleri" }, { hash: "#portfoy", label: "Menkul Kıymet Portföyü" },
+    ] },
   ] },
   { group: "Finansal Hesaplar", items: [
     { href: "hesap-kredi.html", label: "Kredi Hesaplama" },
@@ -81,7 +84,14 @@ function renderShell() {
         try { const s = localStorage.getItem("ekordion-nav-" + n.group); if (!icinde && s !== null) acik = s === "1"; } catch (e) {}
         return '<div class="nav-grp' + (acik ? " open" : "") + (icinde ? " has-active" : "") + '" data-grp="' + n.group + '">' +
           '<button type="button" class="nav-grp-btn" aria-expanded="' + (acik ? "true" : "false") + '"><span>' + n.group + '</span><span class="chev"></span></button>' +
-          '<div class="nav-sub">' + n.items.map(function (i) { return '<a class="' + (i.href === here ? "active" : "") + '" href="' + i.href + '">' + i.label + "</a>"; }).join("") + "</div></div>";
+          '<div class="nav-sub">' + n.items.map(function (i) {
+            const act = i.href === here;
+            if (i.items) {   // üçüncü düzey: aynı sayfanın hash sekmeleri; yalnız o sayfadayken açılır
+              return '<div class="nav-item' + (act ? " open" : "") + '"><a class="' + (act ? "active" : "") + '" href="' + i.href + '">' + i.label + "</a>" +
+                '<div class="nav-sub nav-sub2">' + i.items.map(function (t) { return '<a data-hash="' + t.hash + '" href="' + i.href + t.hash + '">' + t.label + "</a>"; }).join("") + "</div></div>";
+            }
+            return '<a class="' + (act ? "active" : "") + '" href="' + i.href + '">' + i.label + "</a>";
+          }).join("") + "</div></div>";
       }
       if (n.href) {
         const act = n.href === here ? " active" : "";
@@ -94,6 +104,16 @@ function renderShell() {
     '<div class="side-foot">v3.0 · statik site</div>';
   const tb = document.getElementById("temaBtn");
   if (tb) tb.onclick = temaDegistir;
+  // Sayfa içi sekme bağlantıları: etkin olanı hash'e göre işaretle; mobilde menüyü kapat
+  function hashIsaretle() {
+    const h = location.hash || "#genel";
+    side.querySelectorAll(".nav-sub2 a").forEach(function (a) { a.classList.toggle("active", a.dataset.hash === h); });
+  }
+  hashIsaretle();
+  window.addEventListener("hashchange", hashIsaretle);
+  side.querySelectorAll(".nav-sub2 a").forEach(function (a) {
+    a.addEventListener("click", function () { side.classList.remove("open"); const o = document.getElementById("overlay"); if (o) o.classList.remove("show"); });
+  });
   side.querySelectorAll(".nav-grp-btn").forEach(function (b) {
     b.onclick = function () {
       const g = b.parentElement, acik = !g.classList.contains("open");

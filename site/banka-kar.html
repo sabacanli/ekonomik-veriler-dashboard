@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
-  <link rel="stylesheet" href="assets/style.css?v=25">
+  <link rel="stylesheet" href="assets/style.css?v=26">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
   <style>
     .ctl-bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: flex-end; margin: 4px 0 14px; }
@@ -45,6 +45,8 @@
     details.ham summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 8px; }
     .tanim li { margin-bottom: 6px; line-height: 1.5; }
     .bos { color: var(--muted); font-size: 13.5px; padding: 18px 0; }
+    .sekmeler { margin: 2px 0 14px; }
+    .sekmeler .chip { font-size: 13px; padding: 7px 14px; }
   </style>
 </head>
 <body>
@@ -57,7 +59,8 @@
     <div class="update-info" id="updated"></div>
     <div class="info-box" id="ozet">📋 2025 Ç4 solo finansal tablolar, 15 banka: toplam net kâr 681,2 milyar TL (yıllık +39,6%, aynı banka seti); medyan ROE %22,1, ROA %1,83. En yüksek net kâr: Ziraat 161,5 mlr, Garanti 110,6 mlr, Vakıf 70,0 mlr.</div>
 
-    <div class="ctl-bar">
+    <div class="chips sekmeler" id="sekmeChips"></div>
+    <div class="ctl-bar" id="ustKontrol">
       <label>Dönem <select class="sel" id="selDonem"></select></label>
       <label>Karşılaştırma dönemi <select class="sel" id="selKars"></select></label>
       <label>Gelir tablosu kalemleri <div class="chips" id="modChips"><span class="chip active" data-v="ytd">Yıl başından (YTD)</span><span class="chip" data-v="ceyrek">Çeyreklik akım</span></div></label>
@@ -174,7 +177,7 @@
     </section>
   </main>
 
-  <script src="assets/app.js?v=25"></script>
+  <script src="assets/app.js?v=26"></script>
   <script>
     (async () => {
       const D = await getJSON("data/banka_kar.json");
@@ -506,9 +509,33 @@
         stacked("chFz3", cats, [["TRY", C.toplam, k => k.startsWith("TRY")], ["YP", C.euro, k => k.startsWith("YP")]].map(([ad, renk, f]) => ({ ad, renk, x: banks.map(b => sum(D.buckets.filter(f).map(k => F[b][k]))) })), { percent: true, height: Math.max(200, 30 * cats.length + 80), sec: "secFaiz" });
       }
 
-      function herSey() { genel(); karsilastir(); zaman(); rasyolar(); odak(); }
+      /* ---- sayfa içi sekmeler (kenar çubuğundaki alt kırılımlarla aynı; hash ile seçilir) ---- */
+      const SEKME = {
+        genel: { ad: "Genel Bakış", sec: ["secGenel"], kontrol: true, metrik: true, ciz: () => genel() },
+        rasyolar: { ad: "Rasyolar", sec: ["secRasyo"], kontrol: true, ciz: () => rasyolar() },
+        karsilastirma: { ad: "Banka Karşılaştırma", sec: ["secCmp", "secTs"], kontrol: true, ciz: () => { karsilastir(); zaman(); } },
+        odak: { ad: "Banka Odak", sec: ["secOdak"], kontrol: true, ciz: () => odak() },
+        bolumler: { ad: "Faaliyet Bölümleri", sec: ["secSeg"], ciz: () => { bolum(); bolumX(); } },
+        portfoy: { ad: "Menkul Kıymet Portföyü", sec: ["secFaiz"], ciz: () => faiz() },
+      };
+      const TUM_SEC = ["secGenel", "secRasyo", "secCmp", "secTs", "secOdak", "secSeg", "secFaiz"];
+      const sekmeEl = document.getElementById("sekmeChips");
+      chipKur(sekmeEl, Object.entries(SEKME).map(([k, v]) => [k, v.ad]), k => k === "genel", k => { location.hash = "#" + k; });
+      function sekmeGoster(ad) {
+        if (!SEKME[ad]) ad = "genel";
+        S.sekme = ad; const T = SEKME[ad];
+        document.getElementById("ustKontrol").style.display = T.kontrol ? "" : "none";
+        document.getElementById("metrics").style.display = T.metrik ? "" : "none";
+        TUM_SEC.forEach(id => { document.getElementById(id).style.display = T.sec.includes(id) ? "" : "none"; });
+        sekmeEl.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.v === ad));
+        document.title = "Banka Kârlılık Analizi · " + T.ad + " | Ekordion";
+        T.ciz();
+        window.scrollTo(0, 0);
+      }
+      function herSey() { SEKME[S.sekme].ciz(); }
       const CIZ = { secGenel: genel, secCmp: karsilastir, secTs: zaman, secRasyo: rasyolar, secOdak: odak, secSeg: () => { bolum(); bolumX(); }, secFaiz: faiz };
-      herSey(); bolum(); bolumX(); faiz();
+      window.addEventListener("hashchange", () => sekmeGoster((location.hash || "#genel").slice(1)));
+      sekmeGoster((location.hash || "#genel").slice(1));
       sunumAraclariKur(TEMA, CIZ);
     })().catch(e => { console.error(e); const el = document.getElementById("ozet"); if (el) el.textContent = "Veri yüklenemedi: " + e.message; });
   </script>

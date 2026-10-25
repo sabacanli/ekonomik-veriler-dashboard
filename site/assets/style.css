@@ -344,6 +344,12 @@ table.heat td.bos { color: var(--muted); }
 .nav-sub { display: none; margin: 4px 0 4px 12px; padding-left: 8px; border-left: 2px solid var(--border); }
 .nav-grp.open .nav-sub { display: block; }
 .nav-sub a { font-size: 13px; padding: 7px 10px; margin-bottom: 4px; }
+.nav-item .nav-sub2 { display: none; margin: 2px 0 6px 10px; padding-left: 8px; }
+.nav-item.open .nav-sub2 { display: block; }
+.nav-sub2 a { font-size: 12.5px; padding: 5px 10px; margin-bottom: 2px; color: var(--muted); }
+.nav-sub2 a.active { background: transparent; border-color: transparent; color: var(--amber); font-weight: 600; }
+html:not([data-theme="koyu"]) .nav-sub2 a { color: #55627A; }
+html:not([data-theme="koyu"]) .nav-sub2 a.active { background: transparent; border-color: transparent; color: var(--kirmizi); }
 html:not([data-theme="koyu"]) .nav-grp-btn { background: transparent; color: var(--lacivert); }
 html:not([data-theme="koyu"]) .nav-grp-btn:hover { background: #EEF1F5; border-color: transparent; }
 html:not([data-theme="koyu"]) .nav-grp.has-active > .nav-grp-btn { color: var(--kirmizi); }
