@@ -29,13 +29,15 @@ const NAV = [
   { href: "nakit.html", label: "Hazine Nakit Gerçekleşmeleri" },
   { href: "hazine.html", label: "Hazine İhale Verileri" },
   { href: "tcmb-alim.html", label: "TCMB Doğrudan Alım" },
-  { head: "Banka Bilanço Analizi" },
-  { href: "bddk.html", label: "BDDK Haftalık Veriler" },
-  { href: "bankacilik.html", label: "Bankacılık Monitörü" },
-  { href: "banka-kar.html", label: "Banka Kârlılık Analizi" },
-  { head: "Finansal Hesaplar" },
-  { href: "hesap-kredi.html", label: "Kredi Hesaplama" },
-  { href: "hesap-mevduat.html", label: "Mevduat / Stopaj" },
+  { group: "Banka Bilanço Analizi", items: [      // katlanır grup: içindeki sayfadaysa açık, yoksa kullanıcının son tercihi
+    { href: "bddk.html", label: "BDDK Haftalık Veriler" },
+    { href: "bankacilik.html", label: "Bankacılık Monitörü" },
+    { href: "banka-kar.html", label: "Banka Kârlılık Analizi" },
+  ] },
+  { group: "Finansal Hesaplar", items: [
+    { href: "hesap-kredi.html", label: "Kredi Hesaplama" },
+    { href: "hesap-mevduat.html", label: "Mevduat / Stopaj" },
+  ] },
 ];
 
 /* Seri renkleri — temaya göre. Açık tema TCMB paleti: kırmızı ana seri, lacivert ikinci seri,
@@ -73,6 +75,14 @@ function renderShell() {
     '<nav class="nav">' +
     NAV.map(function (n) {
       if (n.head) return '<span class="nav-head">' + n.head + "</span>";
+      if (n.group) {
+        const icinde = n.items.some(function (i) { return i.href === here; });
+        let acik = icinde;
+        try { const s = localStorage.getItem("ekordion-nav-" + n.group); if (!icinde && s !== null) acik = s === "1"; } catch (e) {}
+        return '<div class="nav-grp' + (acik ? " open" : "") + (icinde ? " has-active" : "") + '" data-grp="' + n.group + '">' +
+          '<button type="button" class="nav-grp-btn" aria-expanded="' + (acik ? "true" : "false") + '"><span>' + n.group + '</span><span class="chev"></span></button>' +
+          '<div class="nav-sub">' + n.items.map(function (i) { return '<a class="' + (i.href === here ? "active" : "") + '" href="' + i.href + '">' + i.label + "</a>"; }).join("") + "</div></div>";
+      }
       if (n.href) {
         const act = n.href === here ? " active" : "";
         return '<a class="' + act.trim() + '" href="' + n.href + '">' + n.label + "</a>";
@@ -84,6 +94,13 @@ function renderShell() {
     '<div class="side-foot">v3.0 · statik site</div>';
   const tb = document.getElementById("temaBtn");
   if (tb) tb.onclick = temaDegistir;
+  side.querySelectorAll(".nav-grp-btn").forEach(function (b) {
+    b.onclick = function () {
+      const g = b.parentElement, acik = !g.classList.contains("open");
+      g.classList.toggle("open", acik); b.setAttribute("aria-expanded", acik ? "true" : "false");
+      try { localStorage.setItem("ekordion-nav-" + g.dataset.grp, acik ? "1" : "0"); } catch (e) {}
+    };
+  });
 
   const btn = document.getElementById("menuBtn");
   const ovl = document.getElementById("overlay");

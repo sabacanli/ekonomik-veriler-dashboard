@@ -330,6 +330,24 @@ table.heat td.bos { color: var(--muted); }
 }
 
 /* ── Finansal Hesaplar ── */
+/* ── Katlanır menü grubu (Banka Bilanço Analizi, Finansal Hesaplar) ── */
+.nav-grp { margin-bottom: 6px; }
+.nav-grp-btn {
+  display: flex; justify-content: space-between; align-items: center; width: 100%;
+  padding: 9px 12px; border-radius: 9px; background: #141926; border: 1px solid transparent;
+  color: var(--text); font: inherit; font-size: 13.5px; cursor: pointer; text-align: left;
+}
+.nav-grp-btn:hover { border-color: var(--border); background: #182031; }
+.nav-grp.has-active > .nav-grp-btn { color: var(--amber); font-weight: 600; }
+.nav-grp .chev::before { content: "▸"; font-size: 12px; opacity: .7; }
+.nav-grp.open .chev::before { content: "▾"; }
+.nav-sub { display: none; margin: 4px 0 4px 12px; padding-left: 8px; border-left: 2px solid var(--border); }
+.nav-grp.open .nav-sub { display: block; }
+.nav-sub a { font-size: 13px; padding: 7px 10px; margin-bottom: 4px; }
+html:not([data-theme="koyu"]) .nav-grp-btn { background: transparent; color: var(--lacivert); }
+html:not([data-theme="koyu"]) .nav-grp-btn:hover { background: #EEF1F5; border-color: transparent; }
+html:not([data-theme="koyu"]) .nav-grp.has-active > .nav-grp-btn { color: var(--kirmizi); }
+
 .nav-head {
   display: block;
   color: #475569;
