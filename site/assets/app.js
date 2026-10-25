@@ -34,7 +34,8 @@ const NAV = [
     { href: "bankacilik.html", label: "Bankacılık Monitörü" },
     { href: "banka-kar.html", label: "Banka Kârlılık Analizi", items: [   // sayfa içi sekmeler (hash)
       { hash: "#genel", label: "Genel Bakış" }, { hash: "#rasyolar", label: "Rasyolar" }, { hash: "#karsilastirma", label: "Banka Karşılaştırma" },
-      { hash: "#odak", label: "Banka Odak" }, { hash: "#bolumler", label: "Faaliyet Bölümleri" }, { hash: "#portfoy", label: "Menkul Kıymet Portföyü" },
+      { hash: "#zaman", label: "Zaman Serisi" }, { hash: "#odak", label: "Banka Odak" }, { hash: "#bolumler", label: "Faaliyet Bölümleri" },
+      { hash: "#portfoy", label: "Menkul Kıymet Portföyü" },
     ] },
   ] },
   { group: "Finansal Hesaplar", items: [
@@ -86,8 +87,11 @@ function renderShell() {
           '<button type="button" class="nav-grp-btn" aria-expanded="' + (acik ? "true" : "false") + '"><span>' + n.group + '</span><span class="chev"></span></button>' +
           '<div class="nav-sub">' + n.items.map(function (i) {
             const act = i.href === here;
-            if (i.items) {   // üçüncü düzey: aynı sayfanın hash sekmeleri; yalnız o sayfadayken açılır
-              return '<div class="nav-item' + (act ? " open" : "") + '"><a class="' + (act ? "active" : "") + '" href="' + i.href + '">' + i.label + "</a>" +
+            if (i.items) {   // üçüncü düzey: aynı sayfanın hash sekmeleri; ok düğmesiyle açılır/kapanır (o sayfadayken varsayılan açık)
+              let acik2 = act;
+              try { const s2 = localStorage.getItem("ekordion-nav-item-" + i.href); if (s2 !== null) acik2 = s2 === "1"; } catch (e) {}
+              return '<div class="nav-item' + (acik2 ? " open" : "") + '" data-item="' + i.href + '"><div class="nav-item-row"><a class="' + (act ? "active" : "") + '" href="' + i.href + '">' + i.label + "</a>" +
+                '<button type="button" class="nav-item-btn" aria-expanded="' + (acik2 ? "true" : "false") + '" aria-label="Alt sekmeleri aç/kapat"><span class="chev"></span></button></div>' +
                 '<div class="nav-sub nav-sub2">' + i.items.map(function (t) { return '<a data-hash="' + t.hash + '" href="' + i.href + t.hash + '">' + t.label + "</a>"; }).join("") + "</div></div>";
             }
             return '<a class="' + (act ? "active" : "") + '" href="' + i.href + '">' + i.label + "</a>";
@@ -113,6 +117,13 @@ function renderShell() {
   window.addEventListener("hashchange", hashIsaretle);
   side.querySelectorAll(".nav-sub2 a").forEach(function (a) {
     a.addEventListener("click", function () { side.classList.remove("open"); const o = document.getElementById("overlay"); if (o) o.classList.remove("show"); });
+  });
+  side.querySelectorAll(".nav-item-btn").forEach(function (b) {
+    b.onclick = function () {
+      const it = b.closest(".nav-item"), acik = !it.classList.contains("open");
+      it.classList.toggle("open", acik); b.setAttribute("aria-expanded", acik ? "true" : "false");
+      try { localStorage.setItem("ekordion-nav-item-" + it.dataset.item, acik ? "1" : "0"); } catch (e) {}
+    };
   });
   side.querySelectorAll(".nav-grp-btn").forEach(function (b) {
     b.onclick = function () {

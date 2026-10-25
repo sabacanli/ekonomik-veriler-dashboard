@@ -344,6 +344,12 @@ table.heat td.bos { color: var(--muted); }
 .nav-sub { display: none; margin: 4px 0 4px 12px; padding-left: 8px; border-left: 2px solid var(--border); }
 .nav-grp.open .nav-sub { display: block; }
 .nav-sub a { font-size: 13px; padding: 7px 10px; margin-bottom: 4px; }
+.nav-item-row { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.nav-item-row a { flex: 1; margin-bottom: 0; }
+.nav-item-btn { background: transparent; border: 1px solid transparent; border-radius: 8px; color: var(--muted); cursor: pointer; padding: 6px 8px; font: inherit; line-height: 1; }
+.nav-item-btn:hover { border-color: var(--border); color: var(--text); }
+.nav-item .chev::before { content: "▸"; font-size: 12px; }
+.nav-item.open .chev::before { content: "▾"; }
 .nav-item .nav-sub2 { display: none; margin: 2px 0 6px 10px; padding-left: 8px; }
 .nav-item.open .nav-sub2 { display: block; }
 .nav-sub2 a { font-size: 12.5px; padding: 5px 10px; margin-bottom: 2px; color: var(--muted); }
