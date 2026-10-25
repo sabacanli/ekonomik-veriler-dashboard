@@ -1076,6 +1076,13 @@ def build_bddk():
 # Ana sayfa kartları (dashboard.py home_summaries ile aynı mantık)
 # ──────────────────────────────────────────────────────────────
 
+def build_banka_kar():
+    """Banka Kârlılık Analizi — yerel banka.db varsa JSON'u tazeler, yoksa mevcut JSON'u korur (bulut)."""
+    sys.path.insert(0, str(BASE / "banka kar"))
+    import banka_kar_export as bk
+    bk.build(DATA / "banka_kar.json")
+
+
 def build_home():
     cards = []
 
@@ -1176,6 +1183,11 @@ def build_home():
             f"TP canlı krediler yıllık {ht(k['g_canliTP'], 1, True)}% (3 aylık yıllıklandırılmış {ht(k['g3_canliTP'], 1)}%); "
             f"NPL {ht(k['npl'], 2)}%, SYR {ht(k['syr'], 1)}%, ROE {ht(k['roe'], 1)}%. Aylık net kâr <b>{ht(k['netKar_m'], 1)} milyar TL</b>."
             + (f" {bm['gorunum']['baslik']}." if bm.get("gorunum") else ""), "bankacilik.html")
+    except Exception:
+        pass
+    try:   # Banka Kârlılık Analizi (banka kar/banka_kar_export.py üretir)
+        bk = json.loads((DATA / "banka_kar.json").read_text(encoding="utf-8"))
+        add("📈", "Banka Kârlılık Analizi", bk["ozet_html"], "banka-kar.html")
     except Exception:
         pass
     try:
@@ -1339,7 +1351,7 @@ def build_sitemap():
     """site/sitemap.xml — her export'ta taze lastmod ile yazılır (SEO)."""
     sayfalar = ["", "gundem.html", "tcmb-faiz.html", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
                 "cari.html", "kredi.html", "mevduat.html", "butce.html", "nakit.html",
-                "bddk.html", "bankacilik.html", "hazine.html", "tcmb-alim.html",
+                "bddk.html", "bankacilik.html", "banka-kar.html", "hazine.html", "tcmb-alim.html",
                 "hesap-kredi.html", "hesap-mevduat.html"]
     bugun = datetime.now().strftime("%Y-%m-%d")
     satirlar = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -1361,7 +1373,7 @@ def ozet_gom():
             "enflasyon.html": "enflasyon.json", "net-rezerv.html": "rezerv.json",
             "cari.html": "cari.json", "kredi.html": "kredi.json",
             "mevduat.html": "mevduat.json", "butce.html": "butce.json",
-            "nakit.html": "nakit.json", "bddk.html": "bddk.json", "bankacilik.html": "bankacilik.json",
+            "nakit.html": "nakit.json", "bddk.html": "bddk.json", "bankacilik.html": "bankacilik.json", "banka-kar.html": "banka_kar.json",
             "hazine.html": "hazine.json", "tcmb-alim.html": "tcmb_alim.json",
             "tcmb-faiz.html": "tcmb_faiz.json"}
     for sayfa, js in esle.items():
@@ -1384,7 +1396,7 @@ def ozet_gom():
 def main():
     print("Site verileri dışa aktarılıyor -> site/data/")
     ok, fail = 0, 0
-    for name, fn in [("home", build_home), ("tcmb_stok", build_tcmb_stok),
+    for name, fn in [("banka_kar", build_banka_kar), ("home", build_home), ("tcmb_stok", build_tcmb_stok),
                      ("dth", build_dth), ("enflasyon", build_enflasyon),
                      ("butce", build_butce), ("nakit", build_nakit),
                      ("rezerv", build_rezerv), ("kredi", build_kredi),

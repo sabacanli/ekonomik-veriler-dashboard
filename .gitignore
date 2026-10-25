@@ -34,3 +34,6 @@ Thumbs.db
 
 # HMB İç Borçlanma Stratejisi PDF kaynakları (ayrıştırılmış program.json izlenir)
 hazine ihale /borclanma programi/pdf/
+
+# Banka Kârlılık Analizi: yerel uygulamanın SQLite kopyası (JSON yeterli)
+banka kar/banka.db

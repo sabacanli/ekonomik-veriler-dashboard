@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Banka Kârlılık Analizi — Solo Finansal Tablolarla Banka Karşılaştırması | Ekordion</title>
+  <meta name="description" content="Türk bankalarının solo (konsolide olmayan) finansal tablolarından çeyreklik kârlılık analizi: net kâr sıralaması, ROE–ROA haritası, banka karşılaştırması, zaman serisi, rasyo haritası, banka odak, faaliyet bölümleri ve menkul kıymet faiz tipi kırılımı.">
+  <link rel="canonical" href="https://ekordion.com.tr/banka-kar.html">
+  <meta property="og:title" content="Banka Kârlılık Analizi — Solo Finansal Tablolarla Banka Karşılaştırması | Ekordion">
+  <meta property="og:description" content="Türk bankalarının solo finansal tablolarından çeyreklik kârlılık analizi: net kâr sıralaması, ROE–ROA haritası, banka karşılaştırması, rasyo haritası, faaliyet bölümleri.">
+  <meta property="og:url" content="https://ekordion.com.tr/banka-kar.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ekordion">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:image" content="https://ekordion.com.tr/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=24">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <style>
+    .ctl-bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: flex-end; margin: 4px 0 14px; }
+    .ctl-bar label, .ctl label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; letter-spacing: .4px; text-transform: uppercase; color: var(--muted); }
+    .ctl-bar select.sel, .ctl select.sel { margin-bottom: 0; }
+    .ctl-bar .chips, .ctl .chips { margin-bottom: 0; }
+    .ctl { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: flex-end; margin: 4px 0 10px; }
+    .ikili { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+    .uclu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 14px; }
+    .dortlu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 12px; }
+    @media (max-width: 980px) { .ikili, .uclu, .dortlu { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 640px) { .ikili, .uclu, .dortlu { grid-template-columns: 1fr; } }
+    .mini-h { font-size: 13px; font-weight: 600; margin: 6px 0 0; color: var(--text); }
+    .metrics.kucuk .metric .val { font-size: 20px; }
+    .metrics.kucuk { margin-bottom: 10px; }
+    table.heat td.lbl { min-width: 110px; }
+    table.heat.dar { min-width: 0; width: 100%; }
+    table.heat.dar td.lbl { min-width: 90px; }
+    table.heat td.isi { font-weight: 600; }
+    .not { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
+    details.ham summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .tanim li { margin-bottom: 6px; line-height: 1.5; }
+    .bos { color: var(--muted); font-size: 13.5px; padding: 18px 0; }
+  </style>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Banka Kârlılık Analizi</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet">📋 2025 Ç4 solo finansal tablolar, 15 banka: toplam net kâr 681,2 milyar TL (yıllık +39,6%, aynı banka seti); medyan ROE %22,1, ROA %1,83. En yüksek net kâr: Ziraat 161,5 mlr, Garanti 110,6 mlr, Vakıf 70,0 mlr.</div>
+
+    <div class="ctl-bar">
+      <label>Dönem <select class="sel" id="selDonem"></select></label>
+      <label>Karşılaştırma dönemi <select class="sel" id="selKars"></select></label>
+      <label>Gelir tablosu kalemleri <div class="chips" id="modChips"><span class="chip active" data-v="ytd">Yıl başından (YTD)</span><span class="chip" data-v="ceyrek">Çeyreklik akım</span></div></label>
+      <label>Banka grubu <div class="chips" id="grupChips"></div></label>
+    </div>
+    <div class="metrics" id="metrics"></div>
+
+    <section class="chart-card" id="secGenel">
+      <h3 id="h3Genel">Genel Bakış</h3>
+      <p class="cap" id="capGenel"></p>
+      <button class="btn apko-btn" data-sec="secGenel">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secGenel">🖼 Resim olarak kopyala</button>
+      <div class="ikili">
+        <div><p class="mini-h" id="hNetKar">Net kâr</p><div id="chNetKar"></div></div>
+        <div><p class="mini-h" id="hNetKarChg">Net kâr değişimi</p><div id="chNetKarChg"></div><p class="not" id="notChg"></p></div>
+        <div><p class="mini-h">Kârlılık haritası · ROE ve ROA (balon = toplam aktif)</p><div id="chRoeRoa"></div></div>
+        <div><p class="mini-h" id="hAktif">Toplam aktif</p><div id="chAktif"></div></div>
+        <div><p class="mini-h">Net faiz geliri / toplam aktif (yıllıklandırılmış)</p><div id="chNim"></div></div>
+        <div><p class="mini-h">Komisyonun operasyonel gelirdeki payı</p><div id="chKom"></div></div>
+      </div>
+    </section>
+
+    <section class="chart-card" id="secCmp">
+      <h3>Banka Karşılaştırma</h3>
+      <p class="cap">Bir gösterge, son tam dönemler ve seçili banka grupları; değişim çubukları yukarıdaki karşılaştırma dönemi → dönem arasını gösterir</p>
+      <button class="btn apko-btn" data-sec="secCmp">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secCmp">🖼 Resim olarak kopyala</button>
+      <div class="ctl">
+        <label>Gösterge <select class="sel" id="selCmp"></select></label>
+        <label>Gösterim <div class="chips" id="cmpChips"><span class="chip active" data-v="deger">Değer</span><span class="chip" data-v="aktif">Aktife oran (%)</span></div></label>
+      </div>
+      <div id="chCmp"></div>
+      <div class="ikili">
+        <div><p class="mini-h" id="hCmpChg"></p><div id="chCmpChg"></div></div>
+        <div><p class="mini-h" id="hCmpDiff"></p><div id="chCmpDiff"></div></div>
+      </div>
+      <details class="ham"><summary>Tablo</summary><div class="table-wrap"><table class="heat dar" id="tblCmp"></table></div></details>
+    </section>
+
+    <section class="chart-card" id="secTs">
+      <h3>Zaman Serisi</h3>
+      <p class="cap">Göstergenin dönemler boyunca gelişimi; bankaları çiplerden seçin</p>
+      <button class="btn apko-btn" data-sec="secTs">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secTs">🖼 Resim olarak kopyala</button>
+      <div class="ctl">
+        <label>Gösterge <select class="sel" id="selTs"></select></label>
+        <label>Gösterim <div class="chips" id="tsChips"><span class="chip active" data-v="deger">Değer</span><span class="chip" data-v="endeks">Endeks (ilk dönem = 100)</span><span class="chip" data-v="aktif">Aktife oran (%)</span></div></label>
+      </div>
+      <div class="chips" id="tsBankChips"></div>
+      <div id="chTs"></div>
+    </section>
+
+    <section class="chart-card" id="secRasyo">
+      <h3>Rasyolar</h3>
+      <p class="cap" id="capRasyo">Banka × rasyo haritası; hücre rengi sütun içindeki sırayı gösterir (yeşil = daha iyi; yönsüz rasyolar renksiz)</p>
+      <button class="btn apko-btn" data-sec="secRasyo">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secRasyo">🖼 Resim olarak kopyala</button>
+      <div class="table-wrap"><table class="heat" id="tblRasyo"></table></div>
+      <div class="ikili" style="margin-top:12px">
+        <div><div class="ctl"><label>Sıralama rasyosu <select class="sel" id="selRank"></select></label></div><div id="chRank"></div></div>
+        <div><div class="ctl"><label>X ekseni <select class="sel" id="selRx"></select></label><label>Y ekseni <select class="sel" id="selRy"></select></label></div><div id="chRxy"></div></div>
+      </div>
+    </section>
+
+    <section class="chart-card" id="secOdak">
+      <h3>Banka Odak</h3>
+      <p class="cap">Seçilen banka, emsal grubu ve referans medyanı; değişimler bir yıl önceki aynı çeyreğe göre</p>
+      <button class="btn apko-btn" data-sec="secOdak">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secOdak">🖼 Resim olarak kopyala</button>
+      <div class="ctl">
+        <label>Odak banka <select class="sel" id="selOdak"></select></label>
+        <label>Referans medyan <select class="sel" id="selRef"><option value="big7">Büyük 7</option><option value="tum">Tüm bankalar</option><option value="emsal">Emsal grubu</option></select></label>
+      </div>
+      <label class="not">Emsal grubu</label>
+      <div class="chips" id="emsalChips"></div>
+      <div id="odakGovde"></div>
+    </section>
+
+    <section class="chart-card" id="secSeg">
+      <h3>Faaliyet Bölümleri</h3>
+      <p class="cap">Finansal tablo dipnotlarındaki bölüm raporlaması: banka içi bölüm kârlılığı ve bankalar arası kategori karşılaştırması (mn TL; dipnot tanımları bankadan bankaya değişir)</p>
+      <button class="btn apko-btn" data-sec="secSeg">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secSeg">🖼 Resim olarak kopyala</button>
+      <div class="ctl">
+        <label>Banka <select class="sel" id="selSegBank"></select></label>
+        <label>Dönem <select class="sel" id="selSegDonem"></select></label>
+      </div>
+      <div id="segGovde"></div>
+      <h3 style="margin-top:18px">Bankalar Arası Kategori Karşılaştırması</h3>
+      <div class="ctl"><label>Dönem <select class="sel" id="selSegX"></select></label></div>
+      <div id="segXGovde"></div>
+    </section>
+
+    <section class="chart-card" id="secFaiz">
+      <h3>Menkul Kıymet Portföyü — Faiz Tipi Kırılımı</h3>
+      <p class="cap">Bankaların yatırımcı sunumlarından derlenen menkul kıymet portföyü faiz tipi dağılımı (mn TL); yalnız açıklayan bankalar</p>
+      <button class="btn apko-btn" data-sec="secFaiz">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secFaiz">🖼 Resim olarak kopyala</button>
+      <div class="ctl"><label>Dönem <select class="sel" id="selFaiz"></select></label></div>
+      <div id="faizGovde"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Tanımlar ve Notlar</h3>
+      <ul class="tanim">
+        <li><b>Kaynak:</b> bankaların KAP'ta yayımlanan solo (konsolide olmayan) BDDK formatlı finansal tabloları; faaliyet bölümleri finansal tablo dipnotları; menkul kıymet faiz tipi yatırımcı sunumları. Tutarlar milyon TL.</li>
+        <li><b>Gelir tablosu kalemleri YTD</b> (yıl başından itibaren) tutulur. "Çeyreklik akım" seçeneği Çn − Ç(n−1) farkını alır; Ç1 hariç önceki çeyrek verisi gerekir.</li>
+        <li><b>ROE, ROA ve NFG/Aktif</b> YTD görünümde yıllıklandırılır (değer × 4 / çeyrek no); çeyreklik görünümde yıllıklandırılmaz. Paydalar dönem sonu bilanço değerleridir.</li>
+        <li><b>Op. gelir</b> = net faiz geliri + net ücret/komisyon + ticari kâr/zarar. <b>Maliyet/gelir</b> = (personel + diğer faaliyet giderleri) / (op. gelir + diğer faaliyet gelirleri).</li>
+        <li><b>MDC</b> = gerçeğe uygun değer farkı kâr/zarara yansıtılan + diğer kapsamlı gelire yansıtılan + itfa edilmiş maliyetle ölçülen finansal varlıklar.</li>
+        <li><b>Faaliyet bölümü kategorileri</b> bankaların kendi bölüm adlarından türetilir (Bireysel/Perakende, Kurumsal/Ticari/KOBİ, Hazine/Yatırım, Diğer); bankalar arasında tanım farkları olabilir. Net kâr satırı vermeyen tablolarda vergi öncesi kâr ile vergi kaleminden türetilir ve bu durum belirtilir.</li>
+        <li>Toplamlar ve medyanlar yalnız o dönemde raporlayan bankalar üzerinden hesaplanır; yıllık değişimler her iki dönemde de verisi olan banka setiyle alınır. Bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script src="assets/app.js?v=24"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/banka_kar.json");
+      setUpdated(D.updated + " · veri tabanı " + D.veri_tarihi);
+      setOzet(D.ozet_html);
+      const esc = s => String(s === null || s === undefined ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      const MET = {}; D.metrics.forEach(m => MET[m.key] = m);
+      const RAT = {}; D.ratios.forEach(r => RAT[r.key] = r);
+      const LABEL = k => (MET[k] || RAT[k] || { label: k }).label;
+      const SHORT = k => RAT[k] ? RAT[k].short : LABEL(k);
+      const BANK = {}; D.banks.forEach(b => BANK[b.ad] = b);
+      const KISA = b => (BANK[b] || { kisa: b }).kisa;
+      const GRUP = b => (BANK[b] || { grup: "Diğer" }).grup;
+      const GRUPLAR = ["Kamu", "Özel", "Yabancı", "Kalkınma/Yatırım"].filter(g => D.banks.some(b => b.grup === g));
+      const GRENK = { "Kamu": C.toplam, "Özel": C.hisse, "Yabancı": C.kesin, "Kalkınma/Yatırım": PAL.mor, "Diğer": C.ost };
+      const PALET = [C.toplam, C.hisse, C.kesin, C.green, PAL.sari, PAL.mor, C.euro, C.dolayli];
+      const BRENK = {}; D.banks.forEach((b, i) => BRENK[b.ad] = PALET[i % PALET.length]);
+      const P = D.periods, TAM = P.filter(p => D.kapsam[p] >= 5);
+      const plabel = p => p.slice(0, 4) + " Ç" + p.slice(-1);
+      const kisaP = p => p.slice(2, 4) + "Ç" + p.slice(-1);
+      const prevYear = p => (parseInt(p.slice(0, 4), 10) - 1) + "Q" + p.slice(-1);
+      const num = v => (v === null || v === undefined || isNaN(v)) ? null : v;
+      const fmtMn = v => { v = num(v); if (v === null) return "—"; const a = Math.abs(v); return a >= 1e6 ? trNum(v / 1e6, 2) + " trn" : a >= 1000 ? trNum(v / 1000, 1) + " mlr" : trNum(v, 0) + " mn"; };
+      const fmtPct = (v, d) => { v = num(v); return v === null ? "—" : "%" + trNum(v * 100, d === undefined ? 1 : d); };
+      const fmtX = v => { v = num(v); return v === null ? "—" : trNum(v, 1) + "x"; };
+      const fmtVal = (k, v) => RAT[k] ? (RAT[k].fmt === "pct" ? fmtPct(v) : RAT[k].fmt === "x" ? fmtX(v) : fmtMn(v)) : fmtMn(v);
+      const chgPct = (a, b) => (num(a) === null || num(b) === null || b <= 0) ? null : a / b - 1;
+      const median = arr => { const v = arr.map(num).filter(x => x !== null).sort((a, b) => a - b); if (!v.length) return null; const m = Math.floor(v.length / 2); return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
+      const sum = arr => arr.reduce((s, x) => s + (num(x) || 0), 0);
+      const isiRenk = t => { const a = [224, 92, 87], b = [238, 210, 100], c = [80, 178, 110]; const mix = (p, q, k) => p.map((v, i) => Math.round(v + (q[i] - v) * k)); return "rgb(" + (t < 0.5 ? mix(a, b, t * 2) : mix(b, c, (t - 0.5) * 2)).join(",") + ")"; };
+      const S = { donem: D.son_tam, kars: null, mode: "ytd", gruplar: new Set(GRUPLAR), cmp: "net_kar", cmpNorm: false, ts: "net_kar", tsMode: "deger", tsBanks: new Set(D.big7), rank: "roe", rx: "roa", ry: "roe", odak: "", emsal: new Set(), ref: "big7", segBank: null, segDonem: null, segX: null, faiz: null };
+      S.kars = P.includes(prevYear(S.donem)) ? prevYear(S.donem) : P[Math.max(0, P.indexOf(S.donem) - 1)];
+      const V = () => S.mode === "ytd" ? D.ytd : D.ceyrek;
+      const row = (p, b) => (V()[p] || {})[b] || null;
+      const banksIn = (p, filtre) => D.banks.map(b => b.ad).filter(b => row(p, b) && (!filtre || S.gruplar.has(GRUP(b))));
+      const TEMA = { secGenel: false, secCmp: false, secTs: false, secRasyo: false, secOdak: false, secSeg: false, secFaiz: false };
+      const ciz = (id, traces, layout, sec) => draw(id, traces, layout, sec ? TEMA[sec] : undefined);
+      const olcek = vals => { const m = Math.max(0, ...vals.map(v => Math.abs(num(v) || 0))); return m >= 1e6 ? [1e6, "trilyon TL"] : m >= 1000 ? [1000, "milyar TL"] : [1, "milyon TL"]; };
+      const padRange = (vals, pad) => { const v = vals.map(num).filter(x => x !== null); if (!v.length) return undefined; const lo = Math.min(0, ...v), hi = Math.max(0, ...v); const span = (hi - lo) || Math.abs(hi) || 1; return [lo - (lo < 0 ? span * (pad || 0.25) : 0), hi + (hi > 0 ? span * (pad || 0.25) : 0)]; };
+
+      /* ---- genel grafik yardımcıları ---- */
+      function hbar(id, items, o) {   // items: [{ad, v, renk}] — büyükten küçüğe çizilir
+        o = o || {};
+        const d = items.filter(x => num(x.v) !== null).sort((a, b) => (o.asc === false ? b.v - a.v : a.v - b.v));
+        if (!d.length) { document.getElementById(id).innerHTML = '<p class="bos">Veri yok.</p>'; return Promise.resolve(); }
+        const fmt = o.fmt || (v => trNum(v, 1));
+        return ciz(id, [{ type: "bar", orientation: "h", x: d.map(x => x.v), y: d.map(x => x.ad), text: d.map(x => fmt(x.v)), textposition: "outside", cliponaxis: false,
+          textfont: { size: 11 }, marker: { color: d.map(x => x.renk || (o.posneg ? (x.v >= 0 ? C.toplam : C.hisse) : C.toplam)) }, hovertemplate: "%{y}: %{text}<extra></extra>" }],
+          Object.assign({ height: o.height || Math.max(220, 24 * d.length + 50), margin: { l: 8, r: 76, t: 8, b: 8 }, showlegend: false,
+            xaxis: { visible: false, range: padRange(d.map(x => x.v), 0.3) }, yaxis: { automargin: true, categoryorder: "array", categoryarray: d.map(x => x.ad), tickfont: { size: 12 }, showgrid: false, showline: false },
+            shapes: o.med !== undefined && o.med !== null ? [{ type: "line", x0: o.med, x1: o.med, y0: 0, y1: 1, yref: "paper", line: { color: C.ost, width: 1, dash: "dot" } }] : [],
+            annotations: o.med !== undefined && o.med !== null ? [{ x: o.med, y: 1.04, yref: "paper", text: "medyan " + fmt(o.med), showarrow: false, font: { size: 10.5, color: C.ost } }] : [] }, o.layout || {}), o.sec);
+      }
+      function scatter(id, banks, p, xk, yk, o) {
+        o = o || {};
+        const tr = [];
+        GRUPLAR.concat(["Diğer"]).forEach(g => {
+          const bs = banks.filter(b => GRUP(b) === g && num(row(p, b)[xk]) !== null && num(row(p, b)[yk]) !== null);
+          if (!bs.length) return;
+          const akt = bs.map(b => Math.sqrt(Math.max(0, num(row(p, b).toplam_aktif) || 0)));
+          const mx = Math.max(...akt) || 1;
+          tr.push({ type: "scatter", mode: "markers+text", name: g, x: bs.map(b => row(p, b)[xk]), y: bs.map(b => row(p, b)[yk]), text: bs.map(KISA), textposition: "top center", textfont: { size: 11 },
+            marker: { size: akt.map(a => 9 + 34 * a / mx), color: GRENK[g], opacity: 0.85, line: { width: 1.5, color: "#FFFFFF" } },
+            customdata: bs.map(b => [fmtVal(xk, row(p, b)[xk]), fmtVal(yk, row(p, b)[yk])]),
+            hovertemplate: "%{text}<br>" + LABEL(xk) + ": %{customdata[0]}<br>" + LABEL(yk) + ": %{customdata[1]}<extra></extra>" });
+        });
+        if (o.vurgu && banks.includes(o.vurgu)) { const r = row(p, o.vurgu); tr.push({ type: "scatter", mode: "markers", x: [r[xk]], y: [r[yk]], showlegend: false, hoverinfo: "skip", marker: { size: 30, color: "rgba(0,0,0,0)", line: { width: 2, color: C.hisse } } }); }
+        const ax = k => RAT[k] && RAT[k].fmt === "pct" ? { tickformat: ".0%" } : {};
+        return ciz(id, tr, { height: o.height || 400, margin: { l: 56, r: 16, t: 34, b: 44 }, xaxis: Object.assign({ title: { text: SHORT(xk), font: { size: 12 } }, showgrid: true }, ax(xk)), yaxis: Object.assign({ title: { text: SHORT(yk), font: { size: 12 } } }, ax(yk)), legend: { orientation: "h", y: 1.02 } }, o.sec);
+      }
+      function lines(id, seriler, o) {   // seriler: [{ad, renk, x:[], y:[], dash}]
+        o = o || {};
+        const [div, birim] = o.mn ? olcek(seriler.flatMap(s => s.y)) : [1, null];
+        const tr = seriler.filter(s => s.y.some(v => num(v) !== null)).map(s => ({ type: "scatter", mode: "lines+markers", name: s.ad, x: s.x, y: s.y.map(v => num(v) === null ? null : v / div), line: { color: s.renk, width: s.width || 2, dash: s.dash || "solid" }, marker: { size: 6, color: s.renk }, connectgaps: true,
+          text: s.y.map(v => o.fmt ? o.fmt(v) : trNum(v, 1)), hovertemplate: "%{x} · " + s.ad + ": %{text}<extra></extra>" }));
+        const ann = tr.map(t => { let i = t.y.length - 1; while (i >= 0 && num(t.y[i]) === null) i--; return i < 0 ? null : { x: t.x[i], y: t.y[i], text: t.name, showarrow: false, xanchor: "left", xshift: 8, font: { size: 11, color: t.line.color } }; }).filter(Boolean);
+        return ciz(id, tr, Object.assign({ height: o.height || 420, margin: { l: 56, r: 70, t: 10, b: 44 }, xaxis: { type: "category" }, yaxis: o.pct ? { tickformat: ".0%" } : (birim ? { title: { text: birim, font: { size: 11 } } } : {}), showlegend: false, annotations: o.etiket === false ? [] : ann }, o.layout || {}), o.sec);
+      }
+      function grouped(id, cats, seriler, o) {   // dikey gruplu çubuk: seriler [{ad, renk, y:[]}]
+        o = o || {};
+        const [div, birim] = o.pct ? [1, null] : olcek(seriler.flatMap(s => s.y));
+        return ciz(id, seriler.map(s => ({ type: "bar", name: s.ad, x: cats, y: s.y.map(v => num(v) === null ? null : v / div), marker: { color: s.renk }, text: s.y.map(v => o.fmt ? o.fmt(v) : trNum(v, 1)), textposition: "none", hovertemplate: "%{x} · " + s.ad + ": %{text}<extra></extra>" })),
+          Object.assign({ height: o.height || 420, barmode: "group", margin: { l: 60, r: 16, t: 34, b: 60 }, xaxis: { type: "category", tickangle: -30 }, yaxis: o.pct ? { tickformat: ".1%" } : { title: { text: birim, font: { size: 11 } } }, legend: { orientation: "h", y: 1.02 } }, o.layout || {}), o.sec);
+      }
+      function stacked(id, cats, seriler, o) {   // yatay yığılmış: seriler [{ad, renk, x:[]}]
+        o = o || {};
+        const [div, birim] = (o.percent || o.fmt) ? [1, null] : olcek(seriler.flatMap(s => s.x));
+        return ciz(id, seriler.map(s => ({ type: "bar", orientation: "h", name: s.ad, y: cats, x: s.x.map(v => num(v) === null ? null : v / div), marker: { color: s.renk, line: { width: 1.5, color: "#FFFFFF" } }, text: s.x.map(v => o.fmt ? o.fmt(v) : fmtMn(v)), textposition: "none", hovertemplate: "%{y} · " + s.ad + ": %{text}<extra></extra>" })),
+          Object.assign({ height: o.height || Math.max(240, 34 * cats.length + 90), barmode: "relative", barnorm: o.percent ? "percent" : undefined, margin: { l: 8, r: 16, t: 34, b: 40 },
+            xaxis: o.percent ? { ticksuffix: "%", range: o.range } : (birim ? { title: { text: birim, font: { size: 11 } } } : {}), yaxis: { automargin: true, categoryorder: "array", categoryarray: cats, showgrid: false }, legend: { orientation: "h", y: 1.02 } }, o.layout || {}), o.sec);
+      }
+      const secenekler = (sel, opts, deger) => { sel.innerHTML = opts.map(o => '<option value="' + esc(o[0]) + '"' + (o[0] === deger ? " selected" : "") + ">" + esc(o[1]) + "</option>").join(""); };
+      const chipKur = (el, items, aktifMi, onclick) => { el.innerHTML = items.map(i => '<span class="chip' + (aktifMi(i[0]) ? " active" : "") + '" data-v="' + esc(i[0]) + '">' + esc(i[1]) + "</span>").join(""); el.querySelectorAll(".chip").forEach(c => c.onclick = () => onclick(c.dataset.v, c)); };
+      const tekSec = (el, c) => el.querySelectorAll(".chip").forEach(x => x.classList.toggle("active", x === c));
+
+      /* ---- üst kontroller ---- */
+      const selDonem = document.getElementById("selDonem"), selKars = document.getElementById("selKars");
+      secenekler(selDonem, P.map(p => [p, plabel(p) + " (" + D.kapsam[p] + " banka)"]), S.donem);
+      const karsListe = () => secenekler(selKars, P.filter(p => p !== S.donem).map(p => [p, plabel(p)]), S.kars);
+      karsListe();
+      selDonem.onchange = () => { S.donem = selDonem.value; if (S.kars === S.donem) S.kars = P.includes(prevYear(S.donem)) ? prevYear(S.donem) : P[Math.max(0, P.indexOf(S.donem) - 1)]; karsListe(); herSey(); };
+      selKars.onchange = () => { S.kars = selKars.value; herSey(); };
+      const modEl = document.getElementById("modChips");
+      modEl.querySelectorAll(".chip").forEach(c => c.onclick = () => { S.mode = c.dataset.v; tekSec(modEl, c); herSey(); });
+      const grupEl = document.getElementById("grupChips");
+      chipKur(grupEl, GRUPLAR.map(g => [g, g]), g => S.gruplar.has(g), (g, c) => { if (S.gruplar.has(g)) { if (S.gruplar.size === 1) return; S.gruplar.delete(g); } else S.gruplar.add(g); c.classList.toggle("active", S.gruplar.has(g)); herSey(); });
+
+      /* ---- Genel bakış ---- */
+      function genel() {
+        const p = S.donem, k = S.kars, cur = banksIn(p, true);
+        const sub = S.mode === "ytd" ? "yıl başından (YTD)" : "çeyreklik akım";
+        document.getElementById("capGenel").textContent = plabel(p) + " · " + cur.length + " banka · gelir kalemleri " + sub + " · değişimler " + plabel(k) + " dönemine göre";
+        const ortak = cur.filter(b => row(k, b) && num(row(k, b).net_kar) !== null && num(row(p, b).net_kar) !== null);
+        const ortakA = cur.filter(b => row(k, b) && num(row(k, b).toplam_aktif) !== null && num(row(p, b).toplam_aktif) !== null);
+        const nkCur = sum(cur.map(b => row(p, b).net_kar)), nkChg = chgPct(sum(ortak.map(b => row(p, b).net_kar)), sum(ortak.map(b => row(k, b).net_kar)));
+        const akCur = sum(cur.map(b => row(p, b).toplam_aktif)), akChg = chgPct(sum(ortakA.map(b => row(p, b).toplam_aktif)), sum(ortakA.map(b => row(k, b).toplam_aktif)));
+        const dcls = v => (num(v) === null ? "flat" : (v >= 0 ? "up" : "down"));
+        setMetrics([
+          ["Raporlayan banka", String(cur.length), plabel(p) + " için verisi olan banka", "flat"],
+          ["Toplam net kâr", fmtMn(nkCur), nkChg === null ? "karşılaştırma verisi yok" : trNum(nkChg * 100, 1, true) + "% · " + plabel(k) + " (aynı " + ortak.length + " banka)", dcls(nkChg)],
+          ["Toplam aktif", fmtMn(akCur), akChg === null ? "" : trNum(akChg * 100, 1, true) + "% · " + plabel(k), dcls(akChg)],
+          ["Medyan ROE", fmtPct(median(cur.map(b => row(p, b).roe))), S.mode === "ytd" ? "yıllıklandırılmış net kâr / özkaynak" : "çeyreklik net kâr / özkaynak", "flat"],
+          ["Medyan ROA", fmtPct(median(cur.map(b => row(p, b).roa)), 2), "bankalar arası medyan", "flat"],
+          ["Medyan NFG / Aktif", fmtPct(median(cur.map(b => row(p, b).nim)), 2), "net faiz geliri / toplam aktif", "flat"],
+        ]);
+        document.getElementById("hNetKar").textContent = "Net kâr · " + plabel(p) + (S.mode === "ytd" ? " (YTD)" : " (çeyrek)");
+        document.getElementById("hNetKarChg").textContent = "Net kâr değişimi · " + plabel(k) + " → " + plabel(p);
+        document.getElementById("hAktif").textContent = "Toplam aktif · " + plabel(p);
+        hbar("chNetKar", cur.map(b => ({ ad: KISA(b), v: row(p, b).net_kar, renk: GRENK[GRUP(b)] })), { fmt: fmtMn, sec: "secGenel" });
+        const chg = cur.map(b => ({ ad: KISA(b), v: row(k, b) ? chgPct(row(p, b).net_kar, row(k, b).net_kar) : null })).filter(x => x.v !== null);
+        hbar("chNetKarChg", chg, { fmt: v => trNum(v * 100, 0, true) + "%", posneg: true, sec: "secGenel", height: Math.max(220, 24 * cur.length + 50) });
+        const eksik = cur.filter(b => !chg.some(x => x.ad === KISA(b))).map(KISA);
+        document.getElementById("notChg").textContent = eksik.length ? "Karşılaştırma dönemi verisi olmayan ya da önceki dönemi zararda olan bankalar: " + eksik.join(", ") : "";
+        scatter("chRoeRoa", cur, p, "roa", "roe", { sec: "secGenel" });
+        hbar("chAktif", cur.map(b => ({ ad: KISA(b), v: row(p, b).toplam_aktif, renk: GRENK[GRUP(b)] })), { fmt: fmtMn, sec: "secGenel" });
+        hbar("chNim", cur.map(b => ({ ad: KISA(b), v: row(p, b).nim, renk: GRENK[GRUP(b)] })), { fmt: v => fmtPct(v, 2), sec: "secGenel" });
+        hbar("chKom", cur.map(b => ({ ad: KISA(b), v: row(p, b).ucret_opgelir, renk: GRENK[GRUP(b)] })), { fmt: fmtPct, sec: "secGenel" });
+      }
+
+      /* ---- Karşılaştırma ---- */
+      const GOSTERGE = [["Gelir tablosu", D.metrics.filter(m => m.stmt === "IS").map(m => m.key)], ["Bilanço", D.metrics.filter(m => m.stmt === "BS").map(m => m.key)], ["Rasyolar", D.ratios.map(r => r.key)]];
+      const gostergeSec = (sel, deger) => { sel.innerHTML = GOSTERGE.map(g => '<optgroup label="' + g[0] + '">' + g[1].map(k => '<option value="' + k + '"' + (k === deger ? " selected" : "") + ">" + esc(LABEL(k)) + "</option>").join("") + "</optgroup>").join(""); };
+      const selCmp = document.getElementById("selCmp"); gostergeSec(selCmp, S.cmp); selCmp.onchange = () => { S.cmp = selCmp.value; karsilastir(); };
+      const cmpEl = document.getElementById("cmpChips"); cmpEl.querySelectorAll(".chip").forEach(c => c.onclick = () => { S.cmpNorm = c.dataset.v === "aktif"; tekSec(cmpEl, c); karsilastir(); });
+      function deger(p, b, k) { const r = row(p, b); if (!r) return null; if (S.cmpNorm && !RAT[k]) return (num(r[k]) === null || !r.toplam_aktif) ? null : r[k] / r.toplam_aktif; return num(r[k]); }
+      function karsilastir() {
+        const k = S.cmp, norm = S.cmpNorm && !RAT[k];
+        const fmt = norm ? (v => fmtPct(v, 2)) : (v => fmtVal(k, v));
+        const donemler = TAM.slice(-4).filter(p => p !== S.donem).concat([S.donem]).sort((a, b) => P.indexOf(a) - P.indexOf(b));
+        const banks = D.banks.map(b => b.ad).filter(b => S.gruplar.has(GRUP(b)) && donemler.some(p => deger(p, b, k) !== null));
+        const RENKLER = [C.dolayli, C.kesin, C.toplam, C.hisse, PAL.mor];
+        grouped("chCmp", banks.map(KISA), donemler.map((p, i) => ({ ad: plabel(p), renk: RENKLER[(RENKLER.length - donemler.length + i + RENKLER.length) % RENKLER.length], y: banks.map(b => deger(p, b, k)) })), { fmt, pct: norm || (RAT[k] && RAT[k].fmt === "pct"), sec: "secCmp", layout: { title: { text: LABEL(k) + (norm ? " / toplam aktif" : "") + (S.mode === "ceyrek" && MET[k] && MET[k].flow ? " · çeyreklik" : ""), font: { size: 13 }, x: 0, y: 0.99 } } });
+        const p0 = S.kars, p1 = S.donem;
+        document.getElementById("hCmpChg").textContent = "% değişim · " + plabel(p0) + " → " + plabel(p1);
+        document.getElementById("hCmpDiff").textContent = (norm || RAT[k] ? "Puan farkı" : "Mutlak değişim") + " · " + plabel(p0) + " → " + plabel(p1);
+        const chg = banks.map(b => ({ ad: KISA(b), v: chgPct(deger(p1, b, k), deger(p0, b, k)) })).filter(x => x.v !== null);
+        const dif = banks.map(b => ({ ad: KISA(b), v: (deger(p1, b, k) === null || deger(p0, b, k) === null) ? null : deger(p1, b, k) - deger(p0, b, k) })).filter(x => x.v !== null);
+        hbar("chCmpChg", chg, { fmt: v => trNum(v * 100, 0, true) + "%", posneg: true, sec: "secCmp" });
+        hbar("chCmpDiff", dif, { fmt: (norm || (RAT[k] && RAT[k].fmt === "pct")) ? (v => trNum(v * 100, 2, true) + " pp") : (RAT[k] && RAT[k].fmt === "x" ? (v => trNum(v, 2, true) + "x") : (v => (v >= 0 ? "+" : "−") + fmtMn(Math.abs(v)))), posneg: true, sec: "secCmp" });
+        document.getElementById("tblCmp").innerHTML = "<tr><th>Banka</th>" + donemler.map(p => "<th>" + plabel(p) + "</th>").join("") + "</tr>" +
+          banks.map(b => '<tr><td class="lbl">' + esc(KISA(b)) + "</td>" + donemler.map(p => '<td class="num">' + fmt(deger(p, b, k)) + "</td>").join("") + "</tr>").join("");
+      }
+
+      /* ---- Zaman serisi ---- */
+      const selTs = document.getElementById("selTs"); gostergeSec(selTs, S.ts); selTs.onchange = () => { S.ts = selTs.value; zaman(); };
+      const tsEl = document.getElementById("tsChips"); tsEl.querySelectorAll(".chip").forEach(c => c.onclick = () => { S.tsMode = c.dataset.v; tekSec(tsEl, c); zaman(); });
+      const tsBankEl = document.getElementById("tsBankChips");
+      chipKur(tsBankEl, D.banks.map(b => [b.ad, b.kisa]), b => S.tsBanks.has(b), (b, c) => { if (S.tsBanks.has(b)) S.tsBanks.delete(b); else S.tsBanks.add(b); c.classList.toggle("active", S.tsBanks.has(b)); zaman(); });
+      function zaman() {
+        const k = S.ts, rasyo = !!RAT[k], mode = rasyo ? "deger" : S.tsMode;
+        tsEl.querySelectorAll(".chip").forEach(c => c.style.display = (rasyo && c.dataset.v !== "deger") ? "none" : "");
+        const banks = D.banks.map(b => b.ad).filter(b => S.tsBanks.has(b));
+        if (!banks.length) { document.getElementById("chTs").innerHTML = '<p class="bos">Banka seçin.</p>'; return; }
+        const x = P.map(plabel);
+        const seriler = banks.map(b => {
+          let y = P.map(p => { const r = row(p, b); return r ? num(r[k]) : null; });
+          if (mode === "endeks") { const ilk = y.find(v => v !== null); y = y.map(v => (v === null || !ilk) ? null : v / ilk * 100); }
+          if (mode === "aktif") y = P.map((p, i) => { const r = row(p, b); return (y[i] === null || !r || !r.toplam_aktif) ? null : y[i] / r.toplam_aktif; });
+          return { ad: KISA(b), renk: BRENK[b], x, y };
+        });
+        const fmt = mode === "endeks" ? (v => trNum(v, 0)) : mode === "aktif" ? (v => fmtPct(v, 2)) : (v => fmtVal(k, v));
+        const baslik = LABEL(k) + (mode === "endeks" ? " · endeks (ilk dönem = 100)" : mode === "aktif" ? " / toplam aktif" : "") + (S.mode === "ceyrek" && MET[k] && MET[k].flow ? " · çeyreklik" : "");
+        lines("chTs", seriler, { fmt, pct: mode === "aktif" || (rasyo && RAT[k].fmt === "pct"), mn: mode === "deger" && !rasyo && !(RAT[k] && RAT[k].fmt !== "mn"), sec: "secTs", layout: { title: { text: baslik, font: { size: 13 }, x: 0, y: 0.99 }, margin: { t: 34 } } });
+      }
+
+      /* ---- Rasyolar ---- */
+      const RASYOLAR = ["roe", "roa", "nim", "nfg_fg", "ucret_opgelir", "per_opgelir", "maliyet_gelir", "kredi_mevduat", "yp_kredi", "yp_mevduat", "mdc_aktif", "kaldirac"];
+      const selRank = document.getElementById("selRank"), selRx = document.getElementById("selRx"), selRy = document.getElementById("selRy");
+      secenekler(selRank, RASYOLAR.map(k => [k, LABEL(k)]), S.rank); secenekler(selRx, RASYOLAR.map(k => [k, LABEL(k)]), S.rx); secenekler(selRy, RASYOLAR.map(k => [k, LABEL(k)]), S.ry);
+      selRank.onchange = () => { S.rank = selRank.value; rasyoAlt(); }; selRx.onchange = () => { S.rx = selRx.value; rasyoAlt(); }; selRy.onchange = () => { S.ry = selRy.value; rasyoAlt(); };
+      function rasyolar() {
+        const p = S.donem, cur = banksIn(p, true).slice().sort((a, b) => (row(p, b).toplam_aktif || 0) - (row(p, a).toplam_aktif || 0));
+        document.getElementById("capRasyo").textContent = plabel(p) + " · bankalar aktif büyüklüğüne göre sıralı · hücre rengi sütun içindeki sırayı gösterir (yeşil = daha iyi; yönsüz rasyolar renksiz)";
+        const t = document.getElementById("tblRasyo");
+        t.innerHTML = "<tr><th>Banka</th>" + RASYOLAR.map(k => '<th title="' + esc(LABEL(k)) + '">' + esc(SHORT(k)) + "</th>").join("") + "</tr>" +
+          cur.map(b => '<tr><td class="lbl">' + esc(KISA(b)) + "</td>" + RASYOLAR.map(k => {
+            const v = num(row(p, b)[k]); if (v === null) return '<td class="num bos">—</td>';
+            const good = RAT[k].good; if (!good) return '<td class="num">' + fmtVal(k, v) + "</td>";
+            const vals = cur.map(x => num(row(p, x)[k])).filter(x => x !== null).sort((a, b) => good === "low" ? a - b : b - a);
+            const tt = vals.length < 2 ? 0.5 : 1 - vals.indexOf(v) / (vals.length - 1);
+            return '<td class="num pct isi" style="background:' + isiRenk(tt) + '">' + fmtVal(k, v) + "</td>";
+          }).join("") + "</tr>").join("");
+        rasyoAlt();
+      }
+      function rasyoAlt() {
+        const p = S.donem, cur = banksIn(p, true), k = S.rank;
+        hbar("chRank", cur.map(b => ({ ad: KISA(b), v: row(p, b)[k], renk: GRENK[GRUP(b)] })), { fmt: v => fmtVal(k, v), med: median(cur.map(b => row(p, b)[k])), sec: "secRasyo", asc: RAT[k].good !== "low", layout: { title: { text: LABEL(k) + " · " + plabel(p), font: { size: 13 }, x: 0, y: 0.99 }, margin: { t: 34 } } });
+        scatter("chRxy", cur, p, S.rx, S.ry, { sec: "secRasyo", height: Math.max(360, 24 * cur.length + 50) });
+      }
+
+      /* ---- Banka odak ---- */
+      const selOdak = document.getElementById("selOdak"), selRef = document.getElementById("selRef"), emsalEl = document.getElementById("emsalChips");
+      secenekler(selOdak, [["", "— banka seçin —"]].concat(D.banks.map(b => [b.ad, b.kisa])), "");
+      selOdak.onchange = () => { S.odak = selOdak.value; S.emsal = new Set(D.banks.filter(b => b.ad !== S.odak && b.grup === GRUP(S.odak)).map(b => b.ad)); emsalCiz(); odak(); };
+      selRef.onchange = () => { S.ref = selRef.value; odak(); };
+      function emsalCiz() { chipKur(emsalEl, D.banks.filter(b => b.ad !== S.odak).map(b => [b.ad, b.kisa]), b => S.emsal.has(b), (b, c) => { if (S.emsal.has(b)) S.emsal.delete(b); else S.emsal.add(b); c.classList.toggle("active", S.emsal.has(b)); odak(); }); }
+      emsalCiz();
+      function odak() {
+        const g = document.getElementById("odakGovde"), b = S.odak;
+        if (!b) { g.innerHTML = '<p class="bos">Yukarıdan bir banka seçin; kârlılık göstergeleri, emsal karşılaştırması ve referans medyanından sapma burada görünür.</p>'; return; }
+        const p = S.donem, py = prevYear(p), cur = row(p, b), prv = row(py, b);
+        if (!cur) { g.innerHTML = '<p class="bos">' + esc(KISA(b)) + " için " + plabel(p) + " verisi yok; üstten başka bir dönem seçin.</p>"; return; }
+        const refSet = S.ref === "big7" ? D.big7 : S.ref === "emsal" ? [...S.emsal] : D.banks.map(x => x.ad);
+        const refAd = S.ref === "big7" ? "Büyük 7" : S.ref === "emsal" ? "emsal grubu" : "tüm bankalar";
+        const KPI = ["net_kar", "toplam_aktif", "ozkaynak", "roe", "roa", "nim"];
+        const kart = KPI.map(k => {
+          let d = "", cls = "flat";
+          if (prv && num(prv[k]) !== null && num(cur[k]) !== null) { if (RAT[k]) { const pp = (cur[k] - prv[k]) * 100; d = trNum(pp, 1, true) + " pp · " + plabel(py); cls = pp >= 0 ? "up" : "down"; } else { const c = chgPct(cur[k], prv[k]); d = c === null ? "" : trNum(c * 100, 1, true) + "% · " + plabel(py); cls = c === null ? "flat" : (c >= 0 ? "up" : "down"); } }
+          return '<div class="metric"><div class="lbl">' + esc(SHORT(k)) + '</div><div class="val">' + fmtVal(k, cur[k]) + "</div>" + (d ? '<div class="dlt ' + cls + '">' + d + "</div>" : "") + "</div>";
+        }).join("");
+        const PANEL = ["net_kar", "toplam_aktif", "net_faiz", "net_ucret", "roe", "roa", "nim", "yp_kredi", "kredi_mevduat"];
+        const RK = ["roe", "roa", "nim", "nfg_fg", "ucret_opgelir", "per_opgelir", "yp_kredi", "kaldirac"];
+        g.innerHTML = '<div class="metrics kucuk">' + kart + "</div>" +
+          '<p class="mini-h">Gelişim · ' + esc(KISA(b)) + " ve " + refAd + ' medyanı</p><p class="not">Çubuklar bankanın mutlak büyüklükleri; çizgilerde rasyolar: banka (kırmızı) ve referans medyanı (noktalı gri).</p>' +
+          '<div class="uclu">' + PANEL.map((k, i) => '<div><p class="mini-h" style="font-size:12px">' + esc(SHORT(k)) + '</p><div id="chOd' + i + '"></div></div>').join("") + "</div>" +
+          '<p class="mini-h" style="margin-top:14px">Emsal karşılaştırması · ' + plabel(p) + '</p><div class="dortlu">' + RK.map((k, i) => '<div><p class="mini-h" style="font-size:12px">' + esc(SHORT(k)) + '</p><div id="chPe' + i + '"></div></div>').join("") + "</div>" +
+          '<p class="mini-h" style="margin-top:14px">' + esc(KISA(b)) + " − " + refAd + " medyanı · " + plabel(p) + ' (puan)</p><p class="not">Mavi: olumlu yönde fark, kırmızı: olumsuz, gri: yönsüz rasyo.</p><div id="chSapma"></div>';
+        const ps = P.filter(q => row(q, b));
+        PANEL.forEach((k, i) => {
+          const x = ps.map(kisaP);
+          if (RAT[k]) {
+            const med = ps.map(q => median(refSet.filter(r => row(q, r)).map(r => row(q, r)[k])));
+            lines("chOd" + i, [{ ad: "Medyan", renk: C.ost, x, y: med, dash: "dot" }, { ad: KISA(b), renk: C.hisse, x, y: ps.map(q => row(q, b)[k]) }], { fmt: v => fmtVal(k, v), pct: RAT[k].fmt === "pct", height: 220, etiket: false, sec: "secOdak", layout: { margin: { l: 48, r: 12, t: 6, b: 30 }, xaxis: { tickfont: { size: 10 } } } });
+          } else {
+            const y = ps.map(q => num(row(q, b)[k])), [div, birim] = olcek(y);
+            ciz("chOd" + i, [{ type: "bar", x, y: y.map(v => v === null ? null : v / div), marker: { color: C.toplam }, text: y.map(fmtMn), textposition: "none", hovertemplate: "%{x}: %{text}<extra></extra>" }], { height: 220, margin: { l: 52, r: 12, t: 6, b: 30 }, xaxis: { type: "category", tickfont: { size: 10 } }, yaxis: { title: { text: birim, font: { size: 10 } } }, showlegend: false }, "secOdak");
+          }
+        });
+        const pset = [b, ...S.emsal].filter(r => row(p, r));
+        RK.forEach((k, i) => hbar("chPe" + i, pset.map(r => ({ ad: KISA(r), v: row(p, r)[k], renk: r === b ? C.hisse : C.toplam })), { fmt: v => fmtVal(k, v), asc: RAT[k].good !== "low", height: Math.max(150, 22 * pset.length + 40), sec: "secOdak", layout: { margin: { l: 8, r: 64, t: 4, b: 4 } } }));
+        const DEV = ["roe", "roa", "nim", "nfg_fg", "ucret_opgelir", "per_opgelir", "yp_kredi", "yp_mevduat", "kredi_mevduat", "mevduat_aktif", "mdc_aktif"];
+        const refp = refSet.filter(r => row(p, r));
+        const dv = DEV.map(k => { const m = median(refp.map(r => row(p, r)[k])), v = num(cur[k]); if (m === null || v === null) return null; const good = RAT[k].good; const renk = !good ? C.ost : (((v - m) > 0) === (good === "high") ? C.kesin : C.hisse); return { ad: SHORT(k), v: v - m, renk, txt: fmtVal(k, v) + " vs " + fmtVal(k, m) }; }).filter(Boolean);
+        if (refp.length < 3 || !dv.length) { document.getElementById("chSapma").innerHTML = '<p class="bos">Referans grup için yeterli veri yok.</p>'; return; }
+        ciz("chSapma", [{ type: "bar", orientation: "h", x: dv.map(d => d.v), y: dv.map(d => d.ad), text: dv.map(d => d.txt), textposition: "outside", cliponaxis: false, textfont: { size: 11 }, marker: { color: dv.map(d => d.renk) }, hovertemplate: "%{y}: %{text}<extra></extra>" }],
+          { height: 26 * dv.length + 50, margin: { l: 8, r: 150, t: 8, b: 8 }, showlegend: false, xaxis: { visible: false, range: padRange(dv.map(d => d.v), 0.6) }, yaxis: { automargin: true, autorange: "reversed", showgrid: false, showline: false } }, "secOdak");
+      }
+
+      /* ---- Faaliyet bölümleri ---- */
+      const SEGB = D.banks.map(b => b.ad).filter(b => D.segments[b]);
+      const KAT = ["Bireysel / Perakende", "Kurumsal / Ticari / KOBİ", "Hazine / Yatırım", "Diğer / Dağıtılamayan"];
+      const KRENK = { "Bireysel / Perakende": C.hisse, "Kurumsal / Ticari / KOBİ": C.toplam, "Hazine / Yatırım": PAL.sari, "Diğer / Dağıtılamayan": C.ost };
+      const selSegBank = document.getElementById("selSegBank"), selSegDonem = document.getElementById("selSegDonem"), selSegX = document.getElementById("selSegX");
+      const segDonemler = () => Object.keys(D.segments[S.segBank] || {}).sort((a, b) => P.indexOf(a) - P.indexOf(b));
+      if (SEGB.length) {
+        S.segBank = SEGB[0]; S.segDonem = segDonemler().slice(-1)[0];
+        secenekler(selSegBank, SEGB.map(b => [b, KISA(b)]), S.segBank);
+        selSegBank.onchange = () => { S.segBank = selSegBank.value; S.segDonem = segDonemler().slice(-1)[0]; secenekler(selSegDonem, segDonemler().map(p => [p, plabel(p)]), S.segDonem); bolum(); };
+        secenekler(selSegDonem, segDonemler().map(p => [p, plabel(p)]), S.segDonem);
+        selSegDonem.onchange = () => { S.segDonem = selSegDonem.value; bolum(); };
+        const xd = [...new Set(SEGB.flatMap(b => Object.keys(D.segments[b])))].sort((a, b) => P.indexOf(a) - P.indexOf(b));
+        S.segX = xd.slice(-1)[0]; secenekler(selSegX, xd.map(p => [p, plabel(p)]), S.segX); selSegX.onchange = () => { S.segX = selSegX.value; bolumX(); };
+      }
+      function bolum() {
+        const g = document.getElementById("segGovde"), b = S.segBank, p = S.segDonem;
+        if (!b) { g.innerHTML = '<p class="bos">Faaliyet bölümü verisi yok.</p>'; return; }
+        const s = D.segments[b][p], py = prevYear(p), sp = (D.segments[b] || {})[py];
+        const bol = s.bolumler, topNk = num(s.toplam_net_kar);
+        const enK = bol.filter(x => num(x.net_kar) !== null).sort((a, c) => c.net_kar - a.net_kar)[0];
+        const hz = sum(bol.filter(x => x.kat === "Hazine / Yatırım").map(x => x.net_kar));
+        const roa = bol.map(x => ({ ad: x.ad, v: (num(x.net_kar) === null || !x.varlik || x.varlik <= 0) ? null : x.net_kar / x.varlik })).filter(x => x.v !== null);
+        const enR = roa.slice().sort((a, c) => c.v - a.v)[0];
+        g.innerHTML = '<div class="metrics kucuk">' +
+          '<div class="metric"><div class="lbl">Banka net kârı</div><div class="val">' + fmtMn(topNk) + '</div><div class="dlt flat">' + (s.net_kar_turetilmis ? "vergi öncesi kâr − vergi ile türetildi" : "bölüm tablosu toplamı") + "</div></div>" +
+          (enK ? '<div class="metric"><div class="lbl">En kârlı bölüm</div><div class="val">' + fmtMn(enK.net_kar) + '</div><div class="dlt flat">' + esc(enK.ad) + "</div></div>" : "") +
+          '<div class="metric"><div class="lbl">Hazine / Yatırım katkısı</div><div class="val">' + fmtMn(hz) + '</div><div class="dlt flat">' + (topNk ? "payı " + fmtPct(hz / topNk) : "") + "</div></div>" +
+          (enR ? '<div class="metric"><div class="lbl">En yüksek bölüm ROA</div><div class="val">' + fmtPct(enR.v) + '</div><div class="dlt flat">' + esc(enR.ad) + "</div></div>" : "") + "</div>" +
+          '<div class="ikili"><div><p class="mini-h">Bölüm net kârı (mn TL)</p><div id="chSegNk"></div></div><div><p class="mini-h">Bölüm varlıklarının dağılımı (%)</p><div id="chSegVar"></div></div>' +
+          '<div><p class="mini-h">Bölüm ROA · net kâr / bölüm varlıkları · ' + plabel(p) + '</p><div id="chSegRoa"></div></div><div><p class="mini-h">Gelir kompozisyonu (mn TL) · ' + plabel(p) + '</p><div id="chSegGel"></div></div></div>' +
+          '<details class="ham"><summary>Ham bölüm tablosu (bin TL)</summary><div class="table-wrap"><table class="heat" id="tblSegHam"></table></div></details>';
+        const adlar = bol.map(x => x.ad), prvMap = {}; (sp ? sp.bolumler : []).forEach(x => prvMap[x.ad] = x);
+        const seriNk = []; if (sp) seriNk.push({ ad: plabel(py), renk: C.dolayli, x: adlar.map(a => prvMap[a] ? prvMap[a].net_kar : null) }); seriNk.push({ ad: plabel(p), renk: C.toplam, x: bol.map(x => x.net_kar) });
+        const [sdiv, sbirim] = olcek(seriNk.flatMap(sr => sr.x));
+        ciz("chSegNk", seriNk.map(sr => ({ type: "bar", orientation: "h", name: sr.ad, y: adlar, x: sr.x.map(v => num(v) === null ? null : v / sdiv), marker: { color: sr.renk }, text: sr.x.map(fmtMn), textposition: "none", hovertemplate: "%{y} · " + sr.ad + ": %{text}<extra></extra>" })), { height: Math.max(240, 40 * adlar.length + 90), barmode: "group", margin: { l: 8, r: 16, t: 34, b: 40 }, xaxis: { title: { text: sbirim, font: { size: 11 } } }, yaxis: { automargin: true, categoryorder: "array", categoryarray: adlar.slice().reverse(), showgrid: false }, legend: { orientation: "h", y: 1.02 } }, "secSeg");
+        const varCats = (sp ? [plabel(py)] : []).concat([plabel(p)]);
+        stacked("chSegVar", varCats, bol.map((x, i) => ({ ad: x.ad, renk: PALET[i % PALET.length], x: (sp ? [prvMap[x.ad] ? prvMap[x.ad].varlik : 0] : []).concat([x.varlik || 0]) })), { percent: true, height: 240, sec: "secSeg" });
+        hbar("chSegRoa", roa, { fmt: fmtPct, sec: "secSeg", height: Math.max(180, 30 * roa.length + 50) });
+        const gelSer = [["nfg", "Net faiz", C.toplam], ["komisyon", "Komisyon", C.kesin], ["ticari", "Ticari K/Z", C.hisse], ["diger_gelir", "Diğer gelir", C.ost]].filter(([k]) => bol.some(x => num(x[k]) !== null)).map(([k, ad, renk]) => ({ ad, renk, x: bol.map(x => num(x[k]) || 0) }));
+        if (gelSer.length) stacked("chSegGel", adlar, gelSer, { height: Math.max(220, 40 * adlar.length + 90), sec: "secSeg" }); else document.getElementById("chSegGel").innerHTML = '<p class="bos">Bu banka bölüm bazında gelir kırılımı vermiyor (yalnızca faaliyet geliri/kârı).</p>';
+        const h = s.ham;
+        document.getElementById("tblSegHam").innerHTML = "<tr><th>Kalem</th>" + h.segmentler.map(x => "<th>" + esc(x) + "</th>").join("") + "</tr>" + h.kalemler.map((it, i) => '<tr><td class="lbl">' + esc(it) + "</td>" + h.deger[i].map(v => '<td class="num">' + (v === null ? "" : trNum(v, 0)) + "</td>").join("") + "</tr>").join("");
+      }
+      function bolumX() {
+        const g = document.getElementById("segXGovde"), p = S.segX;
+        if (!p) { g.innerHTML = ""; return; }
+        const rows = SEGB.filter(b => D.segments[b][p]).map(b => { const s = D.segments[b][p]; const kat = {}; KAT.forEach(k => kat[k] = sum(s.bolumler.filter(x => x.kat === k).map(x => x.net_kar))); const tot = num(s.toplam_net_kar) || sum(s.bolumler.map(x => x.net_kar)); return { b, kat, tot }; }).sort((a, c) => a.tot - c.tot);
+        g.innerHTML = '<div class="ikili"><div><p class="mini-h">Net kârın bölüm kategorilerine dağılımı (mn TL) · ' + plabel(p) + '</p><div id="chKatNk"></div></div><div><p class="mini-h">Payı (%) · negatif katkı sola uzar</p><div id="chKatPay"></div></div></div>' +
+          '<p class="mini-h" style="margin-top:12px">Hazine / Yatırım bölümünün net kâr payı · dönemler</p><div class="table-wrap"><table class="heat dar" id="tblHz"></table></div>';
+        const cats = rows.map(r => KISA(r.b));
+        stacked("chKatNk", cats, KAT.map(k => ({ ad: k, renk: KRENK[k], x: rows.map(r => r.kat[k]) })), { sec: "secSeg", height: Math.max(260, 40 * cats.length + 90) });
+        stacked("chKatPay", cats, KAT.map(k => ({ ad: k, renk: KRENK[k], x: rows.map(r => r.tot ? r.kat[k] / r.tot * 100 : 0) })), { fmt: v => trNum(v, 0) + "%", sec: "secSeg", height: Math.max(260, 40 * cats.length + 90), layout: { xaxis: { ticksuffix: "%" } } });
+        const ps = [...new Set(SEGB.flatMap(b => Object.keys(D.segments[b])))].sort((a, c) => P.indexOf(a) - P.indexOf(c));
+        document.getElementById("tblHz").innerHTML = "<tr><th>Banka</th>" + ps.map(q => "<th>" + plabel(q) + "</th>").join("") + "</tr>" + SEGB.map(b => '<tr><td class="lbl">' + esc(KISA(b)) + "</td>" + ps.map(q => { const s = D.segments[b][q]; if (!s) return '<td class="num bos">—</td>'; const tot = num(s.toplam_net_kar) || sum(s.bolumler.map(x => x.net_kar)); const hz = sum(s.bolumler.filter(x => x.kat === "Hazine / Yatırım").map(x => x.net_kar)); return '<td class="num">' + (tot ? fmtPct(hz / tot) : "—") + "</td>"; }).join("") + "</tr>").join("");
+      }
+
+      /* ---- Faiz tipi ---- */
+      const FP = Object.keys(D.faiz_tipi).sort((a, b) => P.indexOf(a) - P.indexOf(b));
+      const selFaiz = document.getElementById("selFaiz");
+      if (FP.length) { S.faiz = FP.slice(-1)[0]; secenekler(selFaiz, FP.map(p => [p, plabel(p)]), S.faiz); selFaiz.onchange = () => { S.faiz = selFaiz.value; faiz(); }; }
+      const FRENK = { "TRY Sabit": C.toplam, "TRY TÜFE": C.hisse, "TRY TLREF/Değişken": C.kesin, "YP Sabit": C.euro, "YP Değişken": PAL.sari };
+      function faiz() {
+        const g = document.getElementById("faizGovde"), p = S.faiz;
+        if (!p) { g.innerHTML = '<p class="bos">Faiz tipi verisi yok.</p>'; return; }
+        const F = D.faiz_tipi[p], banks = Object.keys(F).sort((a, b) => sum(Object.values(F[a])) - sum(Object.values(F[b])));
+        const cats = banks.map(KISA);
+        g.innerHTML = '<div class="ikili"><div><p class="mini-h">Faiz tipi dağılımı (%) · ' + plabel(p) + '</p><div id="chFz1"></div></div><div><p class="mini-h">Portföy büyüklüğü (mn TL) · ' + plabel(p) + '</p><div id="chFz2"></div></div></div><p class="mini-h">TRY / YP ağırlığı (%)</p><div id="chFz3"></div>';
+        stacked("chFz1", cats, D.buckets.map(k => ({ ad: k, renk: FRENK[k], x: banks.map(b => num(F[b][k]) || 0) })), { percent: true, sec: "secFaiz" });
+        stacked("chFz2", cats, D.buckets.map(k => ({ ad: k, renk: FRENK[k], x: banks.map(b => num(F[b][k]) || 0) })), { sec: "secFaiz" });
+        stacked("chFz3", cats, [["TRY", C.toplam, k => k.startsWith("TRY")], ["YP", C.euro, k => k.startsWith("YP")]].map(([ad, renk, f]) => ({ ad, renk, x: banks.map(b => sum(D.buckets.filter(f).map(k => F[b][k]))) })), { percent: true, height: Math.max(200, 30 * cats.length + 80), sec: "secFaiz" });
+      }
+
+      function herSey() { genel(); karsilastir(); zaman(); rasyolar(); odak(); }
+      const CIZ = { secGenel: genel, secCmp: karsilastir, secTs: zaman, secRasyo: rasyolar, secOdak: odak, secSeg: () => { bolum(); bolumX(); }, secFaiz: faiz };
+      herSey(); bolum(); bolumX(); faiz();
+      sunumAraclariKur(TEMA, CIZ);
+    })().catch(e => { console.error(e); const el = document.getElementById("ozet"); if (el) el.textContent = "Veri yüklenemedi: " + e.message; });
+  </script>
+</body>
+</html>
