@@ -109,9 +109,12 @@ function renderShell() {
   const tb = document.getElementById("temaBtn");
   if (tb) tb.onclick = temaDegistir;
   // Sayfa içi sekme bağlantıları: etkin olanı hash'e göre işaretle; mobilde menüyü kapat
-  function hashIsaretle() {
+  function hashIsaretle() {   // yalnız o sayfadayken etkin sekme işaretlenir
     const h = location.hash || "#genel";
-    side.querySelectorAll(".nav-sub2 a").forEach(function (a) { a.classList.toggle("active", a.dataset.hash === h); });
+    side.querySelectorAll(".nav-item").forEach(function (it) {
+      const burada = it.dataset.item === here;
+      it.querySelectorAll(".nav-sub2 a").forEach(function (a) { a.classList.toggle("active", burada && a.dataset.hash === h); });
+    });
   }
   hashIsaretle();
   window.addEventListener("hashchange", hashIsaretle);
