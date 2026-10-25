@@ -81,15 +81,16 @@ function renderShell() {
       if (n.head) return '<span class="nav-head">' + n.head + "</span>";
       if (n.group) {
         const icinde = n.items.some(function (i) { return i.href === here; });
-        let acik = icinde;
-        try { const s = localStorage.getItem("ekordion-nav-" + n.group); if (!icinde && s !== null) acik = s === "1"; } catch (e) {}
+        // Site açıldığında gruplar kapalı gelir (kullanıcı isteği); aynı sekme oturumunda açılan grup açık kalır
+        let acik = false;
+        try { acik = sessionStorage.getItem("ekordion-nav-" + n.group) === "1"; } catch (e) {}
         return '<div class="nav-grp' + (acik ? " open" : "") + (icinde ? " has-active" : "") + '" data-grp="' + n.group + '">' +
           '<button type="button" class="nav-grp-btn" aria-expanded="' + (acik ? "true" : "false") + '"><span>' + n.group + '</span><span class="chev"></span></button>' +
           '<div class="nav-sub">' + n.items.map(function (i) {
             const act = i.href === here;
             if (i.items) {   // üçüncü düzey: aynı sayfanın hash sekmeleri; ok düğmesiyle açılır/kapanır (o sayfadayken varsayılan açık)
-              let acik2 = act;
-              try { const s2 = localStorage.getItem("ekordion-nav-item-" + i.href); if (s2 !== null) acik2 = s2 === "1"; } catch (e) {}
+              let acik2 = false;
+              try { acik2 = sessionStorage.getItem("ekordion-nav-item-" + i.href) === "1"; } catch (e) {}
               return '<div class="nav-item' + (acik2 ? " open" : "") + '" data-item="' + i.href + '"><div class="nav-item-row"><a class="' + (act ? "active" : "") + '" href="' + i.href + '">' + i.label + "</a>" +
                 '<button type="button" class="nav-item-btn" aria-expanded="' + (acik2 ? "true" : "false") + '" aria-label="Alt sekmeleri aç/kapat"><span class="chev"></span></button></div>' +
                 '<div class="nav-sub nav-sub2">' + i.items.map(function (t) { return '<a data-hash="' + t.hash + '" href="' + i.href + t.hash + '">' + t.label + "</a>"; }).join("") + "</div></div>";
@@ -125,14 +126,14 @@ function renderShell() {
     b.onclick = function () {
       const it = b.closest(".nav-item"), acik = !it.classList.contains("open");
       it.classList.toggle("open", acik); b.setAttribute("aria-expanded", acik ? "true" : "false");
-      try { localStorage.setItem("ekordion-nav-item-" + it.dataset.item, acik ? "1" : "0"); } catch (e) {}
+      try { sessionStorage.setItem("ekordion-nav-item-" + it.dataset.item, acik ? "1" : "0"); } catch (e) {}
     };
   });
   side.querySelectorAll(".nav-grp-btn").forEach(function (b) {
     b.onclick = function () {
       const g = b.parentElement, acik = !g.classList.contains("open");
       g.classList.toggle("open", acik); b.setAttribute("aria-expanded", acik ? "true" : "false");
-      try { localStorage.setItem("ekordion-nav-" + g.dataset.grp, acik ? "1" : "0"); } catch (e) {}
+      try { sessionStorage.setItem("ekordion-nav-" + g.dataset.grp, acik ? "1" : "0"); } catch (e) {}
     };
   });
 
