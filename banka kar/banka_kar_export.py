@@ -6,6 +6,8 @@ solo (konsolide olmayan) BDDK formatlı finansal tablolarından okunan metrikler
 Veri bakımı (PDF yükleme, manuel giriş) yerel uygulamada yapılır; bu betik yalnız sonuçları siteye aktarır.
 
   BANKA_DB=/yol/banka.db  → kaynak veritabanı (varsayılan: ~/cowork/*/banka_dashboard/data/banka.db içinde en yenisi)
+  PDF kutusu: proje klasöründeki PDF_YUKLE/ içine bırakılan solo finansal tablo PDF'leri her çalıştırmada uygulamanın
+  bootstrap.py'si ile veritabanına işlenir; okunanlar PDF_ISLENDI/ klasörüne taşınır, okunamayanlar PDF_YUKLE'de kalır.
   Kaynak bulunursa 'banka kar/banka.db' kopyası tazelenir (git'e girmez); bulunamazsa kopya kullanılır;
   o da yoksa hiçbir şey yazılmaz (sitedeki JSON korunur) — bulut iş akışında durum budur.
 
@@ -98,6 +100,39 @@ def kaynak_db():
     return max(adaylar, key=lambda p: p.stat().st_mtime) if adaylar else None
 
 
+def pdf_isle():
+    """PDF_YUKLE/ kutusundaki PDF'leri uygulamanın toplu yükleyicisiyle (bootstrap.py --pdf) veritabanına işler."""
+    src = kaynak_db()
+    if src is None:
+        return
+    app = src.parent.parent; proje = app.parent
+    gelen, islendi = proje / "PDF_YUKLE", proje / "PDF_ISLENDI"
+    gelen.mkdir(exist_ok=True); islendi.mkdir(exist_ok=True)
+    pdfs = sorted(p for p in gelen.iterdir() if p.suffix.lower() == ".pdf")
+    if not pdfs:
+        return
+    print(f"  PDF_YUKLE: {len(pdfs)} dosya işleniyor (bootstrap.py)…")
+    import subprocess
+    r = subprocess.run([sys.executable, str(app / "bootstrap.py"), "--pdf", *map(str, pdfs)], cwd=app, capture_output=True, text=True)
+    cikti = (r.stdout or "") + (r.stderr or "")
+    atlanan = set()
+    for line in cikti.splitlines():
+        if line.startswith("OK "):
+            print("   ", line.strip()[:170])
+        elif line.startswith("ATLANDI "):
+            atlanan.add(line.split("ATLANDI ", 1)[1].split(": banka=")[0].strip()); print("   ", line.strip()[:170])
+    if r.returncode != 0 and not atlanan:
+        print(f"  ~ bootstrap hata kodu {r.returncode}: {cikti.strip()[-300:]}"); return
+    for p in pdfs:
+        if p.name in atlanan:
+            continue
+        hedef = islendi / p.name
+        if hedef.exists():
+            hedef = islendi / f"{p.stem}_{dt.datetime.now():%Y%m%d%H%M%S}{p.suffix}"
+        shutil.move(str(p), str(hedef))
+    print(f"  PDF: {len(pdfs) - len(atlanan)} dosya işlendi → PDF_ISLENDI" + (f"; {len(atlanan)} dosya okunamadı, PDF_YUKLE'de bırakıldı: {', '.join(sorted(atlanan))}" if atlanan else ""))
+
+
 def sync_db():
     src = kaynak_db()
     if src and src.resolve() != LOCAL_DB.resolve():
@@ -157,6 +192,10 @@ def seg_item(items, kind):
 
 
 def build(out=OUT):
+    try:
+        pdf_isle()
+    except Exception as e:
+        print(f"  ~ PDF kutusu işlenemedi ({type(e).__name__}: {str(e)[:80]})")
     db = sync_db()
     if db is None:
         print("  ~ banka.db yok (kaynak uygulama bu makinede değil) — banka_kar.json korunuyor")
