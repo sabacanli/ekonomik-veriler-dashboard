@@ -57,7 +57,7 @@
   <main>
     <h1 class="page-title">Banka Kârlılık Analizi</h1>
     <div class="update-info" id="updated"></div>
-    <div class="info-box" id="ozet">📋 2025 Ç4 solo finansal tablolar, 15 banka: toplam net kâr 681,2 milyar TL (yıllık +39,6%, aynı banka seti); medyan ROE %22,1, ROA %1,83. En yüksek net kâr: Ziraat 161,5 mlr, Garanti 110,6 mlr, Vakıf 70,0 mlr.</div>
+    <div class="info-box" id="ozet">📋 2026 Ç2 solo finansal tablolar, 14 banka: toplam net kâr 286,1 milyar TL (yıllık +20,6%, aynı banka seti); medyan ROE %26,0, ROA %2,43. En yüksek net kâr: Ziraat 74,2 mlr, Garanti 63,7 mlr, Deniz 34,6 mlr.</div>
 
     <div class="chips sekmeler" id="sekmeChips"></div>
     <div class="ctl-bar" id="ustKontrol">
@@ -215,7 +215,7 @@
       const S = { donem: D.son_tam, kars: null, mode: "ytd", gruplar: new Set(GRUPLAR), cmp: "net_kar", cmpNorm: false, ts: "net_kar", tsMode: "deger", tsBanks: new Set(D.big7), rank: "roe", rx: "roa", ry: "roe", odak: "", emsal: new Set(), ref: "big7", segBank: null, segDonem: null, segX: null, faiz: null };
       S.kars = P.includes(prevYear(S.donem)) ? prevYear(S.donem) : P[Math.max(0, P.indexOf(S.donem) - 1)];
       const V = () => S.mode === "ytd" ? D.ytd : D.ceyrek;
-      const row = (p, b) => (V()[p] || {})[b] || null;
+      const row = (p, b) => { const r = (D.ytd[p] || {})[b]; if (!r) return null; if (S.mode !== "ceyrek") return r; const c = (D.ceyrek[p] || {})[b]; return c ? Object.assign({}, r, c) : null; };
       const banksIn = (p, filtre) => D.banks.map(b => b.ad).filter(b => row(p, b) && (!filtre || S.gruplar.has(GRUP(b))));
       const TEMA = { secGenel: false, secCmp: false, secTs: false, secRasyo: false, secOdak: false, secSeg: false, secFaiz: false };
       const ciz = (id, traces, layout, sec) => draw(id, traces, layout, sec ? TEMA[sec] : undefined);
@@ -470,8 +470,7 @@
           '<div class="metric"><div class="lbl">Hazine / Yatırım katkısı</div><div class="val">' + fmtMn(hz) + '</div><div class="dlt flat">' + (topNk ? "payı " + fmtPct(hz / topNk) : "") + "</div></div>" +
           (enR ? '<div class="metric"><div class="lbl">En yüksek bölüm ROA</div><div class="val">' + fmtPct(enR.v) + '</div><div class="dlt flat">' + esc(enR.ad) + "</div></div>" : "") + "</div>" +
           '<div class="ikili"><div><p class="mini-h">Bölüm net kârı (mn TL)</p><div id="chSegNk"></div></div><div><p class="mini-h">Bölüm varlıklarının dağılımı (%)</p><div id="chSegVar"></div></div>' +
-          '<div><p class="mini-h">Bölüm ROA · net kâr / bölüm varlıkları · ' + plabel(p) + '</p><div id="chSegRoa"></div></div><div><p class="mini-h">Gelir kompozisyonu (mn TL) · ' + plabel(p) + '</p><div id="chSegGel"></div></div></div>' +
-          '<details class="ham"><summary>Ham bölüm tablosu (bin TL)</summary><div class="table-wrap"><table class="heat" id="tblSegHam"></table></div></details>';
+          '<div><p class="mini-h">Bölüm ROA · net kâr / bölüm varlıkları · ' + plabel(p) + '</p><div id="chSegRoa"></div></div><div><p class="mini-h">Gelir kompozisyonu (mn TL) · ' + plabel(p) + '</p><div id="chSegGel"></div></div></div>';
         const adlar = bol.map(x => x.ad), prvMap = {}; (sp ? sp.bolumler : []).forEach(x => prvMap[x.ad] = x);
         const seriNk = []; if (sp) seriNk.push({ ad: plabel(py), renk: C.dolayli, x: adlar.map(a => prvMap[a] ? prvMap[a].net_kar : null) }); seriNk.push({ ad: plabel(p), renk: C.toplam, x: bol.map(x => x.net_kar) });
         const [sdiv, sbirim] = olcek(seriNk.flatMap(sr => sr.x));
@@ -481,8 +480,6 @@
         hbar("chSegRoa", roa, { fmt: fmtPct, sec: "secSeg", height: Math.max(180, 30 * roa.length + 50) });
         const gelSer = [["nfg", "Net faiz", C.toplam], ["komisyon", "Komisyon", C.kesin], ["ticari", "Ticari K/Z", C.hisse], ["diger_gelir", "Diğer gelir", C.ost]].filter(([k]) => bol.some(x => num(x[k]) !== null)).map(([k, ad, renk]) => ({ ad, renk, x: bol.map(x => num(x[k]) || 0) }));
         if (gelSer.length) stacked("chSegGel", adlar, gelSer, { height: Math.max(220, 40 * adlar.length + 90), sec: "secSeg" }); else document.getElementById("chSegGel").innerHTML = '<p class="bos">Bu banka bölüm bazında gelir kırılımı vermiyor (yalnızca faaliyet geliri/kârı).</p>';
-        const h = s.ham;
-        document.getElementById("tblSegHam").innerHTML = "<tr><th>Kalem</th>" + h.segmentler.map(x => "<th>" + esc(x) + "</th>").join("") + "</tr>" + h.kalemler.map((it, i) => '<tr><td class="lbl">' + esc(it) + "</td>" + h.deger[i].map(v => '<td class="num">' + (v === null ? "" : trNum(v, 0)) + "</td>").join("") + "</tr>").join("");
       }
       function bolumX() {
         const g = document.getElementById("segXGovde"), p = S.segX;
