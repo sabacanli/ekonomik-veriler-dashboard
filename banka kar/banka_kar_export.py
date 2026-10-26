@@ -101,36 +101,14 @@ def kaynak_db():
 
 
 def pdf_isle():
-    """PDF_YUKLE/ kutusundaki PDF'leri uygulamanın toplu yükleyicisiyle (bootstrap.py --pdf) veritabanına işler."""
-    src = kaynak_db()
-    if src is None:
+    """PDF_YUKLE/ kutusundaki solo rapor PDF'lerini (alt klasörler dahil) pdf_yukle.yukle() ile veritabanına işler."""
+    if kaynak_db() is None:
         return
-    app = src.parent.parent; proje = app.parent
-    gelen, islendi = proje / "PDF_YUKLE", proje / "PDF_ISLENDI"
-    gelen.mkdir(exist_ok=True); islendi.mkdir(exist_ok=True)
-    pdfs = sorted(p for p in gelen.iterdir() if p.suffix.lower() == ".pdf")
-    if not pdfs:
-        return
-    print(f"  PDF_YUKLE: {len(pdfs)} dosya işleniyor (bootstrap.py)…")
-    import subprocess
-    r = subprocess.run([sys.executable, str(app / "bootstrap.py"), "--pdf", *map(str, pdfs)], cwd=app, capture_output=True, text=True)
-    cikti = (r.stdout or "") + (r.stderr or "")
-    atlanan = set()
-    for line in cikti.splitlines():
-        if line.startswith("OK "):
-            print("   ", line.strip()[:170])
-        elif line.startswith("ATLANDI "):
-            atlanan.add(line.split("ATLANDI ", 1)[1].split(": banka=")[0].strip()); print("   ", line.strip()[:170])
-    if r.returncode != 0 and not atlanan:
-        print(f"  ~ bootstrap hata kodu {r.returncode}: {cikti.strip()[-300:]}"); return
-    for p in pdfs:
-        if p.name in atlanan:
-            continue
-        hedef = islendi / p.name
-        if hedef.exists():
-            hedef = islendi / f"{p.stem}_{dt.datetime.now():%Y%m%d%H%M%S}{p.suffix}"
-        shutil.move(str(p), str(hedef))
-    print(f"  PDF: {len(pdfs) - len(atlanan)} dosya işlendi → PDF_ISLENDI" + (f"; {len(atlanan)} dosya okunamadı, PDF_YUKLE'de bırakıldı: {', '.join(sorted(atlanan))}" if atlanan else ""))
+    sys.path.insert(0, str(HERE))
+    import pdf_yukle
+    r = pdf_yukle.yukle(isci=4)
+    if r and (r["ok"] or r["atlandi"] or r["kons"] or r["uyusmaz"]):
+        print(f"  PDF kutusu: yüklenen {r['ok']} · konsolide ayrıldı {r['kons']} · okunamayan {r['atlandi']} · dönem uyuşmazlığı {r['uyusmaz']}" + (f" · rapor {r['rapor']}" if r.get('rapor') else ""))
 
 
 def sync_db():
