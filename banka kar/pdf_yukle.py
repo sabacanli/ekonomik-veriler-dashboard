@@ -156,7 +156,7 @@ def yukle(klasor=None, isci=4, kuru=False, sessiz=False, kaynak=None):
                 T["ok"] += 1; T["kontrol"] += bool(fails); T["genel_ad"] += ("genel adlar" in segmsg)
                 birim = "  BİRİM×1000" if any("milyon TL varsayıldı" in x for x in rep.notes) else ""
                 rapor.append(f"  OK  {rep.bank:16} {rep.period} {n} metrik, {segmsg}{birim}" + (f"  KONTROL: {fails}" if fails else "") + f"  [{p.name}]"); log(rapor[-1])
-                if tasi: _tasi(p, islendi / kl.name)
+                if tasi: _tasi(p, islendi / (kl.name if kl != gelen else "diger"))
     ozet = (f"\nTOPLAM: yüklenen {T['ok']} · konsolide (atlandı) {T['kons']} · okunamayan {T['atlandi']} · dönem uyuşmazlığı {T['uyusmaz']}"
             f" · tutarlılık uyarılı {T['kontrol']} · genel bölüm adlı {T['genel_ad']} · süre {(time.time() - t0) / 60:.1f} dk")
     rapor.append(ozet); log(ozet)
