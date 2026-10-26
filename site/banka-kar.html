@@ -161,6 +161,10 @@
       <button class="btn resim-btn" data-sec="secFaiz">🖼 Resim olarak kopyala</button>
       <div class="ctl"><label>Dönem <select class="sel" id="selFaiz"></select></label></div>
       <div id="faizGovde"></div>
+      <h3 style="margin-top:22px">Menkul Değerler Cüzdanı — Sınıflandırma ve DİBS / Diğer Kırılımı</h3>
+      <p class="cap">Solo bilançodan (mn TL): ASA = gerçeğe uygun değer farkı kâr/zarara yansıtılan, SH = diğer kapsamlı gelire yansıtılan, VKET = itfa edilmiş maliyetle ölçülen; DİBS = devlet borçlanma senetleri alt satırı, Diğer = kalan. Yalnız PDF'i yüklenmiş banka-dönemler.</p>
+      <div class="ctl"><label>Dönem <select class="sel" id="selMdc"></select></label><a class="btn" id="btnMdcXlsx" href="#" download="banka-mdc-kirilimi.xlsx">📊 Excel'e aktar (tüm bankalar ve dönemler)</a></div>
+      <div class="table-wrap"><table class="heat" id="tblMdc"></table></div>
     </section>
 
     <section class="chart-card">
@@ -509,6 +513,23 @@
         stacked("chFz3", cats, [["TRY", C.toplam, k => k.startsWith("TRY")], ["YP", C.euro, k => k.startsWith("YP")]].map(([ad, renk, f]) => ({ ad, renk, x: banks.map(b => sum(D.buckets.filter(f).map(k => F[b][k]))) })), { percent: true, height: Math.max(200, 30 * cats.length + 80), sec: "secFaiz" });
       }
 
+      /* ---- MDC kırılım tablosu ---- */
+      const MP = Object.keys(D.mdc || {}).sort((a, b) => P.indexOf(a) - P.indexOf(b));
+      const selMdc = document.getElementById("selMdc"), btnMdc = document.getElementById("btnMdcXlsx");
+      if (MP.length) { S.mdc = MP.slice(-1)[0]; secenekler(selMdc, MP.map(p => [p, plabel(p) + " (" + Object.keys(D.mdc[p]).length + " banka)"]), S.mdc); selMdc.onchange = () => { S.mdc = selMdc.value; mdc(); }; }
+      if (D.mdc_xlsx) btnMdc.href = D.mdc_xlsx; else btnMdc.style.display = "none";
+      function mdc() {
+        const t = document.getElementById("tblMdc");
+        if (!S.mdc) { t.innerHTML = '<tr><td class="bos">Kırılım verisi yok; bankaların solo bilanço PDF\'leri yüklendikçe dolar.</td></tr>'; return; }
+        const M = D.mdc[S.mdc], banks = D.banks.map(b => b.ad).filter(b => M[b]);
+        const G = [["DİBS", "dibs"], ["DİĞER", "diger"], ["TOPLAM", "toplam"]], SN = [["ASA", "asa"], ["SH", "sh"], ["VKET", "vket"]];
+        const f = v => (v === null || v === undefined) ? "—" : trNum(v, 0);
+        t.innerHTML = '<tr><th rowspan="3">Banka</th>' + G.map(g => '<th colspan="6">' + g[0] + "</th>").join("") + '<th rowspan="3">TOTAL</th></tr>' +
+          "<tr>" + G.map(() => SN.map(sn => '<th colspan="2">' + sn[0] + "</th>").join("")).join("") + "</tr>" +
+          "<tr>" + G.map(() => SN.map(() => "<th>TRY</th><th>YP</th>").join("")).join("") + "</tr>" +
+          banks.map(b => '<tr><td class="lbl">' + esc(KISA(b)) + "</td>" + G.map(g => SN.map(sn => M[b][g[1]][sn[1]].map(v => '<td class="num">' + f(v) + "</td>").join("")).join("")).join("") + '<td class="num" style="font-weight:700">' + f(M[b].total) + "</td></tr>").join("");
+      }
+
       /* ---- sayfa içi sekmeler (kenar çubuğundaki alt kırılımlarla aynı; hash ile seçilir) ---- */
       const SEKME = {
         genel: { ad: "Genel Bakış", sec: ["secGenel"], kontrol: true, metrik: true, ciz: () => genel() },
@@ -517,7 +538,7 @@
         zaman: { ad: "Zaman Serisi", sec: ["secTs"], kontrol: true, ciz: () => zaman() },
         odak: { ad: "Banka Odak", sec: ["secOdak"], kontrol: true, ciz: () => odak() },
         bolumler: { ad: "Faaliyet Bölümleri", sec: ["secSeg"], ciz: () => { bolum(); bolumX(); } },
-        portfoy: { ad: "Menkul Kıymet Portföyü", sec: ["secFaiz"], ciz: () => faiz() },
+        portfoy: { ad: "Menkul Kıymet Portföyü", sec: ["secFaiz"], ciz: () => { faiz(); mdc(); } },
       };
       const TUM_SEC = ["secGenel", "secRasyo", "secCmp", "secTs", "secOdak", "secSeg", "secFaiz"];
       const sekmeEl = document.getElementById("sekmeChips");
@@ -534,7 +555,7 @@
         window.scrollTo(0, 0);
       }
       function herSey() { SEKME[S.sekme].ciz(); }
-      const CIZ = { secGenel: genel, secCmp: karsilastir, secTs: zaman, secRasyo: rasyolar, secOdak: odak, secSeg: () => { bolum(); bolumX(); }, secFaiz: faiz };
+      const CIZ = { secGenel: genel, secCmp: karsilastir, secTs: zaman, secRasyo: rasyolar, secOdak: odak, secSeg: () => { bolum(); bolumX(); }, secFaiz: () => { faiz(); mdc(); } };
       window.addEventListener("hashchange", () => sekmeGoster((location.hash || "#genel").slice(1)));
       sekmeGoster((location.hash || "#genel").slice(1));
       sunumAraclariKur(TEMA, CIZ);

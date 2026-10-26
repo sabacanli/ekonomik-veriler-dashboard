@@ -191,6 +191,111 @@ def seg_item(items, kind):
     return None
 
 
+# ---- Menkul değerler cüzdanı kırılımı: BDDK bilançosundaki sınıflandırma satırları ETİKETLE bulunur (kod numarası bankadan
+# bankaya kayar: Garanti'de itfa satırı 2.3, Akbank'ta 2.4); DİBS = satırın "Devlet Borçlanma Senetleri" alt satırı, DİĞER = kalan.
+MDC_SINIF = {"asa": r"^gercege uygun deger farki kar ?/? ?zarara yansitilan finansal( varliklar)?$",
+             "sh": r"^gercege uygun deger farki diger kapsamli gelire yansitilan finansal( varliklar)?$",
+             "vket": r"^itfa edilmis maliyeti ile olculen (diger )?finansal varliklar$"}
+
+
+def mdc_kirilim(con):
+    """{period: {bank: {dibs/diger/toplam: {asa/sh/vket: [tp, yp]}, total}}} (mn TL); PDF'in önceki yıl sütunu da kullanılır."""
+    rows = con.execute("SELECT bank, period, code, label, tp, yp, total, tp_prev, yp_prev, total_prev FROM fin_rows "
+                       "WHERE stmt='BS' AND section='A' AND code IS NOT NULL ORDER BY bank, period, ord").fetchall()
+    grup = {}
+    for r in rows:
+        grup.setdefault((r[0], r[1]), []).append(r)
+    by = {}   # (bank, period) -> {sinif: {"ana": (tp, yp, tot), "dibs": (tp, yp, tot)}}
+    for (b, p), lst in grup.items():
+        y, q = period_key(p); pp = f"{y-1}Q{q}"
+        cur, prv = {}, {}
+        for sinif, rx in MDC_SINIF.items():
+            ana = next((r for r in lst if re.search(rx, _n(r[3]))), None)
+            if ana is None:
+                continue
+            kod = str(ana[2])
+            dibs = next((r for r in lst if str(r[2]).startswith(kod + ".") and re.search(r"^devlet borclanma", _n(r[3]))), None)
+            cur[sinif] = {"ana": ana[4:7], "dibs": dibs[4:7] if dibs else None}
+            prv[sinif] = {"ana": ana[7:10], "dibs": dibs[7:10] if dibs else None}
+        if cur:
+            by[(b, p)] = cur
+        if prv and any(v["ana"][0] is not None or v["ana"][1] is not None for v in prv.values()):
+            by.setdefault((b, pp), prv)   # doğrudan PDF yoksa önceki yıl sütunundan
+    out = {}
+    for (b, p), c in by.items():
+        def g(sinif, key, i):
+            v = c.get(sinif, {}).get(key); return None if v is None or v[i] is None else v[i] / 1000
+        rec = {"dibs": {}, "diger": {}, "toplam": {}}
+        for k in MDC_SINIF:
+            rec["toplam"][k] = [r1(g(k, "ana", 0)), r1(g(k, "ana", 1))]
+            rec["dibs"][k] = [r1(g(k, "dibs", 0)), r1(g(k, "dibs", 1))]
+            rec["diger"][k] = [None if g(k, "ana", i) is None else r1(g(k, "ana", i) - (g(k, "dibs", i) or 0)) for i in (0, 1)]
+        tots = [g(k, "ana", 2) for k in MDC_SINIF]
+        rec["total"] = None if all(t is None for t in tots) else r1(sum(t or 0 for t in tots))
+        if rec["total"] is None:
+            continue
+        out.setdefault(p, {})[b] = rec
+    return out
+
+
+def mdc_excel(mdc, banks, path):
+    """Kullanıcının MDC tablosu düzeninde Excel: banka · dönem · DİBS/DİĞER/TOPLAM × ASA/SH/VKET × TRY/YP · TOTAL (mn TL)."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.utils import get_column_letter
+    wb = Workbook(); ws = wb.active; ws.title = "MDC"
+    periods = sorted(mdc, key=period_key)
+    LACI, MAVI, ACIK, BEYAZ = "1C3044", "5E8BC5", "C9D6EA", "FFFFFF"
+    fill = lambda hex_: PatternFill("solid", fgColor=hex_)
+    ince = Side(style="thin", color="B8C2D1"); kenar = Border(left=ince, right=ince, top=ince, bottom=ince)
+    ort = Alignment(horizontal="center", vertical="center")
+    ws["A1"] = "MDC"; ws["A2"] = "Menkul Değerler Cüzdanı — bin TL değil, milyon TL · son dönem " + (f"{periods[-1][:4]} Ç{periods[-1][-1]}" if periods else "")
+    ws["A1"].font = Font(bold=True, color=BEYAZ); ws["A1"].fill = fill(LACI); ws["A2"].font = Font(italic=True, size=9, color="55627A")
+    ws.merge_cells("A1:U1"); ws.merge_cells("A2:U2")
+    # başlık satırları 3-5
+    ws.cell(3, 1, "Banka"); ws.cell(3, 2, "Dönem"); ws.merge_cells(start_row=3, start_column=1, end_row=5, end_column=1); ws.merge_cells(start_row=3, start_column=2, end_row=5, end_column=2)
+    gruplar = [("DİBS", "dibs"), ("DİĞER", "diger"), ("TOPLAM", "toplam")]
+    col = 3
+    for ad, _ in gruplar:
+        ws.cell(3, col, ad); ws.merge_cells(start_row=3, start_column=col, end_row=3, end_column=col + 5)
+        for j, sinif in enumerate(("ASA", "SH", "VKET")):
+            ws.cell(4, col + 2 * j, sinif); ws.merge_cells(start_row=4, start_column=col + 2 * j, end_row=4, end_column=col + 2 * j + 1)
+            ws.cell(5, col + 2 * j, "TRY"); ws.cell(5, col + 2 * j + 1, "YP")
+        col += 6
+    ws.cell(3, col, "TOTAL"); ws.merge_cells(start_row=3, start_column=col, end_row=5, end_column=col)
+    for r in (3, 4, 5):
+        for c in range(1, col + 1):
+            cell = ws.cell(r, c); cell.alignment = ort; cell.border = kenar
+            cell.fill = fill(LACI if r == 3 else MAVI if r == 4 else ACIK); cell.font = Font(bold=True, color=BEYAZ if r < 5 else LACI, size=10)
+    # veri satırları: banka (aktif büyüklüğü sırası) × dönem (artan)
+    BANT = ["F4F6F9", "FFFFFF"]
+    r = 6
+    for bi, b in enumerate([x["ad"] for x in banks] + sorted({bb for p in mdc for bb in mdc[p]} - {x["ad"] for x in banks})):
+        ps = [p for p in periods if b in mdc[p]]
+        if not ps:
+            continue
+        for p in ps:
+            rec = mdc[p][b]
+            ws.cell(r, 1, BANKS.get(b, (b, ""))[0] or b).font = Font(bold=True, color=LACI)
+            ws.cell(r, 2, f"{p[:4]} Ç{p[-1]}")
+            c = 3
+            for _, key in gruplar:
+                for sinif in ("asa", "sh", "vket"):
+                    for v in rec[key][sinif]:
+                        cell = ws.cell(r, c, None if v is None else round(v)); cell.number_format = "#,##0"; c += 1
+            cell = ws.cell(r, c, None if rec["total"] is None else round(rec["total"])); cell.number_format = "#,##0"; cell.font = Font(bold=True)
+            for cc in range(1, c + 1):
+                ws.cell(r, cc).fill = fill(BANT[bi % 2]); ws.cell(r, cc).border = kenar
+            r += 1
+    ws.freeze_panes = "C6"
+    ws.column_dimensions["A"].width = 14; ws.column_dimensions["B"].width = 9
+    for c in range(3, col + 1):
+        ws.column_dimensions[get_column_letter(c)].width = 11
+    ws.cell(r + 1, 1, "Kaynak: bankaların solo BDDK formatlı bilançoları. ASA = GUD farkı kâr/zarara yansıtılan (1.2), SH = GUD farkı diğer kapsamlı gelire yansıtılan (1.3), VKET = itfa edilmiş maliyetle ölçülen diğer finansal varlıklar (2.4); DİBS = devlet borçlanma senetleri alt satırı, DİĞER = kalan. Yalnız PDF'i yüklenmiş banka-dönemler yer alır.").font = Font(italic=True, size=9, color="55627A")
+    path.parent.mkdir(parents=True, exist_ok=True); wb.save(path)
+    return r - 6
+
+
 def build(out=OUT):
     try:
         pdf_isle()
@@ -283,6 +388,12 @@ def build(out=OUT):
             "ham": {"kalemler": items, "segmentler": [s.replace("\n", " ") for s in segs],
                     "deger": [[None if val.get((s, it)) is None else round(val[(s, it)]) for s in segs] for it in items]},
         }
+    # Menkul değerler cüzdanı kırılımı (+ Excel)
+    mdc = mdc_kirilim(con)
+    try:
+        n_mdc = mdc_excel(mdc, banks, out.parent / "banka-mdc-kirilimi.xlsx")
+    except Exception as e:
+        n_mdc = 0; print(f"  ~ MDC Excel yazılamadı ({type(e).__name__}: {str(e)[:80]})")
     # MDC faiz tipi
     faiz = {}
     for b, p, bucket, v in con.execute("SELECT bank, period, bucket, value FROM faiz_tipi"):
@@ -317,10 +428,11 @@ def build(out=OUT):
         "metrics": [{"key": k, "label": l, "stmt": s, "flow": s == "IS"} for k, l, s in METRICS],
         "ratios": [{"key": k, "label": l, "short": sh, "fmt": f, "good": g} for k, l, sh, f, g in RATIOS],
         "ytd": ytd, "ceyrek": cey, "segments": segments, "faiz_tipi": faiz, "buckets": BUCKETS, "ozet_html": ozet,
+        "mdc": mdc, "mdc_xlsx": "data/banka-mdc-kirilimi.xlsx" if n_mdc else None,
     }
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(kayit, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"  banka_kar.json: {len(periods)} dönem · {len(banks)} banka · bölüm verisi {len(segments)} banka · {out.stat().st_size // 1024} KB · son tam dönem {plabel}")
+    print(f"  banka_kar.json: {len(periods)} dönem · {len(banks)} banka · bölüm verisi {len(segments)} banka · MDC kırılımı {n_mdc} satır · {out.stat().st_size // 1024} KB · son tam dönem {plabel}")
     return True
 
 
