@@ -39,7 +39,32 @@ def _parse(arg):
         return path, None, f"{type(e).__name__}: {str(e)[:120]}"
 
 
+def _birim_duzelt(db, rep):
+    """Sayfada birim ifadesi yoksa ve toplam aktif bankanın bir önceki dönemine göre 1/100'ün altındaysa rapor milyon TL
+    sayılır: tüm değerler ×1000 (Akbank 2026Ç2 gibi)."""
+    a = rep.metrics.get("toplam_aktif")
+    if not a:
+        return False
+    with db.connect() as con:
+        row = con.execute("SELECT value FROM metrics WHERE bank=? AND metric='toplam_aktif' AND period<? AND value>0 ORDER BY period DESC LIMIT 1", (rep.bank, rep.period)).fetchone()
+    if not row or a / row[0] >= 0.01:
+        return False
+    k = 1000.0
+    rep.metrics = {m: (None if v is None else v * k) for m, v in rep.metrics.items()}
+    rep.prev_metrics = {m: (None if v is None else v * k) for m, v in (rep.prev_metrics or {}).items()}
+    if rep.rows is not None and not rep.rows.empty:
+        for c in ("tp", "yp", "total", "tp_prev", "yp_prev", "total_prev"):
+            if c in rep.rows:
+                rep.rows[c] = rep.rows[c] * k
+    if rep.segments is not None and not rep.segments.empty and "value" in rep.segments:
+        rep.segments["value"] = rep.segments["value"] * k
+    rep.notes.append("birim: milyon TL varsayıldı (önceki döneme oranla)")
+    return True
+
+
 def _kaydet(db, rep, no_prev=False):
+    if _birim_duzelt(db, rep):
+        pass
     """bootstrap.py ile aynı kayıt mantığı; fark: önceki yıl sütunu yalnız o dönem için hiç kayıt yoksa yazılır
     (uygulamadaki force=False eşit öncelikli 'pdf' kaydın üzerine yazıyordu; 2025+ raporlarda önceki yıl sütunu
     enflasyon muhasebesiyle yeniden ifade edilmiş olabilir, doğrudan rapor esastır)."""
@@ -124,7 +149,8 @@ def yukle(klasor=None, isci=4, kuru=False, sessiz=False, kaynak=None):
                     T["ok"] += 1; rapor.append(f"  OK(kuru) {rep.bank:16} {rep.period} {len(rep.metrics)} metrik"); continue
                 n, segmsg, fails = _kaydet(db, rep)
                 T["ok"] += 1; T["kontrol"] += bool(fails); T["genel_ad"] += ("genel adlar" in segmsg)
-                rapor.append(f"  OK  {rep.bank:16} {rep.period} {n} metrik, {segmsg}" + (f"  KONTROL: {fails}" if fails else "") + f"  [{p.name}]"); log(rapor[-1])
+                birim = "  BİRİM×1000" if any("milyon TL varsayıldı" in x for x in rep.notes) else ""
+                rapor.append(f"  OK  {rep.bank:16} {rep.period} {n} metrik, {segmsg}{birim}" + (f"  KONTROL: {fails}" if fails else "") + f"  [{p.name}]"); log(rapor[-1])
                 if tasi: _tasi(p, islendi / kl.name)
     ozet = (f"\nTOPLAM: yüklenen {T['ok']} · konsolide (atlandı) {T['kons']} · okunamayan {T['atlandi']} · dönem uyuşmazlığı {T['uyusmaz']}"
             f" · tutarlılık uyarılı {T['kontrol']} · genel bölüm adlı {T['genel_ad']} · süre {(time.time() - t0) / 60:.1f} dk")
