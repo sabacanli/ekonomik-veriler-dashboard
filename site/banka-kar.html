@@ -453,7 +453,9 @@
         secenekler(selSegDonem, segDonemler().map(p => [p, plabel(p)]), S.segDonem);
         selSegDonem.onchange = () => { S.segDonem = selSegDonem.value; bolum(); };
         const xd = [...new Set(SEGB.flatMap(b => Object.keys(D.segments[b])))].sort((a, b) => P.indexOf(a) - P.indexOf(b));
-        S.segX = xd.slice(-1)[0]; secenekler(selSegX, xd.map(p => [p, plabel(p)]), S.segX); selSegX.onchange = () => { S.segX = selSegX.value; bolumX(); };
+        const segSay = p => SEGB.filter(b => D.segments[b][p]).length;
+        S.segX = xd.filter(p => segSay(p) >= 5).slice(-1)[0] || xd.slice(-1)[0];   // en az 5 bankanın bölüm verisi olan son dönem
+        secenekler(selSegX, xd.map(p => [p, plabel(p) + " (" + segSay(p) + " banka)"]), S.segX); selSegX.onchange = () => { S.segX = selSegX.value; bolumX(); };
       }
       function bolum() {
         const g = document.getElementById("segGovde"), b = S.segBank, p = S.segDonem;
