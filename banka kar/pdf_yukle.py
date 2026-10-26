@@ -56,8 +56,13 @@ def _birim_duzelt(db, rep):
         for c in ("tp", "yp", "total", "tp_prev", "yp_prev", "total_prev"):
             if c in rep.rows:
                 rep.rows[c] = rep.rows[c] * k
-    if rep.segments is not None and not rep.segments.empty and "value" in rep.segments:
-        rep.segments["value"] = rep.segments["value"] * k
+    if rep.segments is not None and not rep.segments.empty:
+        import pandas as pd
+        say = [c for c in rep.segments.columns if c != "block" and pd.api.types.is_numeric_dtype(rep.segments[c])]
+        mx = max((abs(rep.segments[c]).max() for c in say), default=0) or 0
+        if mx and mx < rep.metrics["toplam_aktif"] / 100:   # bölüm tablosu parser tarafından zaten ölçeklenmediyse
+            for c in say:
+                rep.segments[c] = rep.segments[c] * k
     rep.notes.append("birim: milyon TL varsayıldı (önceki döneme oranla)")
     return True
 

@@ -67,7 +67,7 @@ SEGMENT_CATEGORIES = [
 ]
 SEG_ITEM_PRIORITY = {
     "net_kar": [r"^donem net kar", r"^net donem kar", r"^vergi sonrasi kar", r"^net kar", r"net kari?/zarar", r"surdurulen faaliyetler net"],
-    "vergi_oncesi": [r"^vergi oncesi"], "vergi": [r"^vergi gideri", r"^vergi karsiligi", r"^vergi$"],
+    "vergi_oncesi": [r"^vergi oncesi", r"^net faaliyet kar"], "vergi": [r"^vergi gideri", r"^vergi karsiligi", r"^vergi$", r"^vergi karsilig"],
     "varlik": [r"^bolum varliklari", r"^bolum aktif"],
     "nfg": [r"^net faiz"], "komisyon": [r"^net ucret"], "ticari": [r"^ticari"],
     "diger_gelir": [r"^diger faaliyet gelir", r"^diger gelir"],
