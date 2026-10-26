@@ -311,7 +311,7 @@ def build(out=OUT):
             y, q = period_key(p)
             for b, vals in src.get(p, {}).items():
                 ann = (4 / q) if annualize else 1
-                r = {k: r1(v, 1) for k, v in vals.items() if k in dict((m[0], 1) for m in METRICS)}
+                r = {k: r1(v, 1) for k, v in vals.items() if k in dict((m[0], 1) for m in METRICS) and (annualize or k in FLOW)}
                 for k, v in ratios(vals, ann).items():
                     r[k] = r1(v, 1) if k == "op_gelir" else r1(v, 4)
                 out_.setdefault(p, {})[b] = r
@@ -363,8 +363,6 @@ def build(out=OUT):
             "toplam_ad": toplam_ad, "toplam_net_kar": toplam_nk, "net_kar_turetilmis": turetilmis,
             "bolumler": [{"ad": s.replace("\n", " "), "kat": segment_category(s), "net_kar": deg(s, "net_kar"), "varlik": deg(s, "varlik"),
                           "nfg": deg(s, "nfg"), "komisyon": deg(s, "komisyon"), "ticari": deg(s, "ticari"), "diger_gelir": deg(s, "diger_gelir")} for s in bolumler],
-            "ham": {"kalemler": items, "segmentler": [s.replace("\n", " ") for s in segs],
-                    "deger": [[None if val.get((s, it)) is None else round(val[(s, it)]) for s in segs] for it in items]},
         }
     # Menkul değerler cüzdanı kırılımı (+ Excel)
     mdc = mdc_kirilim(con)
