@@ -297,6 +297,17 @@ function cokSerili(id, veriler, tarih, W, yukseklik, acik, secenek) {
 
 /* Kart başına "Beyaz zemin (sunum)" + "Resim olarak kopyala" düğmeleri.
    Kural: kart id'si secN, grafik id'si chN. CIZ[secN]() grafiği yeniden çizer (promise döner). */
+/* html2canvas yalnız gerektiğinde (ilk "resim olarak kopyala" tıklamasında) yüklenir */
+function html2canvasYukle() {
+  if (window.html2canvas) return Promise.resolve();
+  return new Promise(function (res, rej) {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+    s.onload = res; s.onerror = function () { rej(new Error("html2canvas yüklenemedi")); };
+    document.head.appendChild(s);
+  });
+}
+
 function sunumAraclariKur(TEMA, CIZ) {
   document.querySelectorAll(".apko-btn").forEach(function (b) {
     b.onclick = function () {
@@ -315,22 +326,75 @@ function sunumAraclariKur(TEMA, CIZ) {
       .then(function (url) { return fetch(url).then(function (r) { return r.blob(); }); })
       .finally(function () { TEMA[sec] = onceki; CIZ[sec](); });
   }
+  /* Birden çok grafik ya da tablo içeren kart (ör. Rasyolar): kartın tamamı tek resim olur.
+     Başlık, açıklama ve tablolar html2canvas ile yakalanır; Plotly grafikleri PNG olarak yerlerine bindirilir
+     (html2canvas SVG grafikleri güvenilir çizemez). Kontroller ve düğmeler yakalama sırasında gizlenir. */
+  function kartResmi(sec) {
+    const el = document.getElementById(sec);
+    const onceki = TEMA[sec], geciciBeyaz = !el.classList.contains("apko");
+    TEMA[sec] = true;
+    if (geciciBeyaz) el.classList.add("apko");
+    el.classList.add("kopya-modu");
+    let gds = [];
+    return Promise.resolve(CIZ[sec]())
+      .then(function () {
+        gds = Array.from(el.querySelectorAll(".js-plotly-plot")).filter(function (gd) { return gd._fullLayout; });
+        return Promise.all(gds.map(function (gd) { return Promise.all(gd._promises || []); }));
+      })
+      .then(html2canvasYukle)
+      .then(function () { return new Promise(function (r) { setTimeout(r, 80); }); })   // stil/yerleşim otursun (rAF gizli sekmede askıda kalır)
+      .then(function () {
+        gds.forEach(function (gd) { gd.style.visibility = "hidden"; });
+        return html2canvas(el, { scale: 2, backgroundColor: "#FFFFFF", logging: false, width: Math.max(el.offsetWidth, el.scrollWidth) })
+          .finally(function () { gds.forEach(function (gd) { gd.style.visibility = ""; }); });
+      })
+      .then(function (cv) {
+        const ctx = cv.getContext("2d"), r0 = el.getBoundingClientRect();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);   // html2canvas bağlamı ölçekli bırakır; grafikler piksel koordinatıyla bindirilir
+        return Promise.all(gds.map(function (gd) {
+          const r = gd.getBoundingClientRect(), w = gd._fullLayout.width, h = gd._fullLayout.height;
+          return Plotly.toImage(gd, { format: "png", width: w, height: h, scale: 2 })
+            .then(function (url) { return new Promise(function (res, rej) { const im = new Image(); im.onload = function () { res(im); }; im.onerror = rej; im.src = url; }); })
+            .then(function (im) { ctx.drawImage(im, (r.left - r0.left) * 2, (r.top - r0.top) * 2, w * 2, h * 2); });
+        })).then(function () { return cv; });
+      })
+      .then(function (cv) { return new Promise(function (r) { cv.toBlob(r, "image/png"); }); })
+      .finally(function () { el.classList.remove("kopya-modu"); if (geciciBeyaz) el.classList.remove("apko"); TEMA[sec] = onceki; CIZ[sec](); });
+  }
+  function tekGrafik(sec) {   // tek Plotly grafiği olan tablosuz kart: yalnız grafik (eski davranış)
+    const el = document.getElementById(sec);
+    return !!el && el.querySelectorAll(".js-plotly-plot").length === 1 && !el.querySelector("table");
+  }
+  function resim(sec) { return tekGrafik(sec) ? grafikResmi(sec) : kartResmi(sec); }
+  window.ekordionSunum = { resim: resim };   // sınama kancası
   document.querySelectorAll(".resim-btn").forEach(function (b) {
     b.onclick = async function () {
       const sec = b.dataset.sec;
       b.textContent = "⏳ Hazırlanıyor...";
+      const blobP = resim(sec);          // resim bir kez üretilir; jest anında başlatılır (Safari)
+      blobP.catch(function () {});
       try {
         try {
-          await navigator.clipboard.write([new ClipboardItem({ "image/png": grafikResmi(sec) })]);
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": blobP })]);
         } catch (e1) {
-          const blob = await grafikResmi(sec);
+          const blob = await blobP;      // söz kabul etmeyen eski tarayıcılar
           await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
         }
         b.textContent = "✓ Resim kopyalandı — yapıştırabilirsin";
       } catch (e) {
-        b.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+        window.__kopyaHata = String(e && e.name) + ": " + String(e && e.message || e);   // tanı: son hata
+        try {   // pano yazma izni yoksa resim dosya olarak indirilir
+          const blob = await blobP;
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob); a.download = "ekordion-" + sec.replace(/^sec/, "").toLowerCase() + ".png";
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+          b.textContent = "Pano izni yok — resim PNG olarak indirildi";
+        } catch (e2) {
+          b.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+        }
       }
-      setTimeout(function () { b.textContent = "🖼 Resim olarak kopyala"; }, 3000);
+      setTimeout(function () { b.textContent = "🖼 Resim olarak kopyala"; }, 4000);
     };
   });
 }

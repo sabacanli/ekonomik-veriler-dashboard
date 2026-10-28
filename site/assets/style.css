@@ -434,6 +434,11 @@ table.heat th.sortable.sorted { color: var(--amber); }
 .chart-card.apko table.heat td.lbl { color: #1A2233; }
 .chart-card.apko table.heat tr.sec td.lbl,
 .chart-card.apko table.heat tr.sec td.num { color: #8A5A00; }
+
+/* "Resim olarak kopyala": kart yakalanırken düğmeler/kontroller gizlenir, geniş tablo kesilmez */
+.chart-card.kopya-modu .btn, .chart-card.kopya-modu .ctl, .chart-card.kopya-modu .chips, .chart-card.kopya-modu details.ham, .chart-card.kopya-modu .not { display: none !important; }
+.chart-card.kopya-modu .table-wrap { overflow: visible; }
+.chart-card.apko .mini-h, .chart-card.apko label, .chart-card.apko .not { color: #55627A; }
 .chart-card.apko table.heat td.bos { color: #97A1B5; }
 
 /* ── Tablo imzası (BDDK vb.) ── */
