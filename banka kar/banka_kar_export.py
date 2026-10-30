@@ -51,8 +51,8 @@ RATIOS = [
 BANKS = {  # kanonik ad: (kısa ad, grup)
     "Ziraat": ("Ziraat", "Kamu"), "VakıfBank": ("Vakıf", "Kamu"), "Halkbank": ("Halk", "Kamu"),
     "İşbankası": ("İş", "Özel"), "Akbank": ("Akbank", "Özel"), "YapıKredi": ("YKB", "Özel"),
-    "Garanti Bankası": ("Garanti", "Yabancı"), "QNB": ("QNB", "Yabancı"), "DenizBank": ("Deniz", "Yabancı"), "TEB": ("TEB", "Yabancı"),
-    "BurganBank": ("Burgan", "Yabancı"), "Odeabank": ("Odea", "Yabancı"), "Fibabank": ("Fiba", "Yabancı"), "ING": ("ING", "Yabancı"),
+    "Garanti Bankası": ("Garanti", "Yabancı"), "QNB": ("QNB", "Yabancı"), "DenizBank": ("Deniz", "Yabancı"), "TEB": ("TEB", "Özel"),
+    "BurganBank": ("Burgan", "Yabancı"), "Odeabank": ("Odea", "Yabancı"), "Fibabank": ("Fiba", "Özel"), "ING": ("ING", "Yabancı"),
     "HSBC": ("HSBC", "Yabancı"), "ICBC": ("ICBC", "Yabancı"), "Alternatifbank": ("ABank", "Yabancı"),
     "Şekerbank": ("Şeker", "Özel"), "Anadolubank": ("Anadolu", "Özel"),
     "TSKB": ("TSKB", "Kalkınma/Yatırım"), "Aktifbank": ("Aktif", "Kalkınma/Yatırım"), "TKYB": ("TKYB", "Kalkınma/Yatırım"),
