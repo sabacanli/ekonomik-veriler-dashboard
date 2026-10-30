@@ -310,15 +310,15 @@
         document.getElementById("hNetKar").textContent = "Net kâr · " + plabel(p) + (S.mode === "ytd" ? " (YTD)" : " (çeyrek)");
         document.getElementById("hNetKarChg").textContent = "Net kâr değişimi · " + plabel(k) + " → " + plabel(p);
         document.getElementById("hAktif").textContent = "Toplam aktif · " + plabel(p);
-        hbar("chNetKar", cur.map(b => ({ ad: KISA(b), v: row(p, b).net_kar, renk: GRENK[GRUP(b)] })), { fmt: fmtMn, sec: "secGenel" });
+        hbar("chNetKar", cur.map(b => ({ ad: KISA(b), v: row(p, b).net_kar })), { fmt: fmtMn, sec: "secGenel" });
         const chg = cur.map(b => ({ ad: KISA(b), v: row(k, b) ? chgPct(row(p, b).net_kar, row(k, b).net_kar) : null })).filter(x => x.v !== null);
         hbar("chNetKarChg", chg, { fmt: v => trNum(v * 100, 0, true) + "%", posneg: true, sec: "secGenel", height: Math.max(220, 24 * cur.length + 50) });
         const eksik = cur.filter(b => !chg.some(x => x.ad === KISA(b))).map(KISA);
         document.getElementById("notChg").textContent = eksik.length ? "Karşılaştırma dönemi verisi olmayan ya da önceki dönemi zararda olan bankalar: " + eksik.join(", ") : "";
         scatter("chRoeRoa", cur, p, "roa", "roe", { sec: "secGenel" });
-        hbar("chAktif", cur.map(b => ({ ad: KISA(b), v: row(p, b).toplam_aktif, renk: GRENK[GRUP(b)] })), { fmt: fmtMn, sec: "secGenel" });
-        hbar("chNim", cur.map(b => ({ ad: KISA(b), v: row(p, b).nim, renk: GRENK[GRUP(b)] })), { fmt: v => fmtPct(v, 2), sec: "secGenel" });
-        hbar("chKom", cur.map(b => ({ ad: KISA(b), v: row(p, b).ucret_opgelir, renk: GRENK[GRUP(b)] })), { fmt: fmtPct, sec: "secGenel" });
+        hbar("chAktif", cur.map(b => ({ ad: KISA(b), v: row(p, b).toplam_aktif })), { fmt: fmtMn, sec: "secGenel" });
+        hbar("chNim", cur.map(b => ({ ad: KISA(b), v: row(p, b).nim })), { fmt: v => fmtPct(v, 2), sec: "secGenel" });
+        hbar("chKom", cur.map(b => ({ ad: KISA(b), v: row(p, b).ucret_opgelir })), { fmt: fmtPct, sec: "secGenel" });
       }
 
       /* ---- Karşılaştırma ---- */
@@ -388,7 +388,7 @@
       }
       function rasyoAlt() {
         const p = S.donem, cur = banksIn(p, true), k = S.rank;
-        hbar("chRank", cur.map(b => ({ ad: KISA(b), v: row(p, b)[k], renk: GRENK[GRUP(b)] })), { fmt: v => fmtVal(k, v), med: median(cur.map(b => row(p, b)[k])), sec: "secRasyo", asc: RAT[k].good !== "low", layout: { title: { text: LABEL(k) + " · " + plabel(p), font: { size: 13 }, x: 0, y: 0.99 }, margin: { t: 34 } } });
+        hbar("chRank", cur.map(b => ({ ad: KISA(b), v: row(p, b)[k] })), { fmt: v => fmtVal(k, v), med: median(cur.map(b => row(p, b)[k])), sec: "secRasyo", asc: RAT[k].good !== "low", layout: { title: { text: LABEL(k) + " · " + plabel(p), font: { size: 13 }, x: 0, y: 0.99 }, margin: { t: 34 } } });
         scatter("chRxy", cur, p, S.rx, S.ry, { sec: "secRasyo", height: Math.max(360, 24 * cur.length + 50) });
       }
 
