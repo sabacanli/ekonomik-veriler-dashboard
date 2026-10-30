@@ -447,7 +447,8 @@
       const selSegBank = document.getElementById("selSegBank"), selSegDonem = document.getElementById("selSegDonem"), selSegX = document.getElementById("selSegX");
       const segDonemler = () => Object.keys(D.segments[S.segBank] || {}).sort((a, b) => P.indexOf(a) - P.indexOf(b));
       if (SEGB.length) {
-        S.segBank = SEGB[0]; S.segDonem = segDonemler().slice(-1)[0];
+        const sonSeg = P.slice().reverse().find(p => SEGB.some(b => D.segments[b][p]));   // bölüm verisi olan en yeni dönem
+        S.segBank = SEGB.find(b => D.segments[b][sonSeg]) || SEGB[0]; S.segDonem = segDonemler().slice(-1)[0];   // varsayılan banka: en yeni dönemi raporlamış ilk banka
         secenekler(selSegBank, SEGB.map(b => [b, KISA(b)]), S.segBank);
         selSegBank.onchange = () => { S.segBank = selSegBank.value; S.segDonem = segDonemler().slice(-1)[0]; secenekler(selSegDonem, segDonemler().map(p => [p, plabel(p)]), S.segDonem); bolum(); };
         secenekler(selSegDonem, segDonemler().map(p => [p, plabel(p)]), S.segDonem);
