@@ -1,16 +1,16 @@
 {
- "donem": "2026-08",
- "donem_ad": "Ağustos 2026",
+ "donem": "2026-09",
+ "donem_ad": "Eylül 2026",
  "mod": "ai",
- "baslik": "Krediler TP'de %41 yıllık, ama 3 aylık ivme %37,3'e indi",
+ "baslik": "Kredide fren bireyselde: TP kredi 3 aylık %31,2, aylık kâr 104,5 milyar",
  "maddeler": [
-  "TP canlı kredilerde yıllık büyüme %41,0'e (önceki ay %41,4) gerilerken 3 aylık yıllıklandırılmış %37,3 ile ivme kaybını teyit ediyor; reel büyüme %7,2.",
-  "Segment ayrışması belirgin: konut (%24,4 vs %35,8), ihtiyaç (%28,6 vs %40,3) ve KOBİ (%29,7 vs %38,9) yavaşlarken ticari/kurumsal %43,3 yıllıklandırılmış ile %33,8'lik 12 aylığın üzerinde.",
-  "Fonlama tarafında TP mevduat yıllık %32,2'ye (önceki ay %31,4) çıktı ve 3 aylık yıllıklandırılmış %51,7'ye hızlandı; buna karşın TP ağırlığı %62,0'den %61,5'e geriledi, YP mevduat USD bazında %16,6 arttı.",
-  "Aylık net kâr 68,0 milyardan 80,0 milyar TL'ye yükseldi, NIM %5,2'de sabit; net faiz gelirindeki %76,0'lık yıllık artışın %38,7'si hacim, %37,3'ü marj kaynaklı, çekirdek kârlılık/aktif ise %4,05'ten %4,03'e indi.",
-  "Aktif kalitesinde NPL %2,86'dan %2,92'ye çıktı, 3 aylık ortalama NPL oluşum hızı %1,73'ten %1,91'e yükseldi; risk maliyeti %2,77'den %2,76'ya gerilese de teminatsız bireysel pay %21,4 ve ihtiyaç NPL %6,06 izlenmeli.",
-  "Sermaye tarafı rahat: SYR %16,6 ile yatay, çekirdek SYR %12,4, %12 hedefe göre 1.707 milyar TL fazla sermaye ve %38 risk ağırlıklı aktif büyüme kapasitesi var.",
-  "Gruplarda Kalkınma-Yatırım (%55,4) ve Katılım (%51,2) TP kredi büyümesinde öne çıkarken, pazar payında Kamu Mevduat 0,37 puan kazandı, Yerli Özel Mevduat 0,51 puan kaybetti; ROE'de Katılım %31,4 ve Kalkınma-Yatırım %32,2 lider.",
-  "25 Eylül haftalık verilerinde son 4 haftada krediler %1,33, mevduat %0,70, tüketici kredileri %0,66 artarak ağustostaki ılımlı seyrin devamına işaret etti."
+  "TP canlı kredi yıllık %39,6'ya gerilerken 3 aylık yıllıklandırılmış %31,2'ye inerek ivme kaybını teyit etti; reel büyüme %7,6, frenin kaynağı ihtiyaç (%12,6) ve konut (%21,0), ticari/kurumsal ise %41,5 ile hızlandı.",
+  "Toplanan fonlar 32,8 trilyon TL'ye ulaştı; TP mevduat yıllık %32,5 (3 aylık %35,4) ile ivmelenirken reel artış yalnız %2,1 kaldı, TP ağırlığı %61,5'te sabit, YP mevduat dolar bazında %11,0 arttı.",
+  "Aylık net kâr 80,0 milyardan 104,5 milyar TL'ye çıktı; net faiz gelirindeki yıllık %73,8 artışın %37,8'i hacim, %35,9'u marj kaynaklı, NIM %5,2'den %5,3'e, çekirdek kârlılık/aktif %4,03'ten %4,08'e yükseldi.",
+  "NPL %2,92'den %3,05'e çıktı; yıllıklandırılmış NPL oluşum hızı son ayda %2,50, 3 aylık ortalama %1,91'den %2,03'e yükseldi, buna karşın 12 aylık risk maliyeti %2,76'dan %2,74'e hafif geriledi.",
+  "Teminatsız bireysel kredilerin canlı kredi içindeki payı %21,2 iken ihtiyaç NPL %6,29 ve kredi kartı %5,33 ile sektör ortalamasının üzerinde; karşılık gideri karşılık öncesi kârın %36,5'ini kullanıyor, özel karşılık oranı %74,3.",
+  "SYR %16,6'dan %16,7'ye, çekirdek SYR %12,5 düzeyinde; %12 hedefe göre 1.753 milyar TL fazla sermaye ve %39'luk RAK büyüme kapasitesi tampon sağlıyor, kaldıraç 11,8x.",
+  "Gruplarda ayrışma belirgin: kamu mevduat bankaları 12 ayda 0,47 puan canlı kredi payı kazanırken yerli özel bankalar 0,67 puan kaybetti; ROE'de Kalkınma-Yatırım %31,3 ve Katılım %29,7 öne çıktı, yerli özel %19,1'de kaldı.",
+  "23 Ekim'e kadarki dört haftada krediler %1,32, mevduat %0,54 artarken tüketici kredileri %0,15 geriledi; bireysel taraftaki yavaşlama ay sonrası haftalık veride de sürüyor."
  ]
 }
