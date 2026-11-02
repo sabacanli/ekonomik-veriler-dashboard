@@ -33,7 +33,7 @@ const NAV = [
     { href: "bddk.html", label: "BDDK Haftalık Veriler" },
     { href: "bankacilik.html", label: "Bankacılık Monitörü" },
     { href: "banka-kar.html", label: "Banka Kârlılık Analizi", items: [   // sayfa içi sekmeler (hash)
-      { hash: "#genel", label: "Genel Bakış" }, { hash: "#ozettablo", label: "Özet Tablo" }, { hash: "#rasyolar", label: "Rasyolar" }, { hash: "#karsilastirma", label: "Banka Karşılaştırma" },
+      { hash: "#genel", label: "Genel Bakış" }, { hash: "#ozettablo", label: "Özet Tablo" }, { hash: "#rapor", label: "Çeyrek Raporu" }, { hash: "#rasyolar", label: "Rasyolar" }, { hash: "#karsilastirma", label: "Banka Karşılaştırma" },
       { hash: "#zaman", label: "Zaman Serisi" }, { hash: "#odak", label: "Banka Odak" }, { hash: "#bolumler", label: "Faaliyet Bölümleri" },
       { hash: "#portfoy", label: "Menkul Kıymet Portföyü" },
     ] },

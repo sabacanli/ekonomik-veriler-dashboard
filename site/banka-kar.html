@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Banka Kârlılık Analizi — Solo Finansal Tablolarla Banka Karşılaştırması | Ekordion</title>
-  <meta name="description" content="Türk bankalarının solo (konsolide olmayan) finansal tablolarından çeyreklik kârlılık analizi: net kâr sıralaması, ROE–ROA haritası, banka karşılaştırması, zaman serisi, rasyo haritası, banka odak, faaliyet bölümleri ve menkul kıymet faiz tipi kırılımı.">
+  <meta name="description" content="Türk bankalarının solo (konsolide olmayan) finansal tablolarından çeyreklik kârlılık analizi: net kâr sıralaması, ROE–ROA haritası, banka karşılaştırması, zaman serisi, rasyo haritası, banka odak, faaliyet bölümleri, menkul kıymet faiz tipi kırılımı ve otomatik çeyrek raporu.">
   <link rel="canonical" href="https://ekordion.com.tr/banka-kar.html">
   <meta property="og:title" content="Banka Kârlılık Analizi — Solo Finansal Tablolarla Banka Karşılaştırması | Ekordion">
   <meta property="og:description" content="Türk bankalarının solo finansal tablolarından çeyreklik kârlılık analizi: net kâr sıralaması, ROE–ROA haritası, banka karşılaştırması, rasyo haritası, faaliyet bölümleri.">
@@ -48,6 +48,22 @@
     #tblOzetT .kol-ok { cursor: pointer; opacity: .35; padding: 0 4px; font-size: 14px; line-height: 1; }
     #tblOzetT th:hover .kol-ok { opacity: 1; }
     .not { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
+    .rapor { max-width: 980px; line-height: 1.6; font-size: 14.5px; margin-top: 6px; }
+    .rapor h2 { font-size: 20px; margin: 10px 0 2px; color: var(--amber); }
+    .rapor .alt { color: var(--muted); font-size: 12.5px; margin: 0 0 14px; font-style: italic; }
+    .rapor h4 { font-size: 15px; margin: 18px 0 6px; padding-bottom: 3px; border-bottom: 1px solid var(--border); color: var(--text); }
+    .rapor p { margin: 0 0 10px; text-align: justify; }
+    .rapor ul { margin: 0 0 10px 18px; padding: 0; }
+    .rapor li { margin-bottom: 5px; }
+    .rapor table { border-collapse: collapse; font-size: 12.5px; margin: 6px 0 12px; }
+    .rapor th, .rapor td { border: 1px solid var(--border); padding: 4px 7px; text-align: right; white-space: nowrap; }
+    .rapor th { background: var(--panel2); font-weight: 600; }
+    .rapor td.sol { text-align: left; font-weight: 600; }
+    .rapor td.neg { color: var(--red); }
+    .rapor .notlar { font-size: 12px; color: var(--muted); }
+    html:not([data-theme="koyu"]) .rapor h2 { color: var(--kirmizi); }
+    html:not([data-theme="koyu"]) .rapor th { background: #F1F4F9; color: var(--lacivert); }
+    html:not([data-theme="koyu"]) .rapor td.neg { color: #C00000; }
     details.ham summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 8px; }
     .tanim li { margin-bottom: 6px; line-height: 1.5; }
     .bos { color: var(--muted); font-size: 13.5px; padding: 18px 0; }
@@ -184,6 +200,16 @@
       <p class="not" id="notOzetT"></p>
     </section>
 
+    <section class="chart-card" id="secRapor">
+      <h3>Çeyrek Raporu — Otomatik Bilanço Değerlendirmesi</h3>
+      <p class="cap" id="capRapor">Seçilen çeyrek için solo finansal tablosu yüklenmiş bankaların sonuçlarını aracı kurum notu düzeninde özetler; metin verilerden otomatik üretilir</p>
+      <div class="ctl"><label>Dönem <select class="sel" id="selRapor"></select></label><label>Kapsam (tıkla: çıkar / ekle) <div class="chips" id="raporChips"></div></label></div>
+      <button class="btn" id="btnRaporKopya">📋 Metni kopyala (Word / Outlook)</button>
+      <button class="btn" id="btnRaporDocx">📄 Word olarak indir (.docx)</button>
+      <button class="btn" id="btnRaporYazdir">🖨 Yazdır / PDF</button>
+      <div class="rapor" id="raporMetin"></div>
+    </section>
+
     <section class="chart-card">
       <h3>Tanımlar ve Notlar</h3>
       <ul class="tanim">
@@ -198,7 +224,7 @@
     </section>
   </main>
 
-  <script src="assets/app.js?v=33"></script>
+  <script src="assets/app.js?v=34"></script>
   <script>
     (async () => {
       const D = await getJSON("data/banka_kar.json");
@@ -648,10 +674,324 @@
         return { html, duz };
       }
 
+      /* ---- Çeyrek Raporu: seçilen dönem için aracı kurum notu düzeninde otomatik bilanço değerlendirmesi (metin verilerden üretilir) ---- */
+      const RP = { donem: OTP.length ? OTP.slice(-1)[0] : null, haric: new Set(), son: null };
+      const prevQ = p => { const y = +p.slice(0, 4), q = +p.slice(-1); return q > 1 ? y + "Q" + (q - 1) : (y - 1) + "Q4"; };
+      const sdiv = (a, b) => (num(a) === null || num(b) === null || !b) ? null : a / b;
+      const smul = (a, k) => num(a) === null ? null : a * k;
+      const sadd = (a, b) => num(a) === null ? null : a + (num(b) || 0);
+      const avg2 = (a, b) => num(a) === null ? num(b) : num(b) === null ? a : (a + b) / 2;
+      const dPct = (a, b) => (num(a) === null || num(b) === null || b <= 0) ? null : a / b - 1;   // taban pozitifse yüzde değişim
+      const dFark = (a, b) => (num(a) === null || num(b) === null) ? null : a - b;
+      const ozRow = (p, b) => (OT[p] || []).find(r => r.ad === b) || null;
+      const raporBankalar = p => (OT[p] || []).map(r => r.ad).filter(b => (D.ceyrek[p] || {})[b]);   // PDF'i yüklenmiş bankalar, aktif sırası
+      const mlr = v => num(v) === null ? "—" : Math.abs(v) >= 1000 ? trNum(v / 1000, 1) + " milyar TL" : trNum(v, 0) + " milyon TL";
+      const mlrS = v => num(v) === null ? "—" : (v < 0 ? "−" : "+") + mlr(Math.abs(v));
+      const yz = (v, d) => num(v) === null ? "—" : (v < 0 ? "−%" : "+%") + trNum(Math.abs(v) * 100, d === undefined ? 1 : d);   // işaretli yüzde değişim
+      const yzd = (v, d) => num(v) === null ? "—" : "%" + trNum(v * 100, d === undefined ? 1 : d);   // yüzde düzeyi
+      const bp = v => num(v) === null ? "—" : (v < 0 ? "−" : "+") + trNum(Math.abs(v) * 1e4, 0) + " bp";
+      const bpL = v => num(v) === null ? "—" : trNum(v * 1e4, 0) + " bp";
+      const puan = v => num(v) === null ? "—" : (v < 0 ? "−" : "+") + trNum(Math.abs(v), 1) + " puan";
+      const liste = arr => arr.length <= 1 ? arr.join("") : arr.slice(0, -1).join(", ") + " ve " + arr[arr.length - 1];
+      const paragraflar = (cumleler, n) => { const out = []; for (let i = 0; i < cumleler.length; i += n) out.push(cumleler.slice(i, i + n).join(" ")); return out; };
+      function raporVeri(p, b) {
+        const p1 = prevQ(p), p2 = prevQ(p1), py = prevYear(p);
+        const q = (D.ceyrek[p] || {})[b], q1 = (D.ceyrek[p1] || {})[b], qy = (D.ceyrek[py] || {})[b];
+        const s = (D.ytd[p] || {})[b], s1 = (D.ytd[p1] || {})[b], s2 = (D.ytd[p2] || {})[b];
+        if (!q || !s) return null;
+        const g = (o, k) => o ? num(o[k]) : null;
+        const o0 = ozRow(p, b), o1 = ozRow(p1, b);
+        const ortA = avg2(g(s, "toplam_aktif"), g(s1, "toplam_aktif")), ortA1 = avg2(g(s1, "toplam_aktif"), g(s2, "toplam_aktif"));
+        const ortO = avg2(g(s, "ozkaynak"), g(s1, "ozkaynak")), ortO1 = avg2(g(s1, "ozkaynak"), g(s2, "ozkaynak"));
+        const ortK = avg2(g(s, "kredi"), g(s1, "kredi")), ortK1 = avg2(g(s1, "kredi"), g(s2, "kredi"));
+        const nfgS = sadd(g(q, "net_faiz"), g(q, "ticari_kz")), nfgS1 = sadd(g(q1, "net_faiz"), g(q1, "ticari_kz")), nfgSy = sadd(g(qy, "net_faiz"), g(qy, "ticari_kz"));
+        const opg = g(q, "personel") === null ? null : g(q, "personel") + (g(q, "diger_gider") || 0), opg1 = g(q1, "personel") === null ? null : g(q1, "personel") + (g(q1, "diger_gider") || 0);
+        return {
+          ad: b, p1var: !!q1, pyvar: !!qy,
+          nk: g(q, "net_kar"), nk1: g(q1, "net_kar"), nky: g(qy, "net_kar"), kapsamli: g(q, "kapsamli_gelir"),
+          roe: sdiv(smul(g(q, "net_kar"), 4), ortO), roe1: sdiv(smul(g(q1, "net_kar"), 4), ortO1), roa: sdiv(smul(g(q, "net_kar"), 4), ortA),
+          nfg: g(q, "net_faiz"), nfg1: g(q1, "net_faiz"), nfgS, nfgS1, nfgSy, tic: g(q, "ticari_kz"), tic1: g(q1, "ticari_kz"),
+          nim: sdiv(smul(nfgS, 4), ortA), nim1: sdiv(smul(nfgS1, 4), ortA1), nimB: sdiv(smul(g(q, "net_faiz"), 4), ortA), nimB1: sdiv(smul(g(q1, "net_faiz"), 4), ortA1),
+          ucret: g(q, "net_ucret"), ucret1: g(q1, "net_ucret"), ucrety: g(qy, "net_ucret"),
+          mevf: g(q, "mevduata_faiz"), mevf1: g(q1, "mevduata_faiz"), kref: g(q, "krediden_faiz"), kref1: g(q1, "krediden_faiz"), mdcf: g(q, "mdc_faiz"), mdcf1: g(q1, "mdc_faiz"),
+          kars: g(q, "karsilik"), kars1: g(q1, "karsilik"), karsy: g(qy, "karsilik"),
+          rm: sdiv(smul(g(q, "karsilik"), 4), ortK), rm1: sdiv(smul(g(q1, "karsilik"), 4), ortK1),
+          bzk: o0 ? num(o0.bzk_stok) : null, karsOran: o0 ? sdiv(num(o0.bzk_stok), g(s, "kredi")) : null, karsOran1: o1 ? sdiv(num(o1.bzk_stok), g(s1, "kredi")) : null,
+          syr: o0 ? num(o0.syr) : null, syr1: o1 ? num(o1.syr) : null,
+          aktif: g(s, "toplam_aktif"), aktif1: g(s1, "toplam_aktif"), ozk: g(s, "ozkaynak"), ozk1: g(s1, "ozkaynak"),
+          kredi: g(s, "kredi"), kredi1: g(s1, "kredi"), ktl: g(s, "kredi_tl"), ktl1: g(s1, "kredi_tl"), kyp: g(s, "kredi_yp"), kyp1: g(s1, "kredi_yp"),
+          mevd: g(s, "mevduat"), mevd1: g(s1, "mevduat"), mtl: g(s, "mevduat_tl"), mtl1: g(s1, "mevduat_tl"), myp: g(s, "mevduat_yp"), myp1: g(s1, "mevduat_yp"),
+          km: sdiv(g(s, "kredi"), g(s, "mevduat")), mdcPay: sdiv(g(s, "mdc"), g(s, "toplam_aktif")),
+          opg, opg1, mg: g(q, "maliyet_gelir"), mg1: g(q1, "maliyet_gelir"), kaldirac: sdiv(g(s, "toplam_aktif"), g(s, "ozkaynak")),
+        };
+      }
+      function raporHesap(p) {
+        const R = raporBankalar(p).filter(b => !RP.haric.has(b)).map(b => raporVeri(p, b)).filter(Boolean);
+        const cift = (a, b) => R.filter(r => num(r[a]) !== null && num(r[b]) !== null);
+        const topD = (a, b) => { const c = cift(a, b); return c.length ? dPct(sum(c.map(r => r[a])), sum(c.map(r => r[b]))) : null; };
+        const T = {
+          n: R.length, nk: sum(R.map(r => r.nk)), nQoQ: cift("nk", "nk1").length, nYoY: cift("nk", "nky").length,
+          nkQoQ: topD("nk", "nk1"), nkYoY: topD("nk", "nky"), kars: sum(R.map(r => r.kars)), karsQoQ: topD("kars", "kars1"), karsYoY: topD("kars", "karsy"),
+          nfgSQoQ: topD("nfgS", "nfgS1"), ucretQoQ: topD("ucret", "ucret1"), krediQoQ: topD("kredi", "kredi1"), mevdQoQ: topD("mevd", "mevd1"), ozkQoQ: topD("ozk", "ozk1"),
+          medRoe: median(R.map(r => r.roe)), medNim: median(R.map(r => r.nim)), medNimD: median(R.map(r => dFark(r.nim, r.nim1))), medSyr: median(R.map(r => r.syr)), medRm: median(R.map(r => r.rm)),
+        };
+        return { R, T };
+      }
+      function raporOlustur(p) {
+        const { R, T } = raporHesap(p);
+        const pl = plabel(p), p1l = plabel(prevQ(p)), K = b => KISA(b);
+        const qoq = r => dPct(r.nk, r.nk1), yoy = r => dPct(r.nk, r.nky), nimD = r => dFark(r.nim, r.nim1);
+        const siraNk = R.slice().sort((a, b) => (b.nk || 0) - (a.nk || 0));
+        const kars = R.filter(r => qoq(r) !== null).sort((a, b) => qoq(b) - qoq(a));
+        const artan = kars.filter(r => qoq(r) > 0), azalan = kars.filter(r => qoq(r) < 0);
+        const nimli = R.filter(r => nimD(r) !== null).sort((a, b) => nimD(b) - nimD(a));
+        const nimArt = nimli.filter(r => nimD(r) > 0.0005), nimGer = nimli.filter(r => nimD(r) < -0.0005);
+        const nimYay = nimli.length ? nimD(nimli[0]) - nimD(nimli[nimli.length - 1]) : 0;
+        const ayrisma = artan.length && azalan.length;
+        const baslik = "Bankalar: " + (!kars.length ? "çeyrek sonuçları" : ayrisma ? "kârlılıkta ayrışma" : artan.length ? "genele yayılan toparlanma" : "kârlılık baskısı genele yayıldı") + " — " + pl;
+        const alt = pl + " solo finansal tablolar · " + R.length + " banka: " + liste(R.map(r => K(r.ad))) + " · Kaynak: KAP, ekordion.com.tr · veri tabanı " + D.veri_tarihi;
+        const B = [], notlar = [];
+        /* --- Özet (kapak maddeleri) --- */
+        const ozet = [];
+        if (R.length) {
+          ozet.push("Kârlılık: izlenen bankaların toplam net kârı " + mlr(T.nk) + (T.nkQoQ !== null ? ", önceki çeyreğe göre " + yz(T.nkQoQ) : "") + (T.nkYoY !== null ? ", geçen yılın aynı çeyreğine göre " + yz(T.nkYoY) : "") + "." +
+            (kars.length > 1 ? " En güçlü çeyreklik artış " + K(kars[0].ad) + " (" + yz(qoq(kars[0])) + "), en zayıf seyir " + K(kars[kars.length - 1].ad) + " (" + yz(qoq(kars[kars.length - 1])) + ")." : ""));
+          if (nimli.length) ozet.push("Marj: swap dahil net faiz marjı medyanı " + yzd(T.medNim, 2) + " (çeyreklik medyan değişim " + bp(T.medNimD) + ")" + (nimArt.length ? "; marjı genişleyenler: " + liste(nimArt.map(r => K(r.ad))) : "") + (nimGer.length ? "; daralanlar: " + liste(nimGer.map(r => K(r.ad))) : "") + ".");
+          const rmS = R.filter(r => r.rm !== null).sort((a, b) => b.rm - a.rm);
+          ozet.push("Aktif kalitesi: toplam beklenen zarar karşılığı gideri " + mlr(T.kars) + (T.karsQoQ !== null ? " (ç/ç " + yz(T.karsQoQ) + ")" : "") + (rmS.length ? "; yıllıklandırılmış risk maliyeti en yüksek " + K(rmS[0].ad) + " (" + bpL(rmS[0].rm) + "), en düşük " + K(rmS[rmS.length - 1].ad) + " (" + bpL(rmS[rmS.length - 1].rm) + ")" : "") + ".");
+          const syrli = R.filter(r => r.syr !== null);
+          if (syrli.length) ozet.push("Sermaye: solo SYR medyanı %" + trNum(T.medSyr, 1) + (syrli.every(r => r.syr >= 12) ? "; tüm bankalar %12 hedef oranın üzerinde" : "; " + liste(syrli.filter(r => r.syr < 12).map(r => K(r.ad))) + " %12 hedef oranın altında") + ".");
+        }
+        B.push({ baslik: "Özet", madde: ozet });
+        /* --- Giriş --- */
+        const giris = [];
+        if (!R.length) giris.push("Seçilen dönem için solo finansal tablosu yüklenmiş banka bulunmuyor.");
+        else if (!kars.length) giris.push(pl + " için " + R.length + " bankanın solo sonuçları yüklü; önceki çeyrek verisi bulunmadığından çeyreklik karşılaştırma yapılamıyor.");
+        else if (ayrisma) giris.push(pl + " sonuçları, benzer faaliyet koşullarına rağmen kârlılıkta belirgin bir ayrışmaya işaret ediyor: izlenen " + R.length + " bankanın " + artan.length + " tanesinde çeyreklik net kâr artarken " + azalan.length + " tanesinde geriledi. " +
+          K(kars[0].ad) + " ç/ç " + yz(qoq(kars[0])) + " ile öne çıkarken " + K(kars[kars.length - 1].ad) + " tarafında net kâr ç/ç " + yz(qoq(kars[kars.length - 1])) + " ile en zayıf seyri gösterdi.");
+        else if (artan.length) giris.push(pl + " sonuçları kârlılıkta genele yayılan bir iyileşmeye işaret ediyor: izlenen " + R.length + " bankanın tamamında çeyreklik net kâr arttı; en güçlü artış " + K(kars[0].ad) + " (" + yz(qoq(kars[0])) + "), en sınırlısı " + K(kars[kars.length - 1].ad) + " (" + yz(qoq(kars[kars.length - 1])) + ").");
+        else giris.push(pl + " sonuçları kârlılık baskısının genele yayıldığını gösteriyor: izlenen " + R.length + " bankanın tamamında çeyreklik net kâr geriledi; en sert düşüş " + K(kars[kars.length - 1].ad) + " (" + yz(qoq(kars[kars.length - 1])) + "), en sınırlısı " + K(kars[0].ad) + " (" + yz(qoq(kars[0])) + ").");
+        if (R.length && (T.nkQoQ !== null || T.nkYoY !== null)) giris.push("Toplam net kâr " + mlr(T.nk) + (T.nkQoQ !== null ? " ile önceki çeyreğe göre " + yz(T.nkQoQ) + " (" + T.nQoQ + " banka)" : "") + (T.nkYoY !== null ? ", geçen yılın aynı çeyreğine göre " + yz(T.nkYoY) + " (" + T.nYoY + " banka)" : "") + " değişti; medyan çeyreklik ROE " + yzd(T.medRoe) + ".");
+        if (nimYay > 0.005) giris.push("Ayrışmanın arkasında bilanço konumlanması, fonlama yapısı ve faiz marjı yönetimindeki farklar var: swap dahil net faiz marjındaki çeyreklik değişim bankalar arasında " + bp(nimD(nimli[nimli.length - 1])) + " ile " + bp(nimD(nimli[0])) + " arasında dağılıyor; bu da fonlama maliyetlerindeki normalleşmenin faydalarının bankalara eşit dağılmadığını gösteriyor.");
+        B.push({ baslik: "Genel görünüm", p: giris });
+        /* --- Kârlılık --- */
+        const karC = siraNk.map(r => {
+          let s = K(r.ad) + " " + (r.nk < 0 ? mlr(-r.nk) + " net zarar" : mlr(r.nk) + " net kâr") + " açıkladı";
+          const par = [];
+          if (r.p1var) par.push("ç/ç " + (qoq(r) === null ? "hesaplanamadı (önceki çeyrek zarar)" : yz(qoq(r))));
+          if (r.pyvar) par.push("y/y " + (yoy(r) === null ? "hesaplanamadı (geçen yıl zarar)" : yz(yoy(r))));
+          s += par.length ? " (" + par.join(", ") + ")" : " (karşılaştırma dönemi verisi yok)";
+          s += r.roe !== null ? "; yıllıklandırılmış çeyreklik ROE " + yzd(r.roe) + (r.roe1 !== null ? " (" + p1l + ": " + yzd(r.roe1) + ")" : "") + "." : ".";
+          if (r.kapsamli !== null && r.nk !== null && Math.abs(r.kapsamli - r.nk) > 0.25 * Math.abs(r.nk)) s += " Menkul kıymet değerleme farkları gibi diğer kapsamlı gelir kalemleri dahil toplam kapsamlı gelir " + mlr(r.kapsamli) + " ile net kârın " + (r.kapsamli > r.nk ? "üzerinde" : "altında") + " gerçekleşti.";
+          return s;
+        });
+        B.push({ baslik: "Kârlılık", p: paragraflar(karC, 3) });
+        /* --- Marjlar --- */
+        const marj = [];
+        if (nimli.length) {
+          marj.push((nimYay > 0.005 ? "Ayrışma en belirgin biçimde net faiz marjında görülüyor. " : "Net faiz marjları bankalar arasında görece benzer bir seyir izledi. ") +
+            "Swap maliyetleri gelir tablosunda ticari kâr/zarar kaleminde izlendiğinden marj, net faiz geliri ile ticari kâr/zararın toplamının ortalama aktife oranı (yıllıklandırılmış) olarak ele alınıyor." +
+            (T.nfgSQoQ !== null ? " İzlenen bankaların toplam swap dahil net faiz geliri ç/ç " + yz(T.nfgSQoQ) + (T.ucretQoQ !== null ? ", net ücret ve komisyon gelirleri " + yz(T.ucretQoQ) : "") + " değişti." : ""));
+          const marjC = nimli.map(r => {
+            const d = nimD(r);
+            let s = K(r.ad) + " tarafında swap dahil net faiz marjı " + (Math.abs(d) < 0.0005 ? yzd(r.nim, 2) + " ile yatay kaldı" : "çeyreklik " + bp(d) + " ile " + yzd(r.nim, 2) + " düzeyine " + (d > 0 ? "yükseldi" : "geriledi")) +
+              "; swap dahil net faiz geliri ç/ç " + (dPct(r.nfgS, r.nfgS1) === null ? "hesaplanamadı (önceki çeyrek negatif)" : yz(dPct(r.nfgS, r.nfgS1))) + (r.ucret1 !== null ? ", net ücret ve komisyon gelirleri " + yz(dPct(r.ucret, r.ucret1)) : "") + ".";
+            const fon = [];
+            if (dPct(r.mevf, r.mevf1) !== null) fon.push("mevduata verilen faizler ç/ç " + yz(dPct(r.mevf, r.mevf1)));
+            if (dPct(r.kref, r.kref1) !== null) fon.push("kredilerden alınan faizler " + yz(dPct(r.kref, r.kref1)));
+            if (dPct(r.mdcf, r.mdcf1) !== null) fon.push("menkul kıymet faiz gelirleri " + yz(dPct(r.mdcf, r.mdcf1)));
+            if (fon.length) s += " " + fon.join(", ").replace(/^./, c => c.toUpperCase()) + " değişti.";
+            return s;
+          });
+          marj.push.apply(marj, paragraflar(marjC, 2));
+          marj.push("Bankaların kendi raporladıkları marj ölçütleri (TÜFE'ye endeksli kâğıt getirisi normalize edilmiş, faiz getirili aktiflere oranlanmış) düzey olarak bu hesapla doğrudan karşılaştırılamaz; buradaki marjlar yön ve büyüklük sırası için anlamlıdır.");
+        } else marj.push("Önceki çeyrek verisi bulunmadığından marj değişimi hesaplanamıyor.");
+        B.push({ baslik: "Marjlar", p: marj });
+        /* --- Aktif kalitesi ve karşılıklar --- */
+        const ak = [];
+        if (R.length) {
+          ak.push("İzlenen bankaların toplam beklenen zarar karşılığı gideri " + mlr(T.kars) + (T.karsQoQ !== null ? " ile önceki çeyreğe göre " + yz(T.karsQoQ) + " " + (T.karsQoQ > 0 ? "arttı" : "geriledi") : "") + (T.karsYoY !== null ? "; geçen yılın aynı çeyreğine göre değişim " + yz(T.karsYoY) : "") + "." +
+            (T.karsQoQ !== null && T.karsQoQ > 0 ? " Karşılık yükündeki artış, marj görünümündeki iyileşmeye önemli bir çekince getiriyor: bankalar için temel soru, fonlama maliyetlerindeki gerilemenin ötesinde marj toparlanmasının artan karşılık yükünü karşılayıp karşılamayacağı." : ""));
+          const rmS = R.filter(r => r.kars !== null).sort((a, b) => (b.rm || 0) - (a.rm || 0));
+          const akC = rmS.map(r => K(r.ad) + " " + mlr(r.kars) + " karşılık gideri yazdı" + (r.kars1 !== null ? " (ç/ç " + (dPct(r.kars, r.kars1) === null ? "önceki çeyrek sıfır/negatif" : yz(dPct(r.kars, r.kars1))) + ")" : "") +
+            (r.rm !== null ? "; yıllıklandırılmış brüt risk maliyeti " + bpL(r.rm) + (r.rm1 !== null ? " (" + p1l + ": " + bpL(r.rm1) + ")" : "") : "") +
+            (r.karsOran !== null ? ", bilançodaki karşılık stokunun kredilere oranı " + yzd(r.karsOran, 2) + (r.karsOran1 !== null ? " (" + puan((r.karsOran - r.karsOran1) * 100) + ")" : "") : "") + ".");
+          ak.push.apply(ak, paragraflar(akC, 3));
+          ak.push("Takipteki alacak oranı ve aşama bazlı karşılıklar finansal tablo dipnotlarında yer aldığından bu rapora dahil edilmemiştir; aktif kalitesi okuması karşılık gideri ve karşılık stoku üzerinden yapılmaktadır.");
+        }
+        B.push({ baslik: "Aktif kalitesi ve karşılıklar", p: ak });
+        /* --- Sermaye --- */
+        const ser = [];
+        const syrS = R.filter(r => r.syr !== null).sort((a, b) => b.syr - a.syr);
+        if (syrS.length) {
+          ser.push((syrS.every(r => r.syr >= 12) ? "Sermaye tamponları kredi yatırımcısı açısından güven verici: izlenen bankaların tamamında solo SYR %12 hedef oranının üzerinde (medyan %" + trNum(T.medSyr, 1) + "). " : "Solo SYR medyanı %" + trNum(T.medSyr, 1) + "; " + liste(syrS.filter(r => r.syr < 12).map(r => K(r.ad))) + " %12 hedef oranının altında. ") +
+            syrS.map(r => K(r.ad) + " %" + trNum(r.syr, 2) + (r.syr1 !== null ? " (" + p1l + ": %" + trNum(r.syr1, 2) + ", " + puan(r.syr - r.syr1) + ")" : "")).join("; ") + ".");
+          const ozkC = R.filter(r => dPct(r.ozk, r.ozk1) !== null).sort((a, b) => dPct(b.ozk, b.ozk1) - dPct(a.ozk, a.ozk1));
+          if (ozkC.length) ser.push("Özkaynaklar çeyreklik bazda " + ozkC.map(r => K(r.ad) + " " + yz(dPct(r.ozk, r.ozk1))).join(", ") + " değişti" + (T.ozkQoQ !== null ? " (toplam " + yz(T.ozkQoQ) + ")" : "") + "; kaldıraç (aktif/özkaynak) " + R.filter(r => r.kaldirac !== null).map(r => K(r.ad) + " " + trNum(r.kaldirac, 1) + "x").join(", ") + ".");
+          ser.push("Oranlar solo ve BDDK geçici önlemleri dahil raporlanan sermaye yeterliliği standart oranlarıdır; bankaların yatırımcı sunumlarında verdiği geçici önlemler hariç ve konsolide oranlar daha düşük olabilir.");
+        } else ser.push("Seçili bankalar için SYR verisi bulunmuyor.");
+        B.push({ baslik: "Sermaye", p: ser });
+        /* --- Bilanço --- */
+        const bil = [];
+        if (R.length) {
+          if (T.krediQoQ !== null) bil.push("İzlenen bankaların toplam kredileri önceki çeyreğe göre " + yz(T.krediQoQ) + (T.mevdQoQ !== null ? ", mevduatı " + yz(T.mevdQoQ) : "") + " değişti (YP kalemler TL karşılığıyla; kur etkisi arındırılmamıştır).");
+          const bilC = R.slice().sort((a, b) => (dPct(b.kredi, b.kredi1) || 0) - (dPct(a.kredi, a.kredi1) || 0)).map(r => K(r.ad) + ": krediler " + yz(dPct(r.kredi, r.kredi1)) + (dPct(r.ktl, r.ktl1) !== null ? " (TL " + yz(dPct(r.ktl, r.ktl1)) + ", YP " + yz(dPct(r.kyp, r.kyp1)) + ")" : "") +
+            (r.mevd ? ", mevduat " + yz(dPct(r.mevd, r.mevd1)) + (dPct(r.mtl, r.mtl1) !== null ? " (TL " + yz(dPct(r.mtl, r.mtl1)) + ", YP " + yz(dPct(r.myp, r.myp1)) + ")" : "") + "; kredi/mevduat " + yzd(r.km, 0) : "; mevduat tabanı yok (kalkınma/yatırım bankası)") +
+            (r.mdcPay !== null ? "; menkul kıymetlerin aktifteki payı " + yzd(r.mdcPay) : "") + ".");
+          bil.push.apply(bil, paragraflar(bilC, 3));
+        }
+        B.push({ baslik: "Bilanço", p: bil });
+        /* --- Değerlendirme (veriye dayalı maddeler) --- */
+        const deg = [];
+        R.forEach(r => {
+          const dN = dFark(r.nfgS, r.nfgS1), dK = dFark(r.kars, r.kars1);
+          if (dN === null || dK === null) return;
+          if (dN > 0 && dK <= 0) deg.push(K(r.ad) + ": swap dahil net faiz geliri çeyreklik " + mlr(dN) + " artarken karşılık gideri " + mlr(-dK) + " azaldı; her iki kanal da kârlılığı destekledi.");
+          else if (dN > 0 && dN >= dK) deg.push(K(r.ad) + ": swap dahil net faiz gelirindeki çeyreklik artış (" + mlrS(dN) + ") karşılık giderindeki artışı (" + mlrS(dK) + ") karşılıyor; marj toparlanması kârlılığı destekliyor.");
+          else if (dN > 0) deg.push(K(r.ad) + ": net faiz geliri artsa da (" + mlrS(dN) + ") karşılık artışı (" + mlrS(dK) + ") daha büyük; aktif kalitesi kârlılık üzerinde baskı oluşturuyor.");
+          else if (dK > 0) deg.push(K(r.ad) + ": swap dahil net faiz geliri geriledi (" + mlrS(dN) + ") ve karşılık gideri arttı (" + mlrS(dK) + "); kârlılık her iki kanaldan baskı altında.");
+          else deg.push(K(r.ad) + ": swap dahil net faiz geliri çeyreklik " + mlr(-dN) + " gerilerken karşılık gideri " + mlr(-dK) + " azaldı; düşen karşılıklar marj kaybını " + (-dK >= -dN ? "fazlasıyla" : "kısmen") + " telafi etti.");
+        });
+        const mgArt = R.filter(r => dFark(r.mg, r.mg1) !== null && dFark(r.mg, r.mg1) > 0.02), mgIyi = R.filter(r => dFark(r.mg, r.mg1) !== null && dFark(r.mg, r.mg1) < -0.02);
+        if (mgArt.length || mgIyi.length) deg.push("Verimlilik: maliyet/gelir oranı " + (mgArt.length ? liste(mgArt.map(r => K(r.ad) + " (" + yzd(r.mg, 0) + ", " + puan((r.mg - r.mg1) * 100) + ")")) + " tarafında belirgin yükseldi" : "") + (mgArt.length && mgIyi.length ? "; " : "") + (mgIyi.length ? liste(mgIyi.map(r => K(r.ad) + " (" + yzd(r.mg, 0) + ", " + puan((r.mg - r.mg1) * 100) + ")")) + " tarafında iyileşti" : "") + ".");
+        const tampon = R.filter(r => sdiv(r.ucret, r.opg) !== null && sdiv(r.ucret, r.opg) >= 0.8).sort((a, b) => sdiv(b.ucret, b.opg) - sdiv(a.ucret, a.opg));
+        if (tampon.length) deg.push("Komisyon tamponu: net ücret ve komisyon gelirlerinin faaliyet giderlerine oranı " + liste(tampon.map(r => K(r.ad) + " " + yzd(sdiv(r.ucret, r.opg), 0))) + " düzeyinde; yinelenen komisyon gelirleri marj ve karşılık baskısına karşı önemli bir tampon sağlıyor.");
+        if (R.length) deg.push("Sonuçlar solo (konsolide olmayan) tablolara dayanır; iştirakleri büyük bankalarda konsolide net kâr ve oranlar farklılaşabilir. Kârlılıkta marj toparlanmasının hızı ve aktif kalitesinin seyri, manşet çeyreklik kâr rakamlarından daha belirleyici olacaktır.");
+        B.push({ baslik: "Değerlendirme", madde: deg });
+        /* --- Tablo --- */
+        const tablo = { baslik: pl + " özet göstergeler (çeyreklik, solo)", bas: ["Banka", "Net kâr (mlr TL)", "ç/ç", "y/y", "ROE (çeyrek, yıllık.)", "Swap dahil NFM", "Δ NFM ç/ç", "Komisyon ç/ç", "Karşılık gid. (mlr TL)", "Risk maliyeti", "SYR", "Krediler ç/ç", "Mevduat ç/ç"],
+          satir: siraNk.map(r => [K(r.ad), trNum(r.nk / 1000, 1), yz(qoq(r)), yz(yoy(r)), yzd(r.roe), yzd(r.nim, 2), bp(nimD(r)), yz(dPct(r.ucret, r.ucret1)), trNum(r.kars / 1000, 1), bpL(r.rm), r.syr === null ? "—" : "%" + trNum(r.syr, 2), yz(dPct(r.kredi, r.kredi1)), r.mevd ? yz(dPct(r.mevd, r.mevd1)) : "—"]) };
+        /* --- Notlar --- */
+        notlar.push("Kaynak: bankaların KAP'ta yayımlanan solo (konsolide olmayan) BDDK formatlı finansal tabloları; " + R.length + " banka; tutarlar milyar TL. Metin, ekordion.com.tr Banka Kârlılık Analizi verilerinden otomatik üretilmiştir (" + new Date().toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) + ").");
+        notlar.push("ç/ç = önceki çeyreğe göre değişim (gelir tablosu kalemleri çeyreklik akım: Çn − Ç(n−1)); y/y = geçen yılın aynı çeyreğine göre. Tabanı negatif olan değişimler hesaplanmaz.");
+        notlar.push("ROE = çeyreklik net kâr × 4 / (dönem sonu ve önceki çeyrek sonu özkaynak ortalaması). Swap dahil net faiz marjı (NFM) = (net faiz geliri + ticari kâr/zarar) × 4 / ortalama aktif; ticari kâr/zarar swap maliyetlerinin yanı sıra kambiyo ve menkul kıymet alım-satım sonuçlarını da içerir.");
+        notlar.push("Brüt risk maliyeti = beklenen zarar karşılığı gideri (gelir tablosu IX) × 4 / ortalama krediler; karşılık stoku oranı = bilançodaki kredilere ilişkin beklenen zarar karşılıkları / krediler. Maliyet/gelir = (personel + diğer faaliyet giderleri) / (op. gelir + diğer faaliyet gelirleri).");
+        notlar.push("SYR solo ve BDDK geçici önlemleri dahil raporlanan orandır. Takipteki alacak oranı dipnot verisi olduğundan rapora dahil değildir. Bilgilendirme amaçlıdır; yatırım tavsiyesi değildir.");
+        return { baslik, alt, bolumler: B, tablo, notlar };
+      }
+      function raporHtml(rp, ic) {   // ic: Word/Outlook/yazdırma için satır-içi stiller
+        const st = ic ? {
+          kutu: ' style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:11pt;color:#000;line-height:1.45;max-width:820px"',
+          h2: ' style="font-size:16pt;color:#C00000;margin:0 0 2pt;font-weight:700"', alt: ' style="font-size:9.5pt;color:#595959;font-style:italic;margin:0 0 12pt"',
+          h4: ' style="font-size:12pt;color:#1C3044;margin:12pt 0 4pt;font-weight:700;border-bottom:1px solid #BFBFBF;padding-bottom:2pt"', p: ' style="margin:0 0 8pt;text-align:justify"',
+          ul: ' style="margin:0 0 8pt 18pt;padding:0"', li: ' style="margin-bottom:3pt"',
+          tbl: ' style="border-collapse:collapse;font-size:8pt;margin:4pt 0 10pt"', th: ' style="border:1px solid #BFBFBF;background:#595959;color:#fff;padding:2pt 5pt;text-align:right;white-space:nowrap"',
+          td: ' style="border:1px solid #BFBFBF;padding:2pt 5pt;text-align:right;white-space:nowrap"', tdn: ' style="border:1px solid #BFBFBF;padding:2pt 5pt;text-align:right;white-space:nowrap;color:#C00000"',
+          tds: ' style="border:1px solid #BFBFBF;padding:2pt 5pt;text-align:left;white-space:nowrap;font-weight:700"', not: ' style="font-size:9pt;color:#595959"',
+        } : { kutu: "", h2: "", alt: ' class="alt"', h4: "", p: "", ul: "", li: "", tbl: "", th: "", td: "", tdn: ' class="neg"', tds: ' class="sol"', not: ' class="notlar"' };
+        let h = "<div" + st.kutu + "><h2" + st.h2 + ">" + esc(rp.baslik) + "</h2><p" + st.alt + ">" + esc(rp.alt) + "</p>";
+        rp.bolumler.forEach(b => {
+          if (!(b.p || []).length && !(b.madde || []).length) return;
+          h += "<h4" + st.h4 + ">" + esc(b.baslik) + "</h4>" + (b.p || []).map(t => "<p" + st.p + ">" + esc(t) + "</p>").join("") + ((b.madde || []).length ? "<ul" + st.ul + ">" + b.madde.map(t => "<li" + st.li + ">" + esc(t) + "</li>").join("") + "</ul>" : "");
+        });
+        if (rp.tablo) h += "<h4" + st.h4 + ">" + esc(rp.tablo.baslik) + "</h4>" + (ic ? "" : '<div class="table-wrap">') + "<table" + st.tbl + "><tr>" + rp.tablo.bas.map(x => "<th" + st.th + ">" + esc(x) + "</th>").join("") + "</tr>" +
+          rp.tablo.satir.map(r => "<tr>" + r.map((v, i) => i === 0 ? "<td" + st.tds + ">" + esc(v) + "</td>" : "<td" + (String(v).startsWith("−") || String(v).startsWith("-") ? st.tdn : st.td) + ">" + esc(v) + "</td>").join("") + "</tr>").join("") + "</table>" + (ic ? "" : "</div>");
+        h += "<h4" + st.h4 + ">Notlar</h4><ul" + (ic ? st.ul.replace('"', '"font-size:9pt;color:#595959;') : ' class="notlar"') + ">" + rp.notlar.map(t => "<li" + st.li + ">" + esc(t) + "</li>").join("") + "</ul></div>";
+        return h;
+      }
+      function raporDuz(rp) {
+        const L = [rp.baslik, rp.alt, ""];
+        rp.bolumler.forEach(b => { if (!(b.p || []).length && !(b.madde || []).length) return; L.push(b.baslik.toUpperCase()); (b.p || []).forEach(t => L.push(t, "")); (b.madde || []).forEach(t => L.push("• " + t)); L.push(""); });
+        if (rp.tablo) { L.push(rp.tablo.baslik, rp.tablo.bas.join("\t")); rp.tablo.satir.forEach(r => L.push(r.join("\t"))); L.push(""); }
+        L.push("NOTLAR"); rp.notlar.forEach(t => L.push("• " + t));
+        return L.join("\n");
+      }
+      /* .docx üretimi — kütüphanesiz: sıkıştırmasız ZIP (CRC-32) içinde WordprocessingML */
+      const xmlEsc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      function zipStore(dosyalar) {   // [{ad, icerik}] → Blob (yöntem 0 = depola)
+        const enc = new TextEncoder(), tab = [];
+        for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); tab[n] = c >>> 0; }
+        const crc = u => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = tab[(c ^ u[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+        const d = new Date(), dosT = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), dosD = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+        const u32 = (dv, o, v) => dv.setUint32(o, v >>> 0, true), u16 = (dv, o, v) => dv.setUint16(o, v & 0xFFFF, true);
+        const parca = [], merkez = []; let ofs = 0, mboy = 0;
+        dosyalar.forEach(f => {
+          const ad = enc.encode(f.ad), veri = enc.encode(f.icerik), c = crc(veri);
+          const yh = new DataView(new ArrayBuffer(30));
+          u32(yh, 0, 0x04034b50); u16(yh, 4, 20); u16(yh, 6, 0x0800); u16(yh, 8, 0); u16(yh, 10, dosT); u16(yh, 12, dosD); u32(yh, 14, c); u32(yh, 18, veri.length); u32(yh, 22, veri.length); u16(yh, 26, ad.length); u16(yh, 28, 0);
+          parca.push(yh.buffer, ad, veri);
+          const mh = new DataView(new ArrayBuffer(46));
+          u32(mh, 0, 0x02014b50); u16(mh, 4, 20); u16(mh, 6, 20); u16(mh, 8, 0x0800); u16(mh, 10, 0); u16(mh, 12, dosT); u16(mh, 14, dosD); u32(mh, 16, c); u32(mh, 20, veri.length); u32(mh, 24, veri.length);
+          u16(mh, 28, ad.length); u16(mh, 30, 0); u16(mh, 32, 0); u16(mh, 34, 0); u16(mh, 36, 0); u32(mh, 38, 0); u32(mh, 42, ofs);
+          merkez.push(mh.buffer, ad); mboy += 46 + ad.length; ofs += 30 + ad.length + veri.length;
+        });
+        const son = new DataView(new ArrayBuffer(22));
+        u32(son, 0, 0x06054b50); u16(son, 4, 0); u16(son, 6, 0); u16(son, 8, dosyalar.length); u16(son, 10, dosyalar.length); u32(son, 12, mboy); u32(son, 16, ofs); u16(son, 20, 0);
+        return new Blob(parca.concat(merkez, [son.buffer]), { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+      }
+      function raporDocx(rp) {
+        const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+        const run = (t, o) => { o = o || {}; return "<w:r><w:rPr>" + (o.b ? "<w:b/>" : "") + (o.i ? "<w:i/>" : "") + (o.renk ? '<w:color w:val="' + o.renk + '"/>' : "") + (o.sz ? '<w:sz w:val="' + o.sz + '"/><w:szCs w:val="' + o.sz + '"/>' : "") + '</w:rPr><w:t xml:space="preserve">' + xmlEsc(t) + "</w:t></w:r>"; };
+        const par = (runs, o) => { o = o || {}; return "<w:p><w:pPr>" + (o.keep ? "<w:keepNext/>" : "") + '<w:spacing w:before="' + (o.before || 0) + '" w:after="' + (o.after === undefined ? 120 : o.after) + '"/>' + (o.ind ? '<w:ind w:left="360" w:hanging="360"/>' : "") + (o.jc ? '<w:jc w:val="' + o.jc + '"/>' : "") + "</w:pPr>" + runs + "</w:p>"; };
+        const madde = (t, o) => par(run("•", o) + "<w:r><w:tab/></w:r>" + run(t, o), { ind: true, after: 60 });
+        const hucre = (t, o) => { o = o || {}; return "<w:tc><w:tcPr>" + (o.fill ? '<w:shd w:val="clear" w:color="auto" w:fill="' + o.fill + '"/>' : "") + "</w:tcPr>" + par(run(t, { b: o.b, sz: 15, renk: o.renk }), { jc: o.sol ? "left" : "right", after: 0 }) + "</w:tc>"; };
+        let body = par(run(rp.baslik, { b: true, sz: 30, renk: "C00000" }), { after: 40 }) + par(run(rp.alt, { i: true, sz: 18, renk: "595959" }), { after: 200 });
+        rp.bolumler.forEach(b => {
+          if (!(b.p || []).length && !(b.madde || []).length) return;
+          body += par(run(b.baslik, { b: true, sz: 24, renk: "1C3044" }), { before: 160, after: 60, keep: true });
+          (b.p || []).forEach(t => { body += par(run(t), { jc: "both" }); });
+          (b.madde || []).forEach(t => { body += madde(t); });
+        });
+        if (rp.tablo) {
+          const n = rp.tablo.bas.length, kenar = ["top", "left", "bottom", "right", "insideH", "insideV"].map(k => "<w:" + k + ' w:val="single" w:sz="4" w:space="0" w:color="BFBFBF"/>').join("");
+          body += par(run(rp.tablo.baslik, { b: true, sz: 24, renk: "1C3044" }), { before: 160, after: 60, keep: true }) +
+            '<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders>' + kenar + '</w:tblBorders><w:tblLayout w:type="autofit"/></w:tblPr><w:tblGrid>' + rp.tablo.bas.map((_, i) => '<w:gridCol w:w="' + (i === 0 ? 1100 : Math.floor(8538 / (n - 1))) + '"/>').join("") + "</w:tblGrid>" +
+            "<w:tr><w:trPr><w:tblHeader/></w:trPr>" + rp.tablo.bas.map((h, i) => hucre(h, { b: true, fill: "595959", renk: "FFFFFF", sol: i === 0 })).join("") + "</w:tr>" +
+            rp.tablo.satir.map(r => "<w:tr>" + r.map((v, i) => hucre(v, { sol: i === 0, b: i === 0, renk: (String(v).startsWith("−") || String(v).startsWith("-")) ? "C00000" : undefined })).join("") + "</w:tr>").join("") + "</w:tbl>" + par(run(""), { after: 60 });
+        }
+        body += par(run("Notlar", { b: true, sz: 22, renk: "1C3044" }), { before: 160, after: 60, keep: true });
+        rp.notlar.forEach(t => { body += madde(t, { sz: 18, renk: "595959" }); });
+        const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + W + "><w:body>" + body + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>';
+        const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ' + W + '><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri" w:eastAsia="Calibri"/><w:sz w:val="21"/><w:szCs w:val="21"/><w:lang w:val="tr-TR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style></w:styles>';
+        const ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>';
+        const rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
+        const drels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+        return zipStore([{ ad: "[Content_Types].xml", icerik: ct }, { ad: "_rels/.rels", icerik: rels }, { ad: "word/document.xml", icerik: doc }, { ad: "word/_rels/document.xml.rels", icerik: drels }, { ad: "word/styles.xml", icerik: styles }]);
+      }
+      window.__raporDocx = () => RP.son ? raporDocx(RP.son) : null;   // sınama kancası
+      window.__raporMetin = () => RP.son;
+      /* kontroller */
+      const selRapor = document.getElementById("selRapor"), raporChipsEl = document.getElementById("raporChips");
+      if (OTP.length) { secenekler(selRapor, OTP.map(p => [p, plabel(p) + " (" + raporBankalar(p).length + " banka)"]), RP.donem); selRapor.onchange = () => { RP.donem = selRapor.value; RP.haric = new Set(); raporCiz(); }; }
+      function raporChipler() {
+        const bs = raporBankalar(RP.donem);
+        chipKur(raporChipsEl, bs.map(b => [b, KISA(b)]), b => !RP.haric.has(b), (b, c) => { if (RP.haric.has(b)) RP.haric.delete(b); else { if (bs.length - RP.haric.size <= 1) return; RP.haric.add(b); } c.classList.toggle("active", !RP.haric.has(b)); raporCiz(); });
+      }
+      function raporCiz() {
+        const el = document.getElementById("raporMetin");
+        if (!RP.donem) { el.innerHTML = '<p class="bos">Rapor için veri yok; bankaların solo bilanço PDF\'leri yüklendikçe oluşur.</p>'; RP.son = null; return; }
+        raporChipler();
+        RP.son = raporOlustur(RP.donem);
+        document.getElementById("capRapor").textContent = plabel(RP.donem) + " · " + (raporBankalar(RP.donem).length - RP.haric.size) + " banka · metin ve tablo verilerden otomatik üretilir; bankalar çiplerle kapsam dışı bırakılabilir";
+        el.innerHTML = raporHtml(RP.son, false);
+      }
+      document.getElementById("btnRaporKopya").onclick = async function () {
+        const b = this; if (!RP.son) return;
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([raporHtml(RP.son, true)], { type: "text/html" }), "text/plain": new Blob([raporDuz(RP.son)], { type: "text/plain" }) })]);
+          b.textContent = "✓ Kopyalandı — Word ya da Outlook'a yapıştır";
+        } catch (e) {
+          try { await navigator.clipboard.writeText(raporDuz(RP.son)); b.textContent = "✓ Düz metin kopyalandı"; } catch (e2) { b.textContent = "Kopyalanamadı — Word olarak indir"; }
+        }
+        setTimeout(() => { b.textContent = "📋 Metni kopyala (Word / Outlook)"; }, 3500);
+      };
+      document.getElementById("btnRaporDocx").onclick = () => {
+        if (!RP.son) return;
+        const a = document.createElement("a"); a.href = URL.createObjectURL(raporDocx(RP.son)); a.download = "ekordion-ceyrek-raporu-" + plabel(RP.donem).replace(" ", "-") + ".docx";
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+      };
+      document.getElementById("btnRaporYazdir").onclick = () => {
+        if (!RP.son) return;
+        const w = window.open("", "_blank"); if (!w) { alert("Açılır pencere engellendi; tarayıcı izninden sonra tekrar deneyin."); return; }
+        w.document.write("<!DOCTYPE html><html lang=\"tr\"><head><meta charset=\"utf-8\"><title>" + esc(RP.son.baslik) + "</title><style>@page{size:A4;margin:16mm}body{margin:0}</style></head><body>" + raporHtml(RP.son, true) + "</body></html>");
+        w.document.close(); w.focus(); setTimeout(() => w.print(), 400);
+      };
+
       /* ---- sayfa içi sekmeler (kenar çubuğundaki alt kırılımlarla aynı; hash ile seçilir) ---- */
       const SEKME = {
         genel: { ad: "Genel Bakış", sec: ["secGenel"], kontrol: true, metrik: true, ciz: () => genel() },
         ozettablo: { ad: "Özet Tablo", sec: ["secOzetT"], ciz: () => ozetTablo() },
+        rapor: { ad: "Çeyrek Raporu", sec: ["secRapor"], ciz: () => raporCiz() },
         rasyolar: { ad: "Rasyolar", sec: ["secRasyo"], kontrol: true, ciz: () => rasyolar() },
         karsilastirma: { ad: "Banka Karşılaştırma", sec: ["secCmp"], kontrol: true, ciz: () => karsilastir() },
         zaman: { ad: "Zaman Serisi", sec: ["secTs"], kontrol: true, ciz: () => zaman() },
@@ -659,7 +999,7 @@
         bolumler: { ad: "Faaliyet Bölümleri", sec: ["secSeg"], ciz: () => { bolum(); bolumX(); } },
         portfoy: { ad: "Menkul Kıymet Portföyü", sec: ["secFaiz"], ciz: () => { faiz(); mdc(); } },
       };
-      const TUM_SEC = ["secGenel", "secOzetT", "secRasyo", "secCmp", "secTs", "secOdak", "secSeg", "secFaiz"];
+      const TUM_SEC = ["secGenel", "secOzetT", "secRapor", "secRasyo", "secCmp", "secTs", "secOdak", "secSeg", "secFaiz"];
       const sekmeEl = document.getElementById("sekmeChips");
       chipKur(sekmeEl, Object.entries(SEKME).map(([k, v]) => [k, v.ad]), k => k === "genel", k => { location.hash = "#" + k; });
       function sekmeGoster(ad) {

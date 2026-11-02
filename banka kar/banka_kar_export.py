@@ -320,6 +320,9 @@ def ozet_tablo(con, wide):
         ozkay, ozkay_p = g("ozkaynak"), prv(bul(lst, "BS", r"^ozkaynaklar$", "L"))
         ozky = tot(bul(lst, "IS", r"^ozkaynak yontemi uygulanan ortakliklardan"))
         zk = tot(bul(lst, "IS", r"^zorunlu karsiliklardan alinan faiz"))
+        # kredilere ilişkin beklenen zarar karşılığı stoku (bilanço aktif II. bölüm; kod bankadan bankaya kayar: Akbank 2.5, Garanti 2.4)
+        bzk_aday = [r for r in lst if r[2] == "BS" and r[3] == "A" and re.search(r"^beklenen zarar karsiliklari", _n(r[5]))]
+        bzk_r = next((r for r in bzk_aday if str(r[4]).startswith("2.")), None) or (max(bzk_aday, key=lambda r: r[6] or 0) if bzk_aday else None)
         nk = g("net_kar"); nk_x = None if nk is None else nk - (ozky or 0)
         yil = lambda v: None if v is None else v * ann
         out.setdefault(p, []).append({
@@ -331,6 +334,7 @@ def ozet_tablo(con, wide):
             "zk_faiz": r1(zk, 1), "zk_oran": r1(safe_div(zk, g("faiz_geliri")), 4),
             "spk": r1(tot(bul(lst, "IS", r"^sermaye piyasasi islemleri kar")), 1), "turev": r1(tot(bul(lst, "IS", r"^turev finansal islemlerden kar")), 1),
             "kambiyo": r1(tot(bul(lst, "IS", r"^kambiyo islemleri kar")), 1), "ticari": r1(g("ticari_kz"), 1),
+            "bzk_stok": r1(tot(bzk_r), 1),   # çeyrek raporu: karşılık stoku / krediler
         })
     for p in out:
         out[p].sort(key=lambda r: -(r["aktif"] or 0))
