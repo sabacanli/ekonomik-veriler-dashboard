@@ -80,9 +80,11 @@ a { color: var(--blue); }
 
 /* ── Ana içerik ── */
 main {
-  margin-left: 252px;
+  /* Geniş ekranda (1920 px ve üzeri) içerik sola yaslı kalıp sağda büyük boşluk bırakıyordu:
+     azami genişlik 1500 px'e çıkarıldı ve kenar çubuğundan arta kalan alana ortalanır. */
+  margin-left: max(252px, calc(252px + (100vw - 252px - 1500px) / 2));
   padding: 30px 38px 40px;
-  max-width: 1250px;
+  max-width: 1500px;
 }
 .page-title { font-size: 30px; font-weight: 700; margin: 0 0 4px; }
 .update-info { color: var(--muted); font-size: 12.5px; margin-bottom: 18px; }
