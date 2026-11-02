@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
-  <link rel="stylesheet" href="assets/style.css?v=31">
+  <link rel="stylesheet" href="assets/style.css?v=32">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
   <style>
     .ctl-bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: flex-end; margin: 4px 0 14px; }
@@ -41,6 +41,8 @@
     table.heat.dar { min-width: 0; width: 100%; }
     table.heat.dar td.lbl { min-width: 90px; }
     table.heat td.isi { font-weight: 600; }
+    #tblOzetT th[data-k] { cursor: pointer; user-select: none; white-space: nowrap; }
+    #tblOzetT th[data-k]:hover { color: #8A5A00; }
     .not { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
     details.ham summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 8px; }
     .tanim li { margin-bottom: 6px; line-height: 1.5; }
@@ -167,7 +169,7 @@
       <div class="table-wrap"><table class="heat" id="tblMdc"></table></div>
     </section>
 
-    <section class="chart-card" id="secOzetT">
+    <section class="chart-card" id="secOzetT" data-resim-ad="ozet-tablo">
       <h3>Özet Tablo — Sektör Sonuçları</h3>
       <p class="cap" id="capOzetT">Seçilen dönemde solo finansal tablosu yüklenmiş bankalar; tutarlar milyon TL, oranlar yıllıklandırılmış</p>
       <button class="btn apko-btn">🖨 Beyaz zemin (sunum)</button>
@@ -192,7 +194,7 @@
     </section>
   </main>
 
-  <script src="assets/app.js?v=31"></script>
+  <script src="assets/app.js?v=32"></script>
   <script>
     (async () => {
       const D = await getJSON("data/banka_kar.json");
@@ -547,22 +549,59 @@
       if (OTP.length) { S.ozetT = OTP.slice(-1)[0]; secenekler(selOzetT, OTP.map(p => [p, plabel(p) + " (" + OT[p].length + " banka)"]), S.ozetT); selOzetT.onchange = () => { S.ozetT = selOzetT.value; ozetTablo(); }; }
       if (D.ozet_xlsx) btnOzetX.href = D.ozet_xlsx; else btnOzetX.style.display = "none";
       const ozFmt = (v, t) => (v === null || v === undefined) ? "—" : t === "mn" ? trNum(v, 0) : t === "pct100" ? "%" + trNum(v, 1) : "%" + trNum(v * 100, 1);
+      const TAMAD = b => (BANK[b] && BANK[b].tam) || b;   // unvan (özet tablo/Excel)
+      S.ozetSort = { key: "aktif", dir: -1 };   // her sütun tıklanarak sıralanır; varsayılan aktif büyüklüğü (azalan)
+      const OZET_AD = { ad: "Banka" };
+      OK.forEach(k => { OZET_AD[k[0]] = k[1]; });
+      function ozetSirali() {
+        const R = (OT[S.ozetT] || []).slice(), { key, dir } = S.ozetSort;
+        return R.sort((a, b) => {
+          if (key === "ad") return KISA(a.ad).localeCompare(KISA(b.ad), "tr") * dir;
+          const x = num(a[key]), y = num(b[key]);
+          if (x === null && y === null) return 0; if (x === null) return 1; if (y === null) return -1;
+          return (x - y) * dir;
+        });
+      }
       function ozetTablo() {
         const t = document.getElementById("tblOzetT"), p = S.ozetT;
         if (!p) { t.innerHTML = '<tr><td class="bos">Özet tablo için veri yok; bankaların solo bilanço PDF\'leri yüklendikçe dolar.</td></tr>'; return; }
-        const R = OT[p];
-        document.getElementById("capOzetT").textContent = plabel(p) + " · " + R.length + " banka (solo PDF'i yüklenmiş olanlar) · aktif büyüklüğüne göre sıralı · tutarlar milyon TL · oranlar yıllıklandırılmış";
-        t.innerHTML = '<tr><th>#</th><th>Banka</th>' + OK.map(k => '<th title="' + esc(k[1]) + '">' + esc(k[1]) + "</th>").join("") + "</tr>" +
+        const R = ozetSirali(), { key, dir } = S.ozetSort, ok = k => k === key ? (dir < 0 ? " ▼" : " ▲") : "";
+        document.getElementById("capOzetT").textContent = plabel(p) + " · " + R.length + " banka (solo PDF'i yüklenmiş olanlar) · sıralama: " + (OZET_AD[key] || key) + (dir < 0 ? " (azalan)" : " (artan)") + " — sütun başlığına tıklayarak değiştirin · tutarlar milyon TL · oranlar yıllıklandırılmış";
+        t.innerHTML = '<tr><th>#</th><th data-k="ad">Banka' + ok("ad") + "</th>" + OK.map(k => '<th data-k="' + k[0] + '" title="Sıralamak için tıklayın">' + esc(k[1]) + ok(k[0]) + "</th>").join("") + "</tr>" +
           R.map((r, i) => '<tr><td class="num">' + (i + 1) + '</td><td class="lbl">' + esc(KISA(r.ad)) + "</td>" + OK.map(k => '<td class="num' + ((k[2] !== "mn" && r[k[0]] !== null && r[k[0]] !== undefined) ? " pct" : "") + '">' + ozFmt(r[k[0]], k[2]) + "</td>").join("") + "</tr>").join("");
+        t.querySelectorAll("th[data-k]").forEach(th => { th.onclick = () => { const k = th.dataset.k; S.ozetSort = { key: k, dir: S.ozetSort.key === k ? -S.ozetSort.dir : (k === "ad" || k === "cost_income" ? 1 : -1) }; ozetTablo(); }; });
         document.getElementById("notOzetT").textContent = D.ozet_not || "";
       }
-      function ozetKopya() {   // Excel'e yapışacak satır-içi stilli tablo + sekmeyle ayrılmış düz metin
-        const p = S.ozetT, R = p ? OT[p] : [];
+      function ozetResim() {   // kullanıcının "Bankalar Özet Verileri (Solo)" tablosu görünümünde PNG
+        const p = S.ozetT, R = ozetSirali(), { key, dir } = S.ozetSort;
+        const son = { "1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12" }[p.slice(-1)] + "." + p.slice(0, 4);
+        const ana = OK.filter(k => !k[0].startsWith("zk_")), zk = OK.filter(k => k[0].startsWith("zk_"));
+        const f = (v, t) => (v === null || v === undefined) ? "" : t === "mn" ? trNum(v, 0) : t === "pct100" ? trNum(v, 1) + "%" : trNum(v * 100, 1) + "%";
+        const KALIN = new Set(["syr", "roae", "roae_x", "zk_oran"]);
+        const hc = "background:#595959;color:#fff;font-weight:700;text-align:right;vertical-align:bottom;padding:4px 5px;border:1px solid #7f7f7f;font-size:9px;line-height:1.15;width:62px;";
+        const th = (ad, ek) => '<th style="' + hc + (ek || "") + '">' + esc(ad) + "</th>";
+        const td = (v, t, kalin) => '<td style="text-align:right;padding:3px 5px;border-bottom:1px solid #d9d9d9;border-right:1px solid #ececec;font-size:9.5px;white-space:nowrap;' + (kalin ? "font-weight:700;" : "") + (typeof v === "number" && v < 0 ? "color:#C00000;" : "") + '">' + f(v, t) + "</td>";
+        const satir = (r, i) => "<tr>" + '<td style="text-align:center;padding:3px 4px;border-bottom:1px solid #d9d9d9;font-size:9.5px">' + (i + 1) + '</td><td style="text-align:left;padding:3px 6px;border-bottom:1px solid #d9d9d9;border-right:1px solid #ececec;font-size:9.5px;white-space:nowrap">' + esc(TAMAD(r.ad)) + "</td>" +
+          ana.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + '<td style="border:0;width:14px"></td>' + zk.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + "</tr>";
+        const html = '<div style="background:#fff;padding:14px 18px;font-family:Calibri,Carlito,Arial,sans-serif;color:#000;display:inline-block">' +
+          '<div style="width:0;min-width:100%;text-align:center;font-weight:700;color:#C00000;font-size:12px;margin-bottom:6px">' + son + " Bankalar Özet Verileri (Solo)</div>" +
+          '<table style="border-collapse:collapse"><tr>' + th("Sıra No", "width:28px;text-align:center;") + th("Banka (Mio TL)", "text-align:left;width:230px;") + ana.map(k => th(k[1])).join("") +
+          '<th style="border:0;background:#fff;width:14px"></th>' + zk.map(k => th(k[1], "background:#FFF2CC;color:#000;border-color:#bfbfbf;")).join("") + "</tr>" + R.map(satir).join("") + "</table>" +
+          '<div style="width:0;min-width:100%;color:#C00000;font-size:8.5px;margin-top:6px;white-space:normal">Not: Bankalar ' + esc(OZET_AD[key] || key) + (dir < 0 ? " (azalan)" : " (artan)") + ' sırasına göre listelenmiştir. Tutarlar milyon TL; oranlar yıllıklandırılmış. ' + esc(D.ozet_not || "") + "</div></div>";
+        let kutu = document.getElementById("ozetResimKutu");
+        if (!kutu) { kutu = document.createElement("div"); kutu.id = "ozetResimKutu"; kutu.style.cssText = "position:absolute;left:-20000px;top:0;z-index:-1"; document.body.appendChild(kutu); }
+        kutu.innerHTML = html;
+        return html2canvasYukle().then(() => html2canvas(kutu.firstChild, { scale: 2, backgroundColor: "#FFFFFF", logging: false }))
+          .then(cv => new Promise(r => cv.toBlob(r, "image/png"))).finally(() => { kutu.innerHTML = ""; });
+      }
+      window.__ozetResim = ozetResim;   // sınama kancası
+      function ozetKopya() {   // Excel'e yapışacak satır-içi stilli tablo + sekmeyle ayrılmış düz metin (ekrandaki sırayla)
+        const p = S.ozetT, R = p ? ozetSirali() : [];
         const th = s => '<th style="border:1px solid #B8C2D1;background:#C9D6EA;color:#1C3044;font:600 11px Arial;padding:3px 6px">' + esc(s) + "</th>";
         const td = (s, r) => '<td style="border:1px solid #B8C2D1;font:11px Arial;padding:3px 6px;text-align:' + (r ? "right" : "left") + '">' + esc(s) + "</td>";
         const html = '<table><tr>' + th("Sıra No") + th("Banka (Mio TL)") + OK.map(k => th(k[1])).join("") + "</tr>" +
-          R.map((r, i) => "<tr>" + td(i + 1, true) + td(KISA(r.ad)) + OK.map(k => td(ozFmt(r[k[0]], k[2]), true)).join("") + "</tr>").join("") + "</table>";
-        const duz = ["Sıra No\tBanka (Mio TL)\t" + OK.map(k => k[1]).join("\t")].concat(R.map((r, i) => [i + 1, KISA(r.ad)].concat(OK.map(k => ozFmt(r[k[0]], k[2]))).join("\t"))).join("\n");
+          R.map((r, i) => "<tr>" + td(i + 1, true) + td(TAMAD(r.ad)) + OK.map(k => td(ozFmt(r[k[0]], k[2]), true)).join("") + "</tr>").join("") + "</table>";
+        const duz = ["Sıra No\tBanka (Mio TL)\t" + OK.map(k => k[1]).join("\t")].concat(R.map((r, i) => [i + 1, TAMAD(r.ad)].concat(OK.map(k => ozFmt(r[k[0]], k[2]))).join("\t"))).join("\n");
         return { html, duz };
       }
 
@@ -596,7 +635,7 @@
       window.addEventListener("hashchange", () => sekmeGoster((location.hash || "#genel").slice(1)));
       sekmeGoster((location.hash || "#genel").slice(1));
       sunumAraclariKur(TEMA, CIZ);
-      tabloSunumKur(document.getElementById("secOzetT"), ozetKopya);   // tablo kartı: beyaz zemin / Excel'e kopyala / resim
+      tabloSunumKur(document.getElementById("secOzetT"), ozetKopya, ozetResim);   // tablo kartı: beyaz zemin / Excel'e kopyala / PDF görünümlü resim
     })().catch(e => { console.error(e); const el = document.getElementById("ozet"); if (el) el.textContent = "Veri yüklenemedi: " + e.message; });
   </script>
 </body>

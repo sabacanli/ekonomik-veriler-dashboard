@@ -59,6 +59,15 @@ BANKS = {  # kanonik ad: (kısa ad, grup)
     "TSKB": ("TSKB", "Kalkınma/Yatırım"), "Aktifbank": ("Aktif", "Kalkınma/Yatırım"), "TKYB": ("TKYB", "Kalkınma/Yatırım"),
 }
 BIG7 = ["Ziraat", "VakıfBank", "Halkbank", "İşbankası", "Akbank", "YapıKredi", "Garanti Bankası"]
+TAM_AD = {  # özet tablo / Excel için unvanlar (kullanıcının "Sektör Sonuçları" tablosundaki gibi)
+    "Ziraat": "Türkiye Cumhuriyeti Ziraat Bankası A.Ş.", "VakıfBank": "Türkiye Vakıflar Bankası T.A.O.", "Halkbank": "Türkiye Halk Bankası A.Ş.",
+    "İşbankası": "Türkiye İş Bankası A.Ş.", "Akbank": "Akbank T.A.Ş.", "YapıKredi": "Yapı ve Kredi Bankası A.Ş.", "Garanti Bankası": "Türkiye Garanti Bankası A.Ş.",
+    "QNB": "QNB Bank A.Ş.", "DenizBank": "Denizbank A.Ş.", "TEB": "Türk Ekonomi Bankası A.Ş.", "BurganBank": "Burgan Bank A.Ş.", "Odeabank": "Odea Bank A.Ş.",
+    "Fibabank": "Fibabanka A.Ş.", "ING": "ING Bank A.Ş.", "HSBC": "HSBC Bank A.Ş.", "ICBC": "ICBC Turkey Bank A.Ş.", "Alternatifbank": "Alternatifbank A.Ş.",
+    "Şekerbank": "Şekerbank T.A.Ş.", "Anadolubank": "Anadolubank A.Ş.", "TSKB": "Türkiye Sınai Kalkınma Bankası A.Ş.", "Aktifbank": "Aktif Yatırım Bankası A.Ş.",
+    "TKYB": "Türkiye Kalkınma ve Yatırım Bankası A.Ş.",
+}
+DONEM_SONU = {"1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12"}
 SEGMENT_CATEGORIES = [
     ("Hazine / Yatırım", ["hazine", "aktif pasif", "yatırım bankacılığı", "sermaye piyasa"]),
     ("Bireysel / Perakende", ["bireysel", "perakende", "özel bankacılık", "dijital"]),
@@ -340,7 +349,7 @@ def ozet_excel(ozet, path):
     n = 0
     for p in sorted(ozet, key=period_key, reverse=True):
         ws = wb.create_sheet(f"{p[:4]} Ç{p[-1]}")
-        ws["A1"] = f"Sektör Sonuçları — {p[:4]} Ç{p[-1]} · solo finansal tablolar (mn TL) · {len(ozet[p])} banka"
+        ws["A1"] = f"{DONEM_SONU[p[-1]]}.{p[:4]} Bankalar Özet Verileri (Solo) · {len(ozet[p])} banka · mn TL"
         ws["A1"].font = Font(bold=True, color=BEYAZ); ws["A1"].fill = fill(LACI); ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=2 + len(OZET_KOL))
         ws.cell(2, 1, "Sıra No"); ws.cell(2, 2, "Banka (Mio TL)")
         for j, (k, ad, t) in enumerate(OZET_KOL):
@@ -350,13 +359,13 @@ def ozet_excel(ozet, path):
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         ws.row_dimensions[2].height = 48
         for i, r in enumerate(ozet[p]):
-            ws.cell(3 + i, 1, i + 1); ws.cell(3 + i, 2, BANKS.get(r["ad"], (r["ad"], ""))[0] or r["ad"]).font = Font(bold=True, color=LACI)
+            ws.cell(3 + i, 1, i + 1); ws.cell(3 + i, 2, TAM_AD.get(r["ad"], r["ad"])).font = Font(bold=True, color=LACI)
             for j, (k, ad, t) in enumerate(OZET_KOL):
                 v = r.get(k); cell = ws.cell(3 + i, 3 + j, None if v is None else (round(v) if t == "mn" else (v / 100 if t == "pct100" else v)))
                 cell.number_format = "#,##0" if t == "mn" else "0.0%"; cell.border = kenar
             n += 1
         ws.cell(4 + len(ozet[p]), 1, OZET_NOT).font = Font(italic=True, size=8, color="55627A")
-        ws.freeze_panes = "C3"; ws.column_dimensions["A"].width = 6; ws.column_dimensions["B"].width = 12
+        ws.freeze_panes = "C3"; ws.column_dimensions["A"].width = 6; ws.column_dimensions["B"].width = 38
         for c in range(3, 3 + len(OZET_KOL)):
             ws.column_dimensions[get_column_letter(c)].width = 12
     path.parent.mkdir(parents=True, exist_ok=True); wb.save(path)
@@ -414,7 +423,7 @@ def build(out=OUT):
             if v:
                 return v
         return 0
-    banks = [{"ad": b, "kisa": BANKS.get(b, (b, "Diğer"))[0], "grup": BANKS.get(b, (b, "Diğer"))[1]} for b in sorted(banks_set, key=lambda b: -son_aktif(b))]
+    banks = [{"ad": b, "kisa": BANKS.get(b, (b, "Diğer"))[0], "grup": BANKS.get(b, (b, "Diğer"))[1], "tam": TAM_AD.get(b, b)} for b in sorted(banks_set, key=lambda b: -son_aktif(b))]
     kapsam = {p: len(wide[p]) for p in periods}
     # faaliyet bölümleri
     seg_rows = con.execute("SELECT bank, period, segment, item, value, seg_order, item_order FROM segments ORDER BY bank, period, seg_order, item_order").fetchall()

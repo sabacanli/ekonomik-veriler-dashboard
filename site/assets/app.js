@@ -403,7 +403,7 @@ function sunumAraclariKur(TEMA, CIZ) {
    .kopya-btn tabloyu Excel/PowerPoint'e renkleriyle yapışacak şekilde panoya yazar,
    .resim-btn tabloyu HER ZAMAN beyaz zeminli PNG olarak kopyalar (sayfada html2canvas gerekir).
    kopyaVerisi() → { html: satır-içi stilli tablo, duz: sekmeyle ayrılmış düz metin } */
-function tabloSunumKur(sec, kopyaVerisi) {
+function tabloSunumKur(sec, kopyaVerisi, resimUret) {   // resimUret: isteğe bağlı özel resim üretici (Promise<Blob>)
   const apko = sec.querySelector(".apko-btn"), kopya = sec.querySelector(".kopya-btn"),
         resim = sec.querySelector(".resim-btn");
   if (apko) apko.onclick = function () {
@@ -430,26 +430,38 @@ function tabloSunumKur(sec, kopyaVerisi) {
     const eskiW = wrap.style.width;
     if (geciciBeyaz) sec.classList.add("apko");
     wrap.style.width = tbl.scrollWidth + "px";
-    return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); })
+    return new Promise(function (r) { setTimeout(r, 80); })
       .then(function () { return html2canvas(wrap, { scale: 2, backgroundColor: "#FFFFFF", logging: false }); })
       .then(function (cv) { return new Promise(function (r) { cv.toBlob(r, "image/png"); }); })
       .finally(function () { wrap.style.width = eskiW; if (geciciBeyaz) sec.classList.remove("apko"); });
   }
   if (resim) resim.onclick = async function () {
     resim.textContent = "⏳ Hazırlanıyor...";
+    // html2canvas yalnız gerektiğinde yüklenir; resim bir kez üretilir ve jest anında başlatılır (Safari)
+    const blobP = html2canvasYukle().then(function () { return resimUret ? resimUret() : tabloResmi(); });
+    blobP.catch(function () {});
     try {
-      // Safari: blob sözü ClipboardItem'a jest anında verilmeli; eski Chrome için yedek yol
       try {
-        await navigator.clipboard.write([new ClipboardItem({ "image/png": tabloResmi() })]);
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blobP })]);
       } catch (e1) {
-        const blob = await tabloResmi();
+        const blob = await blobP;
         await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
       }
       resim.textContent = "✓ Resim kopyalandı — yapıştırabilirsin";
     } catch (e) {
-      resim.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+      window.__kopyaHata = String(e && e.name) + ": " + String(e && e.message || e);
+      try {   // pano yazma izni yoksa resim dosya olarak indirilir
+        const blob = await blobP;
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = "ekordion-" + (sec.dataset.resimAd || (sec.id || "tablo").replace(/^sec/, "").toLowerCase()) + ".png";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+        resim.textContent = "Pano izni yok — resim PNG olarak indirildi";
+      } catch (e2) {
+        resim.textContent = "Kopyalanamadı — beyaz zemin + ekran görüntüsü kullan";
+      }
     }
-    setTimeout(function () { resim.textContent = "🖼 Resim olarak kopyala"; }, 3000);
+    setTimeout(function () { resim.textContent = "🖼 Resim olarak kopyala"; }, 4000);
   };
 }
 
