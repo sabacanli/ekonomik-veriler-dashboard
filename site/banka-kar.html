@@ -43,6 +43,10 @@
     table.heat td.isi { font-weight: 600; }
     #tblOzetT th[data-k] { cursor: pointer; user-select: none; white-space: nowrap; }
     #tblOzetT th[data-k]:hover { color: #8A5A00; }
+    #tblOzetT th[draggable] { cursor: grab; }
+    #tblOzetT th.surukle-hedef { outline: 2px dashed #8A5A00; outline-offset: -2px; }
+    #tblOzetT .kol-ok { cursor: pointer; opacity: .35; padding: 0 4px; font-size: 14px; line-height: 1; }
+    #tblOzetT th:hover .kol-ok { opacity: 1; }
     .not { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
     details.ham summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 8px; }
     .tanim li { margin-bottom: 6px; line-height: 1.5; }
@@ -175,7 +179,7 @@
       <button class="btn apko-btn">🖨 Beyaz zemin (sunum)</button>
       <button class="btn kopya-btn">📋 Panoya kopyala (Excel)</button>
       <button class="btn resim-btn">🖼 Resim olarak kopyala</button>
-      <div class="ctl"><label>Dönem <select class="sel" id="selOzetT"></select></label><a class="btn" id="btnOzetXlsx" href="#" download="banka-ozet-tablo.xlsx">📊 Excel'e aktar (tüm dönemler)</a></div>
+      <div class="ctl"><label>Dönem <select class="sel" id="selOzetT"></select></label><a class="btn" id="btnOzetXlsx" href="#" download="banka-ozet-tablo.xlsx">📊 Excel'e aktar (tüm dönemler)</a><button class="btn" id="btnOzetSifirla" title="Sütun düzenini ve sıralamayı varsayılana döndür">↺ Düzeni sıfırla</button></div>
       <div class="table-wrap"><table class="heat" id="tblOzetT"></table></div>
       <p class="not" id="notOzetT"></p>
     </section>
@@ -553,6 +557,25 @@
       S.ozetSort = { key: "aktif", dir: -1 };   // her sütun tıklanarak sıralanır; varsayılan aktif büyüklüğü (azalan)
       const OZET_AD = { ad: "Banka" };
       OK.forEach(k => { OZET_AD[k[0]] = k[1]; });
+      /* sütun düzeni: başlık sürüklenerek ya da ‹ › oklarıyla taşınır; sıralama ve düzen bu tarayıcıda hatırlanır */
+      const OK_KEYS = OK.map(k => k[0]);
+      S.ozetKol = OK_KEYS.slice();
+      try {
+        const v = JSON.parse(localStorage.getItem("ekordion-ozet-kol") || "null");
+        if (Array.isArray(v) && v.length === OK_KEYS.length && OK_KEYS.every(k => v.includes(k))) S.ozetKol = v;
+        const w = JSON.parse(localStorage.getItem("ekordion-ozet-sort") || "null");
+        if (w && OK_KEYS.concat(["ad"]).includes(w.key) && (w.dir === 1 || w.dir === -1)) S.ozetSort = w;
+      } catch (e) {}
+      const ozetKolListesi = () => S.ozetKol.map(k => OK.find(c => c[0] === k)).filter(Boolean);
+      const ozetVarsayilan = () => S.ozetKol.every((k, i) => k === OK_KEYS[i]);
+      const ozetKaydet = () => { try { localStorage.setItem("ekordion-ozet-kol", JSON.stringify(S.ozetKol)); localStorage.setItem("ekordion-ozet-sort", JSON.stringify(S.ozetSort)); } catch (e) {} };
+      function ozetTasi(key, hedef) {   // key sütununu hedef konuma (indeks) ya da yön (+1/−1) kadar taşır
+        const i = S.ozetKol.indexOf(key); if (i < 0) return;
+        let j = typeof hedef === "string" ? S.ozetKol.indexOf(hedef) : i + hedef;
+        if (j < 0 || j >= S.ozetKol.length || j === i) return;
+        S.ozetKol.splice(i, 1); S.ozetKol.splice(j, 0, key); ozetKaydet(); ozetTablo();
+      }
+      document.getElementById("btnOzetSifirla").onclick = () => { S.ozetKol = OK_KEYS.slice(); S.ozetSort = { key: "aktif", dir: -1 }; ozetKaydet(); ozetTablo(); };
       function ozetSirali() {
         const R = (OT[S.ozetT] || []).slice(), { key, dir } = S.ozetSort;
         return R.sort((a, b) => {
@@ -565,29 +588,43 @@
       function ozetTablo() {
         const t = document.getElementById("tblOzetT"), p = S.ozetT;
         if (!p) { t.innerHTML = '<tr><td class="bos">Özet tablo için veri yok; bankaların solo bilanço PDF\'leri yüklendikçe dolar.</td></tr>'; return; }
-        const R = ozetSirali(), { key, dir } = S.ozetSort, ok = k => k === key ? (dir < 0 ? " ▼" : " ▲") : "";
-        document.getElementById("capOzetT").textContent = plabel(p) + " · " + R.length + " banka (solo PDF'i yüklenmiş olanlar) · sıralama: " + (OZET_AD[key] || key) + (dir < 0 ? " (azalan)" : " (artan)") + " — sütun başlığına tıklayarak değiştirin · tutarlar milyon TL · oranlar yıllıklandırılmış";
-        t.innerHTML = '<tr><th>#</th><th data-k="ad">Banka' + ok("ad") + "</th>" + OK.map(k => '<th data-k="' + k[0] + '" title="Sıralamak için tıklayın">' + esc(k[1]) + ok(k[0]) + "</th>").join("") + "</tr>" +
-          R.map((r, i) => '<tr><td class="num">' + (i + 1) + '</td><td class="lbl">' + esc(KISA(r.ad)) + "</td>" + OK.map(k => '<td class="num' + ((k[2] !== "mn" && r[k[0]] !== null && r[k[0]] !== undefined) ? " pct" : "") + '">' + ozFmt(r[k[0]], k[2]) + "</td>").join("") + "</tr>").join("");
-        t.querySelectorAll("th[data-k]").forEach(th => { th.onclick = () => { const k = th.dataset.k; S.ozetSort = { key: k, dir: S.ozetSort.key === k ? -S.ozetSort.dir : (k === "ad" || k === "cost_income" ? 1 : -1) }; ozetTablo(); }; });
+        const R = ozetSirali(), KOL = ozetKolListesi(), { key, dir } = S.ozetSort, ok = k => k === key ? (dir < 0 ? " ▼" : " ▲") : "";
+        document.getElementById("capOzetT").textContent = plabel(p) + " · " + R.length + " banka (solo PDF'i yüklenmiş olanlar) · sıralama: " + (OZET_AD[key] || key) + (dir < 0 ? " (azalan)" : " (artan)") + (ozetVarsayilan() ? "" : " · sütun düzeni: özel") + " — başlığa tıkla: sırala · ‹ › ya da sürükle: sütunu taşı · tutarlar milyon TL · oranlar yıllıklandırılmış";
+        t.innerHTML = '<tr><th>#</th><th data-k="ad">Banka' + ok("ad") + "</th>" + KOL.map((k, i) => '<th data-k="' + k[0] + '" draggable="true" title="Tıkla: sırala · sürükle ya da oklar: taşı">' +
+            (i > 0 ? '<span class="kol-ok" data-yon="-1" title="Sola taşı">‹</span>' : "") + esc(k[1]) + ok(k[0]) + (i < KOL.length - 1 ? '<span class="kol-ok" data-yon="1" title="Sağa taşı">›</span>' : "") + "</th>").join("") + "</tr>" +
+          R.map((r, i) => '<tr><td class="num">' + (i + 1) + '</td><td class="lbl">' + esc(KISA(r.ad)) + "</td>" + KOL.map(k => '<td class="num' + ((k[2] !== "mn" && r[k[0]] !== null && r[k[0]] !== undefined) ? " pct" : "") + '">' + ozFmt(r[k[0]], k[2]) + "</td>").join("") + "</tr>").join("");
+        t.querySelectorAll("th[data-k]").forEach(th => {
+          const k = th.dataset.k;
+          th.onclick = e => { if (e.target.classList.contains("kol-ok")) return; S.ozetSort = { key: k, dir: S.ozetSort.key === k ? -S.ozetSort.dir : (k === "ad" || k === "cost_income" ? 1 : -1) }; ozetKaydet(); ozetTablo(); };
+          th.querySelectorAll(".kol-ok").forEach(o => { o.onclick = e => { e.stopPropagation(); ozetTasi(k, parseInt(o.dataset.yon, 10)); }; });
+          if (th.draggable) {
+            th.ondragstart = e => { e.dataTransfer.setData("text/plain", k); e.dataTransfer.effectAllowed = "move"; };
+            th.ondragover = e => { e.preventDefault(); th.classList.add("surukle-hedef"); };
+            th.ondragleave = () => th.classList.remove("surukle-hedef");
+            th.ondrop = e => { e.preventDefault(); th.classList.remove("surukle-hedef"); const from = e.dataTransfer.getData("text/plain"); if (from && from !== k && OK_KEYS.includes(from)) ozetTasi(from, k); };
+          }
+        });
         document.getElementById("notOzetT").textContent = D.ozet_not || "";
       }
       function ozetResim() {   // kullanıcının "Bankalar Özet Verileri (Solo)" tablosu görünümünde PNG
-        const p = S.ozetT, R = ozetSirali(), { key, dir } = S.ozetSort;
+        const p = S.ozetT, R = ozetSirali(), { key, dir } = S.ozetSort, KOL = ozetKolListesi();
         const son = { "1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12" }[p.slice(-1)] + "." + p.slice(0, 4);
-        const ana = OK.filter(k => !k[0].startsWith("zk_")), zk = OK.filter(k => k[0].startsWith("zk_"));
+        // zorunlu karşılık sütunları en sonda ve bitişikse PDF'teki gibi ayrı (sarı) blok; değilse yerlerinde, sarı başlıkla
+        const ayrik = KOL.length >= 2 && KOL.slice(-2).every(k => k[0].startsWith("zk_"));
+        const ana = ayrik ? KOL.slice(0, -2) : KOL, zk = ayrik ? KOL.slice(-2) : [];
+        const sari = k => k[0].startsWith("zk_") ? "background:#FFF2CC;color:#000;border-color:#bfbfbf;" : "";
         const f = (v, t) => (v === null || v === undefined) ? "" : t === "mn" ? trNum(v, 0) : t === "pct100" ? trNum(v, 1) + "%" : trNum(v * 100, 1) + "%";
         const KALIN = new Set(["syr", "roae", "roae_x", "zk_oran"]);
         const hc = "background:#595959;color:#fff;font-weight:700;text-align:right;vertical-align:bottom;padding:4px 5px;border:1px solid #7f7f7f;font-size:9px;line-height:1.15;width:62px;";
         const th = (ad, ek) => '<th style="' + hc + (ek || "") + '">' + esc(ad) + "</th>";
         const td = (v, t, kalin) => '<td style="text-align:right;padding:3px 5px;border-bottom:1px solid #d9d9d9;border-right:1px solid #ececec;font-size:9.5px;white-space:nowrap;' + (kalin ? "font-weight:700;" : "") + (typeof v === "number" && v < 0 ? "color:#C00000;" : "") + '">' + f(v, t) + "</td>";
         const satir = (r, i) => "<tr>" + '<td style="text-align:center;padding:3px 4px;border-bottom:1px solid #d9d9d9;font-size:9.5px">' + (i + 1) + '</td><td style="text-align:left;padding:3px 6px;border-bottom:1px solid #d9d9d9;border-right:1px solid #ececec;font-size:9.5px;white-space:nowrap">' + esc(TAMAD(r.ad)) + "</td>" +
-          ana.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + '<td style="border:0;width:14px"></td>' + zk.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + "</tr>";
+          ana.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + (ayrik ? '<td style="border:0;width:14px"></td>' : "") + zk.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + "</tr>";
         const html = '<div style="background:#fff;padding:14px 18px;font-family:Calibri,Carlito,Arial,sans-serif;color:#000;display:inline-block">' +
           '<div style="width:0;min-width:100%;text-align:center;font-weight:700;color:#C00000;font-size:12px;margin-bottom:6px">' + son + " Bankalar Özet Verileri (Solo)</div>" +
-          '<table style="border-collapse:collapse"><tr>' + th("Sıra No", "width:28px;text-align:center;") + th("Banka (Mio TL)", "text-align:left;width:230px;") + ana.map(k => th(k[1])).join("") +
-          '<th style="border:0;background:#fff;width:14px"></th>' + zk.map(k => th(k[1], "background:#FFF2CC;color:#000;border-color:#bfbfbf;")).join("") + "</tr>" + R.map(satir).join("") + "</table>" +
-          '<div style="width:0;min-width:100%;color:#C00000;font-size:8.5px;margin-top:6px;white-space:normal">Not: Bankalar ' + esc(OZET_AD[key] || key) + (dir < 0 ? " (azalan)" : " (artan)") + ' sırasına göre listelenmiştir. Tutarlar milyon TL; oranlar yıllıklandırılmış. ' + esc(D.ozet_not || "") + "</div></div>";
+          '<table style="border-collapse:collapse"><tr>' + th("Sıra No", "width:28px;text-align:center;") + th("Banka (Mio TL)", "text-align:left;width:230px;") + ana.map(k => th(k[1], sari(k))).join("") +
+          (ayrik ? '<th style="border:0;background:#fff;width:14px"></th>' : "") + zk.map(k => th(k[1], sari(k))).join("") + "</tr>" + R.map(satir).join("") + "</table>" +
+          '<div style="width:0;min-width:100%;color:#C00000;font-size:8.5px;margin-top:6px;white-space:normal">Not: Bankalar ' + esc(OZET_AD[key] || key) + (dir < 0 ? " (azalan)" : " (artan)") + ' sırasına göre listelenmiştir.' + (ozetVarsayilan() ? "" : " Sütun düzeni kullanıcı tarafından değiştirilmiştir.") + ' Tutarlar milyon TL; oranlar yıllıklandırılmış. ' + esc(D.ozet_not || "") + "</div></div>";
         let kutu = document.getElementById("ozetResimKutu");
         if (!kutu) { kutu = document.createElement("div"); kutu.id = "ozetResimKutu"; kutu.style.cssText = "position:absolute;left:-20000px;top:0;z-index:-1"; document.body.appendChild(kutu); }
         kutu.innerHTML = html;
@@ -596,7 +633,7 @@
       }
       window.__ozetResim = ozetResim;   // sınama kancası
       function ozetKopya() {   // Excel'e yapışacak satır-içi stilli tablo + sekmeyle ayrılmış düz metin (ekrandaki sırayla)
-        const p = S.ozetT, R = p ? ozetSirali() : [];
+        const p = S.ozetT, R = p ? ozetSirali() : [], OK = ozetKolListesi();   // ekrandaki sütun düzeni
         const th = s => '<th style="border:1px solid #B8C2D1;background:#C9D6EA;color:#1C3044;font:600 11px Arial;padding:3px 6px">' + esc(s) + "</th>";
         const td = (s, r) => '<td style="border:1px solid #B8C2D1;font:11px Arial;padding:3px 6px;text-align:' + (r ? "right" : "left") + '">' + esc(s) + "</td>";
         const html = '<table><tr>' + th("Sıra No") + th("Banka (Mio TL)") + OK.map(k => th(k[1])).join("") + "</tr>" +
