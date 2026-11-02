@@ -32,6 +32,7 @@ METRICS = [
     ("diger_gelir", "Diğer Faaliyet Gelirleri", "IS"), ("karsilik", "Beklenen Zarar Karşılığı", "IS"),
     ("personel", "Personel Gideri", "IS"), ("diger_gider", "Diğer Faaliyet Giderleri", "IS"),
     ("vergi_oncesi", "Vergi Öncesi Kâr", "IS"), ("vergi", "Vergi Karşılığı", "IS"), ("net_kar", "Net Kâr", "IS"),
+    ("kapsamli_gelir", "Toplam Kapsamlı Gelir", "IS"),
     ("toplam_aktif", "Toplam Aktif", "BS"), ("kredi_tl", "Kredi TL", "BS"), ("kredi_yp", "Kredi YP", "BS"), ("kredi", "Kredi Toplam", "BS"),
     ("mevduat_tl", "Mevduat TL", "BS"), ("mevduat_yp", "Mevduat YP", "BS"), ("mevduat", "Mevduat Toplam", "BS"),
     ("mdc_tl", "MDC TL", "BS"), ("mdc_yp", "MDC YP", "BS"), ("mdc", "MDC Toplam", "BS"), ("ozkaynak", "Özkaynak", "BS"),
@@ -274,6 +275,94 @@ def mdc_excel(mdc, banks, path):
     return r - 6
 
 
+OZET_KOL = [  # (anahtar, başlık, tür)  — kullanıcının "Sektör Sonuçları" özet tablosu düzeni
+    ("aktif", "Toplam Aktifler", "mn"), ("kredi", "Toplam Krediler", "mn"), ("ozkaynak", "Toplam Özkaynaklar", "mn"),
+    ("net_kar", "Net Dönem Kâr/Zararı", "mn"), ("kapsamli", "Toplam Kapsamlı Gelir", "mn"), ("net_faiz", "Net Faiz Gelirleri", "mn"),
+    ("net_ucret", "Net Ücret ve Komisyonlar", "mn"), ("ozk_yontemi", "Özk. Yönt. Uyg. Ortaklık K/Z", "mn"),
+    ("cost_income", "Cost / Income", "pct"), ("syr", "SYR", "pct100"), ("roaa", "ROAA", "pct"), ("roae", "ROAE", "pct"),
+    ("roaa_x", "ROAA (Özk. Yönt. Ort. Hariç)", "pct"), ("roae_x", "ROAE (Özk. Yönt. Ort. Hariç)", "pct"),
+    ("zk_faiz", "Zorunlu Karş. Alınan Faiz", "mn"), ("zk_oran", "Zor. Karş. Faizi / Toplam Faiz Geliri", "pct"),
+    ("spk", "Sermaye Piyasası İşlem K/Z (net)", "mn"), ("turev", "Türev İşlem K/Z (net)", "mn"), ("kambiyo", "Kambiyo K/Z (net)", "mn"), ("ticari", "Ticari K/Z Toplam", "mn"),
+]
+OZET_NOT = ("ROAA/ROAE = yıllıklandırılmış net kâr / (dönem sonu + önceki yıl sonu) ortalaması; 'Özk. Yönt. Ort. Hariç' sütunlarında özkaynak yöntemi "
+            "uygulanan ortaklıklardan kâr/zarar net kârdan düşülür. Cost/Income = (personel + diğer faaliyet giderleri) / (net faiz + net ücret + ticari + "
+            "diğer faaliyet gelirleri). SYR ve toplam kapsamlı gelir finansal tablo dipnotlarından; ticari K/Z kalemleri gelir tablosundaki net tutarlar. "
+            "NPL oranı ve serbest karşılık dipnot verisi olduğundan tabloda yer almaz. Kaynak: bankaların solo BDDK formatlı finansal tabloları (KAP).")
+
+
+def ozet_tablo(con, wide):
+    """{period: [satır]} — PDF'i yüklenmiş (fin_rows'u olan) bankalar, aktif büyüklüğüne göre sıralı; tutarlar mn TL, oranlar kesir."""
+    rows = con.execute("SELECT bank, period, stmt, section, code, label, total, total_prev FROM fin_rows ORDER BY bank, period, ord").fetchall()
+    grp = {}
+    for r in rows:
+        grp.setdefault((r[0], r[1]), []).append(r)
+    def bul(lst, stmt, rx, sec=None):
+        return next((r for r in lst if r[2] == stmt and (sec is None or r[3] == sec) and re.search(rx, _n(r[5]))), None)
+    tot = lambda r: None if r is None or r[6] is None else r[6] / 1000
+    prv = lambda r: None if r is None or r[7] is None else r[7] / 1000
+    ort = lambda c, pv: None if c is None else ((c + pv) / 2 if pv is not None else c)
+    out = {}
+    for (b, p), lst in grp.items():
+        m = wide.get(p, {}).get(b, {})
+        if not m.get("toplam_aktif"):
+            continue
+        y, q = period_key(p); ann = 4 / q; g = m.get
+        aktif, aktif_p = g("toplam_aktif"), prv(bul(lst, "BS", r"^(varliklar|aktif) toplami", "A"))
+        ozkay, ozkay_p = g("ozkaynak"), prv(bul(lst, "BS", r"^ozkaynaklar$", "L"))
+        ozky = tot(bul(lst, "IS", r"^ozkaynak yontemi uygulanan ortakliklardan"))
+        zk = tot(bul(lst, "IS", r"^zorunlu karsiliklardan alinan faiz"))
+        nk = g("net_kar"); nk_x = None if nk is None else nk - (ozky or 0)
+        yil = lambda v: None if v is None else v * ann
+        out.setdefault(p, []).append({
+            "ad": b, "aktif": r1(aktif, 1), "kredi": r1(g("kredi"), 1), "ozkaynak": r1(ozkay, 1), "net_kar": r1(nk, 1),
+            "kapsamli": r1(g("kapsamli_gelir"), 1), "net_faiz": r1(g("net_faiz"), 1), "net_ucret": r1(g("net_ucret"), 1), "ozk_yontemi": r1(ozky, 1),
+            "cost_income": r1(ratios(m, ann)["maliyet_gelir"], 4), "syr": r1(g("syr"), 2),
+            "roaa": r1(safe_div(yil(nk), ort(aktif, aktif_p)), 4), "roae": r1(safe_div(yil(nk), ort(ozkay, ozkay_p)), 4),
+            "roaa_x": r1(safe_div(yil(nk_x), ort(aktif, aktif_p)), 4), "roae_x": r1(safe_div(yil(nk_x), ort(ozkay, ozkay_p)), 4),
+            "zk_faiz": r1(zk, 1), "zk_oran": r1(safe_div(zk, g("faiz_geliri")), 4),
+            "spk": r1(tot(bul(lst, "IS", r"^sermaye piyasasi islemleri kar")), 1), "turev": r1(tot(bul(lst, "IS", r"^turev finansal islemlerden kar")), 1),
+            "kambiyo": r1(tot(bul(lst, "IS", r"^kambiyo islemleri kar")), 1), "ticari": r1(g("ticari_kz"), 1),
+        })
+    for p in out:
+        out[p].sort(key=lambda r: -(r["aktif"] or 0))
+    return out
+
+
+def ozet_excel(ozet, path):
+    """Dönem başına bir sayfa: kullanıcının özet tablo düzeni (mn TL / %)."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.utils import get_column_letter
+    wb = Workbook(); wb.remove(wb.active)
+    LACI, ACIK, BEYAZ = "1C3044", "C9D6EA", "FFFFFF"
+    fill = lambda hex_: PatternFill("solid", fgColor=hex_)
+    ince = Side(style="thin", color="B8C2D1"); kenar = Border(left=ince, right=ince, top=ince, bottom=ince)
+    n = 0
+    for p in sorted(ozet, key=period_key, reverse=True):
+        ws = wb.create_sheet(f"{p[:4]} Ç{p[-1]}")
+        ws["A1"] = f"Sektör Sonuçları — {p[:4]} Ç{p[-1]} · solo finansal tablolar (mn TL) · {len(ozet[p])} banka"
+        ws["A1"].font = Font(bold=True, color=BEYAZ); ws["A1"].fill = fill(LACI); ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=2 + len(OZET_KOL))
+        ws.cell(2, 1, "Sıra No"); ws.cell(2, 2, "Banka (Mio TL)")
+        for j, (k, ad, t) in enumerate(OZET_KOL):
+            ws.cell(2, 3 + j, ad)
+        for c in range(1, 3 + len(OZET_KOL)):
+            cell = ws.cell(2, c); cell.font = Font(bold=True, color=LACI, size=9); cell.fill = fill(ACIK); cell.border = kenar
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        ws.row_dimensions[2].height = 48
+        for i, r in enumerate(ozet[p]):
+            ws.cell(3 + i, 1, i + 1); ws.cell(3 + i, 2, BANKS.get(r["ad"], (r["ad"], ""))[0] or r["ad"]).font = Font(bold=True, color=LACI)
+            for j, (k, ad, t) in enumerate(OZET_KOL):
+                v = r.get(k); cell = ws.cell(3 + i, 3 + j, None if v is None else (round(v) if t == "mn" else (v / 100 if t == "pct100" else v)))
+                cell.number_format = "#,##0" if t == "mn" else "0.0%"; cell.border = kenar
+            n += 1
+        ws.cell(4 + len(ozet[p]), 1, OZET_NOT).font = Font(italic=True, size=8, color="55627A")
+        ws.freeze_panes = "C3"; ws.column_dimensions["A"].width = 6; ws.column_dimensions["B"].width = 12
+        for c in range(3, 3 + len(OZET_KOL)):
+            ws.column_dimensions[get_column_letter(c)].width = 12
+    path.parent.mkdir(parents=True, exist_ok=True); wb.save(path)
+    return n
+
+
 def build(out=OUT):
     try:
         pdf_isle()
@@ -370,6 +459,12 @@ def build(out=OUT):
         n_mdc = mdc_excel(mdc, banks, out.parent / "banka-mdc-kirilimi.xlsx")
     except Exception as e:
         n_mdc = 0; print(f"  ~ MDC Excel yazılamadı ({type(e).__name__}: {str(e)[:80]})")
+    # Özet tablo (sektör sonuçları düzeni) + Excel
+    ozet_t = ozet_tablo(con, wide)
+    try:
+        n_ozet = ozet_excel(ozet_t, out.parent / "banka-ozet-tablo.xlsx")
+    except Exception as e:
+        n_ozet = 0; print(f"  ~ Özet tablo Excel yazılamadı ({type(e).__name__}: {str(e)[:80]})")
     # MDC faiz tipi
     faiz = {}
     for b, p, bucket, v in con.execute("SELECT bank, period, bucket, value FROM faiz_tipi"):
@@ -405,10 +500,11 @@ def build(out=OUT):
         "ratios": [{"key": k, "label": l, "short": sh, "fmt": f, "good": g} for k, l, sh, f, g in RATIOS],
         "ytd": ytd, "ceyrek": cey, "segments": segments, "faiz_tipi": faiz, "buckets": BUCKETS, "ozet_html": ozet,
         "mdc": mdc, "mdc_xlsx": "data/banka-mdc-kirilimi.xlsx" if n_mdc else None,
+        "ozet_tablo": ozet_t, "ozet_xlsx": "data/banka-ozet-tablo.xlsx" if n_ozet else None, "ozet_kol": [list(k) for k in OZET_KOL], "ozet_not": OZET_NOT,
     }
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(kayit, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"  banka_kar.json: {len(periods)} dönem · {len(banks)} banka · bölüm verisi {len(segments)} banka · MDC kırılımı {n_mdc} satır · {out.stat().st_size // 1024} KB · son tam dönem {plabel}")
+    print(f"  banka_kar.json: {len(periods)} dönem · {len(banks)} banka · bölüm verisi {len(segments)} banka · MDC kırılımı {n_mdc} satır · özet tablo {n_ozet} satır · {out.stat().st_size // 1024} KB · son tam dönem {plabel}")
     return True
 
 
