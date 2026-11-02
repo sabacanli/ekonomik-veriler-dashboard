@@ -607,28 +607,34 @@
         document.getElementById("notOzetT").textContent = D.ozet_not || "";
       }
       function ozetResim() {   // kullanıcının "Bankalar Özet Verileri (Solo)" tablosu görünümünde PNG
+        // 20+ sütunlu tek parça yapıştırıldığında sayfaya sığdırılıp küçülüyor: sütunlar iki parçaya bölünür
+        // (banka sütunu her parçada), yazılar büyütülür ve 3 kat çözünürlükte çizilir.
         const p = S.ozetT, R = ozetSirali(), { key, dir } = S.ozetSort, KOL = ozetKolListesi();
         const son = { "1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12" }[p.slice(-1)] + "." + p.slice(0, 4);
-        // zorunlu karşılık sütunları en sonda ve bitişikse PDF'teki gibi ayrı (sarı) blok; değilse yerlerinde, sarı başlıkla
-        const ayrik = KOL.length >= 2 && KOL.slice(-2).every(k => k[0].startsWith("zk_"));
-        const ana = ayrik ? KOL.slice(0, -2) : KOL, zk = ayrik ? KOL.slice(-2) : [];
-        const sari = k => k[0].startsWith("zk_") ? "background:#FFF2CC;color:#000;border-color:#bfbfbf;" : "";
+        const bolme = KOL.length > 12 ? Math.ceil(KOL.length / 2) : KOL.length;
+        const bloklar = [KOL.slice(0, bolme), KOL.slice(bolme)].filter(b => b.length);
         const f = (v, t) => (v === null || v === undefined) ? "" : t === "mn" ? trNum(v, 0) : t === "pct100" ? trNum(v, 1) + "%" : trNum(v * 100, 1) + "%";
         const KALIN = new Set(["syr", "roae", "roae_x", "zk_oran"]);
-        const hc = "background:#595959;color:#fff;font-weight:700;text-align:right;vertical-align:bottom;padding:4px 5px;border:1px solid #7f7f7f;font-size:9px;line-height:1.15;width:62px;";
+        const sari = k => k[0].startsWith("zk_") ? "background:#FFF2CC;color:#000;border-color:#bfbfbf;" : "";
+        const hc = "background:#595959;color:#fff;font-weight:700;text-align:right;vertical-align:bottom;padding:5px 6px;border:1px solid #7f7f7f;font-size:11px;line-height:1.2;width:84px;";
         const th = (ad, ek) => '<th style="' + hc + (ek || "") + '">' + esc(ad) + "</th>";
-        const td = (v, t, kalin) => '<td style="text-align:right;padding:3px 5px;border-bottom:1px solid #d9d9d9;border-right:1px solid #ececec;font-size:9.5px;white-space:nowrap;' + (kalin ? "font-weight:700;" : "") + (typeof v === "number" && v < 0 ? "color:#C00000;" : "") + '">' + f(v, t) + "</td>";
-        const satir = (r, i) => "<tr>" + '<td style="text-align:center;padding:3px 4px;border-bottom:1px solid #d9d9d9;font-size:9.5px">' + (i + 1) + '</td><td style="text-align:left;padding:3px 6px;border-bottom:1px solid #d9d9d9;border-right:1px solid #ececec;font-size:9.5px;white-space:nowrap">' + esc(TAMAD(r.ad)) + "</td>" +
-          ana.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + (ayrik ? '<td style="border:0;width:14px"></td>' : "") + zk.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + "</tr>";
-        const html = '<div style="background:#fff;padding:14px 18px;font-family:Calibri,Carlito,Arial,sans-serif;color:#000;display:inline-block">' +
-          '<div style="width:0;min-width:100%;text-align:center;font-weight:700;color:#C00000;font-size:12px;margin-bottom:6px">' + son + " Bankalar Özet Verileri (Solo)</div>" +
-          '<table style="border-collapse:collapse"><tr>' + th("Sıra No", "width:28px;text-align:center;") + th("Banka (Mio TL)", "text-align:left;width:230px;") + ana.map(k => th(k[1], sari(k))).join("") +
-          (ayrik ? '<th style="border:0;background:#fff;width:14px"></th>' : "") + zk.map(k => th(k[1], sari(k))).join("") + "</tr>" + R.map(satir).join("") + "</table>" +
-          '<div style="width:0;min-width:100%;color:#C00000;font-size:8.5px;margin-top:6px;white-space:normal">Not: Bankalar ' + esc(OZET_AD[key] || key) + (dir < 0 ? " (azalan)" : " (artan)") + ' sırasına göre listelenmiştir.' + (ozetVarsayilan() ? "" : " Sütun düzeni kullanıcı tarafından değiştirilmiştir.") + ' Tutarlar milyon TL; oranlar yıllıklandırılmış. ' + esc(D.ozet_not || "") + "</div></div>";
+        const td = (v, t, kalin) => '<td style="text-align:right;padding:4px 6px;border-bottom:1px solid #d9d9d9;border-right:1px solid #ececec;font-size:12.5px;white-space:nowrap;' + (kalin ? "font-weight:700;" : "") + (typeof v === "number" && v < 0 ? "color:#C00000;" : "") + '">' + f(v, t) + "</td>";
+        const blokHtml = kol => {
+          const ayrik = kol.length >= 2 && kol.slice(-2).every(k => k[0].startsWith("zk_"));
+          const ana = ayrik ? kol.slice(0, -2) : kol, zk = ayrik ? kol.slice(-2) : [];
+          const satir = (r, i) => "<tr>" + '<td style="text-align:center;padding:4px 5px;border-bottom:1px solid #d9d9d9;font-size:12.5px">' + (i + 1) + '</td><td style="text-align:left;padding:4px 8px;border-bottom:1px solid #d9d9d9;border-right:1px solid #ececec;font-size:12.5px;white-space:nowrap">' + esc(TAMAD(r.ad)) + "</td>" +
+            ana.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + (ayrik ? '<td style="border:0;width:14px"></td>' : "") + zk.map(k => td(r[k[0]], k[2], KALIN.has(k[0]))).join("") + "</tr>";
+          return '<table style="border-collapse:collapse;margin-top:8px"><tr>' + th("Sıra No", "width:34px;text-align:center;") + th("Banka (Mio TL)", "text-align:left;width:250px;") + ana.map(k => th(k[1], sari(k))).join("") +
+            (ayrik ? '<th style="border:0;background:#fff;width:14px"></th>' : "") + zk.map(k => th(k[1], sari(k))).join("") + "</tr>" + R.map(satir).join("") + "</table>";
+        };
+        const html = '<div style="background:#fff;padding:16px 20px;font-family:Calibri,Carlito,Arial,sans-serif;color:#000;display:inline-block">' +
+          '<div style="width:0;min-width:100%;text-align:center;font-weight:700;color:#C00000;font-size:16px;margin-bottom:4px">' + son + " Bankalar Özet Verileri (Solo)</div>" +
+          bloklar.map(blokHtml).join("") +
+          '<div style="width:0;min-width:100%;color:#C00000;font-size:10.5px;margin-top:8px;white-space:normal">Not: Bankalar ' + esc(OZET_AD[key] || key) + (dir < 0 ? " (azalan)" : " (artan)") + ' sırasına göre listelenmiştir.' + (ozetVarsayilan() ? "" : " Sütun düzeni kullanıcı tarafından değiştirilmiştir.") + (bloklar.length > 1 ? " Tablo iki parça halinde verilmiştir; sıra numaraları aynı bankayı gösterir." : "") + ' Tutarlar milyon TL; oranlar yıllıklandırılmış. ' + esc(D.ozet_not || "") + "</div></div>";
         let kutu = document.getElementById("ozetResimKutu");
         if (!kutu) { kutu = document.createElement("div"); kutu.id = "ozetResimKutu"; kutu.style.cssText = "position:absolute;left:-20000px;top:0;z-index:-1"; document.body.appendChild(kutu); }
         kutu.innerHTML = html;
-        return html2canvasYukle().then(() => html2canvas(kutu.firstChild, { scale: 2, backgroundColor: "#FFFFFF", logging: false }))
+        return html2canvasYukle().then(() => html2canvas(kutu.firstChild, { scale: 3, backgroundColor: "#FFFFFF", logging: false }))
           .then(cv => new Promise(r => cv.toBlob(r, "image/png"))).finally(() => { kutu.innerHTML = ""; });
       }
       window.__ozetResim = ozetResim;   // sınama kancası
