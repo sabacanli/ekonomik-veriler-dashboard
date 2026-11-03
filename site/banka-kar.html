@@ -685,6 +685,8 @@
       const dFark = (a, b) => (num(a) === null || num(b) === null) ? null : a - b;
       const ozRow = (p, b) => (OT[p] || []).find(r => r.ad === b) || null;
       const raporBankalar = p => (OT[p] || []).map(r => r.ad).filter(b => (D.ceyrek[p] || {})[b]);   // PDF'i yüklenmiş bankalar, aktif sırası
+      const RAPOR_AD = { "YapıKredi": "Yapı Kredi", "İşbankası": "İş Bankası", "Garanti Bankası": "Garanti", "Fibabank": "Fibabanka", "BurganBank": "Burgan Bank", "Aktifbank": "Aktif Bank" };
+      const RAD = b => RAPOR_AD[b] || b;   // rapor metninde kısaltma değil okunur ad (kullanıcı 03.11: "YKB"yi göremedi)
       const mlr = v => num(v) === null ? "—" : Math.abs(v) >= 1000 ? trNum(v / 1000, 1) + " milyar TL" : trNum(v, 0) + " milyon TL";
       const mlrS = v => num(v) === null ? "—" : (v < 0 ? "−" : "+") + mlr(Math.abs(v));
       const yz = (v, d) => num(v) === null ? "—" : (v < 0 ? "−%" : "+%") + trNum(Math.abs(v) * 100, d === undefined ? 1 : d);   // işaretli yüzde değişim
@@ -739,7 +741,7 @@
       }
       function raporOlustur(p) {
         const { R, T } = raporHesap(p);
-        const pl = plabel(p), p1l = plabel(prevQ(p)), K = b => KISA(b);
+        const pl = plabel(p), p1l = plabel(prevQ(p)), K = b => RAD(b);
         const qoq = r => dPct(r.nk, r.nk1), yoy = r => dPct(r.nk, r.nky), nimD = r => dFark(r.nim, r.nim1);
         const siraNk = R.slice().sort((a, b) => (b.nk || 0) - (a.nk || 0));
         const kars = R.filter(r => qoq(r) !== null).sort((a, b) => qoq(b) - qoq(a));
@@ -955,7 +957,7 @@
       if (OTP.length) { secenekler(selRapor, OTP.map(p => [p, plabel(p) + " (" + raporBankalar(p).length + " banka)"]), RP.donem); selRapor.onchange = () => { RP.donem = selRapor.value; RP.haric = new Set(); raporCiz(); }; }
       function raporChipler() {
         const bs = raporBankalar(RP.donem);
-        chipKur(raporChipsEl, bs.map(b => [b, KISA(b)]), b => !RP.haric.has(b), (b, c) => { if (RP.haric.has(b)) RP.haric.delete(b); else { if (bs.length - RP.haric.size <= 1) return; RP.haric.add(b); } c.classList.toggle("active", !RP.haric.has(b)); raporCiz(); });
+        chipKur(raporChipsEl, bs.map(b => [b, RAD(b)]), b => !RP.haric.has(b), (b, c) => { if (RP.haric.has(b)) RP.haric.delete(b); else { if (bs.length - RP.haric.size <= 1) return; RP.haric.add(b); } c.classList.toggle("active", !RP.haric.has(b)); raporCiz(); });
       }
       function raporCiz() {
         const el = document.getElementById("raporMetin");
