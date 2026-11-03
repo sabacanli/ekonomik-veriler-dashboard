@@ -869,8 +869,17 @@
         notlar.push("ROE = çeyreklik net kâr × 4 / (dönem sonu ve önceki çeyrek sonu özkaynak ortalaması). Swap dahil net faiz marjı (NFM) = (net faiz geliri + ticari kâr/zarar) × 4 / ortalama aktif; ticari kâr/zarar swap maliyetlerinin yanı sıra kambiyo ve menkul kıymet alım-satım sonuçlarını da içerir.");
         notlar.push("Brüt risk maliyeti = beklenen zarar karşılığı gideri (gelir tablosu IX) × 4 / ortalama krediler; karşılık stoku oranı = bilançodaki kredilere ilişkin beklenen zarar karşılıkları / krediler. Maliyet/gelir = (personel + diğer faaliyet giderleri) / (op. gelir + diğer faaliyet gelirleri).");
         notlar.push("SYR solo ve BDDK geçici önlemleri dahil raporlanan orandır. Takipteki alacak oranı dipnot verisi olduğundan rapora dahil değildir. Bilgilendirme amaçlıdır; yatırım tavsiyesi değildir.");
-        return { baslik, alt, bolumler: B, tablo, notlar };
+        return { baslik, alt, bolumler: B, tablo, notlar, adlar: R.map(r => K(r.ad)) };
       }
+      /* cümle/madde başındaki banka adı kalın yazılır (kullanıcı 03.11: paragraf içindeki bankayı bulamadı) */
+      const adRegex = adlar => new RegExp("(^|[.;:] )(" + adlar.slice().sort((a, b) => b.length - a.length).map(a => a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")(?=[ :,])", "g");
+      const parcala = (t, adlar) => {   // → [{t, b}] koşuları
+        if (!adlar || !adlar.length) return [{ t }];
+        const re = adRegex(adlar), out = []; let last = 0;
+        t.replace(re, (m, pre, ad, off) => { out.push({ t: t.slice(last, off + pre.length) }); out.push({ t: ad, b: true }); last = off + m.length; return m; });
+        out.push({ t: t.slice(last) });
+        return out.filter(x => x.t);
+      };
       function raporHtml(rp, ic) {   // ic: Word/Outlook/yazdırma için satır-içi stiller
         const st = ic ? {
           kutu: ' style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:11pt;color:#000;line-height:1.45;max-width:820px"',
@@ -881,10 +890,11 @@
           td: ' style="border:1px solid #BFBFBF;padding:2pt 5pt;text-align:right;white-space:nowrap"', tdn: ' style="border:1px solid #BFBFBF;padding:2pt 5pt;text-align:right;white-space:nowrap;color:#C00000"',
           tds: ' style="border:1px solid #BFBFBF;padding:2pt 5pt;text-align:left;white-space:nowrap;font-weight:700"', not: ' style="font-size:9pt;color:#595959"',
         } : { kutu: "", h2: "", alt: ' class="alt"', h4: "", p: "", ul: "", li: "", tbl: "", th: "", td: "", tdn: ' class="neg"', tds: ' class="sol"', not: ' class="notlar"' };
+        const vh = t => parcala(t, rp.adlar).map(x => x.b ? "<b>" + esc(x.t) + "</b>" : esc(x.t)).join("");
         let h = "<div" + st.kutu + "><h2" + st.h2 + ">" + esc(rp.baslik) + "</h2><p" + st.alt + ">" + esc(rp.alt) + "</p>";
         rp.bolumler.forEach(b => {
           if (!(b.p || []).length && !(b.madde || []).length) return;
-          h += "<h4" + st.h4 + ">" + esc(b.baslik) + "</h4>" + (b.p || []).map(t => "<p" + st.p + ">" + esc(t) + "</p>").join("") + ((b.madde || []).length ? "<ul" + st.ul + ">" + b.madde.map(t => "<li" + st.li + ">" + esc(t) + "</li>").join("") + "</ul>" : "");
+          h += "<h4" + st.h4 + ">" + esc(b.baslik) + "</h4>" + (b.p || []).map(t => "<p" + st.p + ">" + vh(t) + "</p>").join("") + ((b.madde || []).length ? "<ul" + st.ul + ">" + b.madde.map(t => "<li" + st.li + ">" + vh(t) + "</li>").join("") + "</ul>" : "");
         });
         if (rp.tablo) h += "<h4" + st.h4 + ">" + esc(rp.tablo.baslik) + "</h4>" + (ic ? "" : '<div class="table-wrap">') + "<table" + st.tbl + "><tr>" + rp.tablo.bas.map(x => "<th" + st.th + ">" + esc(x) + "</th>").join("") + "</tr>" +
           rp.tablo.satir.map(r => "<tr>" + r.map((v, i) => i === 0 ? "<td" + st.tds + ">" + esc(v) + "</td>" : "<td" + (String(v).startsWith("−") || String(v).startsWith("-") ? st.tdn : st.td) + ">" + esc(v) + "</td>").join("") + "</tr>").join("") + "</table>" + (ic ? "" : "</div>");
@@ -925,13 +935,14 @@
         const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
         const run = (t, o) => { o = o || {}; return "<w:r><w:rPr>" + (o.b ? "<w:b/>" : "") + (o.i ? "<w:i/>" : "") + (o.renk ? '<w:color w:val="' + o.renk + '"/>' : "") + (o.sz ? '<w:sz w:val="' + o.sz + '"/><w:szCs w:val="' + o.sz + '"/>' : "") + '</w:rPr><w:t xml:space="preserve">' + xmlEsc(t) + "</w:t></w:r>"; };
         const par = (runs, o) => { o = o || {}; return "<w:p><w:pPr>" + (o.keep ? "<w:keepNext/>" : "") + '<w:spacing w:before="' + (o.before || 0) + '" w:after="' + (o.after === undefined ? 120 : o.after) + '"/>' + (o.ind ? '<w:ind w:left="360" w:hanging="360"/>' : "") + (o.jc ? '<w:jc w:val="' + o.jc + '"/>' : "") + "</w:pPr>" + runs + "</w:p>"; };
-        const madde = (t, o) => par(run("•", o) + "<w:r><w:tab/></w:r>" + run(t, o), { ind: true, after: 60 });
+        const runs = (t, o) => parcala(t, rp.adlar).map(x => run(x.t, Object.assign({}, o || {}, x.b ? { b: true } : {}))).join("");
+        const madde = (t, o, duz) => par(run("•", o) + "<w:r><w:tab/></w:r>" + (duz ? run(t, o) : runs(t, o)), { ind: true, after: 60 });
         const hucre = (t, o) => { o = o || {}; return "<w:tc><w:tcPr>" + (o.fill ? '<w:shd w:val="clear" w:color="auto" w:fill="' + o.fill + '"/>' : "") + "</w:tcPr>" + par(run(t, { b: o.b, sz: 15, renk: o.renk }), { jc: o.sol ? "left" : "right", after: 0 }) + "</w:tc>"; };
         let body = par(run(rp.baslik, { b: true, sz: 30, renk: "C00000" }), { after: 40 }) + par(run(rp.alt, { i: true, sz: 18, renk: "595959" }), { after: 200 });
         rp.bolumler.forEach(b => {
           if (!(b.p || []).length && !(b.madde || []).length) return;
           body += par(run(b.baslik, { b: true, sz: 24, renk: "1C3044" }), { before: 160, after: 60, keep: true });
-          (b.p || []).forEach(t => { body += par(run(t), { jc: "both" }); });
+          (b.p || []).forEach(t => { body += par(runs(t), { jc: "both" }); });
           (b.madde || []).forEach(t => { body += madde(t); });
         });
         if (rp.tablo) {
@@ -942,7 +953,7 @@
             rp.tablo.satir.map(r => "<w:tr>" + r.map((v, i) => hucre(v, { sol: i === 0, b: i === 0, renk: (String(v).startsWith("−") || String(v).startsWith("-")) ? "C00000" : undefined })).join("") + "</w:tr>").join("") + "</w:tbl>" + par(run(""), { after: 60 });
         }
         body += par(run("Notlar", { b: true, sz: 22, renk: "1C3044" }), { before: 160, after: 60, keep: true });
-        rp.notlar.forEach(t => { body += madde(t, { sz: 18, renk: "595959" }); });
+        rp.notlar.forEach(t => { body += madde(t, { sz: 18, renk: "595959" }, true); });
         const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + W + "><w:body>" + body + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>';
         const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ' + W + '><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri" w:eastAsia="Calibri"/><w:sz w:val="21"/><w:szCs w:val="21"/><w:lang w:val="tr-TR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style></w:styles>';
         const ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>';
