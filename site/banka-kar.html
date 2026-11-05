@@ -79,7 +79,7 @@
   <main>
     <h1 class="page-title">Banka Kârlılık Analizi</h1>
     <div class="update-info" id="updated"></div>
-    <div class="info-box" id="ozet">📋 2026 Ç3 solo finansal tablolar, 7 banka: toplam net kâr 297,6 milyar TL (yıllık +17,4%, aynı banka seti); medyan ROE %24,2, ROA %2,44. En yüksek net kâr: Garanti 97,2 mlr, Deniz 46,6 mlr, Akbank 46,0 mlr.</div>
+    <div class="info-box" id="ozet">📋 2026 Ç3 solo finansal tablolar, 11 banka: toplam net kâr 305,3 milyar TL (yıllık +16,5%, aynı banka seti); medyan ROE %21,4, ROA %2,10. En yüksek net kâr: Garanti 97,2 mlr, Deniz 46,6 mlr, Akbank 46,0 mlr.</div>
 
     <div class="chips sekmeler" id="sekmeChips"></div>
     <div class="ctl-bar" id="ustKontrol">
@@ -684,8 +684,18 @@
       const dPct = (a, b) => (num(a) === null || num(b) === null || b <= 0) ? null : a / b - 1;   // taban pozitifse yüzde değişim
       const dFark = (a, b) => (num(a) === null || num(b) === null) ? null : a - b;
       const ozRow = (p, b) => (OT[p] || []).find(r => r.ad === b) || null;
-      const raporBankalar = p => (OT[p] || []).map(r => r.ad).filter(b => (D.ceyrek[p] || {})[b]);   // PDF'i yüklenmiş bankalar, aktif sırası
-      const RAPOR_AD = { "YapıKredi": "Yapı Kredi", "İşbankası": "İş Bankası", "Garanti Bankası": "Garanti", "Fibabank": "Fibabanka", "BurganBank": "Burgan Bank", "Aktifbank": "Aktif Bank" };
+      const raporBankalar = p => (OT[p] || []).map(r => r.ad).filter(b => { const c = (D.ceyrek[p] || {})[b]; return c && num(c.net_kar) !== null; });   // PDF'i yüklenmiş ve çeyreklik akımı hesaplanabilen bankalar, aktif sırası
+      const raporEksik = p => (OT[p] || []).map(r => r.ad).filter(b => { const c = (D.ceyrek[p] || {})[b]; return !c || num(c.net_kar) === null; });   // önceki çeyrek tablosu yüklü değil → çeyreklik akım yok
+      const degisim = (a, b) => {   // kâr/zarar geçişlerini sözle anlatan değişim metni
+        if (num(a) === null || num(b) === null) return null;
+        if (b > 0 && a >= 0) return yz(a / b - 1);
+        if (b > 0 && a < 0) return "kârdan zarara";
+        if (b < 0 && a >= 0) return "zarardan kâra";
+        if (b < 0 && a < 0) return "zarar " + (Math.abs(a) < Math.abs(b) ? "daraldı" : "genişledi") + " (" + yz(Math.abs(a) / Math.abs(b) - 1) + ")";
+        return "—";
+      };
+      const degisimKisa = (a, b) => { const d = degisim(a, b); return d === null ? "—" : d.startsWith("zarar ") ? d.replace(/ \(.*\)$/, "") : d; };
+      const RAPOR_AD = { "YapıKredi": "Yapı Kredi", "İşbankası": "İş Bankası", "Garanti Bankası": "Garanti", "Fibabank": "Fibabanka", "BurganBank": "Burgan Bank", "Aktifbank": "Aktif Bank", "Nurolbank": "Nurol Bank" };
       const RAD = b => RAPOR_AD[b] || b;   // rapor metninde kısaltma değil okunur ad (kullanıcı 03.11: "YKB"yi göremedi)
       const mlr = v => num(v) === null ? "—" : Math.abs(v) >= 1000 ? trNum(v / 1000, 1) + " milyar TL" : trNum(v, 0) + " milyon TL";
       const mlrS = v => num(v) === null ? "—" : (v < 0 ? "−" : "+") + mlr(Math.abs(v));
@@ -757,7 +767,7 @@
         const ozet = [];
         if (R.length) {
           ozet.push("Kârlılık: izlenen bankaların toplam net kârı " + mlr(T.nk) + (T.nkQoQ !== null ? ", önceki çeyreğe göre " + yz(T.nkQoQ) : "") + (T.nkYoY !== null ? ", geçen yılın aynı çeyreğine göre " + yz(T.nkYoY) : "") + "." +
-            (kars.length > 1 ? " En güçlü çeyreklik artış " + K(kars[0].ad) + " (" + yz(qoq(kars[0])) + "), en zayıf seyir " + K(kars[kars.length - 1].ad) + " (" + yz(qoq(kars[kars.length - 1])) + ")." : ""));
+            (kars.length > 1 ? " En güçlü çeyreklik artış " + K(kars[0].ad) + " (" + degisim(kars[0].nk, kars[0].nk1) + "), en zayıf seyir " + K(kars[kars.length - 1].ad) + " (" + degisim(kars[kars.length - 1].nk, kars[kars.length - 1].nk1) + ")." : ""));
           if (nimli.length) ozet.push("Marj: swap dahil net faiz marjı medyanı " + yzd(T.medNim, 2) + " (çeyreklik medyan değişim " + bp(T.medNimD) + ")" + (nimArt.length ? "; marjı genişleyenler: " + liste(nimArt.map(r => K(r.ad))) : "") + (nimGer.length ? "; daralanlar: " + liste(nimGer.map(r => K(r.ad))) : "") + ".");
           const rmS = R.filter(r => r.rm !== null).sort((a, b) => b.rm - a.rm);
           ozet.push("Aktif kalitesi: toplam beklenen zarar karşılığı gideri " + mlr(T.kars) + (T.karsQoQ !== null ? " (ç/ç " + yz(T.karsQoQ) + ")" : "") + (rmS.length ? "; yıllıklandırılmış risk maliyeti en yüksek " + K(rmS[0].ad) + " (" + bpL(rmS[0].rm) + "), en düşük " + K(rmS[rmS.length - 1].ad) + " (" + bpL(rmS[rmS.length - 1].rm) + ")" : "") + ".");
@@ -770,18 +780,20 @@
         if (!R.length) giris.push("Seçilen dönem için solo finansal tablosu yüklenmiş banka bulunmuyor.");
         else if (!kars.length) giris.push(pl + " için " + R.length + " bankanın solo sonuçları yüklü; önceki çeyrek verisi bulunmadığından çeyreklik karşılaştırma yapılamıyor.");
         else if (ayrisma) giris.push(pl + " sonuçları, benzer faaliyet koşullarına rağmen kârlılıkta belirgin bir ayrışmaya işaret ediyor: izlenen " + R.length + " bankanın " + artan.length + " tanesinde çeyreklik net kâr artarken " + azalan.length + " tanesinde geriledi. " +
-          K(kars[0].ad) + " ç/ç " + yz(qoq(kars[0])) + " ile öne çıkarken " + K(kars[kars.length - 1].ad) + " tarafında net kâr ç/ç " + yz(qoq(kars[kars.length - 1])) + " ile en zayıf seyri gösterdi.");
+          K(kars[0].ad) + " ç/ç " + degisim(kars[0].nk, kars[0].nk1) + " ile öne çıkarken " + K(kars[kars.length - 1].ad) + " tarafında net kâr ç/ç " + degisim(kars[kars.length - 1].nk, kars[kars.length - 1].nk1) + " ile en zayıf seyri gösterdi.");
         else if (artan.length) giris.push(pl + " sonuçları kârlılıkta genele yayılan bir iyileşmeye işaret ediyor: izlenen " + R.length + " bankanın tamamında çeyreklik net kâr arttı; en güçlü artış " + K(kars[0].ad) + " (" + yz(qoq(kars[0])) + "), en sınırlısı " + K(kars[kars.length - 1].ad) + " (" + yz(qoq(kars[kars.length - 1])) + ").");
         else giris.push(pl + " sonuçları kârlılık baskısının genele yayıldığını gösteriyor: izlenen " + R.length + " bankanın tamamında çeyreklik net kâr geriledi; en sert düşüş " + K(kars[kars.length - 1].ad) + " (" + yz(qoq(kars[kars.length - 1])) + "), en sınırlısı " + K(kars[0].ad) + " (" + yz(qoq(kars[0])) + ").");
         if (R.length && (T.nkQoQ !== null || T.nkYoY !== null)) giris.push("Toplam net kâr " + mlr(T.nk) + (T.nkQoQ !== null ? " ile önceki çeyreğe göre " + yz(T.nkQoQ) + " (" + T.nQoQ + " banka)" : "") + (T.nkYoY !== null ? ", geçen yılın aynı çeyreğine göre " + yz(T.nkYoY) + " (" + T.nYoY + " banka)" : "") + " değişti; medyan çeyreklik ROE " + yzd(T.medRoe) + ".");
         if (nimYay > 0.005) giris.push("Ayrışmanın arkasında bilanço konumlanması, fonlama yapısı ve faiz marjı yönetimindeki farklar var: swap dahil net faiz marjındaki çeyreklik değişim bankalar arasında " + bp(nimD(nimli[nimli.length - 1])) + " ile " + bp(nimD(nimli[0])) + " arasında dağılıyor; bu da fonlama maliyetlerindeki normalleşmenin faydalarının bankalara eşit dağılmadığını gösteriyor.");
+        const eksik = raporEksik(p);
+        if (eksik.length) giris.push("Kapsam dışı: " + liste(eksik.map(b => { const y = (D.ytd[p] || {})[b] || {}, o = ozRow(p, b); return K(b) + " (yıl başından net kâr " + mlr(y.net_kar) + (o && num(o.syr) !== null ? ", SYR %" + trNum(o.syr, 2) : "") + ")"; })) + " — önceki çeyreğin solo tablosu yüklü olmadığından çeyreklik akım hesaplanamıyor; bu bankalar yüklendiğinde rapora kendiliğinden girer.");
         B.push({ baslik: "Genel görünüm", p: giris });
         /* --- Kârlılık --- */
         const karC = siraNk.map(r => {
           let s = K(r.ad) + " " + (r.nk < 0 ? mlr(-r.nk) + " net zarar" : mlr(r.nk) + " net kâr") + " açıkladı";
           const par = [];
-          if (r.p1var) par.push("ç/ç " + (qoq(r) === null ? "hesaplanamadı (önceki çeyrek zarar)" : yz(qoq(r))));
-          if (r.pyvar) par.push("y/y " + (yoy(r) === null ? "hesaplanamadı (geçen yıl zarar)" : yz(yoy(r))));
+          if (r.p1var && degisim(r.nk, r.nk1) !== null) par.push("ç/ç " + degisim(r.nk, r.nk1));
+          if (r.pyvar && degisim(r.nk, r.nky) !== null) par.push("y/y " + degisim(r.nk, r.nky));
           s += par.length ? " (" + par.join(", ") + ")" : " (karşılaştırma dönemi verisi yok)";
           s += r.roe !== null ? "; yıllıklandırılmış çeyreklik ROE " + yzd(r.roe) + (r.roe1 !== null ? " (" + p1l + ": " + yzd(r.roe1) + ")" : "") + "." : ".";
           if (r.kapsamli !== null && r.nk !== null && Math.abs(r.kapsamli - r.nk) > 0.25 * Math.abs(r.nk)) s += " Menkul kıymet değerleme farkları gibi diğer kapsamlı gelir kalemleri dahil toplam kapsamlı gelir " + mlr(r.kapsamli) + " ile net kârın " + (r.kapsamli > r.nk ? "üzerinde" : "altında") + " gerçekleşti.";
@@ -861,10 +873,10 @@
         if (R.length) deg.push("Sonuçlar solo (konsolide olmayan) tablolara dayanır; iştirakleri büyük bankalarda konsolide net kâr ve oranlar farklılaşabilir. Kârlılıkta marj toparlanmasının hızı ve aktif kalitesinin seyri, manşet çeyreklik kâr rakamlarından daha belirleyici olacaktır.");
         B.push({ baslik: "Değerlendirme", madde: deg });
         /* --- Tablo --- */
-        const tablo = { baslik: pl + " özet göstergeler (çeyreklik, solo)", bas: ["Banka", "Net kâr (mlr TL)", "ç/ç", "y/y", "ROE (çeyrek, yıllık.)", "Swap dahil NFM", "Δ NFM ç/ç", "Komisyon ç/ç", "Karşılık gid. (mlr TL)", "Risk maliyeti", "SYR", "Krediler ç/ç", "Mevduat ç/ç"],
-          satir: siraNk.map(r => [K(r.ad), trNum(r.nk / 1000, 1), yz(qoq(r)), yz(yoy(r)), yzd(r.roe), yzd(r.nim, 2), bp(nimD(r)), yz(dPct(r.ucret, r.ucret1)), trNum(r.kars / 1000, 1), bpL(r.rm), r.syr === null ? "—" : "%" + trNum(r.syr, 2), yz(dPct(r.kredi, r.kredi1)), r.mevd ? yz(dPct(r.mevd, r.mevd1)) : "—"]) };
+        const tablo = { baslik: pl + " özet göstergeler (çeyreklik, solo)", bas: ["Banka", "Net kâr (mn TL)", "ç/ç", "y/y", "ROE (çeyrek, yıllık.)", "Swap dahil NFM", "Δ NFM ç/ç", "Komisyon ç/ç", "Karşılık gid. (mn TL)", "Risk maliyeti", "SYR", "Krediler ç/ç", "Mevduat ç/ç"],
+          satir: siraNk.map(r => [K(r.ad), trNum(r.nk, 0), degisimKisa(r.nk, r.nk1), degisimKisa(r.nk, r.nky), yzd(r.roe), yzd(r.nim, 2), bp(nimD(r)), yz(dPct(r.ucret, r.ucret1)), trNum(r.kars, 0), bpL(r.rm), r.syr === null ? "—" : "%" + trNum(r.syr, 2), yz(dPct(r.kredi, r.kredi1)), r.mevd ? yz(dPct(r.mevd, r.mevd1)) : "—"]) };
         /* --- Notlar --- */
-        notlar.push("Kaynak: bankaların KAP'ta yayımlanan solo (konsolide olmayan) BDDK formatlı finansal tabloları; " + R.length + " banka; tutarlar milyar TL. Metin, ekordion.com.tr Banka Kârlılık Analizi verilerinden otomatik üretilmiştir (" + new Date().toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) + ").");
+        notlar.push("Kaynak: bankaların KAP'ta yayımlanan solo (konsolide olmayan) BDDK formatlı finansal tabloları; " + R.length + " banka; metinde tutarlar milyar/milyon TL, tabloda milyon TL. Metin, ekordion.com.tr Banka Kârlılık Analizi verilerinden otomatik üretilmiştir (" + new Date().toLocaleString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) + ").");
         notlar.push("ç/ç = önceki çeyreğe göre değişim (gelir tablosu kalemleri çeyreklik akım: Çn − Ç(n−1)); y/y = geçen yılın aynı çeyreğine göre. Tabanı negatif olan değişimler hesaplanmaz.");
         notlar.push("ROE = çeyreklik net kâr × 4 / (dönem sonu ve önceki çeyrek sonu özkaynak ortalaması). Swap dahil net faiz marjı (NFM) = (net faiz geliri + ticari kâr/zarar) × 4 / ortalama aktif; ticari kâr/zarar swap maliyetlerinin yanı sıra kambiyo ve menkul kıymet alım-satım sonuçlarını da içerir.");
         notlar.push("Brüt risk maliyeti = beklenen zarar karşılığı gideri (gelir tablosu IX) × 4 / ortalama krediler; karşılık stoku oranı = bilançodaki kredilere ilişkin beklenen zarar karşılıkları / krediler. Maliyet/gelir = (personel + diğer faaliyet giderleri) / (op. gelir + diğer faaliyet gelirleri).");

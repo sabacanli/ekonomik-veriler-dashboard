@@ -57,6 +57,7 @@ BANKS = {  # kanonik ad: (kısa ad, grup)
     "HSBC": ("HSBC", "Yabancı"), "ICBC": ("ICBC", "Yabancı"), "Alternatifbank": ("ABank", "Yabancı"),
     "Şekerbank": ("Şeker", "Özel"), "Anadolubank": ("Anadolu", "Özel"),
     "TSKB": ("TSKB", "Kalkınma/Yatırım"), "Aktifbank": ("Aktif", "Kalkınma/Yatırım"), "TKYB": ("TKYB", "Kalkınma/Yatırım"),
+    "Nurolbank": ("Nurol", "Kalkınma/Yatırım"),
 }
 BIG7 = ["Ziraat", "VakıfBank", "Halkbank", "İşbankası", "Akbank", "YapıKredi", "Garanti Bankası"]
 TAM_AD = {  # özet tablo / Excel için unvanlar (kullanıcının "Sektör Sonuçları" tablosundaki gibi)
@@ -65,7 +66,7 @@ TAM_AD = {  # özet tablo / Excel için unvanlar (kullanıcının "Sektör Sonu�
     "QNB": "QNB Bank A.Ş.", "DenizBank": "Denizbank A.Ş.", "TEB": "Türk Ekonomi Bankası A.Ş.", "BurganBank": "Burgan Bank A.Ş.", "Odeabank": "Odea Bank A.Ş.",
     "Fibabank": "Fibabanka A.Ş.", "ING": "ING Bank A.Ş.", "HSBC": "HSBC Bank A.Ş.", "ICBC": "ICBC Turkey Bank A.Ş.", "Alternatifbank": "Alternatifbank A.Ş.",
     "Şekerbank": "Şekerbank T.A.Ş.", "Anadolubank": "Anadolubank A.Ş.", "TSKB": "Türkiye Sınai Kalkınma Bankası A.Ş.", "Aktifbank": "Aktif Yatırım Bankası A.Ş.",
-    "TKYB": "Türkiye Kalkınma ve Yatırım Bankası A.Ş.",
+    "TKYB": "Türkiye Kalkınma ve Yatırım Bankası A.Ş.", "Nurolbank": "Nurol Yatırım Bankası A.Ş.",
 }
 DONEM_SONU = {"1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12"}
 SEGMENT_CATEGORIES = [
