@@ -57,7 +57,8 @@ BANKS = {  # kanonik ad: (kısa ad, grup)
     "HSBC": ("HSBC", "Yabancı"), "ICBC": ("ICBC", "Yabancı"), "Alternatifbank": ("ABank", "Yabancı"),
     "Şekerbank": ("Şeker", "Özel"), "Anadolubank": ("Anadolu", "Özel"),
     "TSKB": ("TSKB", "Kalkınma/Yatırım"), "Aktifbank": ("Aktif", "Kalkınma/Yatırım"), "TKYB": ("TKYB", "Kalkınma/Yatırım"),
-    "Nurolbank": ("Nurol", "Kalkınma/Yatırım"),
+    "Nurolbank": ("Nurol", "Kalkınma/Yatırım"), "Misyonbank": ("Misyon", "Kalkınma/Yatırım"), "DYatirim": ("D Yatırım", "Kalkınma/Yatırım"),
+    "ZiraatKatilim": ("Z.Katılım", "Katılım"), "Albaraka": ("Albaraka", "Katılım"), "ZiraatDinamik": ("Z.Dinamik", "Kamu"),
 }
 BIG7 = ["Ziraat", "VakıfBank", "Halkbank", "İşbankası", "Akbank", "YapıKredi", "Garanti Bankası"]
 TAM_AD = {  # özet tablo / Excel için unvanlar (kullanıcının "Sektör Sonuçları" tablosundaki gibi)
@@ -66,7 +67,8 @@ TAM_AD = {  # özet tablo / Excel için unvanlar (kullanıcının "Sektör Sonu�
     "QNB": "QNB Bank A.Ş.", "DenizBank": "Denizbank A.Ş.", "TEB": "Türk Ekonomi Bankası A.Ş.", "BurganBank": "Burgan Bank A.Ş.", "Odeabank": "Odea Bank A.Ş.",
     "Fibabank": "Fibabanka A.Ş.", "ING": "ING Bank A.Ş.", "HSBC": "HSBC Bank A.Ş.", "ICBC": "ICBC Turkey Bank A.Ş.", "Alternatifbank": "Alternatifbank A.Ş.",
     "Şekerbank": "Şekerbank T.A.Ş.", "Anadolubank": "Anadolubank A.Ş.", "TSKB": "Türkiye Sınai Kalkınma Bankası A.Ş.", "Aktifbank": "Aktif Yatırım Bankası A.Ş.",
-    "TKYB": "Türkiye Kalkınma ve Yatırım Bankası A.Ş.", "Nurolbank": "Nurol Yatırım Bankası A.Ş.",
+    "TKYB": "Türkiye Kalkınma ve Yatırım Bankası A.Ş.", "Nurolbank": "Nurol Yatırım Bankası A.Ş.", "Misyonbank": "Misyon Yatırım Bankası A.Ş.", "DYatirim": "D Yatırım Bankası A.Ş.",
+    "ZiraatKatilim": "Ziraat Katılım Bankası A.Ş.", "Albaraka": "Albaraka Türk Katılım Bankası A.Ş.", "ZiraatDinamik": "Ziraat Dinamik Banka A.Ş.",
 }
 DONEM_SONU = {"1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12"}
 SEGMENT_CATEGORIES = [
@@ -296,7 +298,7 @@ OZET_KOL = [  # (anahtar, başlık, tür)  — kullanıcının "Sektör Sonuçla
 ]
 OZET_NOT = ("ROAA/ROAE = yıllıklandırılmış net kâr / (dönem sonu + önceki yıl sonu) ortalaması; 'Özk. Yönt. Ort. Hariç' sütunlarında özkaynak yöntemi "
             "uygulanan ortaklıklardan kâr/zarar net kârdan düşülür. Cost/Income = (personel + diğer faaliyet giderleri) / (net faiz + net ücret + ticari + "
-            "diğer faaliyet gelirleri). SYR ve toplam kapsamlı gelir finansal tablo dipnotlarından; ticari K/Z kalemleri gelir tablosundaki net tutarlar. "
+            "diğer faaliyet gelirleri). SYR ve toplam kapsamlı gelir finansal tablo dipnotlarından; ticari K/Z kalemleri gelir tablosundaki net tutarlar. Katılım bankalarında faiz kalemleri kâr payı gelir/giderlerine, mevduat toplanan fonlara karşılık gelir. "
             "NPL oranı ve serbest karşılık dipnot verisi olduğundan tabloda yer almaz. Kaynak: bankaların solo BDDK formatlı finansal tabloları (KAP).")
 
 
@@ -320,7 +322,7 @@ def ozet_tablo(con, wide):
         aktif, aktif_p = g("toplam_aktif"), prv(bul(lst, "BS", r"^(varliklar|aktif) toplami", "A"))
         ozkay, ozkay_p = g("ozkaynak"), prv(bul(lst, "BS", r"^ozkaynaklar$", "L"))
         ozky = tot(bul(lst, "IS", r"^ozkaynak yontemi uygulanan ortakliklardan"))
-        zk = tot(bul(lst, "IS", r"^zorunlu karsiliklardan alinan faiz"))
+        zk = tot(bul(lst, "IS", r"^zorunlu karsiliklardan alinan (faiz|gelir)"))
         # kredilere ilişkin beklenen zarar karşılığı stoku (bilanço aktif II. bölüm; kod bankadan bankaya kayar: Akbank 2.5, Garanti 2.4)
         bzk_aday = [r for r in lst if r[2] == "BS" and r[3] == "A" and re.search(r"^beklenen zarar karsiliklari", _n(r[5]))]
         bzk_r = next((r for r in bzk_aday if str(r[4]).startswith("2.")), None) or (max(bzk_aday, key=lambda r: r[6] or 0) if bzk_aday else None)

@@ -79,7 +79,7 @@
   <main>
     <h1 class="page-title">Banka Kârlılık Analizi</h1>
     <div class="update-info" id="updated"></div>
-    <div class="info-box" id="ozet">📋 2026 Ç3 solo finansal tablolar, 13 banka: toplam net kâr 391,3 milyar TL (yıllık +12,5%, aynı banka seti); medyan ROE %20,9, ROA %1,58. En yüksek net kâr: Garanti 97,2 mlr, Deniz 46,6 mlr, Akbank 46,0 mlr.</div>
+    <div class="info-box" id="ozet">📋 2026 Ç3 solo finansal tablolar, 20 banka: toplam net kâr 404,5 milyar TL (yıllık +11,9%, aynı banka seti); medyan ROE %19,2, ROA %1,64. En yüksek net kâr: Garanti 97,2 mlr, Deniz 46,6 mlr, Akbank 46,0 mlr.</div>
 
     <div class="chips sekmeler" id="sekmeChips"></div>
     <div class="ctl-bar" id="ustKontrol">
@@ -218,6 +218,7 @@
         <li><b>ROE, ROA ve NFG/Aktif</b> YTD görünümde yıllıklandırılır (değer × 4 / çeyrek no); çeyreklik görünümde yıllıklandırılmaz. Paydalar dönem sonu bilanço değerleridir.</li>
         <li><b>Op. gelir</b> = net faiz geliri + net ücret/komisyon + ticari kâr/zarar. <b>Maliyet/gelir</b> = (personel + diğer faaliyet giderleri) / (op. gelir + diğer faaliyet gelirleri).</li>
         <li><b>MDC</b> = gerçeğe uygun değer farkı kâr/zarara yansıtılan + diğer kapsamlı gelire yansıtılan + itfa edilmiş maliyetle ölçülen finansal varlıklar.</li>
+        <li><b>Katılım bankaları</b> (Ziraat Katılım, Albaraka Türk): faiz kalemleri kâr payı gelir/giderlerine, mevduat toplanan fonlara karşılık gelir; aynı başlıklar altında gösterilir.</li>
         <li><b>Faaliyet bölümü kategorileri</b> bankaların kendi bölüm adlarından türetilir (Bireysel/Perakende, Kurumsal/Ticari/KOBİ, Hazine/Yatırım, Diğer); bankalar arasında tanım farkları olabilir. Net kâr satırı vermeyen tablolarda vergi öncesi kâr ile vergi kaleminden türetilir ve bu durum belirtilir.</li>
         <li>Toplamlar ve medyanlar yalnız o dönemde raporlayan bankalar üzerinden hesaplanır; yıllık değişimler her iki dönemde de verisi olan banka setiyle alınır. Bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.</li>
       </ul>
@@ -238,8 +239,8 @@
       const BANK = {}; D.banks.forEach(b => BANK[b.ad] = b);
       const KISA = b => (BANK[b] || { kisa: b }).kisa;
       const GRUP = b => (BANK[b] || { grup: "Diğer" }).grup;
-      const GRUPLAR = ["Kamu", "Özel", "Yabancı", "Kalkınma/Yatırım"].filter(g => D.banks.some(b => b.grup === g));
-      const GRENK = { "Kamu": C.toplam, "Özel": C.hisse, "Yabancı": C.kesin, "Kalkınma/Yatırım": PAL.mor, "Diğer": C.ost };
+      const GRUPLAR = ["Kamu", "Özel", "Yabancı", "Katılım", "Kalkınma/Yatırım"].filter(g => D.banks.some(b => b.grup === g));
+      const GRENK = { "Kamu": C.toplam, "Özel": C.hisse, "Yabancı": C.kesin, "Katılım": C.green, "Kalkınma/Yatırım": PAL.mor, "Diğer": C.ost };
       const PALET = [C.toplam, C.hisse, C.kesin, C.green, PAL.sari, PAL.mor, C.euro, C.dolayli];
       const BRENK = {}; D.banks.forEach((b, i) => BRENK[b.ad] = PALET[i % PALET.length]);
       const P = D.periods, TAM = P.filter(p => D.kapsam[p] >= 5);
@@ -695,7 +696,7 @@
         return "—";
       };
       const degisimKisa = (a, b) => { const d = degisim(a, b); return d === null ? "—" : d.startsWith("zarar ") ? d.replace(/ \(.*\)$/, "") : d; };
-      const RAPOR_AD = { "YapıKredi": "Yapı Kredi", "İşbankası": "İş Bankası", "Garanti Bankası": "Garanti", "Fibabank": "Fibabanka", "BurganBank": "Burgan Bank", "Aktifbank": "Aktif Bank", "Nurolbank": "Nurol Bank" };
+      const RAPOR_AD = { "YapıKredi": "Yapı Kredi", "İşbankası": "İş Bankası", "Garanti Bankası": "Garanti", "Fibabank": "Fibabanka", "BurganBank": "Burgan Bank", "Aktifbank": "Aktif Bank", "Nurolbank": "Nurol Bank", "Misyonbank": "Misyon Bank", "DYatirim": "D Yatırım Bankası", "ZiraatKatilim": "Ziraat Katılım", "ZiraatDinamik": "Ziraat Dinamik", "Albaraka": "Albaraka Türk" };
       const RAD = b => RAPOR_AD[b] || b;   // rapor metninde kısaltma değil okunur ad (kullanıcı 03.11: "YKB"yi göremedi)
       const mlr = v => num(v) === null ? "—" : Math.abs(v) >= 1000 ? trNum(v / 1000, 1) + " milyar TL" : trNum(v, 0) + " milyon TL";
       const mlrS = v => num(v) === null ? "—" : (v < 0 ? "−" : "+") + mlr(Math.abs(v));
@@ -880,6 +881,7 @@
         notlar.push("ç/ç = önceki çeyreğe göre değişim (gelir tablosu kalemleri çeyreklik akım: Çn − Ç(n−1)); y/y = geçen yılın aynı çeyreğine göre. Tabanı negatif olan değişimler hesaplanmaz.");
         notlar.push("ROE = çeyreklik net kâr × 4 / (dönem sonu ve önceki çeyrek sonu özkaynak ortalaması). Swap dahil net faiz marjı (NFM) = (net faiz geliri + ticari kâr/zarar) × 4 / ortalama aktif; ticari kâr/zarar swap maliyetlerinin yanı sıra kambiyo ve menkul kıymet alım-satım sonuçlarını da içerir.");
         notlar.push("Brüt risk maliyeti = beklenen zarar karşılığı gideri (gelir tablosu IX) × 4 / ortalama krediler; karşılık stoku oranı = bilançodaki kredilere ilişkin beklenen zarar karşılıkları / krediler. Maliyet/gelir = (personel + diğer faaliyet giderleri) / (op. gelir + diğer faaliyet gelirleri).");
+        if (R.some(r => GRUP(r.ad) === "Katılım")) notlar.push("Katılım bankalarında (" + liste(R.filter(r => GRUP(r.ad) === "Katılım").map(r => K(r.ad))) + ") faiz kalemleri kâr payı gelir ve giderlerine, mevduat toplanan fonlara karşılık gelir; swap dahil marj ve risk maliyeti aynı yöntemle hesaplanır.");
         notlar.push("SYR solo ve BDDK geçici önlemleri dahil raporlanan orandır. Takipteki alacak oranı dipnot verisi olduğundan rapora dahil değildir. Bilgilendirme amaçlıdır; yatırım tavsiyesi değildir.");
         return { baslik, alt, bolumler: B, tablo, notlar, adlar: R.map(r => K(r.ad)) };
       }
