@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maaş Hesaplama 2026 — Brütten Nete 12 Aylık Bordro | Ekordion</title>
+  <meta name="description" content="2026 brütten nete ve netten brüte maaş hesaplama: 12 ay ayrı ayrı girilir, kümülatif gelir vergisi matrahı, SGK tavanı, asgari ücret gelir ve damga vergisi istisnası, işveren maliyeti. Vergi dilimleri ve oranlar düzenlenebilir.">
+  <link rel="canonical" href="https://ekordion.com.tr/hesap-maas.html">
+  <meta property="og:title" content="Maaş Hesaplama 2026 — Brütten Nete 12 Aylık Bordro | Ekordion">
+  <meta property="og:description" content="12 aylık brüt–net bordro: kümülatif gelir vergisi, SGK tavanı, asgari ücret istisnası ve işveren maliyeti. Vergi dilimleri düzenlenebilir.">
+  <meta property="og:url" content="https://ekordion.com.tr/hesap-maas.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ekordion">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:image" content="https://ekordion.com.tr/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=33">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <style>
+    table.maas { min-width: 1240px; }
+    table.maas td.gir { white-space: nowrap; padding: 3px 6px; }
+    table.maas td.gir input.inp { width: 124px; padding: 5px 8px; font-size: 13px; text-align: right; display: inline-block; }
+    table.maas td.ay { text-align: left; font-family: inherit; font-weight: 600; }
+    table.maas tr.gecis td { background: rgba(212, 0, 49, .06); }
+    table.maas tr.buay td.ay { color: var(--amber); }
+    table.maas td.net { font-weight: 700; }
+    table.maas tfoot td { font-weight: 700; border-top: 2px solid var(--border); }
+    .doldur { cursor: pointer; user-select: none; padding: 2px 6px; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; margin-left: 4px; }
+    .doldur:hover { color: var(--amber); border-color: var(--amber); }
+    table.dilim { min-width: 0; width: auto; }
+    table.dilim td { padding: 4px 8px; }
+    table.dilim input.inp { width: 150px; padding: 6px 9px; font-size: 13.5px; text-align: right; }
+    table.dilim input.oran { width: 84px; }
+    .param-baslik { font-size: 13.5px; font-weight: 600; margin: 14px 0 8px; }
+    .satir-arac { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin: 4px 0 12px; font-size: 13px; color: var(--muted); }
+    .satir-arac input.inp { width: 84px; padding: 6px 9px; font-size: 13px; text-align: right; }
+    .satir-arac select.sel { margin-bottom: 0; padding: 6px 10px; font-size: 13px; }
+    .not { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; line-height: 1.55; }
+    html:not([data-theme="koyu"]) table.maas tr.buay td.ay { color: var(--kirmizi); }
+  </style>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Maaş Hesaplama</h1>
+    <div class="update-info">Finansal Hesaplar · 12 aylık brüt–net bordro — mevzuat durumu: 2026 (1 Ocak – 31 Aralık)</div>
+    <div class="info-box">📋 Net maaş yıl içinde sabit kalmaz: gelir vergisi <b>kümülatif matrah</b> üzerinden hesaplanır ve
+      matrah büyüdükçe üst dilime geçilir. Bu sayfa on iki ayı <b>ayrı ayrı</b> hesaplar; her ayın brüt (ya da net) tutarını
+      dilediğiniz zaman güncelleyebilirsiniz. SGK ve işsizlik primi, <b>SGK tavanı</b>, damga vergisi ile tüm ücretlilere
+      uygulanan <b>asgari ücret gelir ve damga vergisi istisnası</b> dahildir. Vergi dilimleri ve oranlar aşağıdan
+      değiştirilebilir. <b>Girdiğiniz bilgiler yalnız bu tarayıcıda saklanır</b>; sunucuya gönderilmez.</div>
+
+    <!-- ── Yıl parametreleri ── -->
+    <div class="filter-box">
+      <div class="filter-lbl">Hesap Yönü</div>
+      <div class="chips" id="modChips"></div>
+
+      <div class="param-baslik">Yıl parametreleri (2026 varsayılanı — değiştirilebilir)</div>
+      <div class="calc-grid">
+        <div><div class="filter-lbl">Brüt asgari ücret · Ocak–Haziran (TL)</div><input class="inp par" id="pAuH1" inputmode="decimal"></div>
+        <div><div class="filter-lbl">Brüt asgari ücret · Temmuz–Aralık (TL)</div><input class="inp par" id="pAuH2" inputmode="decimal"></div>
+        <div><div class="filter-lbl">SGK tavanı (asgari ücretin katı)</div><input class="inp par" id="pTavan" inputmode="decimal"></div>
+        <div><div class="filter-lbl">SGK işçi payı (%)</div><input class="inp par" id="pSgk" inputmode="decimal"></div>
+        <div><div class="filter-lbl">İşsizlik işçi payı (%)</div><input class="inp par" id="pIss" inputmode="decimal"></div>
+        <div><div class="filter-lbl">Damga vergisi (binde)</div><input class="inp par" id="pDamga" inputmode="decimal"></div>
+        <div><div class="filter-lbl">Önceki işverenden devreden kümülatif matrah (TL)</div><input class="inp par" id="pDevir" inputmode="decimal"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="pIstisna"> Asgari ücret gelir vergisi ve damga vergisi istisnası uygulansın (2022'den beri tüm ücretliler için geçerli)</label>
+      <div class="cap" id="turevSatir" style="margin-top:10px"></div>
+
+      <div class="param-baslik">Engellilik indirimi (aylık, gelir vergisi matrahından düşülür)</div>
+      <div class="chips" id="engelChips"></div>
+
+      <div class="param-baslik">İşveren tarafı (toplam maliyet için)</div>
+      <div class="calc-grid">
+        <div><div class="filter-lbl">SGK işveren payı (%)</div><input class="inp par" id="pSgkIsv" inputmode="decimal"></div>
+        <div><div class="filter-lbl">İşsizlik işveren payı (%)</div><input class="inp par" id="pIssIsv" inputmode="decimal"></div>
+      </div>
+      <div class="filter-lbl" style="margin-top:10px">İşveren prim indirimi (5510 s.K. 81/ı)</div>
+      <div class="chips" id="indirimChips"></div>
+
+      <div class="param-baslik">Gelir vergisi dilimleri (ücret gelirleri — kümülatif matrah)</div>
+      <div class="table-wrap"><table class="heat dilim" id="tblDilim"></table></div>
+      <div class="satir-arac" style="margin-top:10px">
+        <button class="btn" id="btnDilimEkle">+ Dilim ekle</button>
+        <button class="btn" id="btnVarsayilan">↺ 2026 varsayılanlarına dön</button>
+        <button class="btn" id="btnYedekIndir">⬇ Yedeği indir</button>
+        <button class="btn" id="btnYedekYukle">⬆ Yedekten yükle</button>
+        <input type="file" id="dosyaYedek" accept="application/json,.json" style="display:none">
+        <span id="durumSatir"></span>
+      </div>
+    </div>
+
+    <div class="metrics" id="metrics"></div>
+
+    <!-- ── 12 aylık tablo ── -->
+    <section class="chart-card" id="secAy">
+      <h3>12 Aylık Bordro</h3>
+      <p class="cap" id="capAy">Sarı alanlara her ayın tutarını yazın; diğer sütunlar anında hesaplanır</p>
+      <div class="satir-arac">
+        <button class="btn" id="btnTumAylar">Ocak tutarını tüm aylara kopyala</button>
+        <span>Zam uygula:</span>
+        <select class="sel" id="selZamAy"></select>
+        <span>ayından itibaren %</span>
+        <input class="inp" id="inZam" inputmode="decimal" value="20">
+        <button class="btn" id="btnZam">Uygula</button>
+        <button class="btn kopya-btn">📋 Panoya kopyala (Excel)</button>
+      </div>
+      <div class="table-wrap"><table class="heat maas" id="tblAy"></table></div>
+      <p class="not" id="notAy"></p>
+    </section>
+
+    <section class="chart-card">
+      <h3>Brüt Ücretin Dağılımı — Ay Ay</h3>
+      <p class="cap">Her ayın brütü: net ele geçen + gelir vergisi + SGK ve işsizlik primi + damga vergisi (istisnalar düşülmüş)</p>
+      <div id="ch1"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Kümülatif Vergi Matrahı ve Dilim Eşikleri</h3>
+      <p class="cap" id="capCh2">Matrah bir eşiği aştığı ay, aşan kısım üst dilim oranıyla vergilenir</p>
+      <div id="ch2"></div>
+    </section>
+
+    <section class="chart-card">
+      <h3>Hesap Nasıl Yapılıyor?</h3>
+      <ul class="tanim" style="line-height:1.6;font-size:14px">
+        <li><b>SGK matrahı</b> = brüt ücret, en çok SGK tavanı kadar (2026: asgari ücretin 9 katı = 297.270 TL). <b>SGK işçi payı</b> %14, <b>işsizlik işçi payı</b> %1 bu matrahtan kesilir.</li>
+        <li><b>Gelir vergisi matrahı</b> = brüt − SGK işçi payı − işsizlik işçi payı − (varsa) engellilik indirimi. Vergi, yıl başından beri biriken <b>kümülatif matrah</b> tarifeye uygulanarak bulunur; o ayın vergisi = bu ayın kümülatif vergisi − önceki ayın kümülatif vergisi.</li>
+        <li><b>Asgari ücret istisnası</b>: her ay, asgari ücretin kendi kümülatif matrahına isabet eden gelir vergisi (2026: Ocak–Haziran 4.211,33 · Temmuz 4.537,75 · Ağustos–Aralık 5.615,10 TL) hesaplanan vergiden düşülür. Damga vergisinde asgari ücrete isabet eden kısım (250,70 TL) istisnadır.</li>
+        <li><b>Damga vergisi</b> = brüt × binde 7,59 − istisna. <b>Net</b> = brüt − SGK − işsizlik − ödenen gelir vergisi − ödenen damga vergisi.</li>
+        <li><b>İşveren maliyeti</b> = brüt + SGK işveren payı (2026: %21,75; şartları sağlayan işverende 2 puan, imalatta 5 puan indirimli) + işsizlik işveren payı (%2); primler SGK tavanına kadar hesaplanır.</li>
+        <li><b>Netten brüte</b> seçeneğinde her ay için girilen net tutarı veren brüt, önceki ayların matrahı dikkate alınarak aranır; vergi dilimi yükseldikçe aynı net için gereken brüt artar.</li>
+        <li><b>Kapsam dışı:</b> prim/ikramiyede SGK tavanını aşan kısmın izleyen iki aya devri, yemek–yol gibi istisnalı yan ödemeler, BES ve özel sigorta indirimleri, icra ve avans kesintileri hesaba katılmaz.</li>
+      </ul>
+    </section>
+
+    <footer>Bu sayfa bilgilendirme amaçlıdır; bordro ya da mali müşavirlik hizmeti değildir. Varsayılanlar 2026 yılı içindir:
+      gelir vergisi tarifesi (ücretler) 332 Seri No'lu Gelir Vergisi Genel Tebliği (RG 31.12.2025) · asgari ücret brüt 33.030 TL ·
+      SGK tavanı 297.270 TL (7566 s.K. ile 9 kat) · SGK işçi %14, işsizlik işçi %1 (5510 ve 4447 s.K.) · damga vergisi binde 7,59
+      (488 s.K.) · asgari ücret istisnası GVK md. 23/18 ve Damga Vergisi K. (IV-34) · engellilik indirimi GVK md. 31
+      (12.000 / 7.000 / 3.000 TL). Rakamlar EY, PwC ve bordro firmalarının 2026 pratik bilgileriyle karşılaştırılmıştır.
+      Yeni yıl tarifesi açıklandığında dilimleri ve asgari ücreti yukarıdan kendiniz güncelleyebilirsiniz.</footer>
+  </main>
+
+  <script src="assets/app.js?v=35"></script>
+  <script>
+    /* CALC-START — saf hesap çekirdeği (DOM'a dokunmaz; node ile sınanır) */
+    const r2 = v => Math.round((v + (v >= 0 ? 1e-9 : -1e-9)) * 100) / 100;   // kuruşa yuvarlama; ikili kesir hatası (4.211,3249999…) yarım kuruşu aşağı çekmesin
+    function vergiKum(m, dilimler) {   // kümülatif matrah m için tarife vergisi; dilimler: [{ust, oran}], son dilimde ust = null
+      let v = 0, alt = 0;
+      for (const d of dilimler) {
+        const ust = (d.ust === null || d.ust === undefined) ? Infinity : d.ust;
+        if (m > alt) v += (Math.min(m, ust) - alt) * d.oran;
+        if (m <= ust) break;
+        alt = ust;
+      }
+      return v;
+    }
+    function marjinalOran(m, dilimler) {
+      for (const d of dilimler) { const ust = (d.ust === null || d.ust === undefined) ? Infinity : d.ust; if (m <= ust) return d.oran; }
+      return dilimler[dilimler.length - 1].oran;
+    }
+    function ayHesap(brut, m, st, P) {   // m: 0..11; st: { kum, auKum } (değiştirilmez)
+      const au = m < 6 ? P.auH1 : P.auH2;
+      const tavan = P.tavanKat * au;
+      const sgkM = Math.min(brut, tavan);
+      const sgk = r2(sgkM * P.sgkIsci), iss = r2(sgkM * P.issIsci);
+      const eng = brut > 0 ? Math.min(P.engellilik || 0, Math.max(0, brut - sgk - iss)) : 0;
+      const matrah = Math.max(0, r2(brut - sgk - iss - eng));
+      const kum = r2(st.kum + matrah);
+      const gv = r2(vergiKum(kum, P.dilimler) - vergiKum(st.kum, P.dilimler));
+      // asgari ücret istisnası: takvim ayına göre asgari ücretin kendi kümülatif matrahı
+      const auMat = r2(au - r2(au * P.sgkIsci) - r2(au * P.issIsci));
+      const auKum = r2(st.auKum + auMat);
+      const auGv = r2(vergiKum(auKum, P.dilimler) - vergiKum(st.auKum, P.dilimler));
+      const gvIst = P.auIstisna ? Math.min(gv, auGv) : 0;
+      const dv = r2(brut * P.damga);
+      const dvIst = P.auIstisna ? Math.min(dv, r2(au * P.damga)) : 0;
+      const gvOde = r2(gv - gvIst), dvOde = r2(dv - dvIst);
+      const net = r2(brut - sgk - iss - gvOde - dvOde);
+      const isvSgk = r2(sgkM * Math.max(0, P.sgkIsv - P.isvIndirim)), isvIss = r2(sgkM * P.issIsv);
+      return { au, tavan, brut, sgkM, sgk, iss, eng, matrah, kumOnce: st.kum, kum, gv, auGv, gvIst, gvOde, dv, dvIst, dvOde, net,
+        isvSgk, isvIss, maliyet: r2(brut + isvSgk + isvIss), oran: marjinalOran(kum, P.dilimler), oranOnce: marjinalOran(st.kum, P.dilimler), auMat, auKum };
+    }
+    function nettenBrute(hedef, m, st, P) {   // hedef neti veren brüt (net, brüte göre artandır → ikiye bölme)
+      let lo = 0, hi = hedef * 1.5 + 1000;
+      for (let i = 0; i < 60 && ayHesap(hi, m, st, P).net < hedef; i++) hi *= 2;
+      for (let i = 0; i < 80; i++) { const mid = (lo + hi) / 2; if (ayHesap(mid, m, st, P).net < hedef) lo = mid; else hi = mid; }
+      // Kalemler ayrı ayrı kuruşa yuvarlandığından net, kuruş düzeyinde tam tekdüze değildir: yakın çevrede hedefi TAM veren brüt aranır
+      const taban = r2(hi);   // arama kuruş ızgarasında yapılır (hi yarım kuruşa denk gelirse komşu kuruş atlanmasın)
+      let en = taban, fark = Math.abs(ayHesap(en, m, st, P).net - hedef);
+      for (let k = 1; k <= 80 && fark > 0.004; k++) {
+        for (const isaret of [1, -1]) {
+          const b = r2(taban + isaret * k / 100); if (b <= 0) continue;
+          const f = Math.abs(ayHesap(b, m, st, P).net - hedef);
+          if (f < fark - 1e-9) { en = b; fark = f; }
+        }
+      }
+      return en;
+    }
+    function maasHesapla(P, girdi) {   // girdi: 12 × { maas, ek }; P.mod: "brut" | "net"
+      const st = { kum: P.devir || 0, auKum: 0 }, ay = [];
+      for (let m = 0; m < 12; m++) {
+        const hedef = (girdi[m].maas || 0) + (girdi[m].ek || 0);
+        const brut = (P.mod === "net" && hedef > 0) ? nettenBrute(hedef, m, st, P) : hedef;
+        const r = ayHesap(brut, m, st, P);
+        r.hedef = hedef;
+        ay.push(r); st.kum = r.kum; st.auKum = r.auKum;
+      }
+      const T = {};
+      for (const k of ["brut", "sgk", "iss", "eng", "matrah", "gv", "gvIst", "gvOde", "dv", "dvIst", "dvOde", "net", "isvSgk", "isvIss", "maliyet"]) T[k] = r2(ay.reduce((s, r) => s + r[k], 0));
+      return { ay, T };
+    }
+    const VARSAYILAN = { yil: 2026, mod: "brut", auH1: 33030, auH2: 33030, tavanKat: 9, sgkIsci: 0.14, issIsci: 0.01, damga: 0.00759, auIstisna: true,
+      engellilik: 0, sgkIsv: 0.2175, issIsv: 0.02, isvIndirim: 0.02, devir: 0,
+      dilimler: [{ ust: 190000, oran: 0.15 }, { ust: 400000, oran: 0.20 }, { ust: 1500000, oran: 0.27 }, { ust: 5300000, oran: 0.35 }, { ust: null, oran: 0.40 }] };
+    /* CALC-END */
+
+    const AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    const ENGEL = [[0, "Yok"], [12000, "1. derece · 12.000 TL"], [7000, "2. derece · 7.000 TL"], [3000, "3. derece · 3.000 TL"]];
+    const INDIRIM = [[0, "İndirim yok"], [0.02, "2 puan (imalat dışı)"], [0.05, "5 puan (imalat)"]];
+    const ANAHTAR = "ekordion-maas-v1";
+    const kopya = o => JSON.parse(JSON.stringify(o));
+    let P = kopya(VARSAYILAN);
+    let G = AYLAR.map(() => ({ maas: 100000, ek: 0 }));   // ilk açılışta örnek: 100.000 TL brüt
+    let SON = null;
+
+    function yukle(k) {   // kayıtlı ya da yedek veri → durum (eksik alanlar varsayılandan)
+      if (!k || !k.P || !Array.isArray(k.G) || k.G.length !== 12) return false;
+      const yeni = Object.assign(kopya(VARSAYILAN), k.P);
+      if (!Array.isArray(yeni.dilimler) || !yeni.dilimler.length) yeni.dilimler = kopya(VARSAYILAN.dilimler);
+      yeni.dilimler = yeni.dilimler.map(d => ({ ust: (d.ust === null || d.ust === undefined || d.ust === "") ? null : +d.ust, oran: +d.oran || 0 }));
+      yeni.dilimler[yeni.dilimler.length - 1].ust = null;
+      P = yeni; G = k.G.map(x => ({ maas: +x.maas || 0, ek: +x.ek || 0 }));
+      return true;
+    }
+    try { yukle(JSON.parse(localStorage.getItem(ANAHTAR) || "null")); } catch (e) {}
+    function kaydet() {
+      try { localStorage.setItem(ANAHTAR, JSON.stringify({ P, G, zaman: new Date().toISOString() })); durum("Otomatik kaydedildi"); }
+      catch (e) { durum("Bu tarayıcıda kayıt yapılamıyor; yedeği indirerek saklayabilirsiniz"); }
+    }
+    let durumZ = null;
+    function durum(t) { const el = document.getElementById("durumSatir"); el.textContent = "✓ " + t; clearTimeout(durumZ); durumZ = setTimeout(() => { el.textContent = ""; }, 2500); }
+
+    /* ── sayı okuma / yazma (Türkçe biçim) ── */
+    const oku = s => { const v = parseFloat(String(s).trim().replace(/\s/g, "").replace(/\./g, "").replace(",", ".")); return isNaN(v) ? 0 : v; };
+    const yaz = (v, d) => (v === null || v === undefined) ? "" : Number(v).toLocaleString("tr-TR", { minimumFractionDigits: d === undefined ? 0 : d, maximumFractionDigits: d === undefined ? 2 : d });
+    const tl = v => trNum(v, 2);
+
+    /* ── parametre alanları ── */
+    const ALAN = [   // [id, anahtar, çarpan (ekrandaki değer × çarpan = P değeri), ondalık]
+      ["pAuH1", "auH1", 1, 2], ["pAuH2", "auH2", 1, 2], ["pTavan", "tavanKat", 1, 2], ["pSgk", "sgkIsci", 0.01, 2], ["pIss", "issIsci", 0.01, 2],
+      ["pDamga", "damga", 0.001, 2], ["pDevir", "devir", 1, 2], ["pSgkIsv", "sgkIsv", 0.01, 2], ["pIssIsv", "issIsv", 0.01, 2],
+    ];
+    function parametreYaz() {
+      ALAN.forEach(a => { document.getElementById(a[0]).value = yaz(r2(P[a[1]] / a[2] * 100) / 100); });
+      document.getElementById("pIstisna").checked = !!P.auIstisna;
+    }
+    function parametreOku() {
+      ALAN.forEach(a => { P[a[1]] = oku(document.getElementById(a[0]).value) * a[2]; });
+      P.auIstisna = document.getElementById("pIstisna").checked;
+    }
+    function chipler(id, liste, secili, sec) {
+      const el = document.getElementById(id);
+      el.innerHTML = liste.map((x, i) => '<button class="chip' + (secili(x[0]) ? " active" : "") + '" data-i="' + i + '">' + x[1] + "</button>").join("");
+      el.querySelectorAll(".chip").forEach(b => { b.onclick = () => { sec(liste[+b.dataset.i][0]); }; });
+    }
+    function chipleriCiz() {
+      chipler("modChips", [["brut", "Brütten nete"], ["net", "Netten brüte"]], v => P.mod === v, v => { P.mod = v; chipleriCiz(); tabloKur(); guncelle(); });
+      chipler("engelChips", ENGEL, v => Math.abs((P.engellilik || 0) - v) < 0.005, v => { P.engellilik = v; chipleriCiz(); guncelle(); });
+      chipler("indirimChips", INDIRIM, v => Math.abs((P.isvIndirim || 0) - v) < 1e-9, v => { P.isvIndirim = v; chipleriCiz(); guncelle(); });
+    }
+
+    /* ── vergi dilimleri düzenleyici ── */
+    function dilimCiz() {
+      const t = document.getElementById("tblDilim"), n = P.dilimler.length;
+      t.innerHTML = "<tr><th>Dilim</th><th>Kümülatif matrah üst sınırı (TL)</th><th>Oran (%)</th><th></th></tr>" + P.dilimler.map((d, i) =>
+        "<tr><td>" + (i + 1) + '.</td><td>' + (i === n - 1 ? '<span style="color:var(--muted)">üzeri</span>' : '<input class="inp" data-i="' + i + '" data-k="ust" inputmode="decimal" value="' + yaz(d.ust) + '">') +
+        '</td><td><input class="inp oran" data-i="' + i + '" data-k="oran" inputmode="decimal" value="' + yaz(r2(d.oran * 100)) + '"></td><td>' +
+        (n > 1 && i < n - 1 ? '<span class="doldur" data-sil="' + i + '" title="Bu dilimi sil">sil</span>' : "") + "</td></tr>").join("");
+      t.querySelectorAll("input").forEach(inp => {
+        inp.oninput = () => { const d = P.dilimler[+inp.dataset.i]; if (inp.dataset.k === "ust") d.ust = oku(inp.value); else d.oran = oku(inp.value) / 100; guncelle(); };
+        inp.onblur = () => { if (inp.dataset.k === "ust") { P.dilimler.sort((a, b) => (a.ust === null ? Infinity : a.ust) - (b.ust === null ? Infinity : b.ust)); dilimCiz(); guncelle(); } };
+      });
+      t.querySelectorAll("[data-sil]").forEach(s => { s.onclick = () => { P.dilimler.splice(+s.dataset.sil, 1); dilimCiz(); guncelle(); }; });
+    }
+
+    /* ── 12 aylık tablo: iskelet bir kez kurulur, yalnız hesap hücreleri güncellenir (yazarken odak kaybolmasın) ── */
+    const SUTUN = [["brut", "Toplam Brüt"], ["sgk", "SGK İşçi"], ["iss", "İşsizlik"], ["matrah", "GV Matrahı"], ["kum", "Küm. Matrah"], ["oran", "Dilim"],
+      ["gv", "Gelir Vergisi"], ["gvIst", "Asg. Ücret İst."], ["gvOde", "Ödenen GV"], ["dvOde", "Damga V."], ["net", "Net Ele Geçen"], ["maliyet", "İşveren Maliyeti"]];
+    function tabloKur() {
+      const net = P.mod === "net", t = document.getElementById("tblAy"), buAy = new Date().getMonth();
+      t.innerHTML = "<thead><tr><th style='text-align:left'>Ay</th><th>" + (net ? "Net Maaş" : "Brüt Maaş") + "</th><th>" + (net ? "Ek Ödeme (net)" : "Ek Ödeme / Prim (brüt)") + "</th>" +
+        SUTUN.map(s => "<th>" + s[1] + "</th>").join("") + "</tr></thead><tbody>" +
+        AYLAR.map((a, m) => '<tr data-m="' + m + '"' + (m === buAy ? ' class="buay"' : "") + '><td class="ay">' + a + '</td>' +
+          '<td class="gir"><input class="inp" data-m="' + m + '" data-k="maas" inputmode="decimal" value="' + yaz(G[m].maas) + '"><span class="doldur" data-m="' + m + '" title="Bu ayın tutarını sonraki aylara kopyala">⇣</span></td>' +
+          '<td class="gir"><input class="inp" data-m="' + m + '" data-k="ek" inputmode="decimal" value="' + (G[m].ek ? yaz(G[m].ek) : "") + '" placeholder="0"></td>' +
+          SUTUN.map(s => '<td class="num' + (s[0] === "net" ? " net" : "") + '" data-c="' + s[0] + '"></td>').join("") + "</tr>").join("") +
+        '</tbody><tfoot><tr><td class="ay">Toplam</td><td class="num" data-t="maas"></td><td class="num" data-t="ek"></td>' + SUTUN.map(s => '<td class="num' + (s[0] === "net" ? " net" : "") + '" data-t="' + s[0] + '"></td>').join("") + "</tr></tfoot>";
+      t.querySelectorAll("tbody input").forEach(inp => {
+        inp.oninput = () => { G[+inp.dataset.m][inp.dataset.k] = oku(inp.value); guncelle(); };
+        inp.onblur = () => { const v = G[+inp.dataset.m][inp.dataset.k]; inp.value = (v || inp.dataset.k === "maas") ? yaz(v) : ""; };
+      });
+      t.querySelectorAll(".doldur").forEach(d => { d.onclick = () => { const m = +d.dataset.m; for (let i = m + 1; i < 12; i++) G[i].maas = G[m].maas; girdiYaz(); guncelle(); }; });
+      document.getElementById("capAy").textContent = (net ? "Her ay için ele geçmesini istediğiniz net tutarı yazın; gereken brüt ve kesintiler hesaplanır" : "Her ayın brüt maaşını (ve varsa prim/ikramiyeyi) yazın; kesintiler ve net anında hesaplanır") + " · ⇣ işareti tutarı sonraki aylara kopyalar";
+    }
+    function girdiYaz() {
+      document.querySelectorAll("#tblAy tbody input").forEach(inp => { const v = G[+inp.dataset.m][inp.dataset.k]; if (document.activeElement !== inp) inp.value = (v || inp.dataset.k === "maas") ? yaz(v) : ""; });
+    }
+
+    /* ── hesapla + göster ── */
+    function guncelle() {
+      parametreOku();
+      const gecerli = P.dilimler.length && P.dilimler.every((d, i) => d.oran >= 0 && d.oran < 1 && (i === P.dilimler.length - 1 || d.ust > (i ? P.dilimler[i - 1].ust : 0)));
+      if (!gecerli) { document.getElementById("turevSatir").innerHTML = "<b>Vergi dilimleri geçersiz:</b> üst sınırlar artan sırada, oranlar %0–100 arasında olmalı."; return; }
+      const S = SON = maasHesapla(P, G), A = S.ay, T = S.T;
+      kaydet();
+      // türetilmiş parametreler: SGK tavanı ve asgari ücret istisnası (EY/bordro tablolarıyla aynı çıkmalı)
+      const grup = []; A.forEach((r, m) => { const son = grup[grup.length - 1]; if (son && Math.abs(son.v - r.auGv) < 0.005) son.b = m; else grup.push({ a: m, b: m, v: r.auGv }); });
+      document.getElementById("turevSatir").innerHTML = "SGK tavanı: <b>" + tl(A[0].tavan) + " TL</b>" + (Math.abs(A[11].tavan - A[0].tavan) > 0.005 ? " (Temmuz'dan itibaren " + tl(A[11].tavan) + " TL)" : "") +
+        " · Asgari ücret gelir vergisi istisnası: " + grup.map(g => (g.a === g.b ? AYLAR[g.a] : AYLAR[g.a] + "–" + AYLAR[g.b]) + " <b>" + tl(g.v) + "</b>").join(" · ") +
+        " · damga vergisi istisnası <b>" + tl(r2(A[0].au * P.damga)) + " TL</b>" + (P.auIstisna ? "" : " — <b>istisna kapalı</b>");
+      // tablo hücreleri
+      const bicim = (k, r) => k === "oran" ? "%" + trNum(r.oran * 100, 0) : tl(r[k]);
+      document.querySelectorAll("#tblAy tbody tr").forEach(tr => {
+        const m = +tr.dataset.m, r = A[m];
+        tr.classList.toggle("gecis", r.brut > 0 && r.oran > r.oranOnce + 1e-9);
+        tr.querySelectorAll("[data-c]").forEach(td => { td.textContent = r.brut > 0 || td.dataset.c === "kum" ? bicim(td.dataset.c, r) : "—"; });
+      });
+      document.querySelectorAll("#tblAy tfoot [data-t]").forEach(td => {
+        const k = td.dataset.t;
+        td.textContent = k === "maas" ? tl(G.reduce((s, g) => s + g.maas, 0)) : k === "ek" ? tl(G.reduce((s, g) => s + g.ek, 0)) : (k === "kum" ? tl(A[11].kum) : k === "oran" ? "" : tl(T[k]));
+      });
+      // not: dilim geçişleri, SGK tavanı
+      const gecis = A.map((r, m) => (r.brut > 0 && r.oran > r.oranOnce + 1e-9) ? AYLAR[m] + " → %" + trNum(r.oran * 100, 0) : null).filter(Boolean);
+      const tavanAy = A.map((r, m) => r.brut > r.tavan + 0.005 ? AYLAR[m] : null).filter(Boolean);
+      const dolu = A.filter(r => r.brut > 0), ilk = dolu[0], son = dolu[dolu.length - 1];
+      document.getElementById("notAy").innerHTML = (gecis.length ? "Üst dilime geçilen aylar (kırmızı zeminli satırlar): <b>" + gecis.join(" · ") + "</b>. " : "Yıl boyunca vergi dilimi değişmiyor. ") +
+        (tavanAy.length ? "SGK tavanı aşılan aylar: " + tavanAy.join(", ") + " (prim tavandan hesaplanır). " : "") +
+        (ilk && son && ilk !== son && P.mod === "brut" && Math.abs(ilk.brut - son.brut) < 0.005 ? "Aynı brütle net, yıl başındaki <b>" + tl(ilk.net) + " TL</b>'den yıl sonunda <b>" + tl(son.net) + " TL</b>'ye iniyor. " : "") +
+        (P.devir > 0 ? "Devreden matrah " + tl(P.devir) + " TL kümülatif matraha eklenmiştir. " : "");
+      // özet kutuları
+      const ayS = dolu.length || 1;
+      setMetrics([
+        ["Yıllık Brüt", trNum(T.brut, 0) + " TL", dolu.length + " ay · aylık ort. " + trNum(T.brut / ayS, 0) + " TL", "flat"],
+        ["Yıllık Net", trNum(T.net, 0) + " TL", "aylık ort. " + trNum(T.net / ayS, 0) + " TL", "up"],
+        ["Ödenen Gelir Vergisi", trNum(T.gvOde, 0) + " TL", "istisna " + trNum(T.gvIst, 0) + " TL düşüldü", "down"],
+        ["SGK + İşsizlik (işçi)", trNum(T.sgk + T.iss, 0) + " TL", "damga vergisi " + trNum(T.dvOde, 0) + " TL", "down"],
+        ["Efektif Kesinti", T.brut > 0 ? "%" + trNum((1 - T.net / T.brut) * 100, 1) : "—", "net / brüt " + (T.brut > 0 ? "%" + trNum(T.net / T.brut * 100, 1) : "—"), "flat"],
+        ["İşverene Toplam Maliyet", trNum(T.maliyet, 0) + " TL", T.maliyet > 0 ? "netin maliyete oranı %" + trNum(T.net / T.maliyet * 100, 1) : "", "flat"],
+      ]);
+      grafikler(A);
+    }
+    function grafikler(A) {
+      const x = AYLAR.map(a => a.slice(0, 3));
+      const iz = (ad, y, renk) => ({ type: "bar", name: ad, x: x, y: y, marker: { color: renk }, text: y.map(v => trNum(v, 0)), textposition: "none", hovertemplate: "%{x} · " + ad + ": %{text} TL<extra></extra>" });
+      draw("ch1", [iz("Net ele geçen", A.map(r => r.net), C.toplam), iz("Gelir vergisi", A.map(r => r.gvOde), C.hisse), iz("SGK + işsizlik", A.map(r => r.sgk + r.iss), C.kesin), iz("Damga vergisi", A.map(r => r.dvOde), C.ost)],
+        { height: 380, barmode: "stack", margin: { l: 70, r: 16, t: 34, b: 40 }, legend: { orientation: "h", y: 1.08 }, xaxis: { type: "category" }, yaxis: { title: { text: "TL", font: { size: 11 } } } });
+      const maxK = Math.max.apply(null, A.map(r => r.kum).concat([1]));
+      const esik = P.dilimler.filter(d => d.ust !== null && d.ust <= maxK * 1.35);
+      draw("ch2", [{ type: "scatter", mode: "lines+markers", name: "Kümülatif matrah", x: x, y: A.map(r => r.kum), line: { color: C.toplam, width: 2.5 }, marker: { size: 7, color: A.map(r => r.brut > 0 && r.oran > r.oranOnce + 1e-9 ? C.hisse : C.toplam) },
+          text: A.map(r => trNum(r.kum, 0) + " TL · dilim %" + trNum(r.oran * 100, 0)), hovertemplate: "%{x}: %{text}<extra></extra>" }],
+        { height: 360, margin: { l: 80, r: 90, t: 16, b: 40 }, showlegend: false, xaxis: { type: "category" }, yaxis: { title: { text: "TL", font: { size: 11 } }, rangemode: "tozero" },
+          shapes: esik.map(d => ({ type: "line", xref: "paper", x0: 0, x1: 1, y0: d.ust, y1: d.ust, line: { color: C.ost, width: 1, dash: "dot" } })),
+          annotations: esik.map((d, i) => ({ xref: "paper", x: 1, xanchor: "left", y: d.ust, text: " " + trNum(d.ust, 0) + " → %" + trNum(P.dilimler[P.dilimler.indexOf(d) + 1].oran * 100, 0), showarrow: false, font: { size: 10.5, color: C.ost } })) });
+      document.getElementById("capCh2").textContent = "Matrah bir eşiği aştığı ay (kırmızı nokta), aşan kısım üst dilim oranıyla vergilenir · yıl sonu kümülatif matrah " + trNum(A[11].kum, 0) + " TL";
+    }
+
+    /* ── Excel'e kopya ── */
+    function kopyaVerisi() {
+      const A = SON.ay, T = SON.T, net = P.mod === "net";
+      const bas = ["Ay", net ? "Net Maaş" : "Brüt Maaş", net ? "Ek Ödeme (net)" : "Ek Ödeme (brüt)"].concat(SUTUN.map(s => s[1]));
+      const hucre = (k, r) => k === "oran" ? "%" + trNum(r.oran * 100, 0) : tl(r[k]);
+      const satirlar = A.map((r, m) => [AYLAR[m], tl(G[m].maas), tl(G[m].ek)].concat(SUTUN.map(s => hucre(s[0], r))));
+      satirlar.push(["Toplam", tl(G.reduce((s, g) => s + g.maas, 0)), tl(G.reduce((s, g) => s + g.ek, 0))].concat(SUTUN.map(s => s[0] === "kum" ? tl(A[11].kum) : s[0] === "oran" ? "" : tl(T[s[0]]))));
+      const th = s => '<th style="border:1px solid #B8C2D1;background:#C9D6EA;color:#1C3044;font:600 11px Arial;padding:3px 6px">' + s + "</th>";
+      const td = (s, sol) => '<td style="border:1px solid #B8C2D1;font:11px Arial;padding:3px 6px;text-align:' + (sol ? "left" : "right") + '">' + s + "</td>";
+      return { html: "<table><tr>" + bas.map(th).join("") + "</tr>" + satirlar.map(r => "<tr>" + r.map((v, i) => td(v, i === 0)).join("") + "</tr>").join("") + "</table>",
+        duz: [bas.join("\t")].concat(satirlar.map(r => r.join("\t"))).join("\n") };
+    }
+
+    /* ── düğmeler ── */
+    document.querySelectorAll("input.par").forEach(inp => { inp.oninput = guncelle; });
+    document.getElementById("pIstisna").onchange = guncelle;
+    document.getElementById("btnDilimEkle").onclick = () => {
+      const n = P.dilimler.length, onceki = n > 1 ? P.dilimler[n - 2].ust : 0;
+      P.dilimler.splice(n - 1, 0, { ust: onceki ? onceki * 2 : 200000, oran: P.dilimler[n - 1].oran });
+      dilimCiz(); guncelle();
+    };
+    document.getElementById("btnVarsayilan").onclick = () => {
+      if (!confirm("Yıl parametreleri ve vergi dilimleri 2026 varsayılanlarına dönecek. Aylık maaş tutarlarınız korunur. Devam edilsin mi?")) return;
+      const mod = P.mod; P = kopya(VARSAYILAN); P.mod = mod;
+      parametreYaz(); chipleriCiz(); dilimCiz(); guncelle();
+    };
+    document.getElementById("btnTumAylar").onclick = () => { for (let i = 1; i < 12; i++) { G[i].maas = G[0].maas; } girdiYaz(); guncelle(); };
+    document.getElementById("selZamAy").innerHTML = AYLAR.map((a, m) => '<option value="' + m + '"' + (m === 6 ? " selected" : "") + ">" + a + "</option>").join("");
+    document.getElementById("btnZam").onclick = () => {
+      const m0 = +document.getElementById("selZamAy").value, z = oku(document.getElementById("inZam").value) / 100;
+      if (!z) return;
+      for (let i = m0; i < 12; i++) G[i].maas = r2(G[i].maas * (1 + z));
+      girdiYaz(); guncelle(); durum(AYLAR[m0] + " ayından itibaren %" + trNum(z * 100, 1) + " zam uygulandı");
+    };
+    document.getElementById("btnYedekIndir").onclick = () => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify({ P, G, zaman: new Date().toISOString() }, null, 1)], { type: "application/json" }));
+      a.download = "ekordion-maas-yedek.json"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    };
+    document.getElementById("btnYedekYukle").onclick = () => document.getElementById("dosyaYedek").click();
+    document.getElementById("dosyaYedek").onchange = function () {
+      const f = this.files[0]; if (!f) return;
+      f.text().then(t => {
+        if (!yukle(JSON.parse(t))) throw new Error("biçim");
+        parametreYaz(); chipleriCiz(); dilimCiz(); tabloKur(); guncelle(); durum("Yedek yüklendi");
+      }).catch(() => alert("Bu dosya okunamadı. Bu sayfadan indirilen ekordion-maas-yedek.json dosyasını seçin."));
+      this.value = "";
+    };
+
+    parametreYaz(); chipleriCiz(); dilimCiz(); tabloKur(); guncelle();
+    tabloSunumKur(document.getElementById("secAy"), kopyaVerisi);
+    window.__maas = () => ({ P, G, SON });   // sınama kancası
+  </script>
+</body>
+</html>

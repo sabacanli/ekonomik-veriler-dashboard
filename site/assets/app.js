@@ -41,6 +41,7 @@ const NAV = [
   { group: "Finansal Hesaplar", items: [
     { href: "hesap-kredi.html", label: "Kredi Hesaplama" },
     { href: "hesap-mevduat.html", label: "Mevduat / Stopaj" },
+    { href: "hesap-maas.html", label: "Maaş Hesaplama" },
   ] },
 ];
 

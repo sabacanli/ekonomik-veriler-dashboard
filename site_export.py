@@ -1352,7 +1352,7 @@ def build_sitemap():
     sayfalar = ["", "gundem.html", "tcmb-faiz.html", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
                 "cari.html", "kredi.html", "mevduat.html", "butce.html", "nakit.html",
                 "bddk.html", "bankacilik.html", "banka-kar.html", "hazine.html", "tcmb-alim.html",
-                "hesap-kredi.html", "hesap-mevduat.html"]
+                "hesap-kredi.html", "hesap-mevduat.html", "hesap-maas.html"]
     bugun = datetime.now().strftime("%Y-%m-%d")
     satirlar = ['<?xml version="1.0" encoding="UTF-8"?>',
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
