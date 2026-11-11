@@ -291,14 +291,15 @@ OZET_KOL = [  # (anahtar, başlık, tür)  — kullanıcının "Sektör Sonuçla
     ("aktif", "Toplam Aktifler", "mn"), ("kredi", "Toplam Krediler", "mn"), ("ozkaynak", "Toplam Özkaynaklar", "mn"),
     ("net_kar", "Net Dönem Kâr/Zararı", "mn"), ("kapsamli", "Toplam Kapsamlı Gelir", "mn"), ("net_faiz", "Net Faiz Gelirleri", "mn"),
     ("net_ucret", "Net Ücret ve Komisyonlar", "mn"), ("ozk_yontemi", "Özk. Yönt. Uyg. Ortaklık K/Z", "mn"),
-    ("cost_income", "Cost / Income", "pct"), ("syr", "SYR", "pct100"), ("roaa", "ROAA", "pct"), ("roae", "ROAE", "pct"),
+    ("cost_income", "Cost / Income", "pct"), ("syr", "SYR", "pct100"), ("ozk_yuk", "Özkaynak / (Yüküml. − Özk.)", "pct"),
+    ("roaa", "ROAA", "pct"), ("roae", "ROAE", "pct"),
     ("roaa_x", "ROAA (Özk. Yönt. Ort. Hariç)", "pct"), ("roae_x", "ROAE (Özk. Yönt. Ort. Hariç)", "pct"),
     ("zk_faiz", "Zorunlu Karş. Alınan Faiz", "mn"), ("zk_oran", "Zor. Karş. Faizi / Toplam Faiz Geliri", "pct"),
     ("spk", "Sermaye Piyasası İşlem K/Z (net)", "mn"), ("turev", "Türev İşlem K/Z (net)", "mn"), ("kambiyo", "Kambiyo K/Z (net)", "mn"), ("ticari", "Ticari K/Z Toplam", "mn"),
 ]
 OZET_NOT = ("ROAA/ROAE = yıllıklandırılmış net kâr / (dönem sonu + önceki yıl sonu) ortalaması; 'Özk. Yönt. Ort. Hariç' sütunlarında özkaynak yöntemi "
             "uygulanan ortaklıklardan kâr/zarar net kârdan düşülür. Cost/Income = (personel + diğer faaliyet giderleri) / (net faiz + net ücret + ticari + "
-            "diğer faaliyet gelirleri). SYR ve toplam kapsamlı gelir finansal tablo dipnotlarından; ticari K/Z kalemleri gelir tablosundaki net tutarlar. Katılım bankalarında faiz kalemleri kâr payı gelir/giderlerine, mevduat toplanan fonlara karşılık gelir. "
+            "diğer faaliyet gelirleri). Özkaynak / (Yükümlülükler − Özkaynak) = dönem sonu özkaynakların, bilançodaki yükümlülükler toplamından (= aktif toplamı) özkaynaklar düşülerek bulunan yabancı kaynaklara oranı. SYR ve toplam kapsamlı gelir finansal tablo dipnotlarından; ticari K/Z kalemleri gelir tablosundaki net tutarlar. Katılım bankalarında faiz kalemleri kâr payı gelir/giderlerine, mevduat toplanan fonlara karşılık gelir. "
             "NPL oranı ve serbest karşılık dipnot verisi olduğundan tabloda yer almaz. Kaynak: bankaların solo BDDK formatlı finansal tabloları (KAP).")
 
 
@@ -332,6 +333,8 @@ def ozet_tablo(con, wide):
             "ad": b, "aktif": r1(aktif, 1), "kredi": r1(g("kredi"), 1), "ozkaynak": r1(ozkay, 1), "net_kar": r1(nk, 1),
             "kapsamli": r1(g("kapsamli_gelir"), 1), "net_faiz": r1(g("net_faiz"), 1), "net_ucret": r1(g("net_ucret"), 1), "ozk_yontemi": r1(ozky, 1),
             "cost_income": r1(ratios(m, ann)["maliyet_gelir"], 4), "syr": r1(g("syr"), 2),
+            # özkaynak / (yükümlülükler toplamı − özkaynak): bilançoda yükümlülükler toplamı = aktif toplamı (özdeşlik; pasif satırı bir PDF'te yanlış okunmuş)
+            "ozk_yuk": r1(safe_div(ozkay, (aktif - ozkay) if (aktif is not None and ozkay is not None) else None), 4),
             "roaa": r1(safe_div(yil(nk), ort(aktif, aktif_p)), 4), "roae": r1(safe_div(yil(nk), ort(ozkay, ozkay_p)), 4),
             "roaa_x": r1(safe_div(yil(nk_x), ort(aktif, aktif_p)), 4), "roae_x": r1(safe_div(yil(nk_x), ort(ozkay, ozkay_p)), 4),
             "zk_faiz": r1(zk, 1), "zk_oran": r1(safe_div(zk, g("faiz_geliri")), 4),
