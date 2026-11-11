@@ -1,0 +1,64 @@
+{
+ "kaynak": "KAP finansal rapor bildirimi (nazım hesaplar tablosu, elle derleme)",
+ "aciklama": "PDF'i okunamayan/yüklenmemiş banka-dönemler; tutarlar bin TL (toplam sütunu). Veritabanında aynı banka-dönem varsa kullanılmaz.",
+ "veri": {
+  "2025Q3": {
+   "Fibabank": {
+    "tur": 298007717,
+    "hedge": 0,
+    "fwd_a": 25683209,
+    "fwd_s": 24998262,
+    "ps_a": 51114121,
+    "ps_s": 48892085,
+    "fs_a": 7435000,
+    "fs_s": 7435000,
+    "po_a": 65146057,
+    "po_s": 65287888,
+    "fp_a": 186781,
+    "fp_s": 195019
+   },
+   "Şekerbank": {
+    "tur": 103723135,
+    "hedge": 0,
+    "fwd_a": 1546857,
+    "fwd_s": 1515489,
+    "ps_a": 19340271,
+    "ps_s": 28412984,
+    "fs_a": 401069,
+    "fs_s": 401069,
+    "po_a": 20637158,
+    "po_s": 22630171,
+    "fp_a": 0,
+    "fp_s": 0
+   },
+   "Anadolubank": {
+    "tur": 189368957,
+    "hedge": 0,
+    "fwd_a": 11887801,
+    "fwd_s": 12652325,
+    "ps_a": 35312117,
+    "ps_s": 35454516,
+    "fs_a": 27282202,
+    "fs_s": 27282202,
+    "po_a": 19197951,
+    "po_s": 20299843,
+    "fp_a": 0,
+    "fp_s": 0
+   },
+   "Alternatifbank": {
+    "tur": 145854355,
+    "hedge": 5100000,
+    "fwd_a": 8200148,
+    "fwd_s": 8944507,
+    "ps_a": 10051782,
+    "ps_s": 10038165,
+    "fs_a": 8808772,
+    "fs_s": 8808772,
+    "po_a": 35925335,
+    "po_s": 35869888,
+    "fp_a": 0,
+    "fp_s": 0
+   }
+  }
+ }
+}

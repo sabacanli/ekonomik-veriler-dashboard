@@ -1190,6 +1190,11 @@ def build_home():
         add("📈", "Banka Kârlılık Analizi", bk["ozet_html"], "banka-kar.html")
     except Exception:
         pass
+    try:   # Peer Grup Türev Analizi (banka kar/turev_export.py üretir)
+        bt = json.loads((DATA / "banka_turev.json").read_text(encoding="utf-8"))
+        add("🔁", "Peer Grup Türev Analizi", bt["ozet_html"], "banka-turev.html")
+    except Exception:
+        pass
     try:
         c = pd.read_excel(BASE / "cari acik" / "cari_acik_son.xlsx")
         ccol = [x for x in c.columns if "Cari" in str(x)][0]
@@ -1351,7 +1356,7 @@ def build_sitemap():
     """site/sitemap.xml — her export'ta taze lastmod ile yazılır (SEO)."""
     sayfalar = ["", "gundem.html", "tcmb-faiz.html", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
                 "cari.html", "kredi.html", "mevduat.html", "butce.html", "nakit.html",
-                "bddk.html", "bankacilik.html", "banka-kar.html", "hazine.html", "tcmb-alim.html",
+                "bddk.html", "bankacilik.html", "banka-kar.html", "banka-turev.html", "hazine.html", "tcmb-alim.html",
                 "hesap-kredi.html", "hesap-mevduat.html", "hesap-maas.html"]
     bugun = datetime.now().strftime("%Y-%m-%d")
     satirlar = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -1373,7 +1378,7 @@ def ozet_gom():
             "enflasyon.html": "enflasyon.json", "net-rezerv.html": "rezerv.json",
             "cari.html": "cari.json", "kredi.html": "kredi.json",
             "mevduat.html": "mevduat.json", "butce.html": "butce.json",
-            "nakit.html": "nakit.json", "bddk.html": "bddk.json", "bankacilik.html": "bankacilik.json", "banka-kar.html": "banka_kar.json",
+            "nakit.html": "nakit.json", "bddk.html": "bddk.json", "bankacilik.html": "bankacilik.json", "banka-kar.html": "banka_kar.json", "banka-turev.html": "banka_turev.json",
             "hazine.html": "hazine.json", "tcmb-alim.html": "tcmb_alim.json",
             "tcmb-faiz.html": "tcmb_faiz.json"}
     for sayfa, js in esle.items():

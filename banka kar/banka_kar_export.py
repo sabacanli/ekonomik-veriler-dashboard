@@ -481,6 +481,13 @@ def build(out=OUT):
         n_ozet = ozet_excel(ozet_t, out.parent / "banka-ozet-tablo.xlsx")
     except Exception as e:
         n_ozet = 0; print(f"  ~ Özet tablo Excel yazılamadı ({type(e).__name__}: {str(e)[:80]})")
+    # Peer Grup Türev Analizi (nazım hesaplar tablosu, III. bölüm) — ayrı JSON: banka_turev.json
+    try:
+        import turev_export
+        meta = {b: (BANKS.get(b, (b, "Diğer"))[0], BANKS.get(b, (b, "Diğer"))[1], TAM_AD.get(b, b)) for b in set(banks_set) | set(BANKS)}
+        turev_export.build(con, wide, meta, out.parent / "banka_turev.json", buyuk=BIG7)
+    except Exception as e:
+        print(f"  ~ banka_turev.json yazılamadı ({type(e).__name__}: {str(e)[:120]})")
     # MDC faiz tipi
     faiz = {}
     for b, p, bucket, v in con.execute("SELECT bank, period, bucket, value FROM faiz_tipi"):

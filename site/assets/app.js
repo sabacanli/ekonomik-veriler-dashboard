@@ -37,6 +37,7 @@ const NAV = [
       { hash: "#zaman", label: "Zaman Serisi" }, { hash: "#odak", label: "Banka Odak" }, { hash: "#bolumler", label: "Faaliyet Bölümleri" },
       { hash: "#portfoy", label: "Menkul Kıymet Portföyü" },
     ] },
+    { href: "banka-turev.html", label: "Peer Grup Türev Analizi" },
   ] },
   { group: "Finansal Hesaplar", items: [
     { href: "hesap-kredi.html", label: "Kredi Hesaplama" },
