@@ -291,7 +291,7 @@ OZET_KOL = [  # (anahtar, başlık, tür)  — kullanıcının "Sektör Sonuçla
     ("aktif", "Toplam Aktifler", "mn"), ("kredi", "Toplam Krediler", "mn"), ("ozkaynak", "Toplam Özkaynaklar", "mn"),
     ("net_kar", "Net Dönem Kâr/Zararı", "mn"), ("kapsamli", "Toplam Kapsamlı Gelir", "mn"), ("net_faiz", "Net Faiz Gelirleri", "mn"),
     ("net_ucret", "Net Ücret ve Komisyonlar", "mn"), ("ozk_yontemi", "Özk. Yönt. Uyg. Ortaklık K/Z", "mn"),
-    ("cost_income", "Cost / Income", "pct"), ("syr", "SYR", "pct100"), ("ozk_yuk", "Özkaynak / (Yüküml. − Özk.)", "pct"),
+    ("cost_income", "Cost / Income", "pct"), ("syr", "SYR", "pct100"), ("yuk_ozk", "(Yüküml. − Özk.) / Özkaynak", "x"),
     ("roaa", "ROAA", "pct"), ("roae", "ROAE", "pct"),
     ("roaa_x", "ROAA (Özk. Yönt. Ort. Hariç)", "pct"), ("roae_x", "ROAE (Özk. Yönt. Ort. Hariç)", "pct"),
     ("zk_faiz", "Zorunlu Karş. Alınan Faiz", "mn"), ("zk_oran", "Zor. Karş. Faizi / Toplam Faiz Geliri", "pct"),
@@ -299,7 +299,7 @@ OZET_KOL = [  # (anahtar, başlık, tür)  — kullanıcının "Sektör Sonuçla
 ]
 OZET_NOT = ("ROAA/ROAE = yıllıklandırılmış net kâr / (dönem sonu + önceki yıl sonu) ortalaması; 'Özk. Yönt. Ort. Hariç' sütunlarında özkaynak yöntemi "
             "uygulanan ortaklıklardan kâr/zarar net kârdan düşülür. Cost/Income = (personel + diğer faaliyet giderleri) / (net faiz + net ücret + ticari + "
-            "diğer faaliyet gelirleri). Özkaynak / (Yükümlülükler − Özkaynak) = dönem sonu özkaynakların, bilançodaki yükümlülükler toplamından (= aktif toplamı) özkaynaklar düşülerek bulunan yabancı kaynaklara oranı. SYR ve toplam kapsamlı gelir finansal tablo dipnotlarından; ticari K/Z kalemleri gelir tablosundaki net tutarlar. Katılım bankalarında faiz kalemleri kâr payı gelir/giderlerine, mevduat toplanan fonlara karşılık gelir. "
+            "diğer faaliyet gelirleri). (Yükümlülükler − Özkaynak) / Özkaynak = bilançodaki yükümlülükler toplamından (= aktif toplamı) özkaynaklar düşülerek bulunan yabancı kaynakların dönem sonu özkaynaklara oranı (kat); yüksek değer daha yüksek kaldıraç demektir. SYR ve toplam kapsamlı gelir finansal tablo dipnotlarından; ticari K/Z kalemleri gelir tablosundaki net tutarlar. Katılım bankalarında faiz kalemleri kâr payı gelir/giderlerine, mevduat toplanan fonlara karşılık gelir. "
             "NPL oranı ve serbest karşılık dipnot verisi olduğundan tabloda yer almaz. Kaynak: bankaların solo BDDK formatlı finansal tabloları (KAP).")
 
 
@@ -333,8 +333,9 @@ def ozet_tablo(con, wide):
             "ad": b, "aktif": r1(aktif, 1), "kredi": r1(g("kredi"), 1), "ozkaynak": r1(ozkay, 1), "net_kar": r1(nk, 1),
             "kapsamli": r1(g("kapsamli_gelir"), 1), "net_faiz": r1(g("net_faiz"), 1), "net_ucret": r1(g("net_ucret"), 1), "ozk_yontemi": r1(ozky, 1),
             "cost_income": r1(ratios(m, ann)["maliyet_gelir"], 4), "syr": r1(g("syr"), 2),
-            # özkaynak / (yükümlülükler toplamı − özkaynak): bilançoda yükümlülükler toplamı = aktif toplamı (özdeşlik; pasif satırı bir PDF'te yanlış okunmuş)
-            "ozk_yuk": r1(safe_div(ozkay, (aktif - ozkay) if (aktif is not None and ozkay is not None) else None), 4),
+            # (yükümlülükler toplamı − özkaynak) / özkaynak, kat: bilançoda yükümlülükler toplamı = aktif toplamı (özdeşlik; pasif satırı bir PDF'te
+            # yanlış okunmuş). Kullanıcı önce özkaynak/(yük.−özk.) istedi, sonra tersini izlemeyi tercih etti (11.11.2026). Özkaynak ≤ 0 ise boş.
+            "yuk_ozk": r1(safe_div((aktif - ozkay) if (aktif is not None and ozkay is not None and ozkay > 0) else None, ozkay), 2),
             "roaa": r1(safe_div(yil(nk), ort(aktif, aktif_p)), 4), "roae": r1(safe_div(yil(nk), ort(ozkay, ozkay_p)), 4),
             "roaa_x": r1(safe_div(yil(nk_x), ort(aktif, aktif_p)), 4), "roae_x": r1(safe_div(yil(nk_x), ort(ozkay, ozkay_p)), 4),
             "zk_faiz": r1(zk, 1), "zk_oran": r1(safe_div(zk, g("faiz_geliri")), 4),
@@ -372,7 +373,7 @@ def ozet_excel(ozet, path):
             ws.cell(3 + i, 1, i + 1); ws.cell(3 + i, 2, TAM_AD.get(r["ad"], r["ad"])).font = Font(bold=True, color=LACI)
             for j, (k, ad, t) in enumerate(OZET_KOL):
                 v = r.get(k); cell = ws.cell(3 + i, 3 + j, None if v is None else (round(v) if t == "mn" else (v / 100 if t == "pct100" else v)))
-                cell.number_format = "#,##0" if t == "mn" else "0.0%"; cell.border = kenar
+                cell.number_format = "#,##0" if t == "mn" else ("0.0" if t == "x" else "0.0%"); cell.border = kenar
             n += 1
         ws.cell(4 + len(ozet[p]), 1, OZET_NOT).font = Font(italic=True, size=8, color="55627A")
         ws.freeze_panes = "C3"; ws.column_dimensions["A"].width = 6; ws.column_dimensions["B"].width = 38

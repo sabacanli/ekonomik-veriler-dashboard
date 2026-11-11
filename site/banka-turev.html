@@ -34,6 +34,12 @@
     .tanim li { margin-bottom: 6px; line-height: 1.5; }
     .mini-h { font-size: 11.5px; letter-spacing: .4px; text-transform: uppercase; color: var(--muted); margin: 10px 0 6px; }
     .chip.yok { border-style: dashed; opacity: .7; }
+    details.ham summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 8px; }
+    details.ham .btn { margin: 8px 0 6px; }
+    table.heat.turev th.tik { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+    table.heat.turev th.tik:hover { color: var(--amber); }
+    table.heat.turev th.tik.odak { color: var(--amber); text-decoration: underline; }
+    html:not([data-theme="koyu"]) table.heat.turev th.tik:hover, html:not([data-theme="koyu"]) table.heat.turev th.tik.odak { color: var(--kirmizi); }
     .uyari { border-left: 3px solid var(--amber); padding: 6px 10px; margin: 10px 0 0; font-size: 13px; line-height: 1.5; }
     html:not([data-theme="koyu"]) .uyari { border-left-color: var(--kirmizi); }
     .uyari a { color: inherit; font-weight: 700; }
@@ -102,8 +108,24 @@
       <p class="not" id="notTutar"></p>
     </section>
 
+    <section class="chart-card" id="secBanka">
+      <h3 id="h3Banka">Banka Zaman Serisi</h3>
+      <p class="cap" id="capBanka"></p>
+      <button class="btn apko-btn" data-sec="secBanka">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secBanka">🖼 Resim olarak kopyala</button>
+      <div class="ctl"><label>Banka (tablolardaki banka adına tıklayarak da seçilir) <div class="chips" id="odakChips"></div></label></div>
+      <p class="mini-h" id="mhBankaPay">Peer grup içindeki payı (%) — ürünlere göre</p>
+      <div id="chBankaPay"></div>
+      <p class="mini-h" id="mhBankaTutar">Sözleşme tutarları — ürünlere göre</p>
+      <div id="chBankaTutar"></div>
+      <details class="ham"><summary>Tablo: dönem dönem pay ve tutarlar</summary>
+        <button class="btn" id="btnBankaKopya">📋 Panoya kopyala (Excel)</button>
+        <div class="table-wrap"><table class="heat turev" id="tblBanka"></table></div>
+      </details>
+    </section>
+
     <section class="chart-card" id="secSeyir">
-      <h3>Dönemler İtibarıyla Seyir</h3>
+      <h3>Ürün Bazında Seyir — Bankalar Arası</h3>
       <p class="cap" id="capSeyir"></p>
       <button class="btn apko-btn" data-sec="secSeyir">🖨 Beyaz zemin (sunum)</button>
       <button class="btn resim-btn" data-sec="secSeyir">🖼 Resim olarak kopyala</button>
@@ -123,7 +145,8 @@
         <li><b>Diğer alım satım amaçlı türevler</b> = faiz ve menkul değer opsiyonları, futures faiz işlemleri ve "diğer" kalemi. <b>Riskten korunma amaçlı türevler</b> nazım tablosunda ürün kırılımı olmadan verilir; ürün paylarına dahil değildir, "tüm türevler" satırında yer alır.</li>
         <li><b>Toplam aktif payı</b> karşılaştırma içindir: bir bankanın üründeki payı aktif payının üzerindeyse o üründe bilanço büyüklüğüne göre daha etkindir.</li>
         <li><b>Milyon USD</b> gösterimi dönem sonu TCMB döviz alış kuruyla çevrilir; paylar birimden etkilenmez. Dönemler arası tutar karşılaştırmasında kur etkisini ayıklamak için USD gösterimi daha anlamlıdır.</li>
-        <li><b>Pay seyri</b> grafiği, seçili dönemde verisi olan bankalarla çizilir; bu bankalardan birinin verisi olmayan dönemler gösterilmez (grup bileşimi dönemden döneme aynı kalsın diye).</li>
+        <li><b>Banka zaman serisi:</b> tablolardaki banka adına tıklandığında o bankanın, bilançosu yüklü bütün dönemlerdeki ürün tutarları ve peer grup içindeki payı çizilir.</li>
+        <li><b>Pay seyri</b> grafikleri (banka zaman serisi ve ürün bazında seyir), seçili dönemde verisi olan bankalarla çizilir; bu bankalardan birinin verisi olmayan dönemler gösterilmez (grup bileşimi dönemden döneme aynı kalsın diye). Geçmiş verisi kısa olan banka pay seyrine alınmaz.</li>
         <li>Yıl sonu (Ç4) tablosu yüklenmemiş bankada izleyen yılın tablosundaki "önceki dönem" sütunu kullanılır. Katılım bankalarının nazım tablosunda opsiyon, futures ve faiz swapı satırları yoktur; "diğer vadeli alım satım işlemleri" diğer türevlerde gösterilir.</li>
         <li>Bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.</li>
       </ul>
@@ -151,7 +174,7 @@
       const deger = (p, b, k) => k === "bes" ? (URUN.every(u => ham(p, b, u[0]) !== null) ? URUN.reduce((s, u) => s + ham(p, b, u[0]), 0) : null) : ham(p, b, k);
 
       /* ---- durum: seçim aynı tarayıcı oturumunda korunur; yeni ziyarette varsayılan grupla açılır ---- */
-      const S = { donem: null, sec: [], birim: "tl", deg: false, urun: URUN[0][0], seyir: "pay" };
+      const S = { donem: null, sec: [], birim: "tl", deg: false, urun: URUN[0][0], seyir: "pay", odak: null };
       const SS = "ekordion-turev";
       try {
         const k = JSON.parse(sessionStorage.getItem(SS) || "null");
@@ -160,10 +183,11 @@
           if (s.length) S.sec = s;
           if (k.birim === "usd") S.birim = "usd";
           if (P.includes(k.donem)) S.donem = k.donem;
+          if (BANK[k.odak]) S.odak = k.odak;
         }
       } catch (e) {}
       if (!S.sec.length) S.sec = D.varsayilan.slice();
-      const kaydet = () => { try { sessionStorage.setItem(SS, JSON.stringify({ sec: S.sec, birim: S.birim, donem: S.donem })); } catch (e) {} };
+      const kaydet = () => { try { sessionStorage.setItem(SS, JSON.stringify({ sec: S.sec, birim: S.birim, donem: S.donem, odak: S.odak })); } catch (e) {} };
       const aktifSet = p => S.sec.filter(b => varMi(p, b));           // seçili bankalardan o dönemde verisi olanlar
       const enYeni = kosul => { for (let i = P.length - 1; i >= 0; i--) if (kosul(P[i])) return P[i]; return null; };
       if (!S.donem) S.donem = enYeni(p => aktifSet(p).length >= Math.min(2, S.sec.length)) || P[P.length - 1];
@@ -247,7 +271,7 @@
         if (!set.length) return bosTablo(t, "Seçili bankaların " + plabel(p) + " nazım verisi yok; başka bir dönem seçin.");
         const H = payHesap(p, set), q = prevQ(p), degOk = S.deg && set.every(b => varMi(q, b)), O = degOk ? payHesap(q, set) : null;
         let h = '<tr><th class="grp bas" colspan="' + (kol.length + 2) + '">' + tarih(p) + " · Türev ürünlerde grup içi pay</th></tr>" +
-          '<tr><th style="text-align:left">Pay (%)</th>' + kol.map(b => '<th title="' + esc(TAM(b)) + '"' + (varMi(p, b) ? "" : ' class="yok"') + ">" + esc(KISA(b)) + "</th>").join("") + "<th>Grup toplamı (" + birimAd() + ")</th></tr>";
+          '<tr><th style="text-align:left">Pay (%)</th>' + kol.map(b => '<th data-b="' + esc(b) + '" title="' + esc(TAM(b)) + ' — tıkla: bankanın zaman serisi" class="tik' + (varMi(p, b) ? "" : " yok") + '">' + esc(KISA(b)) + "</th>").join("") + "<th>Grup toplamı (" + birimAd() + ")</th></tr>";
         PAY_SATIR.forEach(s => {
           const r = H[s.k];
           if (s.ref && r.top === null) return;   // karşılaştırma satırı hesaplanamıyorsa (ör. bir bankanın bilançosu yüklü değil) gösterilmez
@@ -264,6 +288,7 @@
             }).join("") + '<td class="num top">' + fmtT(cevir(r.top, p)) + "</td></tr>";
         });
         t.innerHTML = h;
+        baslikBagla(t);
         const eksik = kol.filter(b => !varMi(p, b));
         nt.textContent = [
           "Pay = bankanın sözleşme tutarı (alım + satım) / seçili " + set.length + " bankanın toplamı.",
@@ -292,7 +317,7 @@
         if (!kol.length) return bosTablo(t, "Banka seçilmedi.");
         if (!set.length) return bosTablo(t, "Seçili bankaların " + plabel(p) + " nazım verisi yok; başka bir dönem seçin.");
         let h = '<tr><th class="grp bas" colspan="' + (kol.length + 3) + '">' + tarih(p) + " · Türev finansal araçlar, sözleşme tutarları (" + birimAd() + ")</th></tr>" +
-          '<tr><th style="text-align:left">Ürün</th><th style="text-align:left">Nazım hesap kalemi</th>' + kol.map(b => '<th title="' + esc(TAM(b)) + '"' + (varMi(p, b) ? "" : ' class="yok"') + ">" + esc(KISA(b)) + "</th>").join("") + "<th>Grup toplamı</th></tr>";
+          '<tr><th style="text-align:left">Ürün</th><th style="text-align:left">Nazım hesap kalemi</th>' + kol.map(b => '<th data-b="' + esc(b) + '" title="' + esc(TAM(b)) + ' — tıkla: bankanın zaman serisi" class="tik' + (varMi(p, b) ? "" : " yok") + '">' + esc(KISA(b)) + "</th>").join("") + "<th>Grup toplamı</th></tr>";
         TUTAR_SATIR.forEach(s => {
           const v = set.map(b => deger(p, b, s.k)), top = v.every(x => x !== null) ? v.reduce((a, x) => a + x, 0) : null;
           h += '<tr class="' + [s.sec ? "sec" : "", s.ref ? "ref" : "", s.ust ? "ust" : ""].join(" ").trim() + '">' + (s.grup ? '<td class="urun" rowspan="' + s.span + '">' + esc(s.grup) + "</td>" : "") +
@@ -301,6 +326,7 @@
             '<td class="num top">' + fmtT(cevir(top, p)) + "</td></tr>";
         });
         t.innerHTML = h;
+        baslikBagla(t);
         nt.textContent = ["Tutarlar " + (S.birim === "usd" ? "milyon USD (dönem sonu TCMB döviz alış kuru " + trNum(D.kur[p], 4) + " TL ile çevrildi)" : "milyon TL") + "; her üründe alım + satım bacağı toplanır. Kaynak: bankaların solo finansal tabloları, nazım hesaplar tablosu.",
           kaynakNot(p, set)].filter(Boolean).join(" ");
       }
@@ -329,8 +355,94 @@
         return { html: html + "</table>", duz: satirlar.join("\n") };
       }
 
-      /* ---- 3) dönemler itibarıyla seyir ---- */
+      /* ---- 3) banka zaman serisi: tıklanan bankanın peer grup içindeki payı ve tutarları, ürün ürün ---- */
       const TEMA = {};
+      const nDonem = b => P.filter(q => varMi(q, b)).length;
+      function seyirGrubu(p) {   // pay seyrinde bileşimi sabit grup: seçili dönemde verisi olan bankalar − geçmişi kısa olanlar
+        const set = aktifSet(p), enUzun = Math.max(0, ...set.map(nDonem)), kisa = set.filter(b => nDonem(b) < enUzun / 2);
+        return { set, kisa, grup: set.filter(b => !kisa.includes(b)) };
+      }
+      const URENK = ACIK_TEMA ? { fwd: C.hisse, ops: PAL.sari, fut: C.euro, psw: C.kesin, irs: C.green } : { fwd: C.hisse, ops: PAL.sari, fut: PAL.pembe, psw: PAL.mor, irs: C.green };
+      const verili = b => P.some(q => varMi(q, b));
+      const odakBanka = () => (S.odak && S.sec.includes(S.odak) && verili(S.odak)) ? S.odak : (aktifSet(S.donem)[0] || S.sec.find(verili) || null);
+      const isaretle = () => { const o = odakBanka(); document.querySelectorAll("#tblPay th[data-b], #tblTutar th[data-b]").forEach(th => th.classList.toggle("odak", th.dataset.b === o)); };
+      function baslikBagla(t) {   // tablo başlığındaki banka adı: tıklanınca o bankanın zaman serisi çizilir
+        const o = odakBanka();
+        t.querySelectorAll("th[data-b]").forEach(th => {
+          th.classList.toggle("odak", th.dataset.b === o);
+          th.onclick = () => {
+            if (!verili(th.dataset.b)) return;
+            S.odak = th.dataset.b; kaydet(); bankaCiz(); isaretle();
+            document.getElementById("secBanka").scrollIntoView({ behavior: "smooth", block: "start" });
+          };
+        });
+      }
+      function bankaCiz() {
+        const p = S.donem, b = odakBanka(), cap = document.getElementById("capBanka"), tb = document.getElementById("tblBanka");
+        const oc = document.getElementById("odakChips");
+        oc.innerHTML = S.sec.filter(verili).map(x => '<span class="chip' + (x === b ? " active" : "") + '" data-b="' + esc(x) + '">' + esc(AD(x)) + "</span>").join("");
+        oc.querySelectorAll(".chip").forEach(c => { c.onclick = () => { S.odak = c.dataset.b; kaydet(); bankaCiz(); isaretle(); }; });
+        document.getElementById("h3Banka").textContent = "Banka Zaman Serisi" + (b ? " — " + AD(b) : "");
+        document.getElementById("mhBankaTutar").textContent = "Sözleşme tutarları (" + birimAd() + ") — ürünlere göre";
+        if (!b) {
+          cap.textContent = "Zaman serisi için yukarıdan banka seçin.";
+          tb.innerHTML = "";
+          return Promise.all([draw("chBankaPay", [], { height: 120 }, TEMA.secBanka), draw("chBankaTutar", [], { height: 120 }, TEMA.secBanka)]);
+        }
+        /* pay grubu: ürün seyrindeki grupla aynı; bakılan banka grupta değilse (o dönem verisi yok ya da geçmişi kısa) gruba eklenir */
+        const sg = seyirGrubu(p), G = sg.grup.includes(b) ? sg.grup : sg.grup.concat([b]);
+        const tam = q => G.every(x => varMi(q, x));
+        const PP = P.slice(P.findIndex(q => varMi(q, b))), X = PP.map(kisaP);
+        const pay = (q, k) => {
+          if (!tam(q)) return null;
+          const v = G.map(x => deger(q, x, k));
+          if (v.some(x => x === null)) return null;
+          const top = v.reduce((a, x) => a + x, 0);
+          return top > 0 ? deger(q, b, k) / top * 100 : null;
+        };
+        const cizgi = (ad, k, renk, ek) => Object.assign({ type: "scatter", mode: "lines+markers", name: ad, x: X, y: PP.map(q => pay(q, k)), connectgaps: false,
+          line: { color: renk, width: 2 }, marker: { size: 5 }, hovertemplate: "%%{y:.1f}<extra>" + esc(ad) + "</extra>" }, ek || {});
+        const izPay = URUN.map(u => cizgi(u[1], u[0], URENK[u[0]]));
+        izPay.push(cizgi("Beş ürün toplamı", "bes", C.toplam, { line: { color: C.toplam, width: 3.4 }, marker: { size: 6 } }));
+        if (PP.some(q => pay(q, "aktif") !== null)) izPay.push(cizgi("Toplam aktif payı", "aktif", C.ost, { line: { color: C.ost, width: 1.6, dash: "dot" }, marker: { size: 4 } }));
+        /* tutarlar: bankanın kendi nazım kalemleri (bilançosu yüklü her dönem), ürünlere göre yığılmış */
+        const tutar = (q, k) => varMi(q, b) ? cevir(k === "kalan" ? (deger(q, b, "tur") === null || deger(q, b, "bes") === null ? null : Math.max(0, deger(q, b, "tur") - deger(q, b, "bes"))) : deger(q, b, k), q) : null;
+        const bar = (ad, k, renk) => ({ type: "bar", name: ad, x: X, y: PP.map(q => tutar(q, k)), marker: { color: renk }, hovertemplate: "%{y:,.0f}<extra>" + esc(ad) + "</extra>" });
+        const izTutar = URUN.map(u => bar(u[1], u[0], URENK[u[0]])).concat([bar("Diğer + riskten korunma", "kalan", C.dolayli)]);
+        const atlanan = PP.filter(q => varMi(q, b) && !tam(q)).length, yok = PP.filter(q => !varMi(q, b)).length;
+        const disarida = sg.kisa.filter(x => x !== b);
+        const dolu = PP.filter(q => varMi(q, b));
+        cap.textContent = AD(b) + " · bilançosu yüklü " + dolu.length + " dönem (" + plabel(dolu[0]) + " – " + plabel(dolu[dolu.length - 1]) + (yok ? ", arada " + yok + " dönem eksik" : "") + "). Pay: " +
+          (G.length > 1 ? liste(G.map(AD)) + " toplamı içindeki payı" : "grupta başka banka yok") +
+          (atlanan ? "; gruptaki bir bankanın verisi olmayan " + atlanan + " dönemde pay boş" : "") +
+          (disarida.length ? ". " + liste(disarida.map(x => AD(x) + " (" + nDonem(x) + " dönem)")) + " geçmiş verisi kısa olduğu için paya alınmadı" : "") + ".";
+        /* tablo: yeni dönem üstte */
+        const KOL = URUN.map(u => [u[0], u[1]]);
+        let h = '<tr><th class="grp bas" colspan="' + (2 * KOL.length + 5) + '">' + esc(AD(b)) + " · dönemler itibarıyla peer grup içindeki pay ve sözleşme tutarları</th></tr>" +
+          '<tr><th rowspan="2" style="text-align:left">Dönem</th><th class="grp" colspan="' + (KOL.length + 2) + '">Peer grup içindeki pay (%)</th><th class="grp" colspan="' + (KOL.length + 2) + '">Sözleşme tutarı (' + birimAd() + ")</th></tr>" +
+          "<tr>" + KOL.map(k => "<th>" + esc(k[1]) + "</th>").join("") + "<th>Beş ürün</th><th>Aktif payı</th>" + KOL.map(k => "<th>" + esc(k[1]) + "</th>").join("") + "<th>Diğer + r. kor.</th><th>Toplam türev</th></tr>";
+        PP.slice().reverse().filter(q => varMi(q, b)).forEach(q => {
+          const pp = k => { const v = pay(q, k); return '<td class="num' + (v === null ? " bos" : "") + '">' + (v === null ? "—" : "%" + trNum(v, 1)) + "</td>"; };
+          const tt = k => { const v = tutar(q, k); return '<td class="num' + (v === null ? " bos" : "") + '">' + fmtT(v) + "</td>"; };
+          h += '<tr><td class="lbl" style="min-width:0">' + plabel(q) + "</td>" + KOL.map(k => pp(k[0])).join("") + pp("bes") + pp("aktif") + KOL.map(k => tt(k[0])).join("") + tt("kalan") + tt("tur") + "</tr>";
+        });
+        tb.innerHTML = h;
+        const ortak = { height: 340, hovermode: "x unified", xaxis: { type: "category" } };
+        return Promise.all([
+          draw("chBankaPay", izPay, Object.assign({}, ortak, { margin: { l: 56, r: 14, t: 26, b: 44 }, yaxis: { tickprefix: "%", rangemode: "tozero" } }), TEMA.secBanka),
+          draw("chBankaTutar", izTutar, Object.assign({}, ortak, { barmode: "stack", legend: { traceorder: "normal" }, margin: { l: 70, r: 14, t: 26, b: 44 }, yaxis: { rangemode: "tozero", tickformat: ",.0f" } }), TEMA.secBanka),
+        ]);
+      }
+      document.getElementById("btnBankaKopya").onclick = async function () {
+        const btn = this, v = tabloKopya("tblBanka");
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([v.html], { type: "text/html" }), "text/plain": new Blob([v.duz], { type: "text/plain" }) })]);
+          btn.textContent = "✓ Kopyalandı — Excel'e yapıştır";
+        } catch (e) { btn.textContent = "Kopyalanamadı — tabloyu seçip kopyalayın"; }
+        setTimeout(() => { btn.textContent = "📋 Panoya kopyala (Excel)"; }, 3000);
+      };
+
+      /* ---- 4) ürün bazında seyir: seçilen üründe bankalar arası ---- */
       /* banka renkleri seçim sırasına göre; koyu temada iki mavi yan yana gelmesin diye sıra farklı */
       const PALET = ACIK_TEMA ? [C.toplam, C.hisse, C.kesin, C.green, PAL.sari, C.euro, C.dolayli, C.ost] : [C.toplam, C.hisse, C.green, PAL.sari, PAL.mor, PAL.pembe, C.dolayli, C.ost];
       const CIZGI = ["solid", "dash", "dot", "dashdot"];
@@ -339,9 +451,7 @@
         const urunAd = k === "bes" ? "Beş ürün toplamı" : k === "tur" ? "Tüm türevler" : (URUN.find(u => u[0] === k) || [k, k])[1];
         /* Pay seyrinde grup bileşimi dönemden döneme aynı kalmalı: geçmiş verisi kısa olan banka (en uzun geçmişin yarısından az dönem)
            seyre alınmaz, yoksa grafik yalnız o bankanın verisi olan birkaç döneme iner. */
-        const nDonem = b => P.filter(q => varMi(q, b)).length, enUzun = Math.max(0, ...set.map(nDonem));
-        const kisa = payMod ? set.filter(b => nDonem(b) < enUzun / 2) : [];
-        const grup = set.filter(b => !kisa.includes(b));
+        const sg = seyirGrubu(p), kisa = payMod ? sg.kisa : [], grup = payMod ? sg.grup : set;
         const bankalar = payMod ? grup : S.sec.filter(b => P.some(q => varMi(q, b)));
         const tam = q => grup.length > 0 && grup.every(b => varMi(q, b));
         const ilk = P.findIndex(q => payMod ? tam(q) : bankalar.some(b => varMi(q, b)));
@@ -371,12 +481,12 @@
         }, TEMA.secSeyir);
       }
 
-      function hepsi() { grupCiz(); payTablo(); tutarTablo(); seyirCiz(); }
+      function hepsi() { grupCiz(); payTablo(); tutarTablo(); bankaCiz(); seyirCiz(); }
       hepsi();
-      sunumAraclariKur(TEMA, { secSeyir: seyirCiz });
+      sunumAraclariKur(TEMA, { secSeyir: seyirCiz, secBanka: bankaCiz });
       tabloSunumKur(document.getElementById("secPay"), () => tabloKopya("tblPay"));       // tablo kartları: sunumAraclariKur'dan SONRA bağlanır
       tabloSunumKur(document.getElementById("secTutar"), () => tabloKopya("tblTutar"));
-      window.__turev = { S, D, payHesap, aktifSet, deger, tabloKopya };   // sınama kancası
+      window.__turev = { S, D, payHesap, aktifSet, deger, tabloKopya, bankaCiz, odakBanka, seyirGrubu };   // sınama kancası
     })().catch(e => { const o = document.getElementById("ozet"); if (o) o.textContent = "Veri yüklenemedi: " + e.message; });
   </script>
 </body>

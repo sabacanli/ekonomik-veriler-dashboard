@@ -216,7 +216,7 @@
         <li><b>Kaynak:</b> bankaların KAP'ta yayımlanan solo (konsolide olmayan) BDDK formatlı finansal tabloları; faaliyet bölümleri finansal tablo dipnotları; menkul kıymet faiz tipi yatırımcı sunumları. Tutarlar milyon TL.</li>
         <li><b>Gelir tablosu kalemleri YTD</b> (yıl başından itibaren) tutulur. "Çeyreklik akım" seçeneği Çn − Ç(n−1) farkını alır; Ç1 hariç önceki çeyrek verisi gerekir.</li>
         <li><b>ROE, ROA ve NFG/Aktif</b> YTD görünümde yıllıklandırılır (değer × 4 / çeyrek no); çeyreklik görünümde yıllıklandırılmaz. Paydalar dönem sonu bilanço değerleridir.</li>
-        <li><b>Özkaynak / (Yükümlülükler − Özkaynak)</b> (Özet Tablo) = dönem sonu özkaynaklar / (yükümlülükler toplamı − özkaynaklar). Bilançoda yükümlülükler toplamı aktif toplamına eşittir; payda bankanın yabancı kaynaklarıdır. Yüksek oran daha güçlü özkaynak tamponu demektir.</li>
+        <li><b>(Yükümlülükler − Özkaynak) / Özkaynak</b> (Özet Tablo) = (yükümlülükler toplamı − özkaynaklar) / dönem sonu özkaynaklar, kat olarak (ör. 10,8x). Bilançoda yükümlülükler toplamı aktif toplamına eşittir; pay bankanın yabancı kaynaklarıdır. Yüksek değer daha yüksek kaldıraç, düşük değer daha güçlü özkaynak tamponu demektir.</li>
         <li><b>Op. gelir</b> = net faiz geliri + net ücret/komisyon + ticari kâr/zarar. <b>Maliyet/gelir</b> = (personel + diğer faaliyet giderleri) / (op. gelir + diğer faaliyet gelirleri).</li>
         <li><b>MDC</b> = gerçeğe uygun değer farkı kâr/zarara yansıtılan + diğer kapsamlı gelire yansıtılan + itfa edilmiş maliyetle ölçülen finansal varlıklar.</li>
         <li><b>Katılım bankaları</b> (Ziraat Katılım, Albaraka Türk): faiz kalemleri kâr payı gelir/giderlerine, mevduat toplanan fonlara karşılık gelir; aynı başlıklar altında gösterilir.</li>
@@ -580,7 +580,8 @@
       const selOzetT = document.getElementById("selOzetT"), btnOzetX = document.getElementById("btnOzetXlsx");
       if (OTP.length) { S.ozetT = OTP.slice(-1)[0]; secenekler(selOzetT, OTP.map(p => [p, plabel(p) + " (" + OT[p].length + " banka)"]), S.ozetT); selOzetT.onchange = () => { S.ozetT = selOzetT.value; ozetTablo(); }; }
       if (D.ozet_xlsx) btnOzetX.href = D.ozet_xlsx; else btnOzetX.style.display = "none";
-      const ozFmt = (v, t) => (v === null || v === undefined) ? "—" : t === "mn" ? trNum(v, 0) : t === "pct100" ? "%" + trNum(v, 1) : "%" + trNum(v * 100, 1);
+      const ozFmtEkran = (v, t) => ozFmt(v, t);
+      const ozFmt = (v, t) => (v === null || v === undefined) ? "—" : t === "mn" ? trNum(v, 0) : t === "x" ? trNum(v, 1) + "x" : t === "pct100" ? "%" + trNum(v, 1) : "%" + trNum(v * 100, 1);
       const TAMAD = b => (BANK[b] && BANK[b].tam) || b;   // unvan (özet tablo/Excel)
       S.ozetSort = { key: "aktif", dir: -1 };   // her sütun tıklanarak sıralanır; varsayılan aktif büyüklüğü (azalan)
       const OZET_AD = { ad: "Banka" };
@@ -641,7 +642,7 @@
         const son = { "1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12" }[p.slice(-1)] + "." + p.slice(0, 4);
         const bolme = KOL.length > 12 ? Math.ceil(KOL.length / 2) : KOL.length;
         const bloklar = [KOL.slice(0, bolme), KOL.slice(bolme)].filter(b => b.length);
-        const f = (v, t) => (v === null || v === undefined) ? "" : t === "mn" ? trNum(v, 0) : t === "pct100" ? trNum(v, 1) + "%" : trNum(v * 100, 1) + "%";
+        const f = (v, t) => (v === null || v === undefined) ? "" : t === "mn" ? trNum(v, 0) : t === "x" ? trNum(v, 1) + "x" : t === "pct100" ? trNum(v, 1) + "%" : trNum(v * 100, 1) + "%";
         const KALIN = new Set(["syr", "roae", "roae_x", "zk_oran"]);
         const sari = k => k[0].startsWith("zk_") ? "background:#FFF2CC;color:#000;border-color:#bfbfbf;" : "";
         const hc = "background:#595959;color:#fff;font-weight:700;text-align:right;vertical-align:bottom;padding:5px 6px;border:1px solid #7f7f7f;font-size:11px;line-height:1.2;width:84px;";
@@ -668,6 +669,7 @@
       window.__ozetResim = ozetResim;   // sınama kancası
       function ozetKopya() {   // Excel'e yapışacak satır-içi stilli tablo + sekmeyle ayrılmış düz metin (ekrandaki sırayla)
         const p = S.ozetT, R = p ? ozetSirali() : [], OK = ozetKolListesi();   // ekrandaki sütun düzeni
+        const ozFmt = (v, t) => t === "x" ? ((v === null || v === undefined) ? "—" : trNum(v, 1)) : ozFmtEkran(v, t);   // kat sütunu Excel'de sayı olsun diye "x" eki yazılmaz
         const th = s => '<th style="border:1px solid #B8C2D1;background:#C9D6EA;color:#1C3044;font:600 11px Arial;padding:3px 6px">' + esc(s) + "</th>";
         const td = (s, r) => '<td style="border:1px solid #B8C2D1;font:11px Arial;padding:3px 6px;text-align:' + (r ? "right" : "left") + '">' + esc(s) + "</td>";
         const html = '<table><tr>' + th("Sıra No") + th("Banka (Mio TL)") + OK.map(k => th(k[1])).join("") + "</tr>" +
