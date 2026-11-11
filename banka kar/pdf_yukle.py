@@ -75,11 +75,19 @@ def _kaydet(db, rep, no_prev=False):
     enflasyon muhasebesiyle yeniden ifade edilmiş olabilir, doğrudan rapor esastır)."""
     n = db.upsert_metrics(rep.bank, rep.period, rep.metrics, "pdf", force=True)
     db.save_fin_rows(rep.bank, rep.period, rep.rows)
-    if not no_prev and rep.prev_period:
+    if not no_prev and rep.prev_period and rep.prev_metrics:
+        # Önceki dönem sütunu iki ayrı tarihe aittir: gelir tablosu kalemleri GEÇEN YILIN AYNI DÖNEMİ, bilanço kalemleri GEÇEN YIL SONU
+        # (31.12). 11.11.2026'ya kadar ikisi de "geçen yılın aynı dönemi"ne yazılıyordu → PDF'i yüklenmemiş Ç1–Ç3 dönemlerinde bilanço
+        # büyüklükleri yıl sonu değeriydi. Artık her kalem kendi dönemine ve yalnız o kalem henüz yoksa yazılır (doğrudan rapor esastır).
+        from core.metrics import METRICS as _M
+        yil_sonu = f"{int(rep.period[:4]) - 1}Q4"
+        now = dt.datetime.now().isoformat(timespec="seconds")
         with db.connect() as con:
-            var = con.execute("SELECT 1 FROM metrics WHERE bank=? AND period=? LIMIT 1", (rep.bank, rep.prev_period)).fetchone()
-        if not var:
-            db.upsert_metrics(rep.bank, rep.prev_period, rep.prev_metrics, "pdf", force=False)
+            for k, v in rep.prev_metrics.items():
+                if k not in _M or v is None or v != v:
+                    continue
+                donem = rep.prev_period if _M[k].get("flow") else yil_sonu
+                con.execute("INSERT OR IGNORE INTO metrics VALUES (?,?,?,?,?,?)", (rep.bank, donem, k, float(v), "pdf", now))
     segmsg = "bölüm yok"
     if not rep.segments.empty:
         nc = rep.segment_meta["ncols"]

@@ -1,0 +1,137 @@
+{
+ "Ziraat": {
+  "oid": "4028e4a244a081810144df8a1df43625",
+  "unvan": "T.C. ZİRAAT BANKASI A.Ş.",
+  "kod": "tcz,tczb"
+ },
+ "VakıfBank": {
+  "oid": "4028e4a1415f4d9b01415fe3340f36e4",
+  "unvan": "TÜRKİYE VAKIFLAR BANKASI T.A.O.",
+  "kod": "tvb,vakbn"
+ },
+ "Halkbank": {
+  "oid": "1DE05DAA82C3073AE0530A4A622A2EBD",
+  "unvan": "TÜRKİYE HALK BANKASI A.Ş.",
+  "kod": "halkb,thl"
+ },
+ "İşbankası": {
+  "oid": "4028e4a140f2ed7201411682b0cb05c6",
+  "unvan": "TÜRKİYE İŞ BANKASI A.Ş.",
+  "kod": "ısatr,ısbtr,ısctr,ıskur,tıb"
+ },
+ "Akbank": {
+  "oid": "4028e4a240e8d1830140e905edcd0006",
+  "unvan": "AKBANK T.A.Ş.",
+  "kod": "akbnk"
+ },
+ "YapıKredi": {
+  "oid": "4028e4a240f2ef4c01412ae6d6630538",
+  "unvan": "YAPI VE KREDİ BANKASI A.Ş.",
+  "kod": "ykb,ykbnk"
+ },
+ "Garanti Bankası": {
+  "oid": "4028e4a140f2ed720140f37cb2a601b7",
+  "unvan": "TÜRKİYE GARANTİ BANKASI A.Ş.",
+  "kod": "garan,tgb"
+ },
+ "QNB": {
+  "oid": "4028e4a240e95dc90140ee076f400178",
+  "unvan": "QNB BANK A.Ş.",
+  "kod": "fın,qnbtr"
+ },
+ "DenizBank": {
+  "oid": "4028e4a240f2ef4c01412b0cbaf605a3",
+  "unvan": "DENİZBANK A.Ş.",
+  "kod": "denız,dnz"
+ },
+ "TEB": {
+  "oid": "4028e4a1415f4d9b01416003716f3d03",
+  "unvan": "TÜRK EKONOMİ BANKASI A.Ş.",
+  "kod": "teb,tebnk"
+ },
+ "BurganBank": {
+  "oid": "4028e4a140ee35c70140ee3e44840009",
+  "unvan": "BURGAN BANK A.Ş.",
+  "kod": "brgan,bur"
+ },
+ "Odeabank": {
+  "oid": "4028e4a1415f4d9901416017ed29323a",
+  "unvan": "ODEA BANK A.Ş.",
+  "kod": "odb,odea"
+ },
+ "Fibabank": {
+  "oid": "1DE05DAA820D073AE0530A4A622A2EBD",
+  "unvan": "FİBABANKA A.Ş.",
+  "kod": "fbb,fbbnk"
+ },
+ "HSBC": {
+  "oid": "4028e4a14158e41e01415abcf49765df",
+  "unvan": "HSBC BANK A.Ş.",
+  "kod": "hsb,hsbcb"
+ },
+ "Alternatifbank": {
+  "oid": "4028e4a240e95dc90140ed1a01700061",
+  "unvan": "ALTERNATİFBANK A.Ş.",
+  "kod": "alntf,anf"
+ },
+ "Şekerbank": {
+  "oid": "4028e4a240f2ef4c01412adc8fba04ee",
+  "unvan": "ŞEKERBANK T.A.Ş.",
+  "kod": "sek,skbnk"
+ },
+ "Anadolubank": {
+  "oid": "4028e4a140f2ed72014116e79df405db",
+  "unvan": "ANADOLUBANK A.Ş.",
+  "kod": "adb,adbnk"
+ },
+ "TSKB": {
+  "oid": "4028e4a140f2ed710140f3831c6300fd",
+  "unvan": "TÜRKİYE SINAİ KALKINMA BANKASI A.Ş.",
+  "kod": "tsk,tskb"
+ },
+ "Aktifbank": {
+  "oid": "1DE05DAA8212073AE0530A4A622A2EBD",
+  "unvan": "AKTİF YATIRIM BANKASI A.Ş.",
+  "kod": "afb,aktıf"
+ },
+ "Nurolbank": {
+  "oid": "4028e4a1415f4d9901416dc894a66313",
+  "unvan": "NUROL YATIRIM BANKASI A.Ş.",
+  "kod": "nrbnk,nyb"
+ },
+ "Misyonbank": {
+  "oid": "8acae2c482b7ea0b0182f949649916a8",
+  "unvan": "MİSYON YATIRIM BANKASI A.Ş.",
+  "kod": "msy,msybn"
+ },
+ "DYatirim": {
+  "oid": "8acae2c4757dba8c01759d4015520c73",
+  "unvan": "D YATIRIM BANKASI A.Ş.",
+  "kod": "dybnk"
+ },
+ "ZiraatKatilim": {
+  "oid": "402821814bf524d5014d338f92f50d61",
+  "unvan": "ZİRAAT KATILIM BANKASI A.Ş.",
+  "kod": "ztb"
+ },
+ "Albaraka": {
+  "oid": "4028e4a240f2ef4c014106a1c5ef016d",
+  "unvan": "ALBARAKA TÜRK KATILIM BANKASI A.Ş.",
+  "kod": "albrk,alk"
+ },
+ "ZiraatDinamik": {
+  "oid": "567b1f70a6d5424c8f1fd534c5b4ebe4",
+  "unvan": "ZİRAAT DİNAMİK BANKA A.Ş.",
+  "kod": "zdb"
+ },
+ "ING": {
+  "oid": "4028e4a243dd5e8f0144062ac27b0ca1",
+  "unvan": "ING BANK A.Ş.",
+  "kod": "gın,ıngbn"
+ },
+ "ICBC": {
+  "oid": "4028e4a24158e42401415a700e104f3f",
+  "unvan": "ICBC TURKEY BANK A.Ş.",
+  "kod": "ıcb,ıcbct"
+ }
+}
