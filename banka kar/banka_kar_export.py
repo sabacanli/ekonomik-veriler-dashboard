@@ -59,6 +59,7 @@ BANKS = {  # kanonik ad: (kısa ad, grup)
     "TSKB": ("TSKB", "Kalkınma/Yatırım"), "Aktifbank": ("Aktif", "Kalkınma/Yatırım"), "TKYB": ("TKYB", "Kalkınma/Yatırım"),
     "Nurolbank": ("Nurol", "Kalkınma/Yatırım"), "Misyonbank": ("Misyon", "Kalkınma/Yatırım"), "DYatirim": ("D Yatırım", "Kalkınma/Yatırım"),
     "ZiraatKatilim": ("Z.Katılım", "Katılım"), "Albaraka": ("Albaraka", "Katılım"), "ZiraatDinamik": ("Z.Dinamik", "Kamu"),
+    "TurkiyeFinans": ("T.Finans", "Katılım"), "Citibank": ("Citi", "Yabancı"),
 }
 BIG7 = ["Ziraat", "VakıfBank", "Halkbank", "İşbankası", "Akbank", "YapıKredi", "Garanti Bankası"]
 TAM_AD = {  # özet tablo / Excel için unvanlar (kullanıcının "Sektör Sonuçları" tablosundaki gibi)
@@ -69,7 +70,14 @@ TAM_AD = {  # özet tablo / Excel için unvanlar (kullanıcının "Sektör Sonu�
     "Şekerbank": "Şekerbank T.A.Ş.", "Anadolubank": "Anadolubank A.Ş.", "TSKB": "Türkiye Sınai Kalkınma Bankası A.Ş.", "Aktifbank": "Aktif Yatırım Bankası A.Ş.",
     "TKYB": "Türkiye Kalkınma ve Yatırım Bankası A.Ş.", "Nurolbank": "Nurol Yatırım Bankası A.Ş.", "Misyonbank": "Misyon Yatırım Bankası A.Ş.", "DYatirim": "D Yatırım Bankası A.Ş.",
     "ZiraatKatilim": "Ziraat Katılım Bankası A.Ş.", "Albaraka": "Albaraka Türk Katılım Bankası A.Ş.", "ZiraatDinamik": "Ziraat Dinamik Banka A.Ş.",
+    "TurkiyeFinans": "Türkiye Finans Katılım Bankası A.Ş.", "Citibank": "Citibank A.Ş.",
 }
+# Bankanın sunum değişikliğinden doğan seri düzeltmeleri: {(banka, dönem, metrik): değer (mn TL)}; kaynak bankanın kendi sonraki raporu.
+# Citibank 2026 Ç1'e kadar diğer karşılık giderlerini beklenen zarar karşılıkları satırında birlikte raporladı, 2026 Ç2 raporunda ayırdı:
+# IX. beklenen zarar karşılıkları 6 aylık 187, yalnız Ç2 96 → Ç1 = 91; X. diğer karşılıklar 6 aylık 277, yalnız Ç2 8 → Ç1 = 269
+# (91 + 269 = Ç1 raporundaki 360 ✓). Düzeltilmezse 2026 Ç2 çeyreklik karşılık gideri 187 − 360 = −173 (iptal gibi) görünür.
+# 2025 ve öncesi raporlandığı gibi (birlikte) kalır; kırılma yıl başındadır, sayfadaki "Sunum farkı" notunda yazar.
+SUNUM_DUZELTME = {("Citibank", "2026Q1", "karsilik"): 91.0}
 DONEM_SONU = {"1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12"}
 ILK_DONEM = "2021Q1"   # sitede gösterilen ilk dönem
 SEGMENT_CATEGORIES = [
@@ -80,7 +88,9 @@ SEGMENT_CATEGORIES = [
     ("Diğer / Dağıtılamayan", ["diğer", "dağıtılamayan", "genel müdürlük", "merkez"]),
 ]
 SEG_ITEM_PRIORITY = {
-    "net_kar": [r"^donem net kar", r"^net donem kar", r"^vergi sonrasi kar", r"^net kar", r"net kari?/zarar", r"surdurulen faaliyetler net"],
+    # "^net kar" katılım bankalarının "Net Kâr Payı Geliri / Gideri" satırını yakalamasın (Türkiye Finans, Ziraat Katılım: bölüm net kârı
+    # yerine net kâr payı geliri gösteriliyordu) → "payı" ile devam eden etiket dışlanır
+    "net_kar": [r"^donem net kar", r"^net donem kar", r"^vergi sonrasi kar", r"^net kar(?! ?payi)", r"net kari?/zarar", r"surdurulen faaliyetler net"],
     "vergi_oncesi": [r"^vergi oncesi", r"^net faaliyet kar"], "vergi": [r"^vergi gideri", r"^vergi karsiligi", r"^vergi$", r"^vergi karsilig"],
     "varlik": [r"^bolum varliklari", r"^bolum aktif"],
     "nfg": [r"^net faiz"], "komisyon": [r"^net ucret"], "ticari": [r"^ticari"],
@@ -405,6 +415,9 @@ def build(out=OUT):
         if v is None:
             continue
         wide.setdefault(p, {}).setdefault(b, {})[m] = float(v)
+    for (b, p, m), v in SUNUM_DUZELTME.items():
+        if m in wide.get(p, {}).get(b, {}):
+            wide[p][b][m] = v
     periods = sorted(wide, key=period_key)
     banks_set = sorted({b for p in wide for b in wide[p]})
     # çeyreklik akım

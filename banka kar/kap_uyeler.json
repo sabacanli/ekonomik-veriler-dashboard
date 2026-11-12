@@ -133,5 +133,15 @@
   "oid": "4028e4a24158e42401415a700e104f3f",
   "unvan": "ICBC TURKEY BANK A.Ş.",
   "kod": "ıcb,ıcbct"
+ },
+ "TurkiyeFinans": {
+  "oid": "4028e4a240f2ef4c01413b15797606f0",
+  "unvan": "TÜRKİYE FİNANS KATILIM BANKASI A.Ş.",
+  "kod": "fkt"
+ },
+ "Citibank": {
+  "oid": "4028e4a2462cc71d0146711bc6037efb",
+  "unvan": "CITIBANK A.Ş.",
+  "kod": "cıt"
  }
 }

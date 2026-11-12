@@ -79,7 +79,7 @@
   <main>
     <h1 class="page-title">Banka Kârlılık Analizi</h1>
     <div class="update-info" id="updated"></div>
-    <div class="info-box" id="ozet">📋 2026 Ç3 solo finansal tablolar, 24 banka: toplam net kâr 565,8 milyar TL (yıllık +12,3%, aynı banka seti); medyan ROE %20,1, ROA %1,67. En yüksek net kâr: Ziraat 124,5 mlr, Garanti 97,2 mlr, Deniz 46,6 mlr.</div>
+    <div class="info-box" id="ozet">📋 2026 Ç3 solo finansal tablolar, 26 banka: toplam net kâr 587,7 milyar TL (yıllık +12,7%, aynı banka seti); medyan ROE %20,7, ROA %1,78. En yüksek net kâr: Ziraat 124,5 mlr, Garanti 97,2 mlr, Deniz 46,6 mlr.</div>
 
     <div class="chips sekmeler" id="sekmeChips"></div>
     <div class="ctl-bar" id="ustKontrol">
@@ -219,7 +219,8 @@
         <li><b>(Yükümlülükler − Özkaynak) / Özkaynak</b> (Özet Tablo) = (yükümlülükler toplamı − özkaynaklar) / dönem sonu özkaynaklar, kat olarak (ör. 10,8x). Bilançoda yükümlülükler toplamı aktif toplamına eşittir; pay bankanın yabancı kaynaklarıdır. Yüksek değer daha yüksek kaldıraç, düşük değer daha güçlü özkaynak tamponu demektir.</li>
         <li><b>Op. gelir</b> = net faiz geliri + net ücret/komisyon + ticari kâr/zarar. <b>Maliyet/gelir</b> = (personel + diğer faaliyet giderleri) / (op. gelir + diğer faaliyet gelirleri).</li>
         <li><b>MDC</b> = gerçeğe uygun değer farkı kâr/zarara yansıtılan + diğer kapsamlı gelire yansıtılan + itfa edilmiş maliyetle ölçülen finansal varlıklar.</li>
-        <li><b>Katılım bankaları</b> (Ziraat Katılım, Albaraka Türk): faiz kalemleri kâr payı gelir/giderlerine, mevduat toplanan fonlara karşılık gelir; aynı başlıklar altında gösterilir.</li>
+        <li><b>Katılım bankaları</b> (Ziraat Katılım, Türkiye Finans, Albaraka Türk): faiz kalemleri kâr payı gelir/giderlerine, mevduat toplanan fonlara karşılık gelir; aynı başlıklar altında gösterilir.</li>
+        <li><b>Sunum farkı:</b> Citibank 2025 sonuna kadar diğer karşılık giderlerini beklenen zarar karşılıkları satırında birlikte raporlamıştır; 2026'dan itibaren yalnız beklenen zarar karşılıkları gösterilir (2026 Ç1 değeri bankanın 2026 Ç2 raporundaki ayrımdan hesaplanmıştır). Bu bankanın karşılık gideri 2026 öncesiyle birebir karşılaştırılamaz.</li>
         <li><b>Faaliyet bölümü kategorileri</b> bankaların kendi bölüm adlarından türetilir (Bireysel/Perakende, Kurumsal/Ticari/KOBİ, Hazine/Yatırım, Diğer); bankalar arasında tanım farkları olabilir. Net kâr satırı vermeyen tablolarda vergi öncesi kâr ile vergi kaleminden türetilir ve bu durum belirtilir.</li>
         <li>Toplamlar ve medyanlar yalnız o dönemde raporlayan bankalar üzerinden hesaplanır; yıllık değişimler her iki dönemde de verisi olan banka setiyle alınır. Bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.</li>
       </ul>
@@ -699,7 +700,7 @@
         return "—";
       };
       const degisimKisa = (a, b) => { const d = degisim(a, b); return d === null ? "—" : d.startsWith("zarar ") ? d.replace(/ \(.*\)$/, "") : d; };
-      const RAPOR_AD = { "YapıKredi": "Yapı Kredi", "İşbankası": "İş Bankası", "Garanti Bankası": "Garanti", "Fibabank": "Fibabanka", "BurganBank": "Burgan Bank", "Aktifbank": "Aktif Bank", "Nurolbank": "Nurol Bank", "Misyonbank": "Misyon Bank", "DYatirim": "D Yatırım Bankası", "ZiraatKatilim": "Ziraat Katılım", "ZiraatDinamik": "Ziraat Dinamik", "Albaraka": "Albaraka Türk" };
+      const RAPOR_AD = { "YapıKredi": "Yapı Kredi", "İşbankası": "İş Bankası", "Garanti Bankası": "Garanti", "Fibabank": "Fibabanka", "BurganBank": "Burgan Bank", "Aktifbank": "Aktif Bank", "Nurolbank": "Nurol Bank", "Misyonbank": "Misyon Bank", "DYatirim": "D Yatırım Bankası", "ZiraatKatilim": "Ziraat Katılım", "ZiraatDinamik": "Ziraat Dinamik", "Albaraka": "Albaraka Türk", "TurkiyeFinans": "Türkiye Finans" };
       const RAD = b => RAPOR_AD[b] || b;   // rapor metninde kısaltma değil okunur ad (kullanıcı 03.11: "YKB"yi göremedi)
       const mlr = v => num(v) === null ? "—" : Math.abs(v) >= 1000 ? trNum(v / 1000, 1) + " milyar TL" : trNum(v, 0) + " milyon TL";
       const mlrS = v => num(v) === null ? "—" : (v < 0 ? "−" : "+") + mlr(Math.abs(v));

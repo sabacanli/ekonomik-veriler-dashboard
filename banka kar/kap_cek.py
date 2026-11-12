@@ -42,12 +42,13 @@ ARAMA = {
     "Misyonbank": ("misyon yatırım", r"^misyon yatirim bankasi"), "DYatirim": ("d yatırım", r"^d yatirim bankasi"),
     "ZiraatKatilim": ("ziraat katılım", r"^ziraat katilim bankasi"), "Albaraka": ("albaraka", r"^albaraka turk"),
     "ZiraatDinamik": ("ziraat dinamik", r"^ziraat dinamik"),
+    "TurkiyeFinans": ("TÜRKİYE FİNANS", r"^turkiye finans katilim bankasi"), "Citibank": ("CITIBANK", r"^citibank"),
 }
 CEYREK = {"3 Aylık": 1, "6 Aylık": 2, "9 Aylık": 3, "Yıllık": 4}
 # KAP'taki PDF'i okunamayan banka-dönemler (her çalıştırmada yeniden indirilmesin): tablolar metin değil (Fibabanka), ek dosya konsolide
-# (Burgan), cari dönem sütunu ayrıştırılamıyor (D Yatırım). `--donemler` ile yine de indirilebilir.
-OKUNAMAYAN = {("Fibabank", "2021Q2"), ("Fibabank", "2025Q3"), ("BurganBank", "2021Q2"),
-              ("DYatirim", "2022Q3"), ("DYatirim", "2022Q4"), ("DYatirim", "2023Q1")}
+# (Burgan). `--donemler` ile yine de indirilebilir. D Yatırım 2022Ç3–2023Ç1 (önceki dönemi ayrı sayfada sunulan raporlar) 12.11.2026'da
+# okuyucuya "tek dönemli sayfa" desteği eklenince okundu ve listeden çıkarıldı.
+OKUNAMAYAN = {("Fibabank", "2021Q2"), ("Fibabank", "2025Q3"), ("BurganBank", "2021Q2")}
 
 
 def _sade(s):

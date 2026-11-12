@@ -55,7 +55,11 @@ UST = {"fwd_a": "fwd", "fwd_s": "fwd", "ps_a": "swp", "ps_s": "swp", "fs_a": "sw
 VARSAYILAN = ["Aktifbank", "Fibabank", "BurganBank", "Odeabank", "Anadolubank"]   # orta ölçekli grup (sayfa açılışı)
 GORUNEN = {"YapıKredi": "Yapı Kredi", "İşbankası": "İş Bankası", "Garanti Bankası": "Garanti", "Fibabank": "Fibabanka", "BurganBank": "Burgan Bank",
            "Aktifbank": "Aktif Bank", "Nurolbank": "Nurol Bank", "Misyonbank": "Misyon Bank", "DYatirim": "D Yatırım Bankası",
-           "ZiraatKatilim": "Ziraat Katılım", "ZiraatDinamik": "Ziraat Dinamik", "Albaraka": "Albaraka Türk"}
+           "ZiraatKatilim": "Ziraat Katılım", "ZiraatDinamik": "Ziraat Dinamik", "Albaraka": "Albaraka Türk", "TurkiyeFinans": "Türkiye Finans"}
+# Bankanın kendi sunumundan kaynaklanan seri kırılmaları: {banka: (notun geçerli olduğu son dönem, kaynak notu)}.
+# Türkiye Finans nazım tablosunda para swaplarını 2026 Ç2'den itibaren ayrı satırda gösteriyor; o raporda 2025 Ç4 karşılaştırması da
+# yeniden sınıflanmış (vadeli alım-satım 481,9 → 374,9 milyar TL + para swapı 107,0 milyar TL). Önceki raporlar olduğu gibi tutulur.
+SUNUM_NOT = {"TurkiyeFinans": ("2026Q1", "para swapları 2026 Ç2 öncesinde ayrı satırda gösterilmemiş, vadeli alım-satım içinde raporlanmıştır")}
 
 
 def _tn(s):
@@ -281,6 +285,10 @@ def build(con, wide, banks_meta, out, buyuk=()):
                     yaz(p, b, k, e.get("kaynak") or ek.get("kaynak"))
         except Exception as ex:
             print(f"  ~ turev_ek.json okunamadı ({type(ex).__name__}: {str(ex)[:80]})")
+    for b, (son_p, metin) in SUNUM_NOT.items():
+        for p in veri:
+            if b in veri[p] and pkey(p) <= pkey(son_p) and b not in notlar.get(p, {}):
+                notlar.setdefault(p, {})[b] = metin
     periods = sorted(veri, key=pkey)
     r1 = lambda v: None if v is None else round(v / 1000, 1)        # bin TL → mn TL
     paket = {}
