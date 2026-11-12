@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="assets/style.css?v=33">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>.api-not { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; line-height: 1.5; }</style>
 </head>
 <body>
   <button id="menuBtn">☰</button>
@@ -34,6 +35,34 @@
     <h1 class="page-title">TCMB Doğrudan Alım</h1>
     <div class="update-info" id="updated"></div>
     <div class="info-box" id="ozet">📋 06.11.2026 itibarıyla 2026 yılında doğrudan alım ihalelerinde toplam 373,2 milyar TL (nominal) işlem yapıldı (283 işlem). Son 3 ayın tutar ağırlıklı ortalama bileşik faizi %38,84.</div>
+
+    <section class="chart-card" id="secApi1">
+      <h3>APİ Portföyü ve Doğrudan Alımlar</h3>
+      <p class="cap" id="capApi1">Nominal, milyar TL</p>
+      <button class="btn apko-btn" data-sec="secApi1">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secApi1">🖼 Resim olarak kopyala</button>
+      <div class="chips api-yil" style="margin:8px 0 4px"></div>
+      <div id="chApi1"></div>
+      <p class="api-not" id="notApi1"></p>
+    </section>
+
+    <section class="chart-card" id="secApi2">
+      <h3>APİ Portföyünün TCMB Analitik Bilanço Aktif Büyüklüğüne Oranı</h3>
+      <p class="cap" id="capApi2">%</p>
+      <button class="btn apko-btn" data-sec="secApi2">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secApi2">🖼 Resim olarak kopyala</button>
+      <div class="range" id="rngApi2" style="margin:8px 0 4px"></div>
+      <div id="chApi2"></div>
+    </section>
+
+    <section class="chart-card" id="secApi3">
+      <h3>APİ Portföyü ve Doğrudan Alım İhaleleri — Ortalama Vade</h3>
+      <p class="cap" id="capApi3">Yıl, nominal ağırlıklı ortalama</p>
+      <button class="btn apko-btn" data-sec="secApi3">🖨 Beyaz zemin (sunum)</button>
+      <button class="btn resim-btn" data-sec="secApi3">🖼 Resim olarak kopyala</button>
+      <div class="chips api-yil" style="margin:8px 0 4px"></div>
+      <div id="chApi3"></div>
+    </section>
 
     <div class="filter-box">
       <div class="filter-lbl">Yıllar</div>
@@ -104,7 +133,9 @@
 
     <footer>Kaynak: Doğrudan alım ihale sonuçları · Tutarlar Bin TL kaynaklı (görünümlerde
       Milyon/Milyar TL) · Stok ve itfa takvimi bu işlem verisinden hesaplanır; vade = valörden
-      itfaya kalan süredir. PY = piyasa yapıcı ihaleleri.</footer>
+      itfaya kalan süredir. PY = piyasa yapıcı ihaleleri. · APİ portföyü ihale ile alınan kıymetlerden
+      hesaplanır; bilanço oranında payda analitik bilanço aktif toplamıdır (EVDS). Kıymet türü Hazine ihale
+      verisinden: sabit kuponlu (sabit kiralı kira sertifikaları dahil) ve TLREF endeksli (TLREFK kira sertifikaları dahil).</footer>
   </main>
 
   <script src="assets/app.js?v=36"></script>
@@ -422,6 +453,111 @@
 
         matIdx = idx;
         aylikTabloCiz();
+      }
+
+      /* ── APİ portföyü: TCMB Enflasyon Raporu 2026-IV Kutu 1.1'deki üç grafiğin bu sayfanın verisinden karşılığı ──
+         Portföy, ihale ile alınan kıymetlerden yeniden kurulur (valör ≤ gün < itfa); TCMB'nin açıkladığı tutar ihale dışı
+         edinilen kıymetler nedeniyle yaklaşık %1 yüksektir (işaretler: resmî açıklanan değerler). */
+      const A = D.api, TEMA = {}, CIZ = {};
+      if (!A) {
+        ["secApi1", "secApi2", "secApi3"].forEach(id => { document.getElementById(id).style.display = "none"; });
+      } else {
+        const TURLER = [["Sabit kuponlu", C.hisse], ["TLREF endeksli", C.euro], ["Diğer", C.ost]];
+        const apiYillar = [...new Set(A.t.map(x => +x.slice(0, 4)))].sort((a, b) => a - b);
+        let apiYil = apiYillar[apiYillar.length - 1], api2Bas = Math.max(2020, apiYillar[0]);
+        const sonIdx = yil => { let k = -1; for (let i = 0; i < A.t.length; i++) if (+A.t[i].slice(0, 4) === yil) k = i; return k; };
+        const trTarih = x => x.split("-").reverse().join(".");
+
+        CIZ.secApi1 = () => {
+          const y = apiYil, gi = [];
+          for (let i = 0; i < A.t.length; i++) if (+A.t[i].slice(0, 4) === y) gi.push(i);
+          const ay = TURLER.map(() => Array(12).fill(0));
+          for (let i = 0; i < N; i++) {
+            if (yilOf(i) !== y) continue;
+            let k = TURLER.findIndex(t => t[0] === I.tur[i]); if (k < 0) k = TURLER.length - 1;
+            ay[k][+I.t[i].slice(5, 7) - 1] += (I.nom[i] || 0) / 1e6;
+          }
+          const orta = AYK.map((_, m) => y + "-" + String(m + 1).padStart(2, "0") + "-15");
+          const toplam = orta.map((_, m) => ay.reduce((s_, a) => s_ + a[m], 0)), yilTop = toplam.reduce((a, b) => a + b, 0);
+          const izler = TURLER.map((t, k) => ({
+            type: "bar", name: t[0] + " alım (sağ)", x: orta, y: ay[k].map(v => v > 0 ? v : null), yaxis: "y2",
+            marker: { color: t[1] }, width: 19 * 86400000,
+            hovertemplate: "%{x|%m.%Y}<br>" + t[0] + ": %{y:,.1f} milyar TL<extra></extra>",
+          })).filter(tr => tr.y.some(v => v !== null));
+          izler.push({ type: "scatter", mode: "text", x: orta, y: toplam.map(v => v > 0 ? v : null), text: toplam.map(v => v > 0 ? trNum(v, 0) : ""),
+            textposition: "top center", yaxis: "y2", showlegend: false, hoverinfo: "skip", cliponaxis: false,
+            textfont: Object.assign({ size: 12.5, color: C.hisse }, ANN_FONT) });
+          izler.push({ type: "scatter", mode: "lines", name: "APİ portföyü (sol)", x: gi.map(i => A.t[i]), y: gi.map(i => A.portfoy[i]),
+            line: { color: C.toplam, width: 2.8 }, hovertemplate: "%{x|%d.%m.%Y}<br>Portföy: %{y:,.1f} milyar TL<extra></extra>" });
+          const R = A.resmi || {}, rp = (R.portfoy || []).filter(r => +r[0].slice(0, 4) === y);
+          if (rp.length) izler.push({ type: "scatter", mode: "markers", name: "TCMB'nin açıkladığı", x: rp.map(r => r[0]), y: rp.map(r => r[1]),
+            marker: { symbol: "circle-open", size: 11, color: C.toplam, line: { width: 2.2, color: C.toplam } },
+            hovertemplate: "%{x|%d.%m.%Y}<br>TCMB açıklaması: %{y:,.1f} milyar TL<extra></extra>" });
+          const son = gi.length ? gi[gi.length - 1] : -1, hedef = R.hedef && R.hedef[y];
+          const ann = son >= 0 ? [{ x: A.t[son], y: A.portfoy[son], text: trNum(A.portfoy[son], 1), showarrow: false, xanchor: "right", xshift: -8, yshift: 11,   // sol-üstte: dar ekranda sağ eksen etiketine binmesin
+            font: Object.assign({ size: 13.5, color: C.toplam }, ANN_FONT) }] : [];
+          const sekil = [];
+          if (hedef) {
+            sekil.push({ type: "line", xref: "paper", x0: 0, x1: 1, yref: "y", y0: hedef, y1: hedef, line: { color: C.ost, width: 1.4, dash: "dot" } });
+            ann.push({ xref: "paper", x: 0.005, xanchor: "left", y: hedef, yshift: 9, text: y + " hedefi: " + trNum(hedef, 0), showarrow: false, font: { size: 11.5, color: C.ost } });
+          }
+          const b0 = gi.length ? A.portfoy[gi[0]] : null;
+          document.getElementById("capApi1").textContent = y + " · nominal, milyar TL · çizgi: APİ portföyü (sol eksen) · sütunlar: aylık doğrudan alım, kıymet türüne göre (sağ eksen)" +
+            (yilTop > 0 ? " · yıl içi alım " + trNum(yilTop, 1) : "") + (son >= 0 ? " · portföy " + (b0 !== null ? trNum(b0, 1) + " → " : "") + trNum(A.portfoy[son], 1) + " (" + trTarih(A.t[son]) + ")" : "");
+          document.getElementById("notApi1").textContent = "Portföy, ihale ile gerçekleştirilen doğrudan alımlardan hesaplanır (valör tarihinden itfaya kadar stokta)." +
+            (rp.length ? " TCMB'nin açıkladığı tutar (" + rp.map(r => trTarih(r[0]) + ": " + trNum(r[1], 1)).join(" · ") + " milyar TL) ihale dışı edinilen kıymetler nedeniyle yaklaşık %1 yüksektir." : "") +
+            (R.kaynak ? " Resmî değerlerin kaynağı: " + R.kaynak + "." : "");
+          return draw("chApi1", izler, {
+            height: 430, barmode: "stack", margin: { l: 62, r: 62, t: 26, b: 44 }, annotations: ann, shapes: sekil,
+            xaxis: { type: "date", range: [y + "-01-01", y + "-12-31"], tickvals: AYK.map((_, m) => y + "-" + String(m + 1).padStart(2, "0") + "-15"), ticktext: AYK },
+            yaxis: { tickformat: ",.0f" },
+            yaxis2: { overlaying: "y", side: "right", showgrid: false, rangemode: "tozero", tickformat: ",.0f", range: [0, Math.max(10, ...toplam) * 1.22] },
+          }, TEMA.secApi1);
+        };
+
+        CIZ.secApi2 = () => {
+          const gi = [];
+          for (let i = 0; i < A.t.length; i++) if (+A.t[i].slice(0, 4) >= api2Bas && A.oran[i] !== null) gi.push(i);
+          const x = gi.map(i => A.t[i]), son = gi[gi.length - 1];
+          document.getElementById("capApi2").textContent = "% · APİ portföyü (nominal) / analitik bilanço aktif toplamı, günlük · kesikli çizgi: " + A.oran_ort_bas +
+            " yılından bu yana ortalama (%" + trNum(A.oran_ort, 1) + ") · son: %" + trNum(A.oran[son], 1) + " (" + trTarih(A.t[son]) + ")";
+          return draw("chApi2", [
+            { type: "scatter", mode: "lines", name: "APİ portföyü / aktif", x: x, y: gi.map(i => A.oran[i]), line: { color: C.hisse, width: 2.2 },
+              hovertemplate: "%{x|%d.%m.%Y}<br>%%{y:.2f}<extra></extra>" },
+            { type: "scatter", mode: "lines", name: A.oran_ort_bas + "'dan beri ortalama", x: [x[0], x[x.length - 1]], y: [A.oran_ort, A.oran_ort],
+              line: { color: C.toplam, width: 2, dash: "dot" }, hoverinfo: "skip" },
+          ], { height: 400, margin: { l: 56, r: 56, t: 26, b: 44 }, yaxis: { tickprefix: "%", rangemode: "tozero" },
+               annotations: [{ x: A.t[son], y: A.oran[son], text: "%" + trNum(A.oran[son], 1), showarrow: false, xanchor: "left", xshift: 6, yshift: 8,
+                 font: Object.assign({ size: 13.5, color: C.hisse }, ANN_FONT) }] }, TEMA.secApi2);
+        };
+
+        CIZ.secApi3 = () => {
+          const y = apiYil, gi = [], H = A.alim_hafta, hi = [];
+          for (let i = 0; i < A.t.length; i++) if (+A.t[i].slice(0, 4) === y && A.vade[i] !== null) gi.push(i);
+          for (let i = 0; i < H.t.length; i++) if (+H.t[i].slice(0, 4) === y && H.vade[i] !== null) hi.push(i);
+          const son = gi[gi.length - 1];
+          document.getElementById("capApi3").textContent = y + " · yıl, nominal ağırlıklı ortalama · çizgi: portföyün kalan vadesi" +
+            (gi.length ? " (" + trNum(A.vade[gi[0]], 1) + " → " + trNum(A.vade[son], 1) + " yıl)" : "") + " · noktalar: o hafta yapılan doğrudan alımların ortalama vadesi";
+          return draw("chApi3", [
+            { type: "scatter", mode: "lines", name: "APİ portföyü", x: gi.map(i => A.t[i]), y: gi.map(i => A.vade[i]), line: { color: C.hisse, width: 2.6 },
+              hovertemplate: "%{x|%d.%m.%Y}<br>Portföy: %{y:.2f} yıl<extra></extra>" },
+            { type: "scatter", mode: "markers", name: "Doğrudan alımlar (haftalık)", x: hi.map(i => H.t[i]), y: hi.map(i => H.vade[i]),
+              marker: { size: 10, color: C.toplam }, customdata: hi.map(i => H.nom[i]),
+              hovertemplate: "%{x|%d.%m.%Y} haftası<br>Ortalama vade: %{y:.2f} yıl<br>Alım: %{customdata:,.1f} milyar TL<extra></extra>" },
+          ], { height: 400, margin: { l: 50, r: 30, t: 26, b: 44 }, yaxis: { rangemode: "tozero", dtick: 1 },
+               xaxis: { type: "date", range: [y + "-01-01", y + "-12-31"], tickvals: AYK.map((_, m) => y + "-" + String(m + 1).padStart(2, "0") + "-01"), ticktext: AYK } }, TEMA.secApi3);
+        };
+
+        document.querySelectorAll(".api-yil").forEach(el => {
+          el.innerHTML = apiYillar.map(y => '<span class="chip" data-v="' + y + '">' + y + "</span>").join("");
+          el.querySelectorAll(".chip").forEach(c => { c.onclick = () => { apiYil = +c.dataset.v; apiYilBoya(); CIZ.secApi1(); CIZ.secApi3(); }; });
+        });
+        const apiYilBoya = () => document.querySelectorAll(".api-yil .chip").forEach(c => c.classList.toggle("active", +c.dataset.v === apiYil));
+        apiYilBoya();
+        rangeCtl(document.getElementById("rngApi2"), [[apiYillar[0] + "'dan beri", apiYillar[0]], ["2020'den beri", 2020], ["Son 3 yıl", apiYillar[apiYillar.length - 1] - 2]],
+          api2Bas, n => { api2Bas = n; CIZ.secApi2(); });
+        CIZ.secApi1(); CIZ.secApi2(); CIZ.secApi3();
+        sunumAraclariKur(TEMA, CIZ);   // tablo kartının düğmeleri aşağıda tabloSunumKur ile yeniden bağlanır
       }
 
       const olcuEl = document.getElementById("aylikOlcu");

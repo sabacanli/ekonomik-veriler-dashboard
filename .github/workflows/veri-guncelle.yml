@@ -72,6 +72,7 @@ jobs:
           calistir "Hazine İhale — analiz"   "hazine ihale /hazine_analiz.py"
           calistir "Hazine İhale — ödeme"    "hazine ihale /hazine_odeme.py"
           calistir "TCMB Doğrudan Alım"      "tcmb dogrudan alım/guncelle.py"
+          calistir "Analitik Bilanço Aktif"  "tcmb dogrudan alım/analitik_fetch.py"
           calistir "Para Politikası"         "tcmb faiz/tcmb_faiz_fetch.py"
           echo ""
           echo "Başarısız modüller:${FAILS:- (yok — hepsi güncellendi)}"

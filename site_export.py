@@ -15,6 +15,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 BASE = Path(__file__).parent
@@ -930,7 +931,77 @@ def build_tcmb_alim():
         # İşlem bazlı kayıtlar (sayfadaki filtreli analizlerin ham verisi).
         # Birimler: tutarlar Bin TL, faiz %, vade gün (valörden itfaya).
         "islemler": _alim_islemler(d),
+        # APİ portföyü (ihale verisinden yeniden kurulur), bilanço aktifine oranı, ortalama vade — TCMB Enflasyon Raporu
+        # 2026-IV Kutu 1.1'deki üç grafiğin karşılığı; analitik_aktif.csv yoksa None (sayfa bu kartları gizler)
+        "api": _alim_api(d),
     })
+
+
+ALIM_TUR = {"TLREF Endeksli Senetler": "TLREF endeksli", "TL Cinsi Kira Sertifikalari": "kira",
+            "TL Cinsi Kuponsuz Senetler": "Kuponsuz", "TL Cinsi TUFE Endeksli Senetler": "TÜFE endeksli",
+            "TL Cinsi Sabit Faizli Kuponlu S": "Sabit kuponlu", "TL Cinsi Degisken Faizli Kuponl": "Değişken faizli"}
+
+
+def _alim_tur(d):
+    """Her doğrudan alım işleminin kıymet türü. ISIN → tür eşlemesi Hazine ihale verisinin tür sayfalarından; kira sertifikaları
+    borçlanma programında "TLREFK'ye Endeksli" diye geçen itfa tarihindeyse TLREF endeksli, değilse sabit (kira) sayılır —
+    TCMB de "sabit kuponlu" ve "TLREF/TLREFK endeksli" diye ikiye ayırıyor."""
+    harita, tlrefk = {}, set()
+    try:
+        fp = BASE / "hazine ihale " / "hazine_ihale_verileri.xlsx"
+        for sayfa, tur in ALIM_TUR.items():
+            t = pd.read_excel(fp, sheet_name=sayfa, header=1)
+            for i in t["ISIN Kodu"].dropna().astype(str):
+                harita.setdefault(i.strip(), tur)
+        prog = json.loads((BASE / "hazine ihale " / "borclanma programi" / "program.json").read_text(encoding="utf-8"))
+        tlrefk = {k.get("itfa") for k in prog.get("ihale_takvimi", []) if "TLREFK" in str(k.get("senet", ""))}
+    except Exception as e:
+        print(f"  ~ tcmb_alim: kıymet türü eşlemesi kurulamadı ({type(e).__name__}: {str(e)[:80]})")
+    out = []
+    for isin, vade in zip(d["Tanım (ISIN)"], d["Vade"]):
+        t = harita.get(str(isin).strip())
+        if t == "kira":
+            t = "TLREF endeksli" if (pd.notna(vade) and vade.strftime("%Y-%m-%d") in tlrefk) else "Sabit kuponlu"
+        out.append(t or "Diğer")
+    return out
+
+
+def _alim_api(d):
+    """APİ portföyü: ihale ile alınan kıymetlerden günlük nominal stok (valör ≤ gün < itfa), nominal ağırlıklı ortalama kalan vade
+    ve stokun analitik bilanço aktif toplamına (EVDS TP.AB.A01) oranı; haftalık alımların ortalama vadesi; resmî açıklanan
+    referans değerler (resmi_referans.json). TCMB'nin açıkladığı portföy, ihale dışı edinilen kıymetler nedeniyle ~%1 yüksektir."""
+    kl = BASE / "tcmb dogrudan alım"
+    try:
+        ak = pd.read_csv(kl / "analitik_aktif.csv", parse_dates=["tarih"]).dropna().sort_values("tarih")
+    except Exception as e:
+        print(f"  ~ tcmb_alim: analitik_aktif.csv okunamadı ({type(e).__name__}) — APİ grafikleri atlandı")
+        return None
+    h = d.dropna(subset=["Valör", "Vade"])
+    v = h["Valör"].values.astype("datetime64[D]").astype("int64")
+    e = h["Vade"].values.astype("datetime64[D]").astype("int64")
+    nom = h["Kazanan Tutar (Nominal)"].fillna(0).values / 1e6          # mlr TL
+    t = ak["tarih"].values.astype("datetime64[D]").astype("int64")
+    M = (v[None, :] <= t[:, None]) & (e[None, :] > t[:, None])
+    port = (M * nom).sum(1)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        kalan = ((e[None, :] - t[:, None]) * M * nom).sum(1) / port / 365.25
+        oran = port / (ak["aktif_bin_tl"].values / 1e6) * 100
+    hf = h.assign(_vy=(h["Vade"] - h["Valör"]).dt.days / 365.25, _nom=h["Kazanan Tutar (Nominal)"] / 1e6)
+    hg = hf.groupby(hf["İşlem Tarihi"].dt.to_period("W-FRI"))
+    hafta = pd.DataFrame({"nom": hg["_nom"].sum(), "vade": hg.apply(lambda g: _wavg(g["_vy"], g["_nom"]))})
+    resmi = None
+    try:
+        resmi = json.loads((kl / "resmi_referans.json").read_text(encoding="utf-8"))
+    except Exception:
+        pass
+    r = lambda a, n: [None if (x != x) else round(float(x), n) for x in a]
+    return {
+        "t": [x.strftime("%Y-%m-%d") for x in ak["tarih"]],
+        "portfoy": r(port, 1), "vade": r(kalan, 2), "oran": r(oran, 3),
+        "oran_ort": round(float(np.nanmean(oran)), 2), "oran_ort_bas": int(ak["tarih"].iloc[0].year),
+        "alim_hafta": {"t": [p.end_time.strftime("%Y-%m-%d") for p in hafta.index], "vade": r(hafta["vade"], 2), "nom": r(hafta["nom"], 1)},
+        "resmi": resmi,
+    }
 
 
 def _alim_islemler(d):
@@ -951,6 +1022,7 @@ def _alim_islemler(d):
         "faiz": num(d["Ortalama Bileşik Faiz"], 2),
         "isin": [None if pd.isna(x) else str(x) for x in d["Tanım (ISIN)"]],
         "yontem": [YONTEM.get(str(x).strip(), str(x)) for x in d["Yöntem"]],
+        "tur": _alim_tur(d),
     }
 
 

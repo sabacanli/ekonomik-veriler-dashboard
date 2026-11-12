@@ -1,0 +1,6 @@
+{
+ "aciklama": "TCMB'nin açıkladığı APİ portföyü büyüklükleri (nominal, milyar TL) ve yıllık portföy hedefi; grafikte karşılaştırma işareti olarak gösterilir. Yeni bir resmî rakam yayımlandıkça eklenir.",
+ "kaynak": "TCMB Enflasyon Raporu 2026-IV, Kutu 1.1; 2026 Yılı Para Politikası metni",
+ "portfoy": [["2026-01-01", 262.3], ["2026-11-09", 567.9]],
+ "hedef": {"2026": 450}
+}
