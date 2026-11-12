@@ -1,6 +1,8 @@
 #!/bin/zsh
-# Günlük otomatik KAP kontrolü — launchd her gün 09:20, 14:20 ve 17:40'ta çalıştırır
-# (~/Library/LaunchAgents/com.ekordion.kap.plist; log: ~/Library/Logs/ekordion-kap.log).
+# Otomatik KAP kontrolü — launchd yalnız rapor aylarında (Şubat, Mayıs, Ağustos, Kasım) her gün 09:00'da çalıştırır
+# (~/Library/LaunchAgents/com.ekordion.kap.plist; log: ~/Library/Logs/ekordion-kap.log). Kullanıcı tercihi (12.11.2026):
+# her gün kontrol gereksiz. O aylardan sonra yayımlanan rapor (ör. Mart'ta gelen yıllık rapor) bir sonraki rapor ayında alınır,
+# çünkü her koşu son İKİ çeyreğe bakar.
 #
 # Bankaların yeni yayımlanan solo finansal raporlarını KAP'tan indirir, doğrular, veritabanına yükler ve
 # siteyi yayımlar (banka kar/kap_otomatik.py). Yeni rapor yoksa hiçbir şey değişmez; doğrulamadan geçemeyen

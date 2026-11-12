@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Günlük otomatik KAP kontrolü: yeni yayımlanan solo finansal raporları indirir, doğrular, veritabanına yükler ve siteyi yayımlar.
+"""Otomatik KAP kontrolü: yeni yayımlanan solo finansal raporları indirir, doğrular, veritabanına yükler ve siteyi yayımlar.
 
-launchd her gün iki kez çalıştırır (~/Library/LaunchAgents/com.ekordion.kap.plist → banka_kap_otomatik.sh → bu betik).
+launchd rapor aylarında (Şubat, Mayıs, Ağustos, Kasım) her gün 09:00'da çalıştırır
+(~/Library/LaunchAgents/com.ekordion.kap.plist → banka_kap_otomatik.sh → bu betik).
 
   python3 "banka kar/kap_otomatik.py"            # normal koşu
   python3 "banka kar/kap_otomatik.py" --kuru --dene TSKB 2026Q3   # sınama: indir + doğrula, kaydetme / yayımlama
