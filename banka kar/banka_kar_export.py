@@ -71,6 +71,7 @@ TAM_AD = {  # özet tablo / Excel için unvanlar (kullanıcının "Sektör Sonu�
     "ZiraatKatilim": "Ziraat Katılım Bankası A.Ş.", "Albaraka": "Albaraka Türk Katılım Bankası A.Ş.", "ZiraatDinamik": "Ziraat Dinamik Banka A.Ş.",
 }
 DONEM_SONU = {"1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12"}
+ILK_DONEM = "2021Q1"   # sitede gösterilen ilk dönem
 SEGMENT_CATEGORIES = [
     ("Hazine / Yatırım", ["hazine", "aktif pasif", "yatırım bankacılığı", "sermaye piyasa"]),
     ("Bireysel / Perakende", ["bireysel", "perakende", "özel bankacılık", "dijital"]),
@@ -190,7 +191,8 @@ MDC_SINIF = {"asa": r"^gercege uygun deger farki kar ?/? ?zarara yansitilan fina
 
 
 def mdc_kirilim(con):
-    """{period: {bank: {dibs/diger/toplam: {asa/sh/vket: [tp, yp]}, total}}} (mn TL); PDF'in önceki yıl sütunu da kullanılır."""
+    """{period: {bank: {dibs/diger/toplam: {asa/sh/vket: [tp, yp]}, total}}} (mn TL); raporu olmayan yıl sonu için izleyen yılın
+    raporundaki önceki dönem sütunu kullanılır."""
     rows = con.execute("SELECT bank, period, code, label, tp, yp, total, tp_prev, yp_prev, total_prev FROM fin_rows "
                        "WHERE stmt='BS' AND section='A' AND code IS NOT NULL ORDER BY bank, period, ord").fetchall()
     grup = {}
@@ -198,10 +200,13 @@ def mdc_kirilim(con):
         grup.setdefault((r[0], r[1]), []).append(r)
     by = {}   # (bank, period) -> {sinif: {"ana": (tp, yp, tot), "dibs": (tp, yp, tot)}}
     for (b, p), lst in grup.items():
-        y, q = period_key(p); pp = f"{y-1}Q{q}"
+        y, q = period_key(p); pp = f"{y-1}Q4"   # bilançonun önceki dönem sütunu geçen YIL SONUdur (aynı çeyrek değil)
         cur, prv = {}, {}
         for sinif, rx in MDC_SINIF.items():
             ana = next((r for r in lst if re.search(rx, _n(r[3]))), None)
+            if ana is None and sinif in ("asa", "sh"):   # sarmalı etiket bozulmuşsa BDDK şablon koduyla (1.2 / 1.3)
+                kod0 = {"asa": "1.2", "sh": "1.3"}[sinif]
+                ana = next((r for r in lst if str(r[2]) == kod0 and re.search(r"yansitilan|finansal varlik", _n(r[3]))), None)
             if ana is None:
                 continue
             kod = str(ana[2])
@@ -393,7 +398,8 @@ def build(out=OUT):
         print("  ~ banka.db yok (kaynak uygulama bu makinede değil) — banka_kar.json korunuyor")
         return False
     con = sqlite3.connect(db)
-    rows = con.execute("SELECT bank, period, metric, value FROM metrics").fetchall()
+    # 2021'den önceki dönemler yalnız 2021 raporlarının "önceki dönem" sütunundan gelir (Ç1–Ç3'te bilanço yok) → sitede gösterilmez
+    rows = con.execute("SELECT bank, period, metric, value FROM metrics WHERE period >= ?", (ILK_DONEM,)).fetchall()
     wide = {}
     for b, p, m, v in rows:
         if v is None:

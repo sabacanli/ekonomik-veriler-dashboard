@@ -211,16 +211,22 @@ def kalemler(rows, ondeki=False):
     return out, notlar
 
 
+# Yerel günlük kur dosyası 03.01.2022'de başlar; öncesi için EVDS ay sonu değerleri (TP.DK.USD.A.YTL, 12.11.2026'da doğrulandı)
+KUR_ESKI = {"2020Q4": 7.3405, "2021Q1": 8.3260, "2021Q2": 8.7052, "2021Q3": 8.8433, "2021Q4": 12.9775}
+
+
 def kur_donem_sonu(periods):
-    """Dönem sonu USD/TL (TCMB döviz alış; dönem sonundaki ya da öncesindeki son gözlem). Dosya yoksa {}."""
+    """Dönem sonu USD/TL (TCMB döviz alış; dönem sonundaki ya da öncesindeki son gözlem). Dosya yoksa yalnız KUR_ESKI."""
     try:
         import pandas as pd
         g = pd.read_excel(KUR_XLSX, sheet_name="Gunluk")[["tarih", "usd"]].dropna()
         g["tarih"] = pd.to_datetime(g["tarih"]); g = g.sort_values("tarih")
     except Exception:
-        return {}
+        return {p: KUR_ESKI[p] for p in periods if p in KUR_ESKI}
     out = {}
     for p in periods:
+        if p in KUR_ESKI:
+            out[p] = KUR_ESKI[p]; continue
         y, q = pkey(p)
         son = pd.Timestamp(year=y, month=q * 3, day=1) + pd.offsets.MonthEnd(0)
         once = g[g["tarih"] <= son]

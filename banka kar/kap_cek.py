@@ -44,6 +44,10 @@ ARAMA = {
     "ZiraatDinamik": ("ziraat dinamik", r"^ziraat dinamik"),
 }
 CEYREK = {"3 Aylık": 1, "6 Aylık": 2, "9 Aylık": 3, "Yıllık": 4}
+# KAP'taki PDF'i okunamayan banka-dönemler (her çalıştırmada yeniden indirilmesin): tablolar metin değil (Fibabanka), ek dosya konsolide
+# (Burgan), cari dönem sütunu ayrıştırılamıyor (D Yatırım). `--donemler` ile yine de indirilebilir.
+OKUNAMAYAN = {("Fibabank", "2021Q2"), ("Fibabank", "2025Q3"), ("BurganBank", "2021Q2"),
+              ("DYatirim", "2022Q3"), ("DYatirim", "2022Q4"), ("DYatirim", "2023Q1")}
 
 
 def _sade(s):
@@ -126,7 +130,7 @@ def eksikler(db, bankalar, bas, son):
     obs = set(con.execute("SELECT DISTINCT bank, period FROM fin_rows WHERE stmt='OBS'"))
     donemler = [f"{y}Q{q}" for y in range(int(bas[:4]), int(son[:4]) + 1) for q in range(1, 5)]
     donemler = [p for p in donemler if pkey(bas) <= pkey(p) <= pkey(son)]
-    return {b: [p for p in donemler if (b, p) not in bs or (b, p) not in obs] for b in bankalar}
+    return {b: [p for p in donemler if ((b, p) not in bs or (b, p) not in obs) and (b, p) not in OKUNAMAYAN] for b in bankalar}
 
 
 def solo_raporlar(b, oid, istenen, gunluk=print, detay=True):
