@@ -16,6 +16,11 @@
 #   yapmadan çıkar. Yine de iki koşu olursa Resend'in Idempotency-Key'i sayesinde kimseye ikinci e-posta gitmez.
 # İki tür: gunluk (Finans Gündemi, hafta içi e-posta) · haftalik (Pazar "Haftaya Bakış": geçen hafta + gelecek hafta).
 # Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow" (tür + bülten: hayir / test / evet).
+# Kaçan bülten: "Run workflow" → tür: gunluk · bülten: evet · gündemi yeniden üret: hayir → o günün mevcut gündemi değiştirilmeden
+#   yayınlanır ve e-postası gönderilir (aynı gün aynı alıcıya ikinci e-posta gitmez: Resend Idempotency-Key).
+# Dayanıklılık (13.11.2026): e-posta adımı site yayınından bağımsızdır — GitHub Pages yayını geçici bir hatayla düşse de bülten gider
+#   (11.11 ve 13.11.2026'da "No artifacts named github-pages were found" hatası yüzünden bülten atlanmıştı). Yayın, paket yüklendikten
+#   sonra kısa bir beklemeyle ve düşerse ikinci kez denenir; iki deneme de başarısızsa e-posta yine gider, koşu sonda kırmızıya döner.
 name: Finans Gündemi (günlük)
 
 on:
@@ -37,6 +42,11 @@ on:
         type: choice
         options: ["hayir", "test", "evet"]
         default: "hayir"
+      yeniden_uret:
+        description: "Gündemi yeniden üret: evet = haberleri baştan topla (olağan) · hayir = bugünkü mevcut gündemi değiştirmeden yalnız yayınla ve e-postayı gönder (kaçan bülten için)"
+        type: choice
+        options: ["evet", "hayir"]
+        default: "evet"
 
 permissions:
   contents: write
@@ -81,7 +91,13 @@ jobs:
           else
             echo "atla=false" >> "$GITHUB_OUTPUT"
           fi
-          echo "Tür: $TUR · dosya: $DOSYA"
+          # Elle "yeniden üret: hayir": mevcut çıktı varsa haber toplama ve commit atlanır; yalnız yayın + e-posta yapılır
+          YALNIZ=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.yeniden_uret }}" = "hayir" ]; then
+            if [ -f "$DOSYA" ]; then YALNIZ=true; else echo "::warning::$DOSYA yok — gündem baştan üretilecek"; fi
+          fi
+          echo "yalniz_gonder=$YALNIZ" >> "$GITHUB_OUTPUT"
+          echo "Tür: $TUR · dosya: $DOSYA · yalnız gönder: $YALNIZ"
 
       - name: Python kur
         if: steps.kontrol.outputs.atla != 'true'
@@ -111,7 +127,7 @@ jobs:
           echo "Bülten modu: ${MOD:-hayir}"
 
       - name: Ekonomik takvim ve günün rakamları
-        if: steps.kontrol.outputs.atla != 'true'
+        if: steps.kontrol.outputs.atla != 'true' && steps.kontrol.outputs.yalniz_gonder != 'true'
         env:
           EVDS_API_KEY: ${{ secrets.EVDS_API_KEY }}
         run: |
@@ -119,7 +135,8 @@ jobs:
           python piyasa/piyasa_fetch.py || echo "::warning::piyasa verisi alınamadı — rakam tablosu eksik kalabilir"
 
       - name: Haberleri topla
-        if: steps.kontrol.outputs.atla != 'true' && steps.kontrol.outputs.tur == 'gunluk'
+        id: haber
+        if: steps.kontrol.outputs.atla != 'true' && steps.kontrol.outputs.yalniz_gonder != 'true' && steps.kontrol.outputs.tur == 'gunluk'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
@@ -134,7 +151,8 @@ jobs:
           python haberler/haber_topla.py --saat "$SAAT" $BULTEN
 
       - name: Haftaya Bakış (Pazar)
-        if: steps.kontrol.outputs.atla != 'true' && steps.kontrol.outputs.tur == 'haftalik'
+        id: hafta
+        if: steps.kontrol.outputs.atla != 'true' && steps.kontrol.outputs.yalniz_gonder != 'true' && steps.kontrol.outputs.tur == 'haftalik'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           HABER_MODEL: ${{ vars.HABER_MODEL || 'claude-opus-5' }}
@@ -143,7 +161,7 @@ jobs:
           python haberler/hafta_ozeti.py $BULTEN
 
       - name: Değişiklikleri commit + push
-        if: steps.kontrol.outputs.atla != 'true'
+        if: steps.kontrol.outputs.atla != 'true' && steps.kontrol.outputs.yalniz_gonder != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -158,21 +176,39 @@ jobs:
 
       - name: Pages'i yapılandır
         if: steps.kontrol.outputs.atla != 'true'
-        uses: actions/configure-pages@v5
+        continue-on-error: true   # GitHub "Server Error" verirse yayın yine denenir (Pages zaten etkin)
+        uses: actions/configure-pages@v6
 
       - name: Site klasörünü paketle
         if: steps.kontrol.outputs.atla != 'true'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site
+
+      # GitHub yeni yüklenen paketi bazen bir-iki saniye listelemiyor → kısa bekleme; yayın yine de düşerse bir kez daha denenir
+      - name: Paketin listelenmesini bekle
+        if: steps.kontrol.outputs.atla != 'true'
+        run: sleep 8
 
       - name: Yayınla
         if: steps.kontrol.outputs.atla != 'true'
         id: deployment
-        uses: actions/deploy-pages@v4
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: İkinci deneme öncesi bekle
+        if: steps.kontrol.outputs.atla != 'true' && steps.deployment.outcome == 'failure'
+        run: sleep 40
+
+      - name: Yayınla (ikinci deneme)
+        if: steps.kontrol.outputs.atla != 'true' && steps.deployment.outcome == 'failure'
+        id: deployment2
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
 
       - name: E-posta bültenini gönder
-        if: steps.kontrol.outputs.atla != 'true'
+        # Site yayınından bağımsız: gündem üretildiyse (ya da "yalnız gönder" koşusuysa) yayın düşse de bülten gider
+        if: ${{ !cancelled() && steps.kontrol.outputs.atla != 'true' && (steps.haber.outcome == 'success' || steps.hafta.outcome == 'success' || steps.kontrol.outputs.yalniz_gonder == 'true') }}
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           BULTEN_ALICILAR: ${{ secrets.BULTEN_ALICILAR }}
@@ -185,3 +221,9 @@ jobs:
           else
             echo "Bülten gönderilmiyor (mod: ${MOD:-hayir})."
           fi
+
+      - name: Yayın sonucu
+        if: ${{ !cancelled() && steps.deployment.outcome == 'failure' && steps.deployment2.outcome != 'success' }}
+        run: |
+          echo "::error::Site yayını iki denemede de başarısız oldu (GitHub Pages). Bülten e-postası bundan etkilenmez; site bir sonraki yayında güncellenir."
+          exit 1

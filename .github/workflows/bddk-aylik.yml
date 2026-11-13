@@ -84,21 +84,39 @@ jobs:
 
       - name: Pages'i yapılandır
         if: steps.uret.outputs.yeni == 'true'
-        uses: actions/configure-pages@v5
+        continue-on-error: true   # GitHub "Server Error" verirse yayın yine denenir (Pages zaten etkin)
+        uses: actions/configure-pages@v6
 
       - name: Site klasörünü paketle
         if: steps.uret.outputs.yeni == 'true'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site
+
+      # GitHub yeni yüklenen paketi bazen bir-iki saniye listelemiyor → kısa bekleme; yayın yine de düşerse bir kez daha denenir
+      - name: Paketin listelenmesini bekle
+        if: steps.uret.outputs.yeni == 'true'
+        run: sleep 8
 
       - name: Yayınla
         if: steps.uret.outputs.yeni == 'true'
         id: deployment
-        uses: actions/deploy-pages@v4
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: İkinci deneme öncesi bekle
+        if: steps.uret.outputs.yeni == 'true' && steps.deployment.outcome == 'failure'
+        run: sleep 40
+
+      - name: Yayınla (ikinci deneme)
+        if: steps.uret.outputs.yeni == 'true' && steps.deployment.outcome == 'failure'
+        id: deployment2
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
 
       - name: E-posta (PDF ekli)
-        if: steps.uret.outputs.yeni == 'true'
+        # Site yayınından bağımsız: rapor üretildiyse yayın düşse de e-posta gider (13.11.2026: günlük bültende yayın hatası e-postayı atlatmıştı)
+        if: ${{ !cancelled() && steps.uret.outcome == 'success' && steps.uret.outputs.yeni == 'true' }}
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           BULTEN_ALICILAR: ${{ secrets.BULTEN_ALICILAR }}
@@ -114,3 +132,9 @@ jobs:
           else
             echo "E-posta gönderilmiyor (mod: ${MOD:-hayir})."
           fi
+
+      - name: Yayın sonucu
+        if: ${{ !cancelled() && steps.deployment.outcome == 'failure' && steps.deployment2.outcome != 'success' }}
+        run: |
+          echo "::error::Site yayını iki denemede de başarısız oldu (GitHub Pages). E-posta bundan etkilenmez; site bir sonraki yayında güncellenir."
+          exit 1
