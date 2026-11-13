@@ -16,6 +16,7 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+from decimal import Decimal, ROUND_HALF_UP
 import pandas as pd
 
 BASE = Path(__file__).parent
@@ -27,11 +28,18 @@ AY = {1: "Ocak", 2: "Şubat", 3: "Mart", 4: "Nisan", 5: "Mayıs", 6: "Haziran",
 
 
 def ht(v, d=1, sign=False):
-    """Türkçe sayı biçimi (1.234,5)."""
+    """Türkçe sayı biçimi (1.234,5). Yuvarlama sayfadaki JS biçimlendirmesiyle (trNum → toLocaleString) aynıdır: ondalık gösterim
+    üzerinde yarım yukarı. f-string ikili gösterimi yuvarladığından 39,15 → "39,1" çıkıyor, aynı sayfadaki kart "39,2" gösteriyordu
+    (Cari Denge, 13.11.2026)."""
     if v is None or pd.isna(v):
         return "—"
     fmt = f"{{:+,.{d}f}}" if sign else f"{{:,.{d}f}}"
-    return fmt.format(float(v)).replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+    x = float(v)
+    try:
+        x = Decimal(repr(x)).quantize(Decimal(1).scaleb(-d), rounding=ROUND_HALF_UP)
+    except Exception:   # sonsuz vb.: eski davranış
+        pass
+    return fmt.format(x).replace(",", "\x00").replace(".", ",").replace("\x00", ".")
 
 
 def mtime(path):
