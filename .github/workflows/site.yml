@@ -31,15 +31,31 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Pages'i yapılandır (ilk çalışmada otomatik etkinleştirir)
-        uses: actions/configure-pages@v5
+        continue-on-error: true   # GitHub "Server Error" verirse (12.11.2026) yayın yine denenir; Pages zaten etkin
+        uses: actions/configure-pages@v6
         with:
           enablement: true
 
       - name: Site klasörünü paketle
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
+      # GitHub yeni yüklenen paketi bazen bir-iki saniye listelemiyor ("No artifacts named github-pages were found";
+      # 11.11 ve 13.11.2026'da yayın bu yüzden düştü) → kısa bekleme; yine de düşerse bir kez daha denenir.
+      - name: Paketin listelenmesini bekle
+        run: sleep 8
+
       - name: Yayınla
         id: deployment
-        uses: actions/deploy-pages@v4
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: İkinci deneme öncesi bekle
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 40
+
+      - name: Yayınla (ikinci deneme)
+        if: steps.deployment.outcome == 'failure'
+        id: deployment2
+        uses: actions/deploy-pages@v5
