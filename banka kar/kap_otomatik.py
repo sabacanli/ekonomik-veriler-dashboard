@@ -95,23 +95,56 @@ def git(*args, kontrol=False):
     return r
 
 
+def _bekleyenleri_geri_al():
+    """Yerelde gönderilememiş otomatik yayın commit'leri varsa geri alır (içerikleri veritabanından yeniden üretilir).
+    Yalnız YAYIN_DOSYA'ya dokunan commit'ler geri alınır; başka bir şey varsa dokunmaz, False döner."""
+    git("fetch", "-q", "origin", "main")
+    ileri = git("rev-list", "--count", "origin/main..HEAD").stdout.strip()
+    if ileri in ("", "0"):
+        return True
+    dosyalar = {x for x in git("diff", "--name-only", "origin/main...HEAD").stdout.splitlines() if x}
+    if not dosyalar <= set(YAYIN_DOSYA):
+        log(f"UYARI: yerelde gönderilmemiş başka commit var ({ileri} adet) — otomatik yayın yapılmadı, elle bakılmalı")
+        return False
+    taban = git("merge-base", "HEAD", "origin/main", kontrol=True).stdout.strip()
+    git("reset", "-q", "--mixed", taban, kontrol=True)                       # commit'leri geri al
+    git("checkout", "-q", taban, "--", *sorted(dosyalar), kontrol=True)      # üretilmiş dosyaları o commit'teki haline döndür
+    log(f"Gönderilememiş {ileri} otomatik commit geri alındı — paketler yeniden üretilecek")
+    return True
+
+
 def yayimla(mesaj):
-    """Site verisini üretir, yalnız banka veri dosyalarını commit eder ve gönderir. Başarılıysa True."""
+    """Uzak depoyu alır, site verisini EN GÜNCEL depo üzerinde üretir, yalnız banka veri dosyalarını commit eder ve gönderir.
+    Başarılıysa True.
+
+    Sıra önemlidir: önce pull, sonra üretim. site/data/home.json tek satırlık üretilmiş bir dosyadır ve bulut iş akışları (günlük
+    gündem, haftalık veri) onu her gün değiştirir; eski sıra (önce commit, sonra pull --rebase) her seferinde çakışıp push'u
+    reddettiriyordu (14–16.11.2026: Odea ve HSBC 2026Ç3 yüklendi ama üç gün yayımlanamadı, yerelde üç commit birikti).
+    Push reddedilirse (üretim sırasında araya yeni commit girdiyse) commit geri alınır ve tüm adımlar baştan denenir;
+    başarısızlıkta yerelde gönderilmemiş commit bırakılmaz."""
+    import time
     import site_export as s
-    s.build_banka_kar(); s.build_home(); s.build_sitemap(); s.ozet_gom()
-    for f in ("site/data/banka_kar.json", "site/data/banka_turev.json"):     # bozuk paket yayımlanmasın
-        json.loads((REPO / f).read_text(encoding="utf-8"))
-    git("add", "--", *YAYIN_DOSYA, kontrol=True)
-    if git("diff", "--cached", "--quiet").returncode == 0:
-        log("Sitede değişen dosya yok — commit atlandı"); return True
-    git("commit", "-q", "-m", mesaj, "--", *YAYIN_DOSYA, kontrol=True)
     for deneme in range(3):
+        if not _bekleyenleri_geri_al():
+            return False
         cek = git("pull", "--rebase", "--autostash", "-q", "origin", "main")
         if cek.returncode != 0:
             git("rebase", "--abort")
-        if git("push", "-q", "origin", "main").returncode == 0:
+            log(f"UYARI: uzak depo alınamadı (deneme {deneme + 1}): {(cek.stderr or cek.stdout).strip()[:150]}")
+            time.sleep(20); continue
+        s.build_banka_kar(); s.build_home(); s.build_sitemap(); s.ozet_gom()
+        for f in ("site/data/banka_kar.json", "site/data/banka_turev.json"):     # bozuk paket yayımlanmasın
+            json.loads((REPO / f).read_text(encoding="utf-8"))
+        git("add", "--", *YAYIN_DOSYA, kontrol=True)
+        if git("diff", "--cached", "--quiet").returncode == 0:
+            log("Sitede değişen dosya yok — commit atlandı"); return True
+        git("commit", "-q", "-m", mesaj, "--", *YAYIN_DOSYA, kontrol=True)
+        it = git("push", "-q", "origin", "main")
+        if it.returncode == 0:
             return True
-        import time; time.sleep(20)
+        log(f"UYARI: push reddedildi (deneme {deneme + 1}): {(it.stderr or it.stdout).strip()[:150]}")
+        time.sleep(20)
+    _bekleyenleri_geri_al()
     return False
 
 

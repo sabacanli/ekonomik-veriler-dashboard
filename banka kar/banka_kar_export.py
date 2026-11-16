@@ -82,7 +82,7 @@ DONEM_SONU = {"1": "31.03", "2": "30.06", "3": "30.09", "4": "31.12"}
 ILK_DONEM = "2021Q1"   # sitede gösterilen ilk dönem
 SEGMENT_CATEGORIES = [
     ("Hazine / Yatırım", ["hazine", "aktif pasif", "yatırım bankacılığı", "sermaye piyasa"]),
-    ("Bireysel / Perakende", ["bireysel", "perakende", "özel bankacılık", "dijital"]),
+    ("Bireysel / Perakende", ["bireysel", "perakende", "özel bankacılık", "dijital", "premier", "birikim yönetimi"]),   # HSBC 2026: "Uluslararası Birikim Yönetimi ve Premier Bankacılık"
     ("Kurumsal / Ticari / KOBİ", ["kurumsal", "ticari", "kobi", "toptan", "tarım"]),
     ("Toplam", ["toplam", "banka'nın", "bankanın", "banka toplamı"]),
     ("Diğer / Dağıtılamayan", ["diğer", "dağıtılamayan", "genel müdürlük", "merkez"]),
