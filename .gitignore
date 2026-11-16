@@ -37,3 +37,6 @@ hazine ihale /borclanma programi/pdf/
 
 # Banka Kârlılık Analizi: yerel uygulamanın SQLite kopyası (JSON yeterli)
 banka kar/banka.db
+
+# Sabah kontrolcüsünün durum kaydı (yerel)
+kontrol/durum.json
