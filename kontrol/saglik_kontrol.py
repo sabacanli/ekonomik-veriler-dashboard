@@ -374,11 +374,20 @@ def bilgi_banka():
 
 
 def bildir(metin):
-    """macOS masaüstü bildirimi (KAP otomasyonundaki bildir() ile aynı yol). Bildirim gösterilemezse sessizce geçer."""
+    """Kullanıcının dikkatini çeker: ekranda küçük bir pencere açar (osascript 'display dialog'; bir saat sonra kendiliğinden
+    kapanır, betiği bekletmez). 'display notification' bu bilgisayarda görünmüyor (16.11.2026'da denendi: bildirim hiç çıkmadı) —
+    yine de denenir, zararı yok."""
+    guvenli = metin.replace("\\", " ").replace('"', "'")[:300]
     try:
-        guvenli = metin.replace("\\", " ").replace('"', "'")[:230]
-        subprocess.run(["osascript", "-e", f'display notification "{guvenli}" with title "ekordion sabah kontrolü" sound name "Glass"'],
+        subprocess.run(["osascript", "-e", f'display notification "{guvenli}" with title "ekordion sabah kontrolü"'],
                        capture_output=True, timeout=15)
+    except Exception:
+        pass
+    try:
+        subprocess.Popen(["osascript", "-e", "tell me to activate", "-e",
+                          f'display dialog "{guvenli}" with title "ekordion sabah kontrolü" buttons {{"Tamam"}} '
+                          'default button "Tamam" with icon caution giving up after 3600'],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     except Exception:
         pass
 
@@ -393,7 +402,7 @@ def main():
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
     if a.bildirim_deneme:
-        bildir("Bildirim denemesi — bir şey yapmanız gerekmiyor."); print("deneme bildirimi gönderildi"); return
+        bildir("Bildirim denemesi — bir şey yapmanız gerekmiyor."); print("deneme penceresi açıldı"); return
     n = simdi()
     durum = {}
     try:
