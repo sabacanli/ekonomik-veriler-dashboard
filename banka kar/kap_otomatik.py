@@ -39,9 +39,18 @@ def log(s):
 
 
 def bildir(metin):
-    """macOS bildirimi (başarısız olursa sessizce geçilir)."""
+    """Kullanıcıya haber verir: ekranda küçük bir pencere (osascript 'display dialog'; bir saat sonra kendiliğinden kapanır, koşuyu
+    bekletmez). Eski yol 'display notification' bu bilgisayarda hiç görünmüyordu (16.11.2026'da denendi) — yine de denenir.
+    Başarısız olursa sessizce geçilir; sabah kontrolcüsü (kontrol/saglik_kontrol.py) aynı olayları ertesi sabah ayrıca raporlar."""
+    guvenli = metin.replace(chr(34), "'").replace(chr(92), " ")[:300]
     try:
-        subprocess.run(["osascript", "-e", f'display notification "{metin.replace(chr(34), "")[:230]}" with title "Ekordion · KAP"'], timeout=15, capture_output=True)
+        subprocess.run(["osascript", "-e", f'display notification "{guvenli}" with title "Ekordion · KAP"'], timeout=15, capture_output=True)
+    except Exception:
+        pass
+    try:
+        subprocess.Popen(["osascript", "-e", "tell me to activate", "-e",
+                          f'display dialog "{guvenli}" with title "Ekordion · KAP" buttons {{"Tamam"}} default button "Tamam" giving up after 3600'],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     except Exception:
         pass
 
