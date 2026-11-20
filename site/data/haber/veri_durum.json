@@ -1,20 +1,21 @@
 {
 "imza": {
 "enflasyon.html": "6c8d695ae549",
-"butce.html": "66dfd67f3112",
+"butce.html": "440373ed5a6b",
 "nakit.html": "5148ed5e4b58",
-"dth.html": "c77f167737c6",
-"net-rezerv.html": "1ccd7e97ae6c",
+"dth.html": "685c68db69a0",
+"net-rezerv.html": "e5a3347f17ec",
 "bankacilik.html": "4433a78817e1",
 "banka-kar.html": "47ad5db5052b",
 "banka-turev.html": "1783dc69fa18",
 "cari.html": "b7937d41935c",
-"kredi.html": "dd59a2f69327",
-"mevduat.html": "484d368845a8",
+"kredi.html": "5f87712a4c20",
+"mevduat.html": "4cc5d1029e06",
 "bddk.html": "35c5fc00f21e",
-"tcmb-alim.html": "3f9ac8865daa",
-"tcmb-stok.html": "eecb62ed5b8a",
-"tcmb-faiz.html": "7b7d793edff0"
+"hazine.html": "c9125edf3c8a",
+"tcmb-alim.html": "f4feab0fa33c",
+"tcmb-stok.html": "d8f1a14222fc",
+"tcmb-faiz.html": "5c7367a4c866"
 },
-"guncelleme": "19.11.2026 07:51"
+"guncelleme": "20.11.2026 07:52"
 }
