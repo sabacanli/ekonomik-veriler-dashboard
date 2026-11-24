@@ -1,17 +1,22 @@
-# Haftalık otomatik veri güncelleme.
-# Her Perşembe ve Cuma 14:45 (TR) — TCMB haftalık istatistikleri normalde
-# Perşembe 14:30'da açıklanır; resmi tatil kaymalarında Cuma'ya sarkar.
-# EVDS/HMB/web kaynaklı modüllerin verisini çeker, site paketlerini üretir,
-# commit'ler ve siteyi yeniden yayınlar.
+# Otomatik veri güncelleme — hafta içi her gün, günde iki kez.
+# EVDS/HMB/web kaynaklı modüllerin verisini çeker, site paketlerini üretir, commit'ler ve siteyi yeniden yayınlar.
 # (BDDK hariç: o veri yalnızca yerel bilgisayardan Selenium ile çekilebilir.)
+#
+# Zamanlama (24.11.2026'da haftalıktan günlüğe çevrildi): önceden yalnız Perşembe + Cuma çalışıyordu; TCMB rezervleri,
+# para politikası göstergeleri ve doğrudan alım gibi GÜNLÜK seriler hafta başında 3–4 iş günü geride kalıyordu
+# (kullanıcı 24.11 Salı günü rezervin 19.11'de kaldığını fark etti). GitHub bu depoda zamanlanmış koşuları saatlerce
+# geciktiriyor (gözlenen: 7–8 saat). Bu yüzden iki tetik var: 08:17 TR (gecikmeyle öğleden sonra, TCMB 14:30 yayınlarının
+# ardından çalışır) ve 14:45 TR (gecikmeyle gece; günün tüm yayınlarını toplar). GitHub gecikmezse de 14:45 koşusu
+# Perşembe 14:30 haftalık istatistiklerini yakalar.
 #
 # Gerekli secret: EVDS_API_KEY  (Settings → Secrets and variables → Actions)
 # Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow".
-name: Haftalık Veri Güncelleme
+name: Veri Güncelleme (hafta içi her gün)
 
 on:
   schedule:
-    - cron: "45 11 * * 4,5"   # Perşembe ve Cuma 11:45 UTC = 14:45 TR
+    - cron: "17 5 * * 1-5"    # Pzt–Cum 05:17 UTC = 08:17 TR
+    - cron: "45 11 * * 1-5"   # Pzt–Cum 11:45 UTC = 14:45 TR
   workflow_dispatch:
 
 permissions:

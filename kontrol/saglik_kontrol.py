@@ -10,7 +10,7 @@ atlanıyordu), KAP zamanlayıcısı hiç tetiklenmedi (launchd "Month" tuzağı)
 
 Baktıkları (pencere = son kontrolden bugüne; ilk çalıştırmada 26 saat, Pazartesi 74 saat):
   1. GitHub Actions koşuları (anahtarsız, herkese açık API): başarısız koşular; her hafta içi sabah bülteni ve Pazar akşamı
-     "Haftaya Bakış" koşusu başlamış mı, e-posta adımı başarılı mı; haftalık veri güncellemesi çalışıyor mu.
+     "Haftaya Bakış" koşusu başlamış mı, e-posta adımı başarılı mı; veri güncellemesi (hafta içi her gün) çalışıyor mu.
   2. Canlı site: erişilebilir mi; depodaki son sürümle aynı mı (yayın düşmüşse geride kalır); bugünkü gündem sayfası var mı.
   3. Yerel depo: gönderilmemiş eski commit, yarım kalmış rebase/birleştirme, günlerdir bekleyen değişiklik.
   4. Yerel zamanlanmış işler (launchd): yüklü mü; KAP kontrolü (rapor aylarında) bugün çalıştı mı, günlüğünde uyarı var mı,
@@ -47,7 +47,8 @@ LOG_KAP = Path.home() / "Library" / "Logs" / "ekordion-kap.log"
 LOG_BDDK = Path.home() / "Library" / "Logs" / "ekordion-bddk.log"
 LAUNCHD = ["com.ekordion.kap", "com.ekordion.bddk"]
 KAP_AYLARI = (2, 5, 8, 11)            # banka_kap_otomatik.sh yalnız bu aylarda çalışır
-YAYINLAYANLAR = ("Site Yayınla", "Finans Gündemi", "Haftalık Veri Güncelleme", "Bankacılık Monitörü")
+VERI_AKISI = ("Veri Güncelleme", "Haftalık Veri Güncelleme")   # 24.11.2026'da adı ve takvimi değişti (hafta içi her gün)
+YAYINLAYANLAR = ("Site Yayınla", "Finans Gündemi", "Bankacılık Monitörü") + VERI_AKISI
 GUNLER = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
 
 bulgular = []   # {"duzey": "sorun" | "uyari" | "bilgi", "baslik": …, "ayrinti": …, "oneri": …}
@@ -74,7 +75,17 @@ def al(url, zaman=30):
 
 
 def gh(yol):
-    return json.loads(al(API + yol))
+    """GitHub API (anahtarsız). Geçici ağ hatasında iki kez daha dener: 24.11.2026 sabahı tek bir zaman aşımı yüzünden bülten
+    koşusu denetlenememişti. Erişim sınırı (HTTP 403/429) yeniden denenmez."""
+    for deneme in range(3):
+        try:
+            return json.loads(al(API + yol))
+        except urllib.error.HTTPError:
+            raise
+        except Exception:
+            if deneme == 2:
+                raise
+            time.sleep(15 * (deneme + 1))
 
 
 def git(*args):
@@ -199,16 +210,11 @@ def kontrol_github(t0, n):
             ekle("sorun", f"{x['_t']:%d.%m %H:%M} {x['name']} koşusu başarısız ({x['conclusion']})", ayr,
                  "Sonraki koşu da düşerse nedenine bakılmalı; ayrıntı: GitHub → Actions.")
 
-    # 1c. haftalık veri güncellemesi (Perşembe + Cuma 14:45; GitHub saatlerce geciktirebilir)
-    hv = [x for x in kosular if x["name"].startswith("Haftalık Veri Güncelleme")]
+    # 1c. veri güncellemesi koşuları: yalnız bilgi (tazelik kontrol_site içinde, depodaki veri dosyalarından ölçülür)
+    hv = [x for x in kosular if x["name"].startswith(VERI_AKISI) and x["conclusion"] == "success"]
     if hv:
         son = max(hv, key=lambda k: k["_t"])
-        yas = (n - son["_t"]).total_seconds() / 86400
-        if yas > 8.5:
-            ekle("uyari", f"Haftalık veri güncellemesi {yas:.0f} gündür çalışmadı", f"Son koşu {son['_t']:%d.%m.%Y %H:%M}",
-                 "GitHub zamanlayıcısı durmuş olabilir (60 gün hareketsiz depoda kapanır); Actions sekmesinden elle çalıştırılabilir.")
-        elif son["conclusion"] == "success":
-            ekle("bilgi", f"Haftalık veri güncellemesi: son koşu {son['_t']:%d.%m %H:%M} başarılı")
+        ekle("bilgi", f"Veri güncellemesi: son başarılı bulut koşusu {son['_t']:%d.%m %H:%M}")
 
 
 # ───────────────────────────── 2. Canlı site ─────────────────────────────
@@ -216,10 +222,15 @@ def kontrol_site(n):
     cek = git("fetch", "-q", "origin", "main")
     if cek.returncode != 0:
         ekle("uyari", "Depo güncellenemedi (git fetch)", (cek.stderr or cek.stdout).strip()[:160])
-    try:
-        canli = json.loads(al(f"{SITE}/data/home.json"))
-    except Exception as e:
-        ekle("sorun", "Canlı siteye erişilemiyor", f"{SITE}/data/home.json → {type(e).__name__}: {str(e)[:100]}",
+    canli, hata = None, None
+    for deneme in range(4):   # yayın geçişi sırasında anlık 503 görülebiliyor (24.11.2026) → bir dakikaya yayılan dört deneme
+        try:
+            canli = json.loads(al(f"{SITE}/data/home.json")); break
+        except Exception as e:
+            hata = e
+            time.sleep(20)
+    if canli is None:
+        ekle("sorun", "Canlı siteye erişilemiyor", f"{SITE}/data/home.json → {type(hata).__name__}: {str(hata)[:100]} (dört denemede)",
              "Birkaç dakika sonra yeniden denenmeli; sürerse GitHub Pages / Cloudflare durumu kontrol edilmeli.")
         return
     depo = git("show", "origin/main:site/data/home.json")
@@ -239,6 +250,20 @@ def kontrol_site(n):
             ekle("bilgi", f"Site yayını sürüyor olabilir (son değişiklik {yas_dk:.0f} dk önce)")
     else:
         ekle("bilgi", "Canlı site depodaki son sürümle aynı")
+    # Veri tazeliği: günlük serilerin (rezerv, para politikası) depodaki son güncellenmesi — bulut koşusu da yerel güncelleme de sayılır.
+    # Hafta içi her gün iki koşu beklenir; son güncelleme 30 saati (Pazartesi 80, Salı öğlene kadar 54 saati) aşarsa uyarı, iki katını aşarsa sorun.
+    ct = git("log", "-1", "--format=%ct", "origin/main", "--", "site/data/rezerv.json", "site/data/tcmb_faiz.json").stdout.strip()
+    if ct.isdigit() and n.weekday() <= 4:
+        yas = (time.time() - int(ct)) / 3600
+        sinir = 80 if n.weekday() == 0 else (54 if n.weekday() == 1 and n.time() < dt.time(12) else 30)
+        zaman = dt.datetime.fromtimestamp(int(ct), TR)
+        if yas > 2 * sinir:
+            ekle("sorun", f"Veriler {yas / 24:.1f} gündür güncellenmedi", f"Rezerv ve para politikası verilerinin son güncellenmesi {zaman:%d.%m.%Y %H:%M}. Günlük seriler geride kalıyor.",
+                 "GitHub zamanlayıcısı durmuş olabilir. Bu oturumda 'verileri güncelle' denebilir ya da Actions → Veri Güncelleme → Run workflow.")
+        elif yas > sinir:
+            ekle("uyari", f"Veriler {yas:.0f} saattir güncellenmedi", f"Son güncelleme {zaman:%d.%m.%Y %H:%M} (GitHub zamanlayıcısı gecikmiş olabilir).")
+        else:
+            ekle("bilgi", f"Veriler güncel: son güncelleme {zaman:%d.%m %H:%M}")
     if n.weekday() <= 4 and n.time() >= dt.time(8, 25):
         try:
             g = json.loads(al(f"{SITE}/data/haber/{n:%Y-%m-%d}.json"))
