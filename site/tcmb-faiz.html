@@ -38,7 +38,7 @@
 
     <section class="chart-card" id="sec1">
       <h3>Politika Faizi, Fonlama Maliyeti ve Piyasa Faizleri</h3>
-      <p class="cap">% · İş günü — politika faizi (BIS aylık serisi), TCMB ağırlıklı ortalama fonlama maliyeti, BIST TLREF ve BIST gecelik repo ağırlıklı ortalama faizi</p>
+      <p class="cap">% · İş günü — politika faizi (bir hafta vadeli repo ihale faizi), TCMB ağırlıklı ortalama fonlama maliyeti, BIST TLREF ve BIST gecelik repo ağırlıklı ortalama faizi</p>
       <button class="btn apko-btn" data-sec="sec1">🖨 Beyaz zemin (sunum)</button>
       <button class="btn resim-btn" data-sec="sec1">🖼 Resim olarak kopyala</button>
       <div id="ch1"></div>
@@ -95,7 +95,8 @@
     <footer>Kaynak: TCMB EVDS — TCMB Net Fonlaması ve Ağırlıklı Ortalama Fonlama Maliyeti; BIST TLREF; Borsa İstanbul
       Gecelik Repo Faiz Oranları; Piyasa Katılımcıları Anketi ve Sektörel Enflasyon Beklentileri; Bankacılık Sektörü
       Seçilmiş Kredi Büyüklükleri ile TL/YP Mevduatı (yurt içi şubeler, haftalık); Reel Efektif Döviz Kuru (TÜFE bazlı).
-      Politika faizi: BIS merkez bankası politika faizleri (aylık; ay içi karar bir sonraki ayda görünür). GSYH: TÜİK.
+      Politika faizi: bir hafta vadeli repo ihale faizi — Bankalararası Para Piyasası İşlem Özetleri'ndeki TCMB
+      1 haftalık borç verme kotasyonu (günlük; karar günü değişir). GSYH: TÜİK.
       Kredi büyümesi ve TL payı bu ham serilerden hesaplanır; TCMB'nin 5 günlük hareketli ortalamalı günlük
       hesabından küçük farklar gösterebilir.</footer>
   </main>
@@ -108,7 +109,8 @@
       setOzet(D.ozet_html);
       const s = D.son;
       setMetrics([
-        ["Politika Faizi", "%" + trNum(s.politika, 2), "BIS · aylık", "flat"],
+        ["Politika Faizi", "%" + trNum(s.politika, 2),
+         s.politika_kaynak === "gunluk" ? (s.politika_tarih ? "son değişiklik " + s.politika_tarih : "günlük") : "aylık seri · gecikmeli", "flat"],
         ["Fonlama Maliyeti (AOFM)", "%" + trNum(s.aofm, 2), s.tarih, "flat"],
         ["TLREF", "%" + trNum(s.tlref, 2), s.tlref_tarih, "flat"],
         ["TCMB Net Fonlama", trNum(s.net_fonlama, 0), "milyar TL · " + (s.net_fonlama < 0 ? "sterilizasyon" : "fonlama"), s.net_fonlama < 0 ? "down" : "up"],

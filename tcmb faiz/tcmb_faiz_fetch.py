@@ -2,8 +2,9 @@
 """Para Politikası & Beklentiler — EVDS'den çeker (TCMB sunumundaki temel göstergeler).
 
 Sayfalar (tcmb_faiz.xlsx):
-  Gunluk  : politika faizi (BIS aylık serisi iş günlerine taşınır), AOFM, TLREF, BIST gecelik repo,
-            TCMB net fonlama (Milyar TL), USD/TL
+  Gunluk  : politika faizi (TCMB 1 haftalık borç verme kotasyonu — günlük, PPK karar günü değişir;
+            çekilemez ya da BIS aylık serisiyle tutmazsa BIS serisi iş günlerine taşınır), AOFM, TLREF,
+            BIST gecelik repo, TCMB net fonlama (Milyar TL), USD/TL
   Aylik   : 12 ay sonrası enflasyon beklentileri (piyasa / reel sektör / hanehalkı), REDK (TÜFE bazlı)
   Haftalik: TCMB haftalık bankacılık tabloları — kredi toplamları (TL/YP) ve mevduat (TL / YP-USD);
             kur etkisinden arındırılmış 13 haftalık yıllıklandırılmış kredi büyümesi ve TL mevduat payı
@@ -28,6 +29,11 @@ OUT = SCRIPT_DIR / "tcmb_faiz.xlsx"
 
 GUNLUK = {"TP.BISTTLREF.ORAN": "tlref", "TP.APIFON4": "aofm", "TP.AOFOBAP": "on_repo",
           "TP.APIFON3": "net_fonlama", "TP.DK.USD.A": "usd"}
+# Politika faizi (günlük): Bankalararası Para Piyasası İşlem Özetleri'ndeki TCMB 1 haftalık borç verme
+# kotasyonu. Bir hafta vadeli repo ihale faiziyle aynıdır ve PPK karar günü değişir. BIS aylık serisi
+# (TP.BISPOLFAIZ.TUR) ~1 ay gecikmeli yayımlanır: 22.10.2026 indirimi (%37 → %36) sitede 24.11.2026'ya
+# kadar görünmemişti. 24.11.2026'da 2022'den beri 58 ayın sonu karşılaştırıldı, hepsi BIS ile aynı.
+POLITIKA_GUNLUK = "TP.PY.P02.1H"
 AYLIK = {"TP.BISPOLFAIZ.TUR": "politika", "TP.ENFBEK.PKA12ENF": "bek_piyasa",
          "TP.ENFBEK.IYA12ENF": "bek_reel", "TP.ENFBEK.HBA12ENF": "bek_hane", "TP.RK.T1.Y": "redk"}
 # Haftalık bankacılık: krediler (Bin TL) — TL ve YP parçaları ayrı toplanır; mevduat TL (Bin TL) / YP (Milyon USD)
@@ -99,6 +105,29 @@ def t_ceyrek(s):
         return None
 
 
+def politika_gunluk(bugun, son):
+    """TCMB 1 haftalık borç verme kotasyonu → tarih indeksli seri (boş ve sıfır günler atılır).
+
+    Ayrı istekle çekilir: seri bir gün kaldırılır ya da hata verirse diğer günlük seriler etkilenmesin.
+    Çekilemezse boş seri döner; çağıran BIS aylık serisine düşer.
+    """
+    parcalar = []
+    try:
+        for yil in range(2022, bugun.year + 1):
+            s = f"01-01-{yil}"
+            e = son if yil == bugun.year else f"31-12-{yil}"
+            parcalar.append(tablo(fetch([POLITIKA_GUNLUK], s, e), {POLITIKA_GUNLUK: "kot"}, t_gun))
+    except Exception as e:
+        print(f"  ~ politika faizi: günlük seri çekilemedi ({type(e).__name__}) — BIS aylık serisi kullanılacak")
+        return pd.Series(dtype=float)
+    parcalar = [p for p in parcalar if not p.empty]
+    if not parcalar:
+        return pd.Series(dtype=float)
+    df = pd.concat(parcalar, ignore_index=True).dropna(subset=["kot"])
+    df = df[df["kot"] > 0].sort_values("tarih").drop_duplicates("tarih")
+    return df.set_index("tarih")["kot"].astype(float)
+
+
 def main():
     if not KEY:
         print("HATA: EVDS_API_KEY tanımlı değil", file=sys.stderr)
@@ -120,9 +149,26 @@ def main():
 
     aylik = tablo(fetch(list(AYLIK), "01-01-2015", son), AYLIK, t_ay)
     print(f"  aylık: {len(aylik)} ay ({aylik['tarih'].min().date()} → {aylik['tarih'].max().date()})")
-    # politika faizi: iş günlerine taşı (aylık BIS serisi; ay içi değişimler bir sonraki ay görünür)
+    # politika faizi — yedek: aylık BIS serisi iş günlerine taşınır (ay içi değişimler bir sonraki ay görünür)
     pol = aylik[["tarih", "politika"]].dropna().set_index("tarih")["politika"]
-    gunluk["politika"] = gunluk["tarih"].map(lambda t: pol[pol.index <= t].iloc[-1] if (pol.index <= t).any() else None)
+    bis = pd.to_numeric(gunluk["tarih"].map(lambda t: pol[pol.index <= t].iloc[-1] if (pol.index <= t).any() else None),
+                        errors="coerce")
+    # asıl kaynak: günlük kotasyon. BIS'in yayımladığı her ayın sonunda iki seri aynı olmalı; değilse
+    # (TCMB kotasyon düzenini değiştirmiş olabilir) günlük seriye güvenme, BIS'e dön.
+    kot = politika_gunluk(bugun, son)
+    gunluk["politika_g"] = float("nan")          # dolu = günlük kaynak kullanıldı (site_export buna bakar)
+    if not kot.empty:
+        ay_sonu = kot.groupby(kot.index.to_period("M")).last()
+        farkli = [(str(p), float(v), float(ay_sonu[p])) for p, v in zip(pol.index.to_period("M"), pol.values)
+                  if p in ay_sonu.index and abs(float(ay_sonu[p]) - float(v)) > 1e-6]
+        if farkli:
+            print(f"  ~ politika faizi: günlük kotasyon {len(farkli)} ayda BIS serisinden farklı "
+                  f"(ör. {farkli[-1][0]}: BIS {farkli[-1][1]}, kotasyon {farkli[-1][2]}) — BIS aylık serisi kullanıldı")
+        else:
+            gunluk["politika_g"] = kot.reindex(pd.DatetimeIndex(gunluk["tarih"]), method="ffill").values
+    gunluk["politika"] = gunluk["politika_g"].where(gunluk["politika_g"].notna(), bis)
+    kaynak = "günlük kotasyon" if gunluk["politika_g"].notna().any() else "BIS aylık (gecikmeli)"
+    print(f"  politika faizi kaynağı: {kaynak}")
 
     haftalik = tablo(fetch(list(HAFTALIK), "01-01-2022", son), HAFTALIK, t_gun)
     print(f"  haftalık: {len(haftalik)} hafta (son {haftalik['tarih'].max().date()})")

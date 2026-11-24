@@ -1041,7 +1041,8 @@ def _tcmb_faiz_hesapla():
       önceki haftada bugünkü kurla değerlenir; TCMB'nin "kur etkisinden arındırılmış" yaklaşımı).
     - TL mevduat payı: TL mevduat / (TL mevduat + YP mevduat × USD/TL) — TCMB sunumundaki TL payı.
     - GSYH: zincirlenmiş hacimde yıllık % değişim (aynı çeyreğe göre).
-    - Politika faizi BIS'in aylık serisinden; ay içi değişim bir sonraki ay serisine yansır.
+    - Politika faizi günlük: TCMB 1 haftalık borç verme kotasyonu (PPK karar günü değişir). Çekim betiği
+      günlük seriyi kullanamadıysa (politika_g sütunu boş) BIS aylık serisine düşer — o ~1 ay gecikmelidir.
     """
     fp = BASE / "tcmb faiz" / "tcmb_faiz.xlsx"
     g = pd.read_excel(fp, sheet_name="Gunluk"); g["tarih"] = pd.to_datetime(g["tarih"])
@@ -1089,6 +1090,16 @@ def build_tcmb_faiz():
     k13, k13_t = son(h, "kredi13_toplam"); k13t, _ = son(h, "kredi13_ticari_tl"); k13k, _ = son(h, "kredi13_tuketici")
     pay, pay_t = son(h, "tl_pay"); gy, gy_t = son(c, "gsyh_y")
     cL = c.dropna(subset=["gsyh_y"]).iloc[-1]
+    # Politika faizi kaynağı: günlük kotasyon mu, gecikmeli BIS aylık yedeği mi? Günlükse son değişiklik günü
+    pol_gunluk = "politika_g" in g.columns and bool(g["politika_g"].notna().any()) and pd.notna(g["politika_g"].iloc[-1])
+    pol_deg = None
+    if pol_gunluk:
+        p = g[["tarih", "politika"]].dropna()
+        deg = p[p["politika"].diff().fillna(0) != 0]
+        if not deg.empty:
+            pol_deg = deg["tarih"].iloc[-1].strftime("%d.%m.%Y")
+    else:
+        print("  ~ tcmb_faiz: politika faizi günlük seriden alınamadı — BIS aylık (gecikmeli) seri kullanıldı")
     ozet = (f"<b>{nf_t.strftime('%d.%m.%Y')}</b> itibarıyla politika faizi <b>%{ht(pol, 2)}</b>, TCMB ağırlıklı "
             f"ortalama fonlama maliyeti %{ht(aofm, 2)}, TLREF %{ht(tlref, 2)} ({tlref_t.strftime('%d.%m')}); TCMB net "
             f"fonlaması <b>{ht(nf, 0)} milyar TL</b> ({'sterilizasyon' if nf < 0 else 'fonlama'}). "
@@ -1104,6 +1115,7 @@ def build_tcmb_faiz():
         "updated": mtime(T["fp"]),
         "ozet_html": ozet,
         "son": {"tarih": nf_t.strftime("%d.%m.%Y"), "politika": pol, "aofm": aofm, "tlref": tlref,
+                "politika_kaynak": "gunluk" if pol_gunluk else "aylik", "politika_tarih": pol_deg,
                 "tlref_tarih": tlref_t.strftime("%d.%m.%Y"), "on_repo": onr, "net_fonlama": nf,
                 "bek_piyasa": bp, "bek_reel": br, "bek_hane": bh, "bek_ay": f"{AY[bp_t.month]} {bp_t.year}",
                 "kredi13": k13, "kredi13_ticari_tl": k13t, "kredi13_tuketici": k13k,

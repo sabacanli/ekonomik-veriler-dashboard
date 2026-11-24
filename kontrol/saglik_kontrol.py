@@ -264,6 +264,16 @@ def kontrol_site(n):
             ekle("uyari", f"Veriler {yas:.0f} saattir güncellenmedi", f"Son güncelleme {zaman:%d.%m.%Y %H:%M} (GitHub zamanlayıcısı gecikmiş olabilir).")
         else:
             ekle("bilgi", f"Veriler güncel: son güncelleme {zaman:%d.%m %H:%M}")
+    # Politika faizi günlük seriden mi geliyor? Yedek (BIS aylık) ~1 ay gecikmelidir: 22.10.2026 indirimi sitede
+    # 24.11.2026'ya kadar görünmemişti. Çekim betiği yedeğe düştüyse (seri çekilemedi ya da BIS ile tutmadı) haber ver.
+    try:
+        pf = json.loads(git("show", "origin/main:site/data/tcmb_faiz.json").stdout)["son"]
+        if pf.get("politika_kaynak") == "aylik":
+            ekle("uyari", "Politika faizi gecikmeli aylık seriden geliyor",
+                 f"Sitede %{pf.get('politika')} görünüyor; günlük seri (TCMB 1 haftalık kotasyon) kullanılamamış — faiz kararı siteye ~1 ay geç yansır.",
+                 "Veri güncelleme günlüğünde '~ politika faizi' satırına bakılmalı (seri çekilemedi mi, BIS ile mi tutmadı).")
+    except Exception:
+        pass
     if n.weekday() <= 4 and n.time() >= dt.time(8, 25):
         try:
             g = json.loads(al(f"{SITE}/data/haber/{n:%Y-%m-%d}.json"))
