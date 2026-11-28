@@ -38,7 +38,7 @@
 
     /* ── Şerit: tüm dönem tek bakışta ── */
     .zc-serit-kap { overflow-x: auto; margin: 2px 0 0; }
-    #serit { display: block; min-width: 760px; width: 100%; height: auto; }
+    #serit { display: block; min-width: 600px; width: 100%; height: auto; }
     #serit .yil-cizgi { stroke: var(--border); stroke-width: 1; }
     #serit .yil-ad { fill: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; }
     #serit .yil-ad:hover { fill: var(--text); }
@@ -215,7 +215,7 @@
       const svgEl = (ad, oz, metin) => { const e = document.createElementNS(NS, ad); for (const k in oz) e.setAttribute(k, oz[k]); if (metin !== undefined) e.textContent = metin; return e; };
       function seritCiz() {
         const svg = $("serit");
-        const W = Math.max(760, svg.parentNode.clientWidth), SOL = 56, SAG = 10, UST = 22, KUL = 46, H = UST + KUL * 3 + 6;
+        const W = Math.max(600, svg.parentNode.clientWidth), SOL = 56, SAG = 10, UST = 22, KUL = 46, H = UST + KUL * 3 + 6;
         svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.style.height = H + "px"; svg.innerHTML = "";
         const t0 = Date.UTC(ilkYil, 0, 1), t1 = Date.UTC(sonYil + 1, 0, 1);
         const x = t => SOL + (Date.parse(t + "T00:00:00Z") - t0) / (t1 - t0) * (W - SOL - SAG);
@@ -251,6 +251,7 @@
           });
         });
         seritSuz();
+        svg.parentNode.scrollLeft = svg.parentNode.scrollWidth;   // dar ekranda şerit kayar: en yeni dönem görünsün
       }
       function seritSuz() {
         $("serit").querySelectorAll("circle.olay").forEach(c => {
