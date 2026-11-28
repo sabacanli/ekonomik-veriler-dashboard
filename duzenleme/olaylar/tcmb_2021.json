@@ -1,0 +1,700 @@
+{
+ "olaylar": [
+  {
+   "id": "tcmb-2021-01",
+   "kaynak": [
+    "tcmb-2021-01"
+   ],
+   "tarih": "2021-01-08",
+   "yururluk": "2021-01-08",
+   "kurum": "TCMB",
+   "konu": "odeme",
+   "onem": 2,
+   "baslik": "FAST sistemi 50 TL işlem limitiyle kullanıma açıldı",
+   "ozet": "TCMB bünyesinde geliştirilen 7/24 anlık perakende ödeme sistemi FAST ile Kolay Adresleme Sistemi kullanıma sunuldu; limit kademeli olarak 1000 TL'ye kadar yükseltilecek.",
+   "detay": [
+    "FAST, bankalarla sürdürülen pilot testlerin tamamlanmasının ardından 8 Ocak 2021'de kullanıma açıldı.",
+    "İlk aşamada işlem limiti: 50 TL; kullanımın yaygınlığına göre kademeli olarak 1000 TL'ye kadar artırılacak.",
+    "Kolay Adresleme Sistemi ile ödemeler TCKN, telefon numarası ve e-posta adresi ile başlatılabilecek."
+   ],
+   "alinti": "FAST Sistemi, yaygın kullanımının yakından izlenmesi amacıyla, ilk aşamada 50 TL limitli olarak başlatılmıştır."
+  },
+  {
+   "id": "tcmb-2021-02",
+   "kaynak": [
+    "tcmb-2021-02"
+   ],
+   "tarih": "2021-01-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %17'de sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; enflasyonda kalıcı düşüşe işaret eden güçlü göstergeler oluşana kadar sıkı para politikası duruşunun uzun süre sürdürüleceğini belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %17 düzeyinde bırakıldı.",
+    "Kurul, 2021 yılsonu tahmin hedefini dikkate alarak sıkı duruşun kararlılıkla uzun bir müddet sürdürülmesine karar verdi; gerekmesi durumunda ilave parasal sıkılaşma yapılacağını bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 17 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-06",
+   "kaynak": [
+    "tcmb-2021-06"
+   ],
+   "tarih": "2021-01-29",
+   "yururluk": "2021-01-29",
+   "kurum": "TCMB",
+   "konu": "odeme",
+   "onem": 1,
+   "baslik": "FAST işlem üst limiti 1.000 TL'ye yükseltildi",
+   "ozet": "FAST sisteminde işlem üst limiti, sistemin açıldığı 8 Ocak 2021'den bu yana gerçekleşen 9 milyon anlık ödemenin ardından yükseltildi.",
+   "detay": [
+    "FAST işlem üst limiti: 1.000 TL (duyuruda önceki limit belirtilmedi).",
+    "Kolay Adresleme Sistemindeki kayıtlı kullanıcı sayısı 5,3 milyona ulaştı."
+   ],
+   "alinti": "Bugün itibarıyla FAST Sisteminde işlem üst limiti 1.000 TL’ye yükseltilmiştir."
+  },
+  {
+   "id": "tcmb-2021-09",
+   "kaynak": [
+    "tcmb-2021-09"
+   ],
+   "tarih": "2021-02-18",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %17'de sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; yüzde 5 hedefine varıncaya kadar politika faizi ile gerçekleşen/beklenen enflasyon arasındaki dengenin güçlü dezenflasyonist etkiyi koruyacak şekilde sürdürüleceğini belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %17 düzeyinde bırakıldı.",
+    "Kurul, 2021 yılsonu tahmin hedefi dikkate alınarak sıkı para politikası duruşunun kararlılıkla uzun bir müddet sürdürüleceğini, gerekmesi durumunda ilave parasal sıkılaşma yapılacağını bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 17 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-10",
+   "kaynak": [
+    "tcmb-2021-10"
+   ],
+   "tarih": "2021-02-24",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "TL zorunlu karşılık oranları 200 baz puan artırıldı; TL zorunlu karşılık faiz/nema oranı %13,5'e yükseltildi",
+   "ozet": "Parasal aktarım mekanizmasının etkinliğini artırmak için TL zorunlu karşılık oranları yükseltildi, TL zorunlu karşılıkların döviz ve altın cinsinden tesis edilebilme imkânı daraltıldı.",
+   "detay": [
+    "TL zorunlu karşılık oranları: tüm vade dilimlerinde ve yükümlülük türlerinde 200 baz puan artırıldı (duyuruda önceki oranlar belirtilmedi).",
+    "TL zorunlu karşılıkların döviz cinsinden tesis edilebilmesi azami oranı: %30 → %20.",
+    "TL zorunlu karşılıkların standart altın cinsinden tesis edilebilmesi azami oranı: %20 → %15.",
+    "TL cinsinden tesis edilen zorunlu karşılıklara uygulanan faiz/nema oranı: 150 baz puan artırılarak %13,5.",
+    "Rezerv opsiyon kullanım oranları aynı kalırsa TL zorunlu karşılık tesislerinin yaklaşık 25 milyar TL artması, döviz ve altın cinsinden toplam tesislerin 0,5 milyar ABD doları azalması öngörüldü.",
+    "Değişiklikler, tesisi 5 Mart 2021'de başlayacak 19 Şubat 2021 yükümlülük döneminden itibaren geçerli."
+   ],
+   "alinti": "Türk lirası zorunlu karşılık oranlarının tüm vade dilimlerinde ve yükümlülük türlerinde 200 baz puan artırılmasına"
+  },
+  {
+   "id": "tcmb-2021-13",
+   "kaynak": [
+    "tcmb-2021-13"
+   ],
+   "tarih": "2021-03-18",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %17'den %19'a yükseltildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını yükseltti; kararı enflasyon beklentileri, fiyatlama davranışları ve orta vadeli enflasyon görünümü üzerindeki yukarı yönlü risklere bağladı.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %17 → %19.",
+    "Kurul, önden yüklemeli ve güçlü bir ilave parasal sıkılaştırma yapılmasına karar verdiğini belirtti.",
+    "Kurul, 2021 yılsonu tahmin hedefi dikkate alınarak sıkı duruşun uzun süre sürdürüleceğini, gerekmesi durumunda ilave sıkılaşma yapılacağını bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 17’den yüzde 19’a yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-16",
+   "kaynak": [
+    "tcmb-2021-16"
+   ],
+   "tarih": "2021-04-15",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %19'da sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; mevcut parasal duruşun krediler ve iç talep üzerindeki yavaşlatıcı etkilerinin önümüzdeki dönemde belirginleşeceğini öngördü.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %19 düzeyinde bırakıldı.",
+    "Kurul, enflasyonda kalıcı düşüşe işaret eden güçlü göstergeler oluşana ve orta vadeli yüzde 5 hedefine ulaşıncaya kadar politika faizinin enflasyonun üzerinde bir düzeyde oluşturulmaya devam edileceğini bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 19 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-17",
+   "kaynak": [
+    "tcmb-2021-17"
+   ],
+   "tarih": "2021-04-16",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kripto",
+   "onem": 2,
+   "baslik": "Kripto varlıkların ödemelerde kullanılmasını yasaklayan yönetmelik yürürlüğe konuldu",
+   "ozet": "TCMB, kripto varlıkların ödeme alanında kullanılmamasına yönelik düzenleme çalışmasını tamamladı; \"Ödemelerde Kripto Varlıkların Kullanılmamasına Dair Yönetmelik\" yürürlüğe girdi.",
+   "detay": [
+    "Düzenleme, 1211 sayılı TCMB Kanunu ile 6493 sayılı Kanun'daki yetkiler çerçevesinde çıkarıldı.",
+    "Gerekçe olarak kripto varlıkların düzenleme ve denetime tabi olmaması, aşırı oynaklık, anonim yapıları nedeniyle yasadışı kullanılabilmesi ve işlemlerin geri dönülemez olması belirtildi.",
+    "Duyuruda yönetmeliğin yürürlük tarihi belirtilmedi."
+   ],
+   "alinti": "“Ödemelerde Kripto Varlıkların Kullanılmamasına Dair Yönetmelik” yürürlüğe konulmuştur."
+  },
+  {
+   "id": "tcmb-2021-21",
+   "kaynak": [
+    "tcmb-2021-21"
+   ],
+   "tarih": "2021-05-06",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %19'da sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; Nisan Enflasyon Raporu tahmin patikasındaki belirgin düşüş sağlanana kadar mevcut duruşun sürdürüleceğini belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %19 düzeyinde bırakıldı.",
+    "Kurul, enflasyonda kalıcı düşüşe işaret eden güçlü göstergeler oluşana ve orta vadeli yüzde 5 hedefine ulaşıncaya kadar politika faizinin enflasyonun üzerinde bir düzeyde oluşturulmaya devam edileceğini bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 19 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-24",
+   "kaynak": [
+    "tcmb-2021-24"
+   ],
+   "tarih": "2021-06-15",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 2,
+   "baslik": "Çin Merkez Bankası ile swap anlaşması toplam 46 milyar TL ve 35 milyar yuana çıkarıldı",
+   "ozet": "30 Mayıs 2019'da imzalanan ikili para takası anlaşması 35,1 milyar TL ve 23 milyar yuan artırıldı; artırılan tutar 15 Haziran 2021'de TCMB hesaplarına girdi.",
+   "detay": [
+    "Anlaşma tutarı: 35,1 milyar TL ve 23 milyar yuan artırılarak toplam 46 milyar TL ve 35 milyar yuan.",
+    "Anlaşmanın hedefi, yerel para birimleriyle yapılan ticareti kolaylaştırmak ve iki ülkenin finansal istikrarına destek sağlamak."
+   ],
+   "alinti": "35,1 milyar TL ve 23 milyar Çin yuanı artırılarak toplam 46 milyar TL ve 35 milyar Çin yuanına ulaşmıştır"
+  },
+  {
+   "id": "tcmb-2021-25",
+   "kaynak": [
+    "tcmb-2021-25"
+   ],
+   "tarih": "2021-06-17",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %19'da sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; Nisan Enflasyon Raporu tahmin patikasındaki belirgin düşüş sağlanana kadar mevcut sıkı duruşun sürdürüleceğini belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %19 düzeyinde bırakıldı.",
+    "Kurul, enflasyonda kalıcı düşüşe işaret eden güçlü göstergeler oluşana ve orta vadeli yüzde 5 hedefine ulaşıncaya kadar politika faizinin enflasyonun üzerinde bir düzeyde oluşturulmaya devam edileceğini bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 19 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-27",
+   "kaynak": [
+    "tcmb-2021-27"
+   ],
+   "tarih": "2021-07-01",
+   "yururluk": "2021-07-19",
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "YP zorunlu karşılık oranları 200 baz puan artırıldı; TL zorunlu karşılığın döviz cinsinden tesisi sonlandırılıyor",
+   "ozet": "TL zorunlu karşılıkların döviz cinsinden tesis imkânı daraltılıp 1 Ekim 2021'de sonlandırılacak; TL mevduat payını artırıcı yönde ilave faiz/nema ve YP'den TL'ye dönüşen tutarlara zorunlu karşılık muafiyeti getirildi.",
+   "detay": [
+    "TL zorunlu karşılıkların döviz cinsinden tesis edilebilmesi azami oranı: %20 → %10; imkân 1 Ekim 2021 tesis tarihinde %0'a indirilerek sonlandırılacak.",
+    "Döviz cinsinden mevduat/katılım fonu zorunlu karşılık oranları: tüm vade dilimlerinde 200 baz puan artırıldı.",
+    "25 Haziran 2021'de YP mevduat/katılım fonu hesaplarında bulunup sonradan TL mevduat/katılım fonuna dönüşen tutarlar zorunlu karşılıktan muaf (1 ay ve daha uzun vadeli TL hesapta kaldığı sürece).",
+    "Bu tutara denk gelen TL zorunlu karşılıklara %19 faiz/nema; diğer TL zorunlu karşılıklara YP payı ve dönüşüm göstergelerine bağlı kademeli ilave faiz/nema (%13,5, %15, %17 ve %19).",
+    "İlk aşamada TL zorunlu karşılık tesislerinin 13,2 milyar TL, döviz zorunlu karşılık tesislerinin yaklaşık 2,7 milyar ABD doları artması beklendi.",
+    "Değişiklikler, tesisi 6 Ağustos 2021'de başlayacak 19 Temmuz 2021 yükümlülük döneminden itibaren geçerli."
+   ],
+   "alinti": "Türk lirası zorunlu karşılıkların döviz cinsinden tesis edilmesi imkânı azami oranı yüzde 20’den yüzde 10’a düşürülmüştür."
+  },
+  {
+   "id": "tcmb-2021-28",
+   "kaynak": [
+    "tcmb-2021-28"
+   ],
+   "tarih": "2021-07-09",
+   "yururluk": "2021-08-04",
+   "kurum": "TCMB",
+   "konu": "odeme",
+   "onem": 1,
+   "baslik": "FAST işlem tutar limiti 1.000 TL'den 2.000 TL'ye yükseltilecek; ödeme kuruluşları katılım başvurusu alınmaya başlandı",
+   "ozet": "FAST işlem tutar limiti 4 Ağustos 2021'de artırılacak; ödeme ve elektronik para kuruluşlarının sisteme katılım talepleri alınmaya başlandı.",
+   "detay": [
+    "FAST işlem tutar limiti: 1.000 TL → 2.000 TL (4 Ağustos 2021).",
+    "6493 sayılı Kanun kapsamındaki ödeme ve elektronik para kuruluşları, teknik ve operasyonel şartları sağlayıp testlerde başarılı olmaları hâlinde FAST'a katılabilecek.",
+    "FAST'ta günlük ortalama 2 milyon anlık ödeme yapılıyor; Kolay Adresleme Sistemine kayıtlı kullanıcı sayısı 11,3 milyon."
+   ],
+   "alinti": "hâlihazırda 1.000 TL olan işlem tutar limiti 4 Ağustos 2021 tarihinde 2.000 TL’ye yükseltilecektir."
+  },
+  {
+   "id": "tcmb-2021-30",
+   "kaynak": [
+    "tcmb-2021-30"
+   ],
+   "tarih": "2021-07-14",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %19'da sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; Nisan Enflasyon Raporu tahmin patikasındaki belirgin düşüş sağlanana kadar mevcut sıkı duruşun sürdürüleceğini belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %19 düzeyinde bırakıldı.",
+    "Kurul, bireysel kredi kullanımında alınan makroihtiyati tedbirlerin etkilerinin izleneceğini belirtti."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 19 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-33",
+   "kaynak": [
+    "tcmb-2021-33"
+   ],
+   "tarih": "2021-08-12",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %19'da sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; Enflasyon Raporu tahmin patikasındaki belirgin düşüş sağlanana kadar mevcut sıkı duruşun sürdürüleceğini belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %19 düzeyinde bırakıldı.",
+    "Kurul, bireysel kredilerin ılımlı seyre dönmesi için alınan makroihtiyati tedbirlerin yeterliliğinin izlendiğini belirtti."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 19 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-34",
+   "kaynak": [
+    "tcmb-2021-34"
+   ],
+   "tarih": "2021-08-12",
+   "yururluk": "2021-08-12",
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 2,
+   "baslik": "Kore Merkez Bankası ile 17,5 milyar TL / 2,3 trilyon won tutarında swap anlaşması imzalandı",
+   "ozet": "TCMB ile Kore Merkez Bankası arasında TL-Kore wonu ikili para takası anlaşması imzalandı; anlaşma 12 Ağustos 2021'de yürürlüğe girdi ve süresi 3 yıl.",
+   "detay": [
+    "Azami takas tutarı: 17,5 milyar TL veya 2,3 trilyon Kore wonu.",
+    "Geçerlilik süresi bugünden itibaren 3 yıl; tarafların karşılıklı uzlaşısıyla uzatılabilecek.",
+    "Amaç, para takası finansmanlı ticaret mutabakatı yoluyla ikili ticareti ve mali iş birliğini teşvik etmek."
+   ],
+   "alinti": "azami 17,5 milyar Türk lirası veya 2,3 trilyon Kore wonu değerinde yerel para birimi takasına imkân sağlayacaktır"
+  },
+  {
+   "id": "tcmb-2021-39",
+   "kaynak": [
+    "tcmb-2021-39"
+   ],
+   "tarih": "2021-09-15",
+   "yururluk": "2021-10-01",
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "TL zorunlu karşılığın döviz cinsinden tesisi %0'a indirilecek; YP zorunlu karşılıklar 200 baz puan artırılacak",
+   "ozet": "1 Temmuz 2021'de ilan edilen adım tamamlanıyor: 1 Ekim 2021 tesis tarihinde TL zorunlu karşılıkların döviz cinsinden tesisi sona eriyor ve YP zorunlu karşılık oranları yeniden artırılıyor.",
+   "detay": [
+    "TL zorunlu karşılıkların döviz cinsinden tesis edilebilmesi azami oranı: 1 Ekim 2021 tesis tarihinde %10 → %0 (imkân sonlandırılacak).",
+    "YP mevduat/katılım fonu zorunlu karşılık oranları: aynı tarihte yürürlüğe girmek üzere tüm vade dilimlerinde 200 baz puan artırılacak.",
+    "1 Ekim 2021 itibarıyla TL zorunlu karşılık tesislerinin yaklaşık 13,9 milyar TL, döviz ve altın cinsinden tesislerin yaklaşık 3,4 milyar ABD doları karşılığı artması beklendi."
+   ],
+   "alinti": "söz konusu imkân 1 Ekim 2021 tesis tarihinde %10’dan %0’a düşürülerek sonlandırılacak olup"
+  },
+  {
+   "id": "tcmb-2021-40",
+   "kaynak": [
+    "tcmb-2021-40"
+   ],
+   "tarih": "2021-09-15",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "odeme",
+   "onem": 1,
+   "baslik": "Dijital Türk lirası Ar-Ge projesi için ASELSAN, HAVELSAN ve TÜBİTAK-BİLGEM ile iş birliği platformu kuruldu",
+   "ozet": "TCMB, üç kurumla mutabakat zaptı imzalayarak Dijital Türk Lirası İşbirliği Platformu'nu oluşturdu; dijital Türk lirasının tedavülüne ilişkin nihai karar bulunmadığı belirtildi.",
+   "detay": [
+    "Birinci faz kapsamında TCMB nezdinde prototip Dijital Türk Lirası Ağı kurulacak; teknoloji paydaşlarıyla dar kapsamlı ve kapalı devre pilot testler yapılacak.",
+    "Sonuçlara göre daha yaygın ve geniş katılımlı pilot testlerin yapılacağı ileri aşama fazlara geçilecek.",
+    "Birinci faz sonuçları testlerin tamamlanmasının ardından 2022 yılında kamuoyuyla paylaşılacak."
+   ],
+   "alinti": "ASELSAN, HAVELSAN ve TÜBİTAK-BİLGEM ile ikili mutabakat zabıtları imzalamış ve “Dijital Türk Lirası İşbirliği Platformu” oluşturmuştur"
+  },
+  {
+   "id": "tcmb-2021-41",
+   "kaynak": [
+    "tcmb-2021-41"
+   ],
+   "tarih": "2021-09-17",
+   "yururluk": "2021-10-01",
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "İhracat reeskont kredilerinde toplam limit 30 milyar ABD dolarına çıkarıldı; azami vade 240'tan 180 güne indirildi",
+   "ozet": "İhracat ve döviz kazandırıcı hizmetler reeskont kredilerinin kullanım ve geri ödeme koşulları 1 Ekim 2021'den itibaren değiştirildi; krediler net ihracatçı firmalara ve TL harcama alanlarına yönlendirildi.",
+   "detay": [
+    "Toplam limit 30 milyar ABD doları: 20 milyar ABD doları Türk Eximbank, 10 milyar ABD doları diğer bankalar aracılığıyla; 5 milyar ABD doları karşılığı TL reeskont kredisi olarak da kullanılabilecek.",
+    "Krediler, son üç yıldaki ya da son yıldaki ihracatı ithalatından en az %10 fazla olan net ihracatçı firmalara kullandırılacak.",
+    "Krediler yalnızca belirlenen TL cinsi harcama alanlarında kullanılabilecek; geri ödemeler sadece ihracat bedelleriyle yapılacak.",
+    "Azami vade: 240 gün → 180 gün; yeni pazarlara ihracat, yüksek teknolojili ürün ihracatı ve döviz kazandırıcı hizmetlerin finansmanında 360 gün olarak sürecek.",
+    "Aracı bankaların uygulayabileceği azami komisyon oranı: 100 baz puan.",
+    "Firmaların TCMB'ye ilave ihracat bedeli satış taahhüdünde bulunması hâlinde kredi faiz oranından indirim yapılacak."
+   ],
+   "alinti": "Toplam reeskont kredisi limiti 30 milyar ABD dolarına yükseltilmiş, bu limitin 20 milyar ABD dolarlık bölümü Türk Eximbank, 10 milyar ABD dolarlık bölümü diğer bankalar"
+  },
+  {
+   "id": "tcmb-2021-42",
+   "kaynak": [
+    "tcmb-2021-42"
+   ],
+   "tarih": "2021-09-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %19'dan %18'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını indirdi; para politikası duruşunda güncelleme ihtiyacı bulunduğunu belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %19 → %18.",
+    "Kurul, enflasyondaki son yükselişte arz yönlü unsurların, yönetilen/yönlendirilen fiyat artışlarının ve açılmaya bağlı talep gelişmelerinin etkili olduğunu, bu etkilerin arızi unsurlardan kaynaklandığını değerlendirdi.",
+    "Parasal duruşun sıkılığının ticari kredilerde öngörülenin ötesinde daraltıcı etki yapmaya başladığı, bireysel kredilerde makroihtiyati çerçevenin güçlendirildiği belirtildi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 19’dan yüzde 18’e indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-45",
+   "kaynak": [
+    "tcmb-2021-45"
+   ],
+   "tarih": "2021-10-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %18'den %16'ya indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını 200 baz puan indirdi; arz yönlü arızi unsurlar nedeniyle yapılan aşağı yönlü düzeltme için yıl sonuna kadar sınırlı alan kaldığını belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %18 → %16 (200 baz puan).",
+    "Kurul, politika faizinde yapılan aşağı yönlü düzeltme için yıl sonuna kadar sınırlı bir alan kaldığını değerlendirdi.",
+    "Kurul, para politikasının ana hedeflerinde değişiklik yapmadan sürdürülebilir finans uygulamalarını uzun vadeli bir politika olarak destekleme kararı aldı."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 18’den yüzde 16’ya indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-48",
+   "kaynak": [
+    "tcmb-2021-48"
+   ],
+   "tarih": "2021-11-09",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "TL zorunlu karşılığın altın cinsinden tesis oranı %15'ten %10'a düşürüldü; YP zorunlu karşılıklar 200 baz puan artırıldı",
+   "ozet": "TL zorunlu karşılıkların standart altın cinsinden tesis imkânı daraltıldı ve kademeli olarak sonlandırılacak; YP mevduat/katılım fonu zorunlu karşılık oranları yükseltildi.",
+   "detay": [
+    "TL zorunlu karşılıkların standart altın cinsinden tesis edilebilmesi azami oranı: %15 → %10; imkân kademeli olarak azaltılarak sonlandırılacak.",
+    "YP mevduat/katılım fonu zorunlu karşılık oranları: tüm vade dilimlerinde 200 baz puan artırıldı.",
+    "TL zorunlu karşılık tesislerinin yaklaşık 7,4 milyar TL, YP zorunlu karşılık tesislerinin yaklaşık 3,8 milyar ABD doları karşılığı artması öngörüldü.",
+    "Değişiklikler, tesisi 12 Kasım 2021'de başlayacak 28 Ekim 2021 tarihli yükümlülük döneminden itibaren geçerli."
+   ],
+   "alinti": "Türk lirası zorunlu karşılıkların standart altın cinsinden tesis edilmesi imkânı azami oranı %15’ten %10’a düşürülmüştür."
+  },
+  {
+   "id": "tcmb-2021-49",
+   "kaynak": [
+    "tcmb-2021-49"
+   ],
+   "tarih": "2021-11-18",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %16'dan %15'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını 100 baz puan indirdi; arz yönlü geçici etkilerin ima ettiği sınırlı alanın kullanımını Aralık ayında tamamlamayı değerlendireceğini belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %16 → %15 (100 baz puan).",
+    "Kurul, arz yönlü ve para politikası etki alanı dışındaki faktörlerin fiyat artışları üzerindeki geçici etkilerinin 2022'nin ilk yarısı boyunca sürmesini beklediğini bildirdi.",
+    "Kurul, bu etkilerin ima ettiği sınırlı alanın kullanımını Aralık ayında tamamlamayı değerlendireceğini belirtti."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 16’dan yüzde 15’e indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-50",
+   "kaynak": [
+    "tcmb-2021-50"
+   ],
+   "tarih": "2021-11-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 1,
+   "baslik": "Kur seviyesine ilişkin taahhüt bulunmadığı, yalnızca aşırı oynaklığa müdahale edilebileceği duyuruldu",
+   "ozet": "Döviz piyasalarında iktisadi temellerden uzak, sağlıksız fiyat oluşumları gözlemlendiği belirtilerek şirketler ve vatandaşlar olası kayıplara karşı uyarıldı.",
+   "detay": [
+    "Dalgalı kur rejimi altında TCMB'nin kur seviyesine ilişkin bir taahhüdü bulunmuyor; kurlar arz ve talep koşullarıyla belirleniyor.",
+    "TCMB belli koşullar altında kalıcı yön amacı taşımadan yalnızca aşırı oynaklığa müdahale edebiliyor.",
+    "Duyuruda müdahale ya da tutar belirtilmedi."
+   ],
+   "alinti": "Merkez Bankası belli koşullar altında kalıcı yön amacı taşımadan sadece aşırı oynaklığa müdahale edebilmektedir."
+  },
+  {
+   "id": "tcmb-2021-54",
+   "kaynak": [
+    "tcmb-2021-54"
+   ],
+   "tarih": "2021-12-01",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 3,
+   "baslik": "Piyasaya satım yönünde doğrudan döviz müdahalesi yapıldığı duyuruldu",
+   "ozet": "TCMB, döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale ettiğini duyurdu.",
+   "detay": [
+    "Müdahale döviz satımı yönünde; duyuruda tutar belirtilmedi."
+   ],
+   "alinti": "Döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale edilmektedir."
+  },
+  {
+   "id": "tcmb-2021-55",
+   "kaynak": [
+    "tcmb-2021-55"
+   ],
+   "tarih": "2021-12-01",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 2,
+   "baslik": "Borsa İstanbul VİOP nezdinde işlem yapılmaya başlandı",
+   "ozet": "Döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle TCMB, Borsa İstanbul Vadeli İşlemler ve Opsiyon Piyasası'nda işlem yapmaya başladı.",
+   "detay": [
+    "Duyuruda işlemlerin yönü, tutarı ve vadesi belirtilmedi."
+   ],
+   "alinti": "Borsa İstanbul A.Ş. Vadeli İşlemler ve Opsiyon Piyasası nezdinde işlem yapılmaya başlanmıştır."
+  },
+  {
+   "id": "tcmb-2021-56",
+   "kaynak": [
+    "tcmb-2021-56"
+   ],
+   "tarih": "2021-12-03",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 3,
+   "baslik": "Piyasaya satım yönünde doğrudan döviz müdahalesi yapıldığı duyuruldu",
+   "ozet": "TCMB, döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale ettiğini duyurdu.",
+   "detay": [
+    "Müdahale döviz satımı yönünde; duyuruda tutar belirtilmedi."
+   ],
+   "alinti": "Döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale edilmektedir."
+  },
+  {
+   "id": "tcmb-2021-57",
+   "kaynak": [
+    "tcmb-2021-57"
+   ],
+   "tarih": "2021-12-10",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 3,
+   "baslik": "Piyasaya satım yönünde doğrudan döviz müdahalesi yapıldığı duyuruldu",
+   "ozet": "TCMB, döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale ettiğini duyurdu.",
+   "detay": [
+    "Müdahale döviz satımı yönünde; duyuruda tutar belirtilmedi."
+   ],
+   "alinti": "Döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale edilmektedir."
+  },
+  {
+   "id": "tcmb-2021-58",
+   "kaynak": [
+    "tcmb-2021-58"
+   ],
+   "tarih": "2021-12-13",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 3,
+   "baslik": "Piyasaya satım yönünde doğrudan döviz müdahalesi yapıldığı duyuruldu",
+   "ozet": "TCMB, döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale ettiğini duyurdu.",
+   "detay": [
+    "Müdahale döviz satımı yönünde; duyuruda tutar belirtilmedi."
+   ],
+   "alinti": "Döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale edilmektedir."
+  },
+  {
+   "id": "tcmb-2021-59",
+   "kaynak": [
+    "tcmb-2021-59"
+   ],
+   "tarih": "2021-12-16",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %15'ten %14'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını 100 baz puan indirerek arız faktörlerin geçici etkilerinin ima ettiği alanın kullanımını tamamladı; 2022'nin ilk çeyreğinde politika çerçevesi gözden geçirilecek.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %15 → %14 (100 baz puan).",
+    "Kurul, arz yönlü ve para politikası etki alanı dışındaki arızi faktörlerin geçici etkilerinin ima ettiği alanın kullanımının tamamlanmasına karar verdi.",
+    "Alınan kararların birikimli etkileri 2022'nin ilk çeyreğinde izlenecek; bu dönemde geniş kapsamlı politika çerçevesi gözden geçirme süreci yürütülecek."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 15’ten yüzde 14’e indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2021-60",
+   "kaynak": [
+    "tcmb-2021-60"
+   ],
+   "tarih": "2021-12-17",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 3,
+   "baslik": "Piyasaya satım yönünde doğrudan döviz müdahalesi yapıldığı duyuruldu",
+   "ozet": "TCMB, döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale ettiğini duyurdu.",
+   "detay": [
+    "Müdahale döviz satımı yönünde; duyuruda tutar belirtilmedi."
+   ],
+   "alinti": "Döviz kurlarında görülen sağlıksız fiyat oluşumları nedeniyle piyasaya satım yönünde doğrudan müdahale edilmektedir."
+  },
+  {
+   "id": "tcmb-2021-61",
+   "kaynak": [
+    "tcmb-2021-61"
+   ],
+   "tarih": "2021-12-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 3,
+   "baslik": "İhracatçı ve ithalatçı firmalara TL uzlaşmalı vadeli döviz satımı başlatıldı",
+   "ozet": "Firmaların kur riskini yönetebilmesi için TCMB nezdinde ihale yoluyla ve Borsa İstanbul VİOP'ta TL uzlaşmalı vadeli döviz satışı yapılacak.",
+   "detay": [
+    "İhaleler 1 ve 3 ay vadeli olacak; ihale takvimi ayrıca paylaşılacak, firmalar ihalelere bankalar aracılığıyla katılacak.",
+    "İhracatçı ve ithalatçı firmalar, VİOP'ta gerçekleştirilecek vadeli döviz alım taleplerini bankalar aracılığıyla TCMB Döviz Piyasaları Müdürlüğü'ne iletebilecek."
+   ],
+   "alinti": "Bankamız nezdinde ihale yoluyla ve Borsa İstanbul Vadeli İşlem ve Opsiyon Piyasasında (VİOP) TL uzlaşmalı vadeli döviz satışı gerçekleştirilecektir."
+  },
+  {
+   "id": "tcmb-2021-62",
+   "kaynak": [
+    "tcmb-2021-62"
+   ],
+   "tarih": "2021-12-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 3,
+   "baslik": "Döviz hesaplarından TL vadeli mevduata dönüşüm için kur değişimine karşı destek getirildi",
+   "ozet": "20 Aralık 2021'de döviz hesabı bulunan yurt içi yerleşik gerçek kişiler hesaplarını 3, 6 veya 12 ay vadeli TL hesaba dönüştürürse, vade sonunda kur değişim oranı ile faiz/kâr payından yüksek olanı üzerinden ödeme alacak.",
+   "detay": [
+    "Kapsam: 20 Aralık 2021'de ABD doları, Euro ve İngiliz Sterlini cinsinden döviz tevdiat hesabı veya döviz cinsinden katılım fonu bulunan yurt içi yerleşik gerçek kişiler.",
+    "Vadeler: 3, 6 ve 12 ay.",
+    "Ödeme, hesaba işleyecek faiz/kâr payı ile hesap açılışı ve vade sonundaki kur değişim oranından yüksek olan oran üzerinden yapılacak.",
+    "Vade sonu kuru üzerinden hesaplanan tutar anapara ve faiz/kâr payı tutarından büyükse aradaki fark TCMB tarafından karşılanacak.",
+    "Vadeden önce hesaptan para çekilmesi durumunda destekten faydalanılamayacak."
+   ],
+   "alinti": "Açılacak Türk lirası vadeli hesaplara işleyecek faiz/kâr payı ile hesap açılışı ve vade sonundaki kur değişim oranı kıyaslanarak yüksek olan oran üzerinden"
+  },
+  {
+   "id": "tcmb-2021-64",
+   "kaynak": [
+    "tcmb-2021-64"
+   ],
+   "tarih": "2021-12-28",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 1,
+   "baslik": "TL uzlaşmalı vadeli döviz satım ihale takvimi açıklandı: 29 Aralık ve 4 Ocak'ta 100'er milyon ABD doları",
+   "ozet": "1 ay ve 3 ay vadeli TL uzlaşmalı vadeli döviz satım ihalelerinin takvimi ve miktarları duyuruldu.",
+   "detay": [
+    "29 Aralık 2021: 1 ay vadeli 100 milyon ABD doları, 3 ay vadeli 100 milyon ABD doları.",
+    "4 Ocak 2022: 1 ay vadeli 100 milyon ABD doları, 3 ay vadeli 100 milyon ABD doları.",
+    "Takvimdeki diğer tarihlerde (30 Aralık 2021 - 7 Ocak 2022) miktar belirtilmedi."
+   ],
+   "alinti": "Türk lirası uzlaşmalı vadeli döviz satım ihalelerine ilişkin ihale takvimi aşağıda yer almaktadır."
+  },
+  {
+   "id": "tcmb-2021-65",
+   "kaynak": [
+    "tcmb-2021-65"
+   ],
+   "tarih": "2021-12-29",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 2,
+   "baslik": "Dönüşüm desteği altın hesaplarından TL vadeli mevduata dönüşümü de kapsayacak şekilde genişletildi",
+   "ozet": "21 Aralık 2021'de döviz hesapları için açıklanan destek, altın cinsinden mevduat ve katılım fonlarının vadeli TL hesaplara dönüşmesi durumunu da kapsayacak.",
+   "detay": [
+    "Altın cinsinden mevduat hesapları ve katılım fonlarının hesap sahibinin talebiyle vadeli TL mevduat ve katılma hesaplarına dönüşmesi hâlinde sahiplerine destek sağlanacak.",
+    "Duyuruda desteğin koşulları, vadeleri ve yürürlük tarihi belirtilmedi."
+   ],
+   "alinti": "altın cinsinden mevduat hesapları ve katılım fonlarının vadeli Türk lirası mevduat ve katılma hesaplarına dönüşmesi halinde mevduat ve katılım fonu sahiplerine destek sağlanmasına karar verilmiştir"
+  }
+ ],
+ "elenen": [
+  {
+   "id": "tcmb-2021-04",
+   "neden": "veri yayımı duyurusu (uluslararası rezervler tablosu haftalık yayımlanmaya başlıyor)"
+  },
+  {
+   "id": "tcmb-2021-08",
+   "neden": "TCMB iç organizasyon (yeni müdürlükler) duyurusu"
+  },
+  {
+   "id": "tcmb-2021-15",
+   "neden": "Para Politikası Kurulu üyeliği (personel) duyurusu"
+  },
+  {
+   "id": "tcmb-2021-19",
+   "neden": "istatistik yöntemi (yatırım eğilimi anketi) duyurusu"
+  },
+  {
+   "id": "tcmb-2021-23",
+   "neden": "anket isim değişikliği duyurusu"
+  },
+  {
+   "id": "tcmb-2021-35",
+   "neden": "iş birliği mutabakat zaptı — kural değişikliği içermiyor"
+  },
+  {
+   "id": "tcmb-2021-36",
+   "neden": "veri yayımlama takvimi duyurusu"
+  },
+  {
+   "id": "tcmb-2021-38",
+   "neden": "izinsiz ödeme hizmeti sunanlara ilişkin uyarı duyurusu"
+  },
+  {
+   "id": "tcmb-2021-51",
+   "neden": "iş birliği mutabakat zaptı — kural değişikliği içermiyor"
+  },
+  {
+   "id": "tcmb-2021-53",
+   "neden": "iş birliği mutabakat zaptı — kural değişikliği içermiyor"
+  }
+ ]
+}

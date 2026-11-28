@@ -9,7 +9,14 @@
 # ardından çalışır) ve 14:45 TR (gecikmeyle gece; günün tüm yayınlarını toplar). GitHub gecikmezse de 14:45 koşusu
 # Perşembe 14:30 haftalık istatistiklerini yakalar.
 #
+# Düzenleme Zaman Çizelgesi (28.11.2026): aynı koşuda TCMB, BDDK ve SPK'nın yeni duyuruları taranır, Claude ile özetlenir
+# (duzenleme/guncelle.py). Kurumlar hafta sonu da duyuru yayımladığı için (TCMB makroihtiyati duyuruları çoğu kez
+# Cumartesi çıkar) Cumartesi–Pazar için bir tetik daha vardır; o koşuda diğer modüller de çalışır, yeni veri yoksa
+# commit üretmez.
+#
 # Gerekli secret: EVDS_API_KEY  (Settings → Secrets and variables → Actions)
+# İsteğe bağlı secret: ANTHROPIC_API_KEY (bülteninkiyle aynı) — yoksa yeni duyurular işlenmeden bekler.
+# Variable: DUZENLEME_MODEL (varsayılan claude-opus-5-5)
 # Elle çalıştırma: Actions sekmesi → bu workflow → "Run workflow".
 name: Veri Güncelleme (hafta içi her gün)
 
@@ -17,6 +24,7 @@ on:
   schedule:
     - cron: "17 5 * * 1-5"    # Pzt–Cum 05:17 UTC = 08:17 TR
     - cron: "45 11 * * 1-5"   # Pzt–Cum 11:45 UTC = 14:45 TR
+    - cron: "30 9 * * 0,6"    # Cmt–Paz 09:30 UTC = 12:30 TR (hafta sonu duyuruları için)
   workflow_dispatch:
 
 permissions:
@@ -48,7 +56,7 @@ jobs:
           python-version: "3.11"
 
       - name: Kütüphaneleri kur
-        run: pip install --quiet pandas requests openpyxl xlrd beautifulsoup4 matplotlib numpy
+        run: pip install --quiet pandas requests openpyxl xlrd beautifulsoup4 matplotlib numpy pymupdf anthropic
 
       - name: Verileri çek (başarısız modül atlanır, kalanlar devam eder)
         run: |
@@ -82,6 +90,16 @@ jobs:
           echo ""
           echo "Başarısız modüller:${FAILS:- (yok — hepsi güncellendi)}"
 
+      # Bu adım düşse de diğer veriler yayımlanır (continue-on-error). Sisteme ait sorun duzenleme/durum.json'a,
+      # elle bakılması gereken belge duzenleme/bekleyen.json'a yazılır; ikisini de sabah kontrolcüsü okur.
+      - name: Düzenleme çizelgesini güncelle (TCMB, BDDK, SPK duyuruları)
+        id: duzenleme
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DUZENLEME_MODEL: ${{ vars.DUZENLEME_MODEL || 'claude-opus-5-5' }}
+        run: timeout 900 python duzenleme/guncelle.py
+
       - name: Site veri paketlerini üret
         run: python site_export.py
 
@@ -91,7 +109,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "tcmb haftalık stok/output" "net rezerv" "enflasyon" "kredi mevduat" \
                   "yabanci para hareketi" "cari acik" "butce" "hazine nakit" \
-                  "hazine ihale " "tcmb dogrudan alım" "tcmb faiz" site
+                  "hazine ihale " "tcmb dogrudan alım" "tcmb faiz" duzenleme site
           if git diff --cached --quiet; then
             echo "Yeni veri yok — commit atlanıyor."
           else

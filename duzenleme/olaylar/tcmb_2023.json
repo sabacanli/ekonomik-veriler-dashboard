@@ -1,0 +1,682 @@
+{
+ "olaylar": [
+  {
+   "id": "tcmb-2023-01",
+   "kaynak": [
+    "tcmb-2023-01"
+   ],
+   "tarih": "2023-01-07",
+   "yururluk": "2023-02-24",
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "Menkul kıymet tesis oranı %5'ten %10'a yükseltildi; TL payı %60'ı aşan bankalara indirim getirildi",
+   "ozet": "Bankaların geneli 2022'de mevduatta %50 liralaşma hedefine ulaştı; yılın ilk yarısı için hedef %60 olarak belirlendi ve menkul kıymet tesisi uygulaması 24 Şubat 2023'ten itibaren buna göre güncellendi.",
+   "detay": [
+    "Menkul kıymet tesis oranı: %5 → %10.",
+    "Gerçek ve tüzel kişi TL paylarında %60 hedefini aşan bankalara tesis oranı indirimli uygulanacak: TL payı %60 (dâhil) ile %70 arasında olanlar için 5 puan, %70'ten büyük olanlar için 7 puan indirim.",
+    "TL payında %60 hedefinin altında kalan bankalar için daha önce belirlenmiş ilave oranlar, tesis oranına eklenerek uygulanmaya devam edecek."
+   ],
+   "alinti": "Menkul kıymet tesis oranı yüzde 5’ten yüzde 10’a yükseltilmiştir."
+  },
+  {
+   "id": "tcmb-2023-02",
+   "kaynak": [
+    "tcmb-2023-02"
+   ],
+   "tarih": "2023-01-15",
+   "yururluk": "2023-01-20",
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "3 aydan uzun vadeli TL mevduatta zorunlu karşılık %0 yapıldı; uzun vadeli yurt dışı YP borçlarda da %0",
+   "ozet": "TL mevduatın vadesinin uzamasını teşvik etmek amacıyla 3 aydan uzun vadeli TL mevduatta zorunlu karşılık oranları sıfırlandı; yurt dışından temin edilen 6 aydan uzun vadeli YP yükümlülüklerdeki artış için de 2023 sonuna kadar %0 uygulanacak.",
+   "detay": [
+    "3 aydan uzun vadeli TL mevduat için zorunlu karşılık oranları: %0 (duyuruda önceki oranlar belirtilmedi).",
+    "Yurt dışından doğrudan temin edilen 6 aydan uzun vadeli YP yükümlülüklerdeki artış için zorunlu karşılık oranı: 2023 yıl sonuna kadar %0.",
+    "Değişiklikler, tesisi 3 Şubat 2023'te başlayacak 20 Ocak 2023 hesaplama tarihinden itibaren geçerli."
+   ],
+   "alinti": "3 aydan uzun vadeli Türk lirası mevduat için zorunlu karşılık oranlarının yüzde sıfır olarak belirlenmesine karar verilmiştir"
+  },
+  {
+   "id": "tcmb-2023-03",
+   "kaynak": [
+    "tcmb-2023-03"
+   ],
+   "tarih": "2023-01-19",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %9'da sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; 2023 Yılı Para Politikası ve Liralaşma metninde belirtildiği üzere tüm politika araç setinin liralaşma hedefleriyle uyumlu hale getirileceğini bildirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %9 düzeyinde bırakıldı.",
+    "Kurul, parasal aktarım mekanizmasının etkinliğini destekleyecek araçlarını kararlılıkla kullanmaya devam edeceğini ve fonlama kanalları başta olmak üzere tüm politika araç setini liralaşma hedefleriyle uyumlu hale getireceğini belirtti.",
+    "TCMB, enflasyonda kalıcı düşüşe işaret eden güçlü göstergeler oluşana ve orta vadeli %5 hedefine ulaşıncaya kadar tüm araçları kararlılıkla kullanmaya devam edecek ve Liralaşma Stratejisi'ni tüm unsurlarıyla uygulayacak."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 9 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-05",
+   "kaynak": [
+    "tcmb-2023-05"
+   ],
+   "tarih": "2023-01-26",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 2,
+   "baslik": "Yurt dışı kaynaklı dövizini TL'ye çeviren firmalara çevrilen tutarın %2'si kadar dönüşüm desteği getirildi",
+   "ozet": "Ticari hayatta liralaşmayı desteklemek amacıyla, firmaların yurt dışı kaynaklı dövizlerini TCMB'ye satması ya da kur korumalı dönüşüm hesabında değerlendirmesi hâlinde taahhüt karşılığında döviz dönüşüm desteği verilecek.",
+   "detay": [
+    "Firmalar yurt dışı kaynaklı dövizlerini TCMB'ye satarken, verecekleri taahhüt karşılığında TL'ye çevrilen tutarın %2'si kadar döviz dönüşüm desteği alabilecek.",
+    "Firmalar yurda getirdikleri yurt dışı kaynaklı dövizlerin en az %40'ını TCMB'ye sattıktan sonra kalan kısmı kur korumalı dönüşüm hesabında değerlendirebilecek; taahhüt karşılığında TL'ye çevrilen tutarın %2'si kadar destek alabilecek.",
+    "TCMB'ye satılacak ve TL vadeli mevduat/katılma hesaplarına dönüştürülecek dövizlerin yurt dışı kaynaklı olduğunu bankalar tespit edecek."
+   ],
+   "alinti": "firmaların yurt dışı kaynaklı dövizlerinin Türk lirasına dönüşümüne destek sağlanmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-08",
+   "kaynak": [
+    "tcmb-2023-08"
+   ],
+   "tarih": "2023-02-06",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Deprem bölgesindeki firmaların reeskont ve YTAK geri ödemelerine 180 güne kadar faizsiz vade uzatımı tanındı",
+   "ozet": "Deprem/afet bölgesindeki 10 ilde kurulu firmaların ihracat ve döviz kazandırıcı hizmetler reeskont kredileri ile yatırım taahhütlü avans kredisi (YTAK) geri ödemeleri için vade uzatımı ve taahhüt kapatma süresi verildi.",
+   "detay": [
+    "Kapsam: Adana, Adıyaman, Diyarbakır, Hatay, Gaziantep, Kahramanmaraş, Kilis, Malatya, Osmaniye ve Şanlıurfa'da kurulu firmalar.",
+    "6 Şubat 2023 (dâhil) ile 30 Nisan 2023 (dâhil) arasındaki ihracat ve döviz kazandırıcı hizmetler reeskont kredileri ile YTAK geri ödemelerine 180 güne kadar faizsiz vade uzatımı imkânı.",
+    "6 Şubat 2023 öncesinde kullanılmış ihracat ve döviz kazandırıcı hizmetler reeskont kredilerine 6 ay ilave ihracat ve döviz kazandırıcı hizmet taahhüdü kapatma süresi."
+   ],
+   "alinti": "reeskont kredileri ile yatırım taahhütlü avans kredileri geri ödemelerine 180 güne kadar faizsiz olarak vade uzatımı imkânı tanınmıştır"
+  },
+  {
+   "id": "tcmb-2023-09",
+   "kaynak": [
+    "tcmb-2023-09"
+   ],
+   "tarih": "2023-02-06",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "odeme",
+   "onem": 1,
+   "baslik": "Deprem bağış hesaplarına yapılan para transferlerinden ücret alınmaması için bankalara talimat verildi",
+   "ozet": "AFAD ve Kızılay gibi yardım kuruluşları başta olmak üzere deprem bağış hesaplarına yapılan para transferlerinden ücret alınmaması yönünde TBB ve TKBB üyesi bankalara talimat gönderildi.",
+   "detay": [
+    "Kapsam: deprem bağış hesaplarına yapılan para transferleri; AFAD ve Kızılay gibi yardım kuruluşları başta olmak üzere.",
+    "Talimat, Türkiye Bankalar Birliği (TBB) ve Türkiye Katılım Bankaları Birliği (TKBB) üyesi bankalara gönderildi; duyuruda süre belirtilmedi."
+   ],
+   "alinti": "deprem bağış hesaplarına yapılan para transferlerinden ücret alınmaması yönünde Türkiye Bankalar Birliği (TBB) ve Türkiye Katılım Bankaları Birliği (TKBB) üyesi bankalara talimat gönderilmiştir"
+  },
+  {
+   "id": "tcmb-2023-10",
+   "kaynak": [
+    "tcmb-2023-10"
+   ],
+   "tarih": "2023-02-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %9'dan %8,5'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını 50 baz puan indirdi; depremin etkilerinin en düşük seviyelere indirilmesi için uygun finansal koşulların önceliklendirileceğini bildirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %9 → %8,5 (50 baz puan).",
+    "Kurul, bu ölçülü indirim sonrası para politikası duruşunun fiyat istikrarı ve finansal istikrarı koruyarak deprem sonrası gerekli toparlanmayı desteklemek için yeterli olduğu görüşünde.",
+    "Kurul, felaketin etkilerinin en düşük seviyelere indirilmesi ve gerekli dönüşümün desteklenmesi amacıyla uygun finansal koşulların oluşmasını önceliklendirecek.",
+    "Depremin 2023'ün ilk yarısındaki etkileri yakından takip edilecek."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 9’dan yüzde 8,5’e indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-12",
+   "kaynak": [
+    "tcmb-2023-12"
+   ],
+   "tarih": "2023-03-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %8,5'te sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; para politikası duruşunun deprem sonrası gerekli toparlanmayı desteklemek için yeterli olduğunu değerlendirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %8,5 düzeyinde bırakıldı.",
+    "Kurul, para politikası duruşunun fiyat istikrarı ve finansal istikrarı koruyarak deprem sonrası gerekli toparlanmayı desteklemek için yeterli olduğu görüşünde.",
+    "Kurul, felaketin etkilerinin en düşük seviyelere indirilmesi için uygun finansal koşulların oluşmasını önceliklendirecek; depremin 2023'ün ilk yarısındaki etkileri yakından takip edilecek."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 8,5 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-17",
+   "kaynak": [
+    "tcmb-2023-17"
+   ],
+   "tarih": "2023-04-27",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %8,5'te sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; para politikası duruşunun deprem sonrası gerekli toparlanmayı desteklemek için yeterli olduğunu belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %8,5 düzeyinde bırakıldı.",
+    "Kurul, para politikası duruşunun fiyat istikrarı ve finansal istikrarı koruyarak deprem sonrası gerekli toparlanmayı desteklemek için yeterli olduğu görüşünde.",
+    "Kurul, felaketin etkilerinin en düşük seviyelere indirilmesi için uygun finansal koşulların oluşmasını önceliklendirecek; depremin 2023'ün ilk yarısındaki etkileri yakından takip edilecek."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 8,5 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-20",
+   "kaynak": [
+    "tcmb-2023-20"
+   ],
+   "tarih": "2023-05-25",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %8,5'te sabit tutuldu",
+   "ozet": "PPK faizi değiştirmedi; güncel verilerin deprem bölgesinde ekonomik faaliyetin beklenenden hızlı toparlandığını gösterdiğini belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %8,5 düzeyinde bırakıldı.",
+    "Kurul, para politikası duruşunun fiyat istikrarı ve finansal istikrarı koruyarak deprem sonrası gerekli toparlanmayı desteklemek için yeterli olduğu görüşünde.",
+    "Kurul, felaketin etkilerinin en düşük seviyelere indirilmesi için uygun finansal koşulların oluşmasını önceliklendirecek."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 8,5 düzeyinde sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-22",
+   "kaynak": [
+    "tcmb-2023-22"
+   ],
+   "tarih": "2023-06-22",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %8,5'ten %15'e yükseltildi; parasal sıkılaştırma süreci başladı",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını yükselterek parasal sıkılaştırma sürecini başlattı; mikro ve makroihtiyati çerçevenin kademeli olarak sadeleştirileceğini bildirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %8,5 → %15.",
+    "Kurul, enflasyon görünümünde belirgin iyileşme sağlanana kadar parasal sıkılaştırmanın gerektiği zamanda ve gerektiği ölçüde kademeli olarak güçlendirileceğini belirtti.",
+    "Kurul, mevcut mikro ve makroihtiyati çerçeveyi etki analizleri yaparak kademeli biçimde sadeleştireceğini bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 8,5’ten yüzde 15 düzeyine yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-23",
+   "kaynak": [
+    "tcmb-2023-23"
+   ],
+   "tarih": "2023-06-25",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "Menkul kıymet tesisi uygulaması sadeleştirildi; sadeleşme sürecinin ilk adımı Resmî Gazete'de yayımlandı",
+   "ozet": "PPK'nın 22 Haziran kararında belirtilen mikro ve makroihtiyati çerçevenin kademeli sadeleştirilmesi kapsamında ilk adım olarak menkul kıymet tesisi uygulaması sadeleştirildi.",
+   "detay": [
+    "Menkul kıymet tesisi uygulaması, piyasa mekanizmalarının işlevselliğini artıracak ve makro finansal istikrarı güçlendirecek doğrultuda sadeleştirilerek Resmî Gazete'de yayımlandı; duyuruda yeni oranlar belirtilmedi.",
+    "Sadeleşme süreci PPK'nın ilan ettiği ilkeler doğrultusunda kademeli olarak devam edecek."
+   ],
+   "alinti": "menkul kıymet tesisi uygulaması, piyasa mekanizmalarının işlevselliğini artıracak ve makro finansal istikrarı güçlendirecek doğrultuda sadeleştirilerek Resmî Gazete'de yayımlanmıştır"
+  },
+  {
+   "id": "tcmb-2023-25",
+   "kaynak": [
+    "tcmb-2023-25"
+   ],
+   "tarih": "2023-07-20",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %15'ten %17,5'e yükseltildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını yükseltti; faiz artırımının yanı sıra parasal sıkılaştırmayı destekleyecek seçici kredi ve miktarsal sıkılaştırma kararları aldığını bildirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %15 → %17,5.",
+    "Kurul, parasal sıkılaştırma sürecinin devamına karar verdi.",
+    "Kurul, faiz artırımının yanı sıra parasal sıkılaştırma sürecini destekleyecek seçici kredi ve miktarsal sıkılaştırma kararları aldı.",
+    "Kurul, enflasyon görünümünde belirgin iyileşme sağlanana kadar parasal sıkılaştırmanın gerektiği zamanda ve gerektiği ölçüde kademeli olarak güçlendirileceğini belirtti."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 15’ten yüzde 17,5 düzeyine yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-28",
+   "kaynak": [
+    "tcmb-2023-28"
+   ],
+   "tarih": "2023-07-25",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 3,
+   "baslik": "Ticari kredi büyüme sınırı %3'ten %2,5'e, taşıt kredisi %3'ten %2'ye indirildi; kart ve KMH azami faizi %2,89",
+   "ozet": "PPK'nın 20 Temmuz kararındaki seçici kredi sıkılaştırması açıklandı: kredi büyüme sınırları sıkılaştırıldı, kredi kartı nakit ve KMH azami faizi yükseltildi, ihracatçılar için reeskont kredilerine erişim kolaylaştırıldı.",
+   "detay": [
+    "Kredi büyümesine göre menkul kıymet tesisi kapsamında TL ticari kredilerde aylık büyüme sınırı: %3 → %2,5; ihracat, yatırım, tarım ve esnaf kredileri sınırlandırmanın dışında.",
+    "Faiz oranına göre menkul kıymet tesisi sadeleştirildi: ihracat ve yatırım kredileri hariç TL ticari kredilerde birinci kademe kaldırıldı, faiz sınırı tek kademe olarak uygulanacak.",
+    "Taşıt kredilerinde büyüme sınırı: %3 → %2; ihtiyaç kredilerinde %3 sınırı korundu. İhracat ve yatırım kredileri ile deprem bölgesine yönelik krediler TCMB'nin kredileri sınırlandırıcı tüm tedbirlerinin dışında tutulacak.",
+    "Kredi kartı nakit kullanımlarına ve kredili mevduat hesaplarına uygulanan aylık azami faiz oranı %2,89'a yükseltildi (duyuruda önceki oran belirtilmedi).",
+    "Reeskont kredilerinin günlük limiti 1,5 milyar TL'ye yükseltildi; kullandırımda KOBİ payının artırılması ve ihracat artış performansının dikkate alınması kararlaştırıldı.",
+    "Reeskont kredisi kullanımında %30 ilave ihracat bedeli satış koşulu kaldırıldı; reeskont kredi vadesi boyunca verilen döviz almama taahhüdünden ithalat ödemeleri kapsamındaki döviz alımları istisna tutuldu."
+   ],
+   "alinti": "kredi büyümesine göre menkul kıymet tesisi kapsamında yüzde 3 olan TL ticari krediler için aylık büyüme sınırının yüzde 2,5 olarak belirlenmesine karar verilmiştir"
+  },
+  {
+   "id": "tcmb-2023-28-b",
+   "kaynak": [
+    "tcmb-2023-28"
+   ],
+   "tarih": "2023-07-25",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "Kur koruma desteği sağlanan hesaplar için %15 zorunlu karşılık uygulaması getirildi",
+   "ozet": "Parasal sıkılaşma sürecini destekleyen miktarsal sıkılaştırma kapsamında, kur koruma desteği sağlanan hesaplara zorunlu karşılık uygulaması getirildi; düzenleme 21 Temmuz 2023 tarihli Resmi Gazete'de yayımlandı.",
+   "detay": [
+    "Kur koruma desteği sağlanan hesaplar için zorunlu karşılık oranı: %15.",
+    "Uygulama 21 Temmuz 2023 tarihli Resmi Gazete'de yayımlandı; duyuruda yürürlük tarihi belirtilmedi."
+   ],
+   "alinti": "kur koruma desteği sağlanan hesaplar için yüzde 15 oranında zorunlu karşılık uygulaması 21 Temmuz 2023 tarihli Resmi Gazetede yayımlanmıştır"
+  },
+  {
+   "id": "tcmb-2023-31",
+   "kaynak": [
+    "tcmb-2023-31"
+   ],
+   "tarih": "2023-08-20",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 3,
+   "baslik": "YP'den KKM'ye dönüşüm hedefi sona erdi; KKM'den TL'ye geçiş ve kur korumasız TL payı artış hedefi getirildi",
+   "ozet": "Sadeleşme sürecinde yabancı para mevduattan kur korumalı mevduata dönüşüm hedefi ile TL payına göre menkul kıymet tesisi ve zorunlu karşılık uygulaması kaldırıldı; kur korumalı mevduatın azaltılmasına yönelik yeni hedefler getirildi.",
+   "detay": [
+    "Yabancı para mevduattan kur korumalı mevduata dönüşüm hedefi uygulamasına son verildi.",
+    "TL payına göre menkul kıymet tesisi ve zorunlu karşılık uygulamasına son verildi.",
+    "TCMB'nin kur koruma desteği sağladığı hesaplardan TL hesaplara geçiş ve kur korumalı hesapların belli oranda yenilenmesi hedeflendi; duyuruda oran belirtilmedi.",
+    "Kur koruması bulunmayan TL payı seviyesinde artış hedefine geçildi; duyuruda hedef oranı belirtilmedi."
+   ],
+   "alinti": "yabancı para mevduattan kur korumalı mevduata dönüşüm hedefi uygulamasına ve TL payına göre menkul kıymet tesis ve zorunlu karşılık uygulamasına son verilmiştir"
+  },
+  {
+   "id": "tcmb-2023-32",
+   "kaynak": [
+    "tcmb-2023-32"
+   ],
+   "tarih": "2023-08-24",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %17,5'ten %25'e yükseltildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını yükseltti; enflasyonun yıl sonunda Enflasyon Raporu'ndaki tahmin aralığının üst sınırına yakın seyredeceğini, dezenflasyonun 2024'te tesis edileceğini öngördüğünü bildirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %17,5 → %25.",
+    "Kurul, parasal sıkılaştırma sürecinin devamına karar verdi.",
+    "Kurul, faiz artırımının yanı sıra parasal sıkılaştırma sürecini destekleyecek seçici kredi ve miktarsal sıkılaştırma kararları almaya devam edecek.",
+    "Kurul, parasal sıkılaştırma adımlarının etkisiyle dezenflasyonun 2024'te Enflasyon Raporu ile uyumlu şekilde tesis edileceğini öngörüyor."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 17,5’ten yüzde 25 düzeyine yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-34",
+   "kaynak": [
+    "tcmb-2023-34"
+   ],
+   "tarih": "2023-09-12",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "İhracat reeskont kredisi günlük limiti 1,5 milyar TL'den 3 milyar TL'ye yükseltildi",
+   "ozet": "Seçici kredi kullanımını ve ihracatçıların finansmana erişimini desteklemek amacıyla reeskont kredisi günlük kullandırım limiti iki katına çıkarıldı.",
+   "detay": [
+    "İhracat ve döviz kazandırıcı hizmetler reeskont kredisi günlük kullandırım limiti: 1,5 milyar TL → 3 milyar TL.",
+    "Duyuruya göre limit 25 Temmuz 2023 tarihli duyuruda 300 milyon TL'den 1,5 milyar TL'ye yükseltilmişti.",
+    "Kullandırımda KOBİ payının artırılmasına ve ihracat performansının dikkate alınmasına devam edilecek."
+   ],
+   "alinti": "İhracat ve döviz kazandırıcı hizmetler reeskont kredisi günlük kullandırım limitleri 1,5 milyar TL’den 3 milyar TL’ye yükseltilmiştir"
+  },
+  {
+   "id": "tcmb-2023-35",
+   "kaynak": [
+    "tcmb-2023-35"
+   ],
+   "tarih": "2023-09-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %25'ten %30'a yükseltildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını yükseltti; temmuz ve ağustos enflasyonunun öngörülenin üzerinde gerçekleştiğini, dezenflasyonu 2024'te Enflasyon Raporu'ndaki patika ile uyumlu tesis etmekte kararlı olduğunu bildirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %25 → %30.",
+    "Kurul, parasal sıkılaştırma sürecinin devamına karar verdi.",
+    "Kurul, faiz artırımının yanı sıra parasal sıkılaştırma sürecini destekleyecek seçici kredi ve miktarsal sıkılaştırma kararları almayı sürdürecek.",
+    "Kurul, enflasyonun yıl sonunda Enflasyon Raporu'ndaki tahmin aralığının üst sınırına yakın seyredeceğini değerlendirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 25’ten yüzde 30 düzeyine yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-39",
+   "kaynak": [
+    "tcmb-2023-39"
+   ],
+   "tarih": "2023-10-26",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %30'dan %35'e yükseltildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını yükseltti; enflasyonun üçüncü çeyrekte öngörülenin üzerinde gerçekleştiğini, TL mevduat payının artırılmasına yönelik ilave adımların süreceğini bildirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %30 → %35.",
+    "Kurul, parasal sıkılaştırma sürecinin devamına karar verdi.",
+    "Kurul, TL mevduat payının artırılmasına yönelik ilave adımlarla parasal aktarım mekanizmasının güçlendirilmesine devam edileceğini belirtti.",
+    "Kurul, faiz artırımının yanı sıra seçici kredi ve miktarsal sıkılaştırma kararları almayı sürdürecek."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 30’dan yüzde 35 düzeyine yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-40",
+   "kaynak": [
+    "tcmb-2023-40"
+   ],
+   "tarih": "2023-10-27",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 3,
+   "baslik": "Kredi ve reel kesim menkul değerlerinde %30 menkul kıymet tesisi sona erdi; faize dayalı tesis kaldırılıyor",
+   "ozet": "Makroihtiyati çerçevedeki sadeleşme kapsamında bankaların TL nakdi kredileri ve reel kesim menkul değerleri üzerindeki menkul kıymet tesisi uygulaması sona erdirildi; faize dayalı tesis uygulamaları kaldırılıyor.",
+   "detay": [
+    "Bankalarca kullandırılan TL nakdi krediler üzerinden %30 oranında menkul kıymet tesisi uygulamasına son verildi; hariç tutulan kredi türlerinin harcama mukabili kullandırılmaması halinde menkul kıymet tesisine tabi olması uygulaması da sona erdi.",
+    "Bankalarca satın alınan reel kesim menkul değerleri üzerinden %30 oranında menkul kıymet tesisi uygulamasına son verildi.",
+    "Bankaların TL ticari kredilerde referans oranın 1,8 katının üzerinde uyguladıkları faiz/kâr payı oranına göre menkul kıymet tesisi uygulaması kaldırılacak.",
+    "Faktoring şirketlerinin faktoring alacaklarında referans oranın 2,7 katının üzerinde uyguladıkları faiz oranına göre menkul kıymet tesisi uygulaması kaldırıldı.",
+    "Kur korumalı hesapların (döviz dönüşümlü) yenilenmesi ve TL'ye geçişi ile TL payının artırılmasına ilişkin maddeler menkul kıymet düzenlemesinden çıkarıldı.",
+    "Teknik detaylar ilgili düzenlemelerde yer alacak."
+   ],
+   "alinti": "Bankalarca kullandırılan Türk lirası cinsinden nakdi krediler üzerinden yüzde 30 oranında menkul kıymet tesisi uygulamasına son verilmiştir"
+  },
+  {
+   "id": "tcmb-2023-40-b",
+   "kaynak": [
+    "tcmb-2023-40"
+   ],
+   "tarih": "2023-10-27",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 2,
+   "baslik": "Gerçek kişilerin TL mevduat payı artış hedefi %2,5'ten %3,5'e yükseltilecek",
+   "ozet": "TL mevduatın payının artırılmasına yönelik adımlar kapsamında gerçek kişi TL mevduat payı hedefi yükseltilecek; YP mevduat zorunlu karşılığı üzerinden komisyon uygulaması kur korumalı hesapların yenilenmesi ve TL'ye geçişine göre değiştirilecek.",
+   "detay": [
+    "Gerçek kişilere ait TL mevduatın payı için daha önce belirlenmiş %2,5 artış hedefi: %3,5'e yükseltilecek.",
+    "YP mevduat için tesis edilen zorunlu karşılıklar üzerinden komisyon alınması uygulamasında, kur korumalı hesapların (döviz dönüşümlü) yenilenmesi ve TL'ye geçişi ile TL payının artırılmasına yönelik değişiklikler yapılacak.",
+    "TL'ye geçiş oranı %10'dan fazla olan bankaların hedefi aşan kısmı yenileme hedefine sayılacak.",
+    "Teknik detaylar ilgili düzenlemelerde yer alacak."
+   ],
+   "alinti": "Gerçek kişilere ait Türk lirası mevduatın payı için daha önce belirlenmiş olan yüzde 2,5 artış hedefi yüzde 3,5’e yükseltilecektir"
+  },
+  {
+   "id": "tcmb-2023-40-c",
+   "kaynak": [
+    "tcmb-2023-40"
+   ],
+   "tarih": "2023-10-27",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 1,
+   "baslik": "Yatırım malı ithalatı net ihracatçılık şartının dışında tutuldu",
+   "ozet": "Yatırım malı ithalatının net ihracatçılık şartından hariç tutulmasıyla ihracat kredilerine erişimin kolaylaşması hedefleniyor; duyuruda ayrıntı verilmedi.",
+   "detay": [
+    "Yatırım malı ithalatı net ihracatçılık şartından hariç tutuldu; duyuruda şartın kapsamı ve başlangıç tarihi belirtilmedi.",
+    "Düzenlemenin ihracat kredilerine erişimin kolaylaşmasına katkı sağlaması öngörülüyor."
+   ],
+   "alinti": "Yatırım malı ithalatının net ihracatçılık şartından hariç tutulmasıyla ihracat kredilerine erişimin kolaylaşmasına katkı sağlanacaktır"
+  },
+  {
+   "id": "tcmb-2023-43",
+   "kaynak": [
+    "tcmb-2023-43"
+   ],
+   "tarih": "2023-11-08",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 1,
+   "baslik": "Özet Döviz Pozisyon Raporlaması kaldırıldı; Sistemik Risk Veri Takip Sistemi kapsamı yeniden belirlendi",
+   "ozet": "Firmaların Merkez Bankasına yaptığı döviz pozisyon raporlamasında sadeleştirme yapıldı; Mart 2023'te başlatılan özet raporlama sona erdirildi, sistemik risk raporlamasının firma kapsamı değiştirildi.",
+   "detay": [
+    "2023 Mart'ında başlatılan, 10 milyon TL ve üzeri toplam nakdi ve gayrinakdi kredi bakiyesi bulunan firmalardan alınan Özet Döviz Pozisyon Raporlaması uygulamasına son verildi.",
+    "Sistemik Risk Veri Takip Sistemi (2018'den beri) kapsamındaki raporlamada 15 milyon ABD doları ve üzeri YP kredi yükümlülüğü şartı kaldırıldı.",
+    "Yeni kapsam: toplam nakdi kredi bakiyesinin ilgili aylık hesap döneminin son iş günü itibarıyla 100 milyon TL ve üzerinde olması veya geçmiş bir yıllık dönemdeki net satış hasılatı ya da aktif büyüklüğünün 500 milyon TL ve üzerinde olması.",
+    "Mevcut detaylı raporlama formatının sadeleştirilmesi planlanıyor."
+   ],
+   "alinti": "2023 yılı Mart ayında başlatılan, 10 milyon Türk lirası ve üzeri toplam nakdi ve gayrinakdi kredi bakiyesi bulunan firmalardan alınan Özet Döviz Pozisyon Raporlaması uygulamasına son verilmiştir"
+  },
+  {
+   "id": "tcmb-2023-45",
+   "kaynak": [
+    "tcmb-2023-45"
+   ],
+   "tarih": "2023-11-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %35'ten %40'a yükseltildi; sıkılaştırma hızı yavaşlatılacak",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını yükseltti; dezenflasyon için gerekli parasal sıkılık düzeyine önemli ölçüde yaklaşıldığını belirterek sıkılaştırma adımlarının kısa sürede tamamlanacağını bildirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %35 → %40.",
+    "Kurul, gerekli parasal sıkılık düzeyine önemli ölçüde yaklaşıldığını değerlendirdi; parasal sıkılaştırma hızı yavaşlatılacak ve sıkılaştırma adımları kısa bir zaman diliminde tamamlanacak.",
+    "Fiyat istikrarının kalıcı tesisi için gerekli parasal sıkılık gerektiği müddetçe sürdürülecek.",
+    "Kurul, faiz kararlarının yanı sıra parasal sıkılaştırma sürecini destekleyecek miktarsal sıkılaştırma kararları almayı sürdürecek."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 35’ten yüzde 40 düzeyine yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-46",
+   "kaynak": [
+    "tcmb-2023-46"
+   ],
+   "tarih": "2023-11-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 1,
+   "baslik": "Kredi kartı azami faiz ve üye işyeri komisyon oranları Aralık'ta ve yıl sonuna kadar değişmeyecek",
+   "ozet": "Aralık ayı referans oranının sabit kalacağı hesaplandığından kredi kartı azami faiz oranları ve üye işyeri azami komisyon oranları yıl sonuna kadar değişmeyecek.",
+   "detay": [
+    "Kredi kartı azami faiz oranları ve üye işyeri azami komisyon oranlarında Aralık ayında değişiklik olmayacak; yıl sonuna kadar değişim gerçekleşmeyecek.",
+    "Referans oran, 32-45 gün vadeli TL mevduata bankaların uyguladığı ağırlıklı ortalama akım faiz oranı ile politika faizinin %10 fazlasının düşük olanına göre hesaplanıyor; her ayın sondan beşinci iş günü ilan ediliyor.",
+    "Referans oran, son ilan edilenden aşağı ya da yukarı yönde %5'ten fazla değişirse güncelleniyor.",
+    "Aralık ayı referans oranı, ayın sondan beşinci iş günü olan 24 Kasım 2023'te ilan edilecek."
+   ],
+   "alinti": "Kredi kartı azami faiz oranları ve üye işyeri azami komisyon oranlarında Aralık ayında değişiklik olmayacaktır."
+  },
+  {
+   "id": "tcmb-2023-47",
+   "kaynak": [
+    "tcmb-2023-47"
+   ],
+   "tarih": "2023-11-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "İhracat reeskont kredilerinde iskonto oranı azami %25,93'te sabitlendi; faiz maliyetine üst sınır getirildi",
+   "ozet": "İhracat ve döviz kazandırıcı hizmetler reeskont kredilerinde toplam faiz maliyetine üst sınır getirildi; ihracatçı firmaların finansmana erişimi ve finansman koşulları desteklenmeye devam ediliyor.",
+   "detay": [
+    "İhracat ve döviz kazandırıcı hizmetler reeskont kredilerinde toplam faiz maliyetine üst sınır getirildi.",
+    "İskonto oranı azami %25,93'te sabit tutuldu.",
+    "Duyuruya göre günlük kullanım limiti 21 Temmuz 2023 ve 12 Eylül 2023'teki güncellemelerle önceki düzeyine göre toplamda 10 kat artırılarak 3 milyar TL'ye yükseltilmişti.",
+    "Reeskont kredisi kullanımında %30 ilave ihracat bedeli satış koşulu kaldırılmış, ithalat ödemeleri kapsamındaki döviz alımları döviz almama taahhüdünden istisna tutulmuştu."
+   ],
+   "alinti": "İhracat ve döviz kazandırıcı hizmetler reeskont kredilerinde iskonto oranı azami yüzde 25,93’te sabit tutulmuştur"
+  },
+  {
+   "id": "tcmb-2023-48",
+   "kaynak": [
+    "tcmb-2023-48"
+   ],
+   "tarih": "2023-11-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "YTAK yeniden yapılandırıldı: en az 1 milyar TL'lik projeler, azami 10 yıl vade, %15–%30 faiz",
+   "ozet": "YTAK uygulama çerçevesi yeniden yapılandırıldı; Teknoloji/Strateji puanı dikkate alınarak aracı bankalar kanalıyla tahsis yapılacak ve yeni programa yıllık 100 milyar TL limit ayrıldı.",
+   "detay": [
+    "Kapsam: toplam yatırım tutarı en az 1 milyar TL olan yatırım projeleri; Teknoloji/Strateji puanı dikkate alınarak aracı bankalar kanalıyla tahsis edilecek.",
+    "Vade: azami 10 yıl.",
+    "Faiz oranı: Teknoloji/Strateji puanı, yatırım kapsamında yurt dışından sağlanan finansman oranı ve finansal sağlamlık değerlendirmesine bağlı olarak %30 ile %15 aralığında belirlenecek.",
+    "Yeni YTAK programına yıllık 100 milyar TL limit tahsis edildi; 3 yıl boyunca toplam 300 milyar TL limit tahsis edilmesi planlanıyor."
+   ],
+   "alinti": "toplam yatırım tutarı en az 1 milyar Türk lirası olan yatırım projelerine aracı bankalar kanalıyla YTAK tahsis edilebilecektir"
+  },
+  {
+   "id": "tcmb-2023-51",
+   "kaynak": [
+    "tcmb-2023-51"
+   ],
+   "tarih": "2023-12-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %40'tan %42,5'e yükseltildi; sıkılaştırma hızı yavaşlatıldı",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını yükseltti; parasal sıkılaştırma hızını yavaşlattığını ve adımları en kısa zamanda tamamlamayı öngördüğünü bildirdi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %40 → %42,5.",
+    "Kurul, gerekli parasal sıkılık düzeyine önemli ölçüde yaklaşıldığını değerlendirerek sıkılaştırma hızını yavaşlattı; sıkılaştırma adımlarını en kısa zamanda tamamlamayı öngörüyor.",
+    "Fiyat istikrarının kalıcı tesisi için gerekli parasal sıkılık gerektiği müddetçe sürdürülecek.",
+    "Kurul, kullandığı sterilizasyon araçlarının çeşitliliğini artırarak miktarsal sıkılaştırmaya devam edecek."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 40’tan yüzde 42,5 düzeyine yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2023-52",
+   "kaynak": [
+    "tcmb-2023-52"
+   ],
+   "tarih": "2023-12-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 2,
+   "baslik": "Sterilizasyon araçlarını çeşitlendirmek için TL depo alım ihaleleri düzenlenecek",
+   "ozet": "TCMB, açık piyasa işlemleri kapsamında parasal aktarım mekanizmasını güçlendirmek ve sterilizasyon araçlarının çeşitliliğini artırmak amacıyla TL depo alım ihaleleri düzenleyecek.",
+   "detay": [
+    "TCMB Kanunu'nun 52'nci maddesi, para arzının ve likiditenin etkin düzenlenmesi için açık piyasa işlemlerine imkân tanıyor.",
+    "Bu çerçevede TL depo alım ihaleleri düzenlenecek; duyuruda vade, tutar ve başlangıç tarihi belirtilmedi."
+   ],
+   "alinti": "parasal aktarım mekanizmasının güçlendirilmesi ve kullanılan sterilizasyon araçlarının çeşitliliğini artırmak amacıyla Türk Lirası depo alım ihaleleri düzenlenecektir"
+  },
+  {
+   "id": "tcmb-2023-53",
+   "kaynak": [
+    "tcmb-2023-53"
+   ],
+   "tarih": "2023-12-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Kredi kartı azami faiz ve komisyon oranlarının artmaması için referans orana 3,11 üst sınır getirildi",
+   "ozet": "Kredi kartı azami faiz ve üye işyeri azami komisyon oranlarının mevcut seviyelerinin üzerine çıkmaması için referans orana üst sınır getirildi; en son ilan edilen oranlarda artış olmayacak.",
+   "detay": [
+    "Referans orana üst sınır getirildi: mevcut seviye olan 3,11.",
+    "Bu seviyenin altındaki oranlar için mevcut hesaplama yönteminde değişiklik yapılmadı.",
+    "Kredi kartı azami faiz ve üye işyeri azami komisyon oranlarında en son ilan edilenlere göre artış olmayacak.",
+    "Referans oran, 32-45 gün vadeli TL mevduata bankaların uyguladığı ağırlıklı ortalama akım faiz oranı ile politika faizinin %10 fazlasının düşük olanına göre hesaplanıyor."
+   ],
+   "alinti": "Referans oranın mevcut seviyesi 3,11 üst sınır olarak belirlenmiş, bu seviyenin altındaki oranlar için mevcut hesaplama yönteminde bir değişiklik yapılmamıştır"
+  },
+  {
+   "id": "tcmb-2023-54",
+   "kaynak": [
+    "tcmb-2023-54"
+   ],
+   "tarih": "2023-12-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "YP yükümlülükler için menkul kıymet tesis oranı %5'ten %4'e indirilecek",
+   "ozet": "Mikro ve makroihtiyati çerçevenin sadeleştirilmesi kapsamında yabancı para yükümlülükler için uygulanan menkul kıymet tesis oranı düşürülecek.",
+   "detay": [
+    "Yabancı para yükümlülükler için menkul kıymet tesis oranı: %5 → %4.",
+    "Duyuruda yürürlük tarihi belirtilmedi.",
+    "TL mevduatın önceliklendirilmesine ilişkin politikalar kapsamında TL mevduatı destekleyici adımlar atılmaya devam edilecek."
+   ],
+   "alinti": "yabancı para yükümlülükler için yüzde 5 olarak uygulanan menkul kıymet tesis oranı yüzde 4’e indirilecektir"
+  },
+  {
+   "id": "tcmb-2023-54-b",
+   "kaynak": [
+    "tcmb-2023-54"
+   ],
+   "tarih": "2023-12-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 1,
+   "baslik": "Büyümeye bağlı menkul kıymet tesisi 6 ay uzatıldı; deprem bölgesi muafiyeti Haziran 2024'e kadar sürecek",
+   "ozet": "29 Aralık 2023'te sonlanacak olan kredi büyümesine göre menkul kıymet tesisine ilişkin geçici uygulamanın süresi uzatıldı; deprem bölgesi kredileri için muafiyet de sürecek.",
+   "detay": [
+    "29 Aralık 2023'te sonlanacak olan kredi büyümesine göre menkul kıymet tesisine ilişkin geçici uygulama 6 ay süreyle uzatılacak.",
+    "Depremin olumsuz etkilerinin azaltılması amacıyla deprem bölgesine kullandırılan kredilerin menkul kıymet tesisi uygulamasından muafiyetine yönelik hususlar Haziran 2024'e kadar devam edecek."
+   ],
+   "alinti": "29/12/2023 tarihinde sonlanacak olan kredi büyümesine göre menkul kıymet tesisine ilişkin geçici uygulama 6 ay süre ile uzatılacaktır"
+  },
+  {
+   "id": "tcmb-2023-56",
+   "kaynak": [
+    "tcmb-2023-56"
+   ],
+   "tarih": "2023-12-31",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "odeme",
+   "onem": 1,
+   "baslik": "Dijital Türk lirası birinci faz değerlendirme raporu yayımlandı",
+   "ozet": "TCMB, Dijital Türk Lirası Projesi'nin birinci faz pilot test çalışmalarının bulgularını ve projede benimsenen yaklaşımları içeren değerlendirme raporunu paylaştı.",
+   "detay": [
+    "Birinci faz pilot test çalışmalarında belirli lokasyonlarda pilot uygulama testleri yapılarak kullanıcı deneyimi ve sistem performansının ölçülmesi amaçlandı.",
+    "Rapor, TCMB'deki Ar-Ge çalışmalarının ve Dijital Türk Lirası İş Birliği Platformu paydaşlarıyla yürütülen birinci fazın bulgularını ve projede benimsenen yaklaşımları içeriyor.",
+    "Duyuruda bulgulara ilişkin sayısal bilgi verilmedi."
+   ],
+   "alinti": "Dijital Türk Lirası İş Birliği Platformu paydaşlarıyla birlikte yürütülen birinci fazın bulguları ile projede benimsenen yaklaşımlar paylaşılmaktadır"
+  }
+ ],
+ "elenen": [
+  {
+   "id": "tcmb-2023-15",
+   "neden": "internet sitesi TLS protokolü duyurusu"
+  },
+  {
+   "id": "tcmb-2023-30",
+   "neden": "Başkan Yardımcılığı atamaları (personel) duyurusu"
+  },
+  {
+   "id": "tcmb-2023-38",
+   "neden": "Piyasa Katılımcıları Anketi katılımcı listesi revizyonu (anket/istatistik duyurusu)"
+  },
+  {
+   "id": "tcmb-2023-44",
+   "neden": "Yatırımcı Günleri etkinlik duyurusu"
+  }
+ ]
+}

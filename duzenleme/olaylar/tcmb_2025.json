@@ -1,0 +1,658 @@
+{
+ "olaylar": [
+  {
+   "id": "tcmb-2025-02",
+   "kaynak": [
+    "tcmb-2025-02"
+   ],
+   "tarih": "2025-01-04",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "YP ticari kredilerde aylık büyüme sınırı %1,5'ten %1'e indirildi; TL ticari kredilerde KOBİ %2,5, diğer %1,5 oldu",
+   "ozet": "Kredi büyümesine dayalı zorunlu karşılık uygulamasında YP ticari kredi sınırı düşürüldü, TL ticari kredilerde tek olan sınır KOBİ ve diğer ticari krediler için ayrıştırıldı.",
+   "detay": [
+    "Yabancı para ticari krediler, aylık büyüme sınırı: %1,5 → %1.",
+    "TL ticari kredilerde %2 olan aylık büyüme sınırı farklılaştırıldı: KOBİ kredileri için %2,5, diğer ticari krediler için %1,5.",
+    "KOBİ'lere KOSGEB desteğiyle veya uluslararası kalkınma finansmanı kuruluşlarından sağlanan kaynaklarla sürdürülebilirlik kapsamında kullandırılan TL krediler büyüme sınırından muaf tutuldu."
+   ],
+   "alinti": "Yabancı para ticari krediler için yüzde 1,5 olan aylık büyüme sınırı yüzde 1’e indirilmiştir."
+  },
+  {
+   "id": "tcmb-2025-04",
+   "kaynak": [
+    "tcmb-2025-04"
+   ],
+   "tarih": "2025-01-20",
+   "yururluk": "2025-01-20",
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 2,
+   "baslik": "Döviz ve altın dönüşümlü KKM'de 6 ve 12 ay vadeli hesap açma ve yenileme sonlandırıldı",
+   "ozet": "KKM hesaplarından çıkış stratejisi kapsamında açılış ve yenileme işlemlerinde vade süreleri kısıtlandı.",
+   "detay": [
+    "Döviz ve altın dönüşümlü kur korumalı mevduat ve katılma hesaplarında 6 ve 12 ay vadeli hesap açma ve yenileme işlemleri 20 Ocak 2025 itibarıyla sonlandırıldı."
+   ],
+   "alinti": "döviz ve altın dönüşümlü kur korumalı mevduat ve katılma hesaplarında 6 ve 12 ay vadeli hesap açma ve yenileme işlemlerinin 20 Ocak 2025 tarihi itibarıyla sonlandırılmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-05",
+   "kaynak": [
+    "tcmb-2025-05"
+   ],
+   "tarih": "2025-01-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %47,5'ten %45'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını indirdi; kararlarını enflasyon görünümü odaklı, ihtiyatlı ve toplantı bazlı bir yaklaşımla alacağını belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %47,5 → %45.",
+    "Kurul, enflasyonda kalıcı düşüş ve fiyat istikrarı sağlanana kadar sıkı para politikası duruşunun sürdürüleceğini bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 47,5’ten yüzde 45’e indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-06",
+   "kaynak": [
+    "tcmb-2025-06"
+   ],
+   "tarih": "2025-01-24",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "odeme",
+   "onem": 1,
+   "baslik": "FAST Ödeme İste Katman Servisi kurumsal kullanıcılara açıldı; kısmi ödeme, erken ödeme ve erteleme eklendi",
+   "ozet": "FAST Ödeme İste Katman Servisi, bireysel kullanıcıların yanı sıra işletmeler arası ödemelerde ve işletmelerin bireysel kullanıcılarla işlemlerinde de kullanılabilecek şekilde güncellendi.",
+   "detay": [
+    "Yeni özellikler 18 Ocak 2025'ten itibaren kullanılabiliyor.",
+    "Tüm ödeme türlerinde kısmi ödeme ve erken ödeme, kurumsal kullanıcıların başlattığı ödeme türlerinde ise ödeme erteleme fonksiyonları devreye alındı.",
+    "FAST katılımcı sayısı 2024'te 42'ye çıktı; Aralık 2024'te günlük ortalama işlem adedi 13,8 milyon."
+   ],
+   "alinti": "FAST Ödeme İste Katman Servisinin yeni özellikleri devreye alınmıştır."
+  },
+  {
+   "id": "tcmb-2025-09",
+   "kaynak": [
+    "tcmb-2025-09"
+   ],
+   "tarih": "2025-02-04",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "Yurt dışından sağlanan 1 yıla kadar vadeli TL borçların zorunlu karşılık oranı %8'den %12'ye çıkarıldı",
+   "ozet": "Parasal aktarım mekanizmasını güçlendirmek amacıyla bankaların yurt dışı kaynaklı kısa vadeli TL yükümlülüklerinde zorunlu karşılık oranı yükseltildi.",
+   "detay": [
+    "Kapsam: bankaların 1 yıla kadar (1 yıl dahil) vadeli TL cinsi yükümlülüklerinden yurt dışı repo işlemlerinden sağlanan fonlar, yurt dışından kullanılan krediler ve yurt dışı bankalar mevduatı/katılım fonu.",
+    "Zorunlu karşılık oranı: %8 → %12."
+   ],
+   "alinti": "Yurt dışı bankalar mevduatı/katılım fonu için zorunlu karşılık oranı %8’den %12’ye yükseltilmiştir."
+  },
+  {
+   "id": "tcmb-2025-12",
+   "kaynak": [
+    "tcmb-2025-12"
+   ],
+   "tarih": "2025-02-15",
+   "yururluk": "2025-02-15",
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 2,
+   "baslik": "Tüzel kişilerin KKM hesap açma ve yenileme işlemleri sonlandırıldı",
+   "ozet": "KKM hesaplarından çıkış stratejisi kapsamında YUVAM hesapları dahil tüm KKM hesaplarında tüzel kişiler için hesap açma ve yenileme durduruldu; tüzel kişi KKM hesapları TL'ye geçiş hedeflerinden çıkarıldı.",
+   "detay": [
+    "Tüm KKM hesaplarında (YUVAM hesapları dahil) tüzel kişilerin hesap açma ve yenileme işlemleri 15 Şubat 2025 itibarıyla sonlandırıldı.",
+    "Tüzel kişi KKM hesapları, KKM'nin TL'ye geçişine ve yenilenmesine ilişkin hedeflerden çıkarıldı."
+   ],
+   "alinti": "tüm KKM hesaplarında (YUVAM hesapları dâhil) tüzel kişilerin hesap açma ve yenileme işlemlerinin 15 Şubat 2025 tarihi itibarıyla sonlandırılmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-14",
+   "kaynak": [
+    "tcmb-2025-14"
+   ],
+   "tarih": "2025-03-01",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "YP kredilerde aylık büyüme sınırı %1'den %0,5'e düşürüldü; istisna kapsamı daraltıldı",
+   "ozet": "Yabancı para kredilerdeki gelişmeler dikkate alınarak kredi büyümesine dayalı zorunlu karşılık uygulaması sıkılaştırıldı.",
+   "detay": [
+    "Yabancı para krediler, aylık büyüme sınırı: %1 → %0,5.",
+    "YP kredi büyüme sınırından istisna tutulan kredilerin kapsamı daraltıldı; duyuruda ayrıntı verilmedi."
+   ],
+   "alinti": "Yabancı para krediler için aylık yüzde 1 olan büyüme sınırı yüzde 0,5’e düşürülmüştür."
+  },
+  {
+   "id": "tcmb-2025-15",
+   "kaynak": [
+    "tcmb-2025-15"
+   ],
+   "tarih": "2025-03-06",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %45'ten %42,5'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını indirdi; son dönem kredi büyümesi gelişmeleri nedeniyle makro finansal istikrarı korumak için ek adımlar atıldığını belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %45 → %42,5.",
+    "Kurul, politika faizine ilişkin adımları enflasyon görünümü odaklı, ihtiyatlı ve toplantı bazlı bir yaklaşımla belirleyeceğini bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 45’ten yüzde 42,5’e indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-19",
+   "kaynak": [
+    "tcmb-2025-19"
+   ],
+   "tarih": "2025-03-20",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 3,
+   "baslik": "TCMB nezdinde TL uzlaşmalı vadeli döviz satım işlemlerine başlanacak",
+   "ozet": "Döviz piyasasının sağlıklı çalışması, kurlardaki oynaklığın engellenmesi ve döviz likiditesinin dengelenmesi amacıyla TCMB nezdinde TL uzlaşmalı vadeli döviz satım işlemleri başlatılıyor.",
+   "detay": [
+    "İşlemler TCMB nezdinde, Türk lirası uzlaşmalı vadeli döviz satımı biçiminde yapılacak.",
+    "Duyuruda tutar, vade ya da takvim belirtilmedi."
+   ],
+   "alinti": "Türkiye Cumhuriyet Merkez Bankası nezdinde Türk lirası uzlaşmalı vadeli döviz satım işlemlerine başlanacaktır."
+  },
+  {
+   "id": "tcmb-2025-20",
+   "kaynak": [
+    "tcmb-2025-20",
+    "tcmb-2025-23"
+   ],
+   "tarih": "2025-03-20",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "PPK ara toplantısı: gecelik borç verme faizi %44'ten %46'ya yükseltildi; politika faizi %42,5'te sabit tutuldu",
+   "ozet": "PPK finansal piyasalardaki gelişmeleri değerlendirmek üzere ara toplantı yaptı; sıkı parasal duruşu destekleyici tedbirler aldı ve gerekli görülmesi halinde ek önlemler alınacağını bildirdi.",
+   "detay": [
+    "Merkez Bankası gecelik vadede borç verme faiz oranı: %44 → %46.",
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi) %42,5'te, gecelik vadede borçlanma faiz oranı %41'de sabit tutuldu.",
+    "Piyasadaki oynaklığı sınırlamak üzere TL ve döviz likiditesine yönelik tedbirler alındı (TL uzlaşmalı vadeli döviz satım işlemleri, 1 hafta vadeli repo ihalelerine ara verilmesi, vadesi 91 güne kadar likidite senedi ihracı)."
+   ],
+   "alinti": "Merkez Bankası gecelik vadede borç verme faiz oranının yüzde 46’ya yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-21",
+   "kaynak": [
+    "tcmb-2025-21"
+   ],
+   "tarih": "2025-03-20",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Bir hafta vadeli repo ihalelerine bir süreliğine ara verildi",
+   "ozet": "Finansal piyasalardaki gelişmeler gerekçesiyle politika faizinden fonlama sağlayan 1 hafta vadeli repo ihaleleri durduruldu.",
+   "detay": [
+    "1 hafta vadeli repo ihaleleri bir süreliğine durduruldu; duyuruda süre belirtilmedi."
+   ],
+   "alinti": "1 hafta vadeli repo ihalelerine bir süreliğine ara verilmesi kararlaştırılmıştır."
+  },
+  {
+   "id": "tcmb-2025-22",
+   "kaynak": [
+    "tcmb-2025-22"
+   ],
+   "tarih": "2025-03-21",
+   "yururluk": "2025-03-24",
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 2,
+   "baslik": "Vadesi 91 güne kadar likidite senetleri ihraç edilmesine karar verildi",
+   "ozet": "Parasal aktarım mekanizmasını güçlendirmek ve sıkı parasal duruşu desteklemek amacıyla sterilizasyon aracı olarak likidite senedi ihracına başlanıyor.",
+   "detay": [
+    "Likidite senetlerinin vadesi 91 güne kadar olacak.",
+    "İhaleler 24 Mart 2025 Pazartesi gününden başlayarak yapılacak; ihalelere ilişkin bilgiler veri sağlayıcılar aracılığıyla duyurulacak."
+   ],
+   "alinti": "Bu çerçevede, vadesi 91 güne kadar likidite senetleri ihraç edilmesine karar verilmiştir."
+  },
+  {
+   "id": "tcmb-2025-24",
+   "kaynak": [
+    "tcmb-2025-24"
+   ],
+   "tarih": "2025-04-17",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %42,5'ten %46'ya yükseltildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını yükseltti; gecelik borç verme ve borçlanma faizleri de artırıldı.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %42,5 → %46.",
+    "Gecelik borç verme faiz oranı: %46 → %49.",
+    "Gecelik borçlanma faiz oranı: %41 → %44,5.",
+    "Kurul, finansal piyasalarda son dönemde yaşanan gelişmeler neticesinde parasal aktarım mekanizmasını destekleyen ilave adımların ivedilikle atıldığını belirtti."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 42,5’ten yüzde 46’ya yükseltilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-25",
+   "kaynak": [
+    "tcmb-2025-25"
+   ],
+   "tarih": "2025-04-17",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Bir hafta vadeli repo ihalelerine yeniden başlandı",
+   "ozet": "20 Mart 2025'te ara verilen bir hafta vadeli repo ihalelerine tekrar başlanmasına karar verildi.",
+   "detay": [
+    "Politika faizinden fonlama sağlayan bir hafta vadeli repo ihaleleri, 20 Mart 2025'te verilen aranın ardından yeniden yapılacak."
+   ],
+   "alinti": "20 Mart 2025 tarihinde ara verilen bir hafta vadeli repo ihalelerine tekrar başlanmasına karar verilmiştir."
+  },
+  {
+   "id": "tcmb-2025-27",
+   "kaynak": [
+    "tcmb-2025-27"
+   ],
+   "tarih": "2025-04-24",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 2,
+   "baslik": "Kazakistan Merkez Bankası ile TL-tenge swap anlaşması imzalandı",
+   "ozet": "İki merkez bankası arasında azami 28 milyar TL veya 423 milyar Kazakistan tengesi tutarında yerel para takasına imkân sağlayan ikili para takası anlaşması imzalandı.",
+   "detay": [
+    "Azami takas tutarı: 28 milyar TL veya 423 milyar Kazakistan tengesi.",
+    "Geçerlilik süresi 3 yıl; tarafların karşılıklı uzlaşısıyla uzatılabilir.",
+    "Amaç: para takası finansmanlı ticaret mutabakatı yoluyla ikili ticareti ve mali iş birliğini teşvik etmek."
+   ],
+   "alinti": "Swap anlaşması, iki merkez bankası arasında azami 28 milyar Türk lirası veya 423 milyar Kazakistan tengesi değerinde yerel para birimi takasına imkân sağlayacaktır."
+  },
+  {
+   "id": "tcmb-2025-30",
+   "kaynak": [
+    "tcmb-2025-30"
+   ],
+   "tarih": "2025-05-03",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "YP mevduat ZK oranları 200 baz puan artırıldı; TL mevduat ZK faizi AOFM'nin %84'ünden %86'sına çıkarıldı",
+   "ozet": "TL'ye geçişi desteklemek amacıyla yabancı para mevduat ve YP repo fonlarında zorunlu karşılık oranları yükseltildi, TL mevduat zorunlu karşılıklarına ödenen faiz artırıldı.",
+   "detay": [
+    "Yabancı para mevduat zorunlu karşılık oranları: tüm vadelerde 200 baz puan artırıldı.",
+    "Yurt içi yerleşiklerle yapılan 1 yıla kadar vadeli YP repo işlemlerinden sağlanan fonlar için zorunlu karşılık oranı 400 baz puan artırıldı; hesaplama yönteminde değişiklik yapıldı, duyuruda yöntem belirtilmedi.",
+    "TL mevduat için tesis edilen zorunlu karşılıklara ödenen faiz/telafi: TCMB ağırlıklı ortalama fonlama maliyetinin %84'ü → %86'sı."
+   ],
+   "alinti": "TL mevduat için tesis edilen zorunlu karşılıklara TCMB ağırlıklı ortalama fonlama maliyetinin yüzde 84’ü yerine yüzde 86’sı oranında faiz veya telafi ödemesi yapılmasına karar verilmiştir."
+  },
+  {
+   "id": "tcmb-2025-30-b",
+   "kaynak": [
+    "tcmb-2025-30"
+   ],
+   "tarih": "2025-05-03",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 2,
+   "baslik": "Tüzel kişi TL mevduat payı %60'ın altındaki bankalara aylık 0,3 puan artış hedefi getirildi",
+   "ozet": "TL'ye geçişi desteklemek amacıyla tüzel kişi TL mevduat payı %60'ın altında olan bankalar için ilgili paya yönelik artış hedefi getirildi.",
+   "detay": [
+    "Tüzel kişi TL mevduat payı %60'ın altında olan bankalar için ilgili pay: aylık 0,3 puan artış hedefi."
+   ],
+   "alinti": "Tüzel kişi TL mevduat payı yüzde 60’ın altında olan bankalara, ilgili pay için aylık 0,3 puan artış hedefi getirilmiştir."
+  },
+  {
+   "id": "tcmb-2025-30-c",
+   "kaynak": [
+    "tcmb-2025-30"
+   ],
+   "tarih": "2025-05-03",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 2,
+   "baslik": "İhracat bedeli asgari satış oranı %35 olarak uygulanacak; döviz dönüşüm desteği %3'e yükseltildi",
+   "ozet": "Hazine ve Maliye Bakanlığı kararına istinaden ihracat bedellerinin TCMB'ye asgari satış oranı ile ihracatçıların döviz dönüşüm desteği oranı 31 Temmuz 2025'e kadar belirlendi.",
+   "detay": [
+    "İhracat bedellerinin TCMB'ye asgari satış oranı, İhracat Genelgesi'nde yapılan değişiklikle 31 Temmuz 2025'e kadar %35 olarak uygulanacak.",
+    "İhracat bedeli dövizlerinin TL'ye dönüşümünü destekleme uygulaması kapsamındaki döviz dönüşüm desteği oranı 31 Temmuz 2025'e kadar %3'e yükseltildi."
+   ],
+   "alinti": "ihracat bedellerinin Türkiye Cumhuriyet Merkez Bankasına (TCMB) asgari satış oranının 31 Temmuz 2025 tarihine kadar yüzde 35 olarak uygulanması kararlaştırılmıştır"
+  },
+  {
+   "id": "tcmb-2025-33",
+   "kaynak": [
+    "tcmb-2025-33"
+   ],
+   "tarih": "2025-05-24",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "Yurt dışı TL repo ve kredilerde ZK oranı vadeye göre farklılaştırıldı: 1 aya kadar %18, 3 aya kadar %14",
+   "ozet": "Yurt dışından temin edilen TL cinsi kısa vadeli borçlara uygulanan tek zorunlu karşılık oranı vadeye göre ayrıştırılarak yükseltildi.",
+   "detay": [
+    "Kapsam: TL cinsi yurt dışı repo işlemlerinden sağlanan fonlar ve yurt dışından kullanılan krediler.",
+    "1 yıla kadar vadede %12 olan oran: 1 aya kadar vadede %18, 3 aya kadar vadede %14. Duyuruda 3 aydan uzun vadeler için oran belirtilmedi."
+   ],
+   "alinti": "Türk lirası cinsi yurt dışı repo işlemlerinden sağlanan fonlar ve yurt dışından kullanılan krediler için 1 yıla kadar vadede yüzde 12 olan zorunlu karşılık oranı vadeye göre farklılaştırılarak;"
+  },
+  {
+   "id": "tcmb-2025-35",
+   "kaynak": [
+    "tcmb-2025-35"
+   ],
+   "tarih": "2025-06-13",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 1,
+   "baslik": "Çin Merkez Bankası ile renminbi takas düzenlemelerinin tesisine ilişkin mutabakat zaptı imzalandı",
+   "ozet": "İkili ticaretin ve yatırımların kolaylaştırılmasını teşvik etmek amacıyla iki merkez bankası arasında renminbi takas düzenlemelerinin kurulmasına ilişkin mutabakat zaptı imzalandı.",
+   "detay": [
+    "Mutabakat zaptı, TCMB Başkanı ile Çin Halk Cumhuriyeti Merkez Bankası Başkanı tarafından imzalandı; duyuruda tutar ya da süre belirtilmedi."
+   ],
+   "alinti": "ikili ticaretin ve yatırımların kolaylaştırılmasının teşvik edilmesi amacıyla renminbi takas düzenlemelerinin tesisine ilişkin bir Mutabakat Zaptı imzalamıştır."
+  },
+  {
+   "id": "tcmb-2025-36",
+   "kaynak": [
+    "tcmb-2025-36"
+   ],
+   "tarih": "2025-06-13",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 2,
+   "baslik": "Çin Merkez Bankası ile TL-yuan swap anlaşması 3 yıllığına yenilendi; azami tutar 189 milyar TL veya 35 milyar yuan",
+   "ozet": "İki merkez bankası arasındaki ikili para takası anlaşması yenilendi.",
+   "detay": [
+    "Azami takas tutarı: güncel döviz kurlarını yansıtacak şekilde 189 milyar TL veya 35 milyar Çin yuanı.",
+    "Geçerlilik süresi 3 yıl; tarafların karşılıklı uzlaşısıyla uzatılabilir.",
+    "Amaç: para takası finansmanlı ticaret mutabakatı yoluyla ikili ticareti ve mali iş birliğini teşvik etmek."
+   ],
+   "alinti": "Swap anlaşması, iki merkez bankası arasında güncel döviz kurlarını yansıtacak şekilde azami 189 milyar Türk lirası veya 35 milyar Çin yuanı değerinde yerel para birimi takasına imkân sağlayacaktır."
+  },
+  {
+   "id": "tcmb-2025-37",
+   "kaynak": [
+    "tcmb-2025-37"
+   ],
+   "tarih": "2025-06-19",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 1,
+   "baslik": "Politika faizi %46'da sabit tutuldu",
+   "ozet": "PPK faizleri değiştirmedi; jeopolitik gelişmelerin ve küresel ticarette artan korumacılığın dezenflasyon sürecine olası etkilerinin yakından takip edildiğini belirtti.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı %46, gecelik borç verme %49, gecelik borçlanma %44,5 düzeyinde bırakıldı.",
+    "Kurul, enflasyonda belirgin ve kalıcı bir bozulma öngörülmesi durumunda tüm para politikası araçlarının etkili şekilde kullanılacağını bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 46’da sabit tutulmasına karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-38",
+   "kaynak": [
+    "tcmb-2025-38"
+   ],
+   "tarih": "2025-06-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 2,
+   "baslik": "KKM asgari faiz oranı politika faizinin %50'sinden %40'ına indirildi; KKM'den TL'ye geçiş hedefi kaldırıldı",
+   "ozet": "TL'ye geçişi desteklemek amacıyla KKM hedefleri ve faiz oranı gevşetildi, gerçek kişi TL mevduat payı hedefleri artırıldı, 1 aydan uzun vadelerde değişken faizli TL mevduata imkân tanındı.",
+   "detay": [
+    "KKM hesapları için belirlenen asgari faiz oranı: politika faizinin %50'si → %40'ı.",
+    "KKM'den TL'ye geçiş hedefi kaldırıldı; KKM'nin yenilenmesi ve TL'ye geçişine ilişkin toplam hedef korundu.",
+    "Gerçek kişi TL mevduat payı %60'ın altında olan bankalar için hedef oranlar artırıldı; payı %60 ile %65 arasında olan bankalara aylık 0,4 puan artış hedefi getirildi.",
+    "1 aydan uzun vadelerde de değişken faizli TL mevduat hesabı açılabilmesine imkân sağlandı."
+   ],
+   "alinti": "KKM hesapları için belirlenen asgari faiz oranı politika faizinin yüzde 50’sinden yüzde 40’ına indirilmiştir."
+  },
+  {
+   "id": "tcmb-2025-38-b",
+   "kaynak": [
+    "tcmb-2025-38"
+   ],
+   "tarih": "2025-06-21",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "KKM zorunlu karşılık oranı %33'ten %40'a yükseltildi; YP mevduat için TL tesis oranı %4'ten %2,5'e indirildi",
+   "ozet": "TL'ye geçişi desteklemek amacıyla KKM zorunlu karşılık oranı artırıldı, YP mevduat için TL cinsinden tesis oranı düşürüldü, endeksli mevduat için tüm vadelerde %10 oran belirlendi.",
+   "detay": [
+    "KKM hesaplarına uygulanan zorunlu karşılık oranı: %33 → %40.",
+    "TÜFE, ÜFE ve TLREF'e endeksli mevduat için zorunlu karşılık oranı tüm vadelerde %10 olarak belirlendi.",
+    "Yabancı para mevduat için TL cinsinden tesis edilmesi gereken zorunlu karşılık oranı: %4 → %2,5."
+   ],
+   "alinti": "Kur Korumalı Mevduat (KKM) hesaplarına uygulanan zorunlu karşılık oranı yüzde 33’ten yüzde 40’a yükseltilmiştir."
+  },
+  {
+   "id": "tcmb-2025-41",
+   "kaynak": [
+    "tcmb-2025-41"
+   ],
+   "tarih": "2025-07-24",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %46'dan %43'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını indirdi; gecelik borç verme ve borçlanma faizleri de aynı ölçüde aşağı çekildi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %46 → %43.",
+    "Gecelik borç verme faiz oranı: %49 → %46.",
+    "Gecelik borçlanma faiz oranı: %44,5 → %41,5.",
+    "Kurul, adımların büyüklüğünün enflasyon görünümü odaklı, toplantı bazlı ve ihtiyatlı bir yaklaşımla gözden geçirileceğini bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 46’dan yüzde 43’e indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-45",
+   "kaynak": [
+    "tcmb-2025-45"
+   ],
+   "tarih": "2025-08-23",
+   "yururluk": "2025-08-23",
+   "kurum": "TCMB",
+   "konu": "mevduat",
+   "onem": 3,
+   "baslik": "KKM hesap açma ve yenileme işlemleri sonlandırıldı; TL'ye geçiş ve yenilenme hedefi kaldırıldı",
+   "ozet": "YUVAM hesapları hariç KKM hesap açma ve yenileme işlemleri 23 Ağustos 2025 itibarıyla sona erdi; bu tarihten önce açılan hesapların vadeleri dolduğunda ilgili tebliğler yürürlükten kaldırılacak.",
+   "detay": [
+    "KKM hesap açma ve yenileme işlemleri (YUVAM hesapları hariç) 23 Ağustos 2025 itibarıyla sonlandırıldı.",
+    "Bu tarihten önce açılmış hesapların vadeleri sona erdiğinde ilgili tebliğler yürürlükten kaldırılacak.",
+    "KKM'nin TL'ye geçişine ve yenilenmesine ilişkin toplam hedef kaldırıldı.",
+    "Zorunlu karşılık faiz ve komisyon düzenlemeleri gözden geçirildi; duyuruda ayrıntı verilmedi."
+   ],
+   "alinti": "KKM hesap açma ve yenileme işlemlerinin (YUVAM hesapları hariç) 23 Ağustos 2025 tarihi itibarıyla sonlandırılmasına karar vermiştir."
+  },
+  {
+   "id": "tcmb-2025-46",
+   "kaynak": [
+    "tcmb-2025-46"
+   ],
+   "tarih": "2025-09-03",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "odeme",
+   "onem": 1,
+   "baslik": "Dijital Türk lirası projesi ekosistemine katılım çağrısı yapıldı",
+   "ozet": "TCMB, özel sektörü Dijital Türk Lirası Projesi'nin ikinci faz çalışmalarını zenginleştirecek yeni kullanım senaryoları geliştirmeye davet etti.",
+   "detay": [
+    "Bankalar, ödeme kuruluşları ve elektronik para kuruluşları, teknoloji çözüm sağlayıcılarıyla birlikte projelerini sunabilecek.",
+    "Başvuru sürecini tamamlayan projelerle deney alanında ortak çalışmalar yürütülecek."
+   ],
+   "alinti": "Türkiye Cumhuriyet Merkez Bankası (TCMB), özel sektörü Merkez Bankası Dijital Türk Lirası Araştırma ve Geliştirme Projesi (Dijital Türk Lirası Projesi) ekosistemine davet etmektedir."
+  },
+  {
+   "id": "tcmb-2025-47",
+   "kaynak": [
+    "tcmb-2025-47"
+   ],
+   "tarih": "2025-09-11",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %43'ten %40,5'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını indirdi; gecelik borç verme ve borçlanma faizleri de aynı ölçüde aşağı çekildi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %43 → %40,5.",
+    "Gecelik borç verme faiz oranı: %46 → %43,5.",
+    "Gecelik borçlanma faiz oranı: %41,5 → %39.",
+    "Kurul, enflasyon görünümünün ara hedeflerden belirgin biçimde ayrışması durumunda para politikası duruşunun sıkılaştırılacağını bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 43’ten yüzde 40,5’e indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-52",
+   "kaynak": [
+    "tcmb-2025-52"
+   ],
+   "tarih": "2025-10-02",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "doviz",
+   "onem": 2,
+   "baslik": "BAE Merkez Bankası ile 198 milyar TL / 18 milyar dirhem tutarında swap anlaşması ve iki mutabakat zaptı imzalandı",
+   "ozet": "TL-BAE dirhemi ikili para takası anlaşmasına ek olarak yerel para kullanımını teşvik eden ve ödeme ile mesajlaşma sistemlerinin bağlanmasını öngören iki mutabakat zaptı imzalandı.",
+   "detay": [
+    "Swap anlaşmasının nominal tutarı: 198 milyar TL ve 18 milyar BAE dirhemi (karşılıklı); duyuruda süre belirtilmedi.",
+    "Birinci mutabakat zaptı: sınır ötesi ödemelerde TL ve dirhem kullanımını teşvik eden çerçeve, yerel para birimi takas mekanizması kurulması.",
+    "İkinci mutabakat zaptı: sınır ötesi ödemelerin kolaylaştırılması, yerel ödeme kartlarının kullanımının desteklenmesi ve FAST ile BAE'deki anlık ödeme platformu Aani'nin entegrasyonunun öngörülmesi."
+   ],
+   "alinti": "Swap anlaşmasının nominal tutarı karşılıklı olarak 198 milyar TRY ve 18 milyar AED olarak belirlenmiştir."
+  },
+  {
+   "id": "tcmb-2025-55",
+   "kaynak": [
+    "tcmb-2025-55"
+   ],
+   "tarih": "2025-10-23",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %40,5'ten %39,5'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını indirdi; gecelik borç verme ve borçlanma faizleri de aynı ölçüde aşağı çekildi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %40,5 → %39,5.",
+    "Gecelik borç verme faiz oranı: %43,5 → %42,5.",
+    "Gecelik borçlanma faiz oranı: %39 → %38.",
+    "Kurul, enflasyon görünümünün ara hedeflerden belirgin biçimde ayrışması durumunda para politikası duruşunun sıkılaştırılacağını bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 40,5’ten yüzde 39,5’e indirilmesine karar vermiştir"
+  },
+  {
+   "id": "tcmb-2025-61",
+   "kaynak": [
+    "tcmb-2025-61"
+   ],
+   "tarih": "2025-12-02",
+   "yururluk": "2026-01-16",
+   "kurum": "TCMB",
+   "konu": "zk",
+   "onem": 2,
+   "baslik": "YP zorunlu karşılık oranları yeniden belirlendi; 5 yıldan uzun vadeli diğer YP yükümlülüklerde %5'ten %0'a indirildi",
+   "ozet": "Zorunlu karşılık düzenlemesinde sadeleşme adımı olarak YP yükümlülüklerin oranları yeniden belirlendi; yeni oranlar üzerinden tesis 16 Ocak 2026'da yapılacak.",
+   "detay": [
+    "Bankaların ve finansman şirketlerinin yurt dışından doğrudan temin ettiği 1 yıldan uzun vadeli YP yükümlülüklerdeki artış tutarına yıl sonuna kadar %0 zorunlu karşılık uygulanmasına ilişkin geçici uygulamanın süresi uzatılmayacak.",
+    "Döviz mevduat/katılım fonu, vadesiz ve 1 aya kadar vadeli: %32 → %30; daha uzun vadeli: %22-28 → %26.",
+    "Kıymetli maden depo hesapları, vadesiz ve 1 aya kadar vadeli: %28 → %30; daha uzun vadeli: %24-28 → %26.",
+    "Diğer YP yükümlülükler: 1 yıla kadar %21 (değişmedi); 2 yıla kadar %16 → %10; 3 yıla kadar %11 → %8; 5 yıla kadar %7 → %3; 5 yıldan uzun %5 → %0."
+   ],
+   "alinti": "YP zorunlu karşılık oranları aşağıdaki şekilde değiştirilmiştir. Yeni oranlar üzerinden tesis 16 Ocak 2026 tarihinde yapılacaktır."
+  },
+  {
+   "id": "tcmb-2025-63",
+   "kaynak": [
+    "tcmb-2025-63"
+   ],
+   "tarih": "2025-12-11",
+   "yururluk": null,
+   "kurum": "TCMB",
+   "konu": "faiz",
+   "onem": 3,
+   "baslik": "Politika faizi %39,5'ten %38'e indirildi",
+   "ozet": "PPK bir hafta vadeli repo ihale faiz oranını indirdi; gecelik borç verme ve borçlanma faizleri de aynı ölçüde aşağı çekildi.",
+   "detay": [
+    "Bir hafta vadeli repo ihale faiz oranı (politika faizi): %39,5 → %38.",
+    "Gecelik borç verme faiz oranı: %42,5 → %41.",
+    "Gecelik borçlanma faiz oranı: %38 → %36,5.",
+    "Kurul, enflasyon görünümünün ara hedeflerden belirgin biçimde ayrışması durumunda para politikası duruşunun sıkılaştırılacağını bildirdi."
+   ],
+   "alinti": "politika faizi olan bir hafta vadeli repo ihale faiz oranının yüzde 39,5’ten yüzde 38’e indirilmesine karar vermiştir"
+  }
+ ],
+ "elenen": [
+  {
+   "id": "tcmb-2025-03",
+   "neden": "ödeme ve elektronik para kuruluşları gözetim ve denetim sonuçları bilgilendirmesi"
+  },
+  {
+   "id": "tcmb-2025-11",
+   "neden": "iş birliği mutabakat zaptı — kural değişikliği içermiyor"
+  },
+  {
+   "id": "tcmb-2025-16",
+   "neden": "dergi makale çağrısı duyurusu"
+  },
+  {
+   "id": "tcmb-2025-18",
+   "neden": "üç ödeme/elektronik para kuruluşunun faaliyet izinlerinin durdurulması — tek tek şirketlere özgü işlem"
+  },
+  {
+   "id": "tcmb-2025-26",
+   "neden": "istatistik yayını (Faiz ve Kâr Payı İstatistikleri)"
+  },
+  {
+   "id": "tcmb-2025-34",
+   "neden": "tek bir elektronik para kuruluşuna (Papara) ilişkin kayyum ve limit duyurusu"
+  },
+  {
+   "id": "tcmb-2025-42",
+   "neden": "araştırma verisi erişim merkezi (VERİM) duyurusu"
+  },
+  {
+   "id": "tcmb-2025-48",
+   "neden": "öğrenci makale yarışması duyurusu"
+  },
+  {
+   "id": "tcmb-2025-51",
+   "neden": "iş birliği mutabakat zaptı — kural değişikliği içermiyor"
+  },
+  {
+   "id": "tcmb-2025-53",
+   "neden": "Bankalararası Kart Merkezi denetim sürecine ilişkin bilgilendirme (tek kuruluş)"
+  },
+  {
+   "id": "tcmb-2025-58",
+   "neden": "Finansal İstikrar Kurulu bölgesel danışma grubu toplantısı"
+  },
+  {
+   "id": "tcmb-2025-59",
+   "neden": "rapor yayım duyurusu (Dijital Türk Lirası İkinci Faz İlerleme Raporu)"
+  },
+  {
+   "id": "tcmb-2025-60",
+   "neden": "canlı yayın programı duyurusu"
+  },
+  {
+   "id": "tcmb-2025-62",
+   "neden": "internet sitesi duyurusu (Ödemelerin Merkezi)"
+  }
+ ]
+}

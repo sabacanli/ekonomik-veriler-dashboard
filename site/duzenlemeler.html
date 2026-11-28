@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Düzenleme Zaman Çizelgesi — TCMB, BDDK ve SPK Kararları | Ekordion</title>
+  <meta name="description" content="2021'den bugüne TCMB, BDDK ve SPK'nın finansal piyasaları etkileyen kararları tek zaman çizelgesinde: faiz, zorunlu karşılık, kredi ve mevduat kuralları, döviz, sermaye piyasası düzenlemeleri — her kayıt kısa özet ve resmî kaynak bağlantısıyla.">
+  <link rel="canonical" href="https://ekordion.com.tr/duzenlemeler.html">
+  <meta property="og:title" content="Düzenleme Zaman Çizelgesi — TCMB, BDDK ve SPK Kararları | Ekordion">
+  <meta property="og:description" content="2021'den bugüne TCMB, BDDK ve SPK'nın finansal piyasaları etkileyen kararları tek zaman çizelgesinde — kısa özet ve resmî kaynak bağlantısıyla.">
+  <meta property="og:url" content="https://ekordion.com.tr/duzenlemeler.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Ekordion">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:image" content="https://ekordion.com.tr/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>try{if(localStorage.getItem("ekordion-tema")==="koyu")document.documentElement.setAttribute("data-theme","koyu")}catch(e){}</script>
+  <link rel="stylesheet" href="assets/style.css?v=33">
+  <style>
+    /* Kurum renkleri app.js paletinden (PAL) gelir; betik yüklenene kadarki yedekler aşağıda. */
+    :root { --k-tcmb: #D40031; --k-bddk: #1C3044; --k-spk: #5E8BC5; }
+
+    /* ── Süzgeçler ── */
+    .zc-suzgec { display: grid; grid-template-columns: 92px 1fr; gap: 9px 12px; align-items: start; margin: 4px 0 6px; }
+    .zc-suzgec .lbl { color: var(--muted); font-size: 12.5px; padding-top: 7px; }
+    .zc-suzgec .chips { margin-bottom: 0; }
+    .zc-ara { width: 100%; max-width: 420px; padding: 8px 12px; border-radius: 9px; border: 1px solid var(--border);
+              background: var(--panel); color: var(--text); font: inherit; font-size: 13.5px; }
+    .zc-ara:focus { outline: 2px solid var(--k-bddk); outline-offset: 1px; }
+    .zc-sayac { color: var(--muted); font-size: 12.5px; margin: 10px 0 14px; }
+    .zc-sayac button { background: none; border: none; color: var(--blue); cursor: pointer; font: inherit; padding: 0; text-decoration: underline; }
+
+    /* ── Şerit: tüm dönem tek bakışta ── */
+    .zc-serit-kap { overflow-x: auto; margin: 2px 0 0; }
+    #serit { display: block; min-width: 760px; width: 100%; height: auto; }
+    #serit .yil-cizgi { stroke: var(--border); stroke-width: 1; }
+    #serit .yil-ad { fill: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; }
+    #serit .yil-ad:hover { fill: var(--text); }
+    #serit .kulvar-ad { fill: var(--muted); font-size: 11.5px; font-weight: 700; }
+    #serit .kulvar-cizgi { stroke: var(--border); stroke-width: 1; stroke-dasharray: 2 4; }
+    #serit circle.olay { cursor: pointer; stroke: var(--panel); stroke-width: 1; }
+    #serit circle.olay.o1 { fill-opacity: .42; stroke: none; }
+    #serit circle.olay.o2 { fill-opacity: .85; }
+    #serit circle.olay:hover, #serit circle.olay.secili { stroke: var(--text); stroke-width: 2; fill-opacity: 1; }
+    #serit circle.olay.gizli { display: none; }
+    #ipucu { position: fixed; z-index: 80; max-width: 340px; pointer-events: none; display: none; background: var(--panel);
+             color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px; font-size: 12.5px;
+             line-height: 1.45; box-shadow: 0 6px 22px rgba(0,0,0,.18); }
+    #ipucu .t { color: var(--muted); font-size: 11.5px; margin-bottom: 2px; }
+    .zc-lejant { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: 12px; margin: 6px 0 4px; align-items: center; }
+    .zc-lejant i { display: inline-block; border-radius: 50%; background: var(--muted); margin-right: 6px; vertical-align: middle; }
+
+    /* ── Çizelge ── */
+    .zc-yil { margin: 26px 0 0; }
+    .zc-yil > h2 { position: sticky; top: 0; z-index: 5; margin: 0; padding: 9px 0 8px; font-size: 22px; font-weight: 700;
+                   background: var(--bg); border-bottom: 2px solid var(--text); display: flex; align-items: baseline; gap: 12px; }
+    .zc-yil > h2 span { color: var(--muted); font-size: 12.5px; font-weight: 400; }
+    .zc-ay { display: grid; grid-template-columns: 92px 1fr; gap: 0 12px; padding-top: 14px; }
+    .zc-ay-ad { color: var(--muted); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; padding-top: 9px; }
+    .zc-ray { border-left: 2px solid var(--border); padding: 0 0 4px 0; min-width: 0; }
+    .zc-olay { position: relative; margin-left: -2px; border-left: 2px solid transparent; }
+    .zc-olay.acik { border-left-color: var(--kr); background: var(--panel2); border-radius: 0 10px 10px 0; }
+    .zc-bas { display: grid; grid-template-columns: 22px 56px 52px 1fr auto; gap: 0 8px; align-items: baseline; width: 100%;
+              text-align: left; background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 8px 10px 8px 0; }
+    .zc-bas:hover .zc-baslik { text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 3px; }
+    .zc-bas:focus-visible { outline: 2px solid var(--kr); outline-offset: -2px; border-radius: 6px; }
+    .zc-nokta { width: 11px; height: 11px; border-radius: 50%; background: var(--kr); margin-left: -7.5px; align-self: center;
+                box-shadow: 0 0 0 3px var(--bg); }
+    .zc-olay.acik .zc-nokta { box-shadow: 0 0 0 3px var(--panel2); }
+    .o1 .zc-nokta { width: 9px; height: 9px; margin-left: -6.5px; background: var(--bg); border: 2px solid var(--kr); }
+    .o3 .zc-nokta { width: 15px; height: 15px; margin-left: -9.5px; }
+    .zc-gun { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .zc-kurum { font-size: 11px; font-weight: 700; letter-spacing: .3px; color: var(--kr); }
+    .zc-baslik { font-size: 14.5px; line-height: 1.45; min-width: 0; }
+    .o3 .zc-baslik { font-weight: 700; }
+    .o2 .zc-baslik { font-weight: 600; }
+    .o1 .zc-baslik { color: var(--muted); }
+    .zc-konu { color: var(--muted); font-size: 11.5px; white-space: nowrap; border: 1px solid var(--border); border-radius: 10px; padding: 1px 8px; }
+    .zc-govde { padding: 2px 16px 14px 146px; font-size: 14px; line-height: 1.6; }
+    .zc-govde p { margin: 0 0 8px; }
+    .zc-govde ul { margin: 0 0 10px; padding-left: 18px; }
+    .zc-govde li { margin-bottom: 4px; }
+    .zc-alt { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; color: var(--muted); font-size: 12.5px; }
+    .zc-alt a { color: var(--blue); text-decoration: none; font-weight: 600; }
+    .zc-alt a:hover { text-decoration: underline; }
+    .zc-alt button { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer;
+                     font: inherit; font-size: 12px; padding: 2px 9px; }
+    .zc-alt button:hover { color: var(--text); }
+    .zc-bos { color: var(--muted); padding: 28px 0; }
+    .k-TCMB { --kr: var(--k-tcmb); } .k-BDDK { --kr: var(--k-bddk); } .k-SPK { --kr: var(--k-spk); }
+    .chip .dot.k-TCMB, .chip .dot.k-BDDK, .chip .dot.k-SPK { background: var(--kr); }
+    mark { background: #FFE9A8; color: inherit; border-radius: 2px; padding: 0 1px; }
+    html[data-theme="koyu"] mark { background: #5A4A12; }
+
+    @media (max-width: 760px) {
+      .zc-suzgec { grid-template-columns: 1fr; gap: 4px; }
+      .zc-suzgec .lbl { padding-top: 6px; }
+      .zc-ay { grid-template-columns: 1fr; }
+      .zc-ay-ad { padding: 0 0 6px; }
+      .zc-ray { margin-left: 8px; }
+      .zc-bas { grid-template-columns: 18px 50px 1fr; }
+      .zc-bas .zc-kurum { grid-column: 2; grid-row: 2; }
+      .zc-bas .zc-baslik { grid-column: 3; grid-row: 1 / span 2; }
+      .zc-bas .zc-konu { display: none; }
+      .zc-govde { padding-left: 76px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <button id="menuBtn">☰</button>
+  <div id="overlay"></div>
+  <aside id="sidebar"></aside>
+
+  <main>
+    <h1 class="page-title">Düzenleme Zaman Çizelgesi</h1>
+    <div class="update-info" id="updated"></div>
+    <div class="info-box" id="ozet">📋 2021 yılından bugüne TCMB, BDDK ve SPK'nın finansal piyasaları etkileyen 529 kararı tek çizelgede (TCMB 194, BDDK 152, SPK 183). Son kayıtlar: 27.11.2026 SPK — Bulls, A1 Capital ve Pardus Portföy fonlarından listedekiler 30.11.2026'da yeniden işleme açılacak · 26.11.2026 TCMB — Bir hafta vadeli repo ihalelerine geçici olarak ara verildi · 26.11.2026 TCMB — TL zorunlu karşılıklara ödenen faiz AOFM'nin %86'sından %90'ına çıkarıldı.</div>
+
+    <section class="chart-card" id="secSerit">
+      <h3>Tek Bakışta: 2021'den Bugüne</h3>
+      <p class="cap">Her nokta bir karar ya da duyuru — büyük nokta kritik, küçük soluk nokta bilgi niteliğinde. Noktaya tıklayınca ayrıntısı aşağıda açılır; yıla tıklayınca o yıla gidilir.</p>
+      <div class="zc-serit-kap"><svg id="serit" role="img" aria-label="TCMB, BDDK ve SPK kararlarının yıllara göre dağılımı"></svg></div>
+      <div class="zc-lejant" id="lejant"></div>
+    </section>
+
+    <div class="zc-suzgec">
+      <div class="lbl">Kurum</div><div class="chips" id="fKurum"></div>
+      <div class="lbl">Konu</div><div class="chips" id="fKonu"></div>
+      <div class="lbl">Önem</div><div class="chips" id="fOnem"></div>
+      <div class="lbl">Ara</div><div><input class="zc-ara" id="ara" type="search" placeholder="ör. zorunlu karşılık, açığa satış, KKM…" autocomplete="off" aria-label="Kayıtlarda ara"></div>
+    </div>
+    <div class="zc-sayac" id="sayac"></div>
+
+    <div id="cizelge"></div>
+    <div id="ipucu"></div>
+
+    <footer>Kaynak: TCMB basın duyuruları; BDDK basın açıklamaları, mevzuat duyuruları ve Kurul kararları; SPK
+      Bülteni'ndeki duyuru ve ilke kararları ile SPK basın duyuruları. Özetler bu resmî metinlerden hazırlanmıştır;
+      bağlayıcı olan resmî metindir ve her kaydın altında kaynağına bağlantı vardır. Tek bir şirketi ilgilendiren
+      izin ve yaptırımlar (banka kuruluş ve faaliyet kararları dışında) kapsam dışıdır. Yeni duyurular yayımlandıktan
+      sonra otomatik eklenir; özetler Claude ile hazırlanır ve içlerindeki her sayı kaynak metinle karşılaştırılır.
+      Yatırım tavsiyesi değildir.</footer>
+  </main>
+
+  <script src="assets/app.js?v=37"></script>
+  <script>
+    (async () => {
+      const D = await getJSON("data/duzenleme.json");
+      setUpdated(D.updated);
+      setOzet(D.ozet_html);
+
+      const kok = document.documentElement.style;
+      kok.setProperty("--k-tcmb", PAL.kirmizi); kok.setProperty("--k-bddk", PAL.lacivert); kok.setProperty("--k-spk", PAL.mor);
+      const RENK = { TCMB: PAL.kirmizi, BDDK: PAL.lacivert, SPK: PAL.mor };
+      const KURUMLAR = ["TCMB", "BDDK", "SPK"];
+      const AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+      const AYK = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+      const $ = id => document.getElementById(id);
+      // Metinler veri dosyasından gelir; sayfaya yalnız kaçışlanmış olarak girer
+      const esc = s => String(s === null || s === undefined ? "" : s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      const guvenliLink = u => (/^https?:\/\//i.test(u || "") ? esc(u) : "#");
+      const kucuk = s => String(s || "").toLocaleLowerCase("tr");
+      const trTarih = t => t.slice(8, 10) + "." + t.slice(5, 7) + "." + t.slice(0, 4);
+      const gunAy = t => +t.slice(8, 10) + " " + AYK[+t.slice(5, 7) - 1];
+
+      const OLAY = D.olaylar;                       // yeni → eski sıralı
+      OLAY.forEach(o => { o._ara = kucuk([o.baslik, o.ozet, (o.detay || []).join(" "), o.kurum, D.konular[o.konu]].join(" ")); });
+      const HARITA = Object.fromEntries(OLAY.map(o => [o.id, o]));
+      const S = { kurum: new Set(), konu: new Set(), onem: 1, ara: "", acik: new Set() };
+
+      // ── Süzgeç düğmeleri ──
+      function chipler(el, liste, kume, tekil) {
+        el.innerHTML = liste.map(([v, ad, nokta]) => '<span class="chip" data-v="' + esc(v) + '" role="button" tabindex="0">' +
+          (nokta ? '<span class="dot k-' + esc(v) + '"></span>' : "") + esc(ad) + "</span>").join("");
+        const boya = () => el.querySelectorAll(".chip").forEach(c => {
+          const v = c.dataset.v;
+          c.classList.toggle("active", tekil ? String(S.onem) === v : (v === "" ? kume.size === 0 : kume.has(v)));
+        });
+        const sec = c => {
+          const v = c.dataset.v;
+          if (tekil) S.onem = +v;
+          else if (v === "") kume.clear();
+          else if (kume.has(v)) kume.delete(v); else kume.add(v);
+          boya(); uygula();
+        };
+        el.querySelectorAll(".chip").forEach(c => {
+          c.onclick = () => sec(c);
+          c.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); sec(c); } };
+        });
+        boya();
+        return boya;
+      }
+      const say = (alan, v) => OLAY.filter(o => o[alan] === v).length;
+      const boyaKurum = chipler($("fKurum"), [["", "Tümü"]].concat(KURUMLAR.map(k => [k, k + " · " + say("kurum", k), true])), S.kurum);
+      const konuSira = Object.keys(D.konular).filter(k => say("konu", k) > 0);
+      const boyaKonu = chipler($("fKonu"), [["", "Tümü"]].concat(konuSira.map(k => [k, D.konular[k] + " · " + say("konu", k)])), S.konu);
+      chipler($("fOnem"), [["1", "Tümü"], ["2", "Önemli ve kritik"], ["3", "Yalnız kritik"]], null, true);
+      let araZaman = null;
+      $("ara").oninput = e => { clearTimeout(araZaman); araZaman = setTimeout(() => { S.ara = kucuk(e.target.value.trim()); uygula(); }, 140); };
+
+      const uyar = o => (!S.kurum.size || S.kurum.has(o.kurum)) && (!S.konu.size || S.konu.has(o.konu)) &&
+        o.onem >= S.onem && (!S.ara || S.ara.split(/\s+/).every(p => o._ara.includes(p)));
+
+      // ── Şerit ──
+      const ilkYil = +OLAY[OLAY.length - 1].tarih.slice(0, 4), sonYil = +OLAY[0].tarih.slice(0, 4);
+      const NS = "http://www.w3.org/2000/svg";
+      const svgEl = (ad, oz, metin) => { const e = document.createElementNS(NS, ad); for (const k in oz) e.setAttribute(k, oz[k]); if (metin !== undefined) e.textContent = metin; return e; };
+      function seritCiz() {
+        const svg = $("serit");
+        const W = Math.max(760, svg.parentNode.clientWidth), SOL = 56, SAG = 10, UST = 22, KUL = 46, H = UST + KUL * 3 + 6;
+        svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.style.height = H + "px"; svg.innerHTML = "";
+        const t0 = Date.UTC(ilkYil, 0, 1), t1 = Date.UTC(sonYil + 1, 0, 1);
+        const x = t => SOL + (Date.parse(t + "T00:00:00Z") - t0) / (t1 - t0) * (W - SOL - SAG);
+        for (let y = ilkYil; y <= sonYil; y++) {
+          const xx = SOL + (Date.UTC(y, 0, 1) - t0) / (t1 - t0) * (W - SOL - SAG);
+          svg.appendChild(svgEl("line", { x1: xx, x2: xx, y1: UST - 4, y2: H - 4, class: "yil-cizgi" }));
+          const ad = svgEl("text", { x: xx + 6, y: 13, class: "yil-ad", tabindex: 0, role: "link" }, y);
+          ad.onclick = () => yilaGit(y);
+          ad.onkeydown = e => { if (e.key === "Enter") yilaGit(y); };
+          svg.appendChild(ad);
+        }
+        KURUMLAR.forEach((k, i) => {
+          const cy = UST + KUL * i + KUL / 2;
+          svg.appendChild(svgEl("line", { x1: SOL, x2: W - SAG, y1: cy, y2: cy, class: "kulvar-cizgi" }));
+          svg.appendChild(svgEl("text", { x: 4, y: cy + 4, class: "kulvar-ad", fill: RENK[k] }, k));
+          // üst üste binen noktaları kulvar içinde yukarı-aşağı kaydır (arı kovanı yerleşimi)
+          const konan = [];
+          OLAY.filter(o => o.kurum === k).slice().reverse().forEach(o => {
+            const r = o.onem === 3 ? 5.6 : o.onem === 2 ? 4 : 2.7, cx = x(o.tarih);
+            let dy = 0;
+            for (let n = 0; n < 15; n++) {
+              dy = n === 0 ? 0 : (n % 2 ? 1 : -1) * Math.ceil(n / 2) * 6.2;
+              if (Math.abs(dy) + r > KUL / 2 - 1) { dy = 0; break; }
+              if (!konan.some(p => Math.abs(p.cx - cx) < p.r + r + .6 && Math.hypot(p.cx - cx, p.dy - dy) < p.r + r + .6)) break;
+            }
+            konan.push({ cx, dy, r });
+            const c = svgEl("circle", { cx: cx.toFixed(1), cy: (cy + dy).toFixed(1), r, fill: RENK[k], class: "olay o" + o.onem, "data-id": o.id });
+            c.onmouseenter = e => ipucuGoster(e, o);
+            c.onmousemove = e => ipucuKonum(e);
+            c.onmouseleave = () => { $("ipucu").style.display = "none"; };
+            c.onclick = () => ac(o.id, true);
+            svg.appendChild(c);
+          });
+        });
+        seritSuz();
+      }
+      function seritSuz() {
+        $("serit").querySelectorAll("circle.olay").forEach(c => {
+          c.classList.toggle("gizli", !uyar(HARITA[c.dataset.id]));
+          c.classList.toggle("secili", S.acik.has(c.dataset.id));
+        });
+      }
+      function ipucuGoster(e, o) {
+        const el = $("ipucu");
+        el.innerHTML = '<div class="t">' + trTarih(o.tarih) + " · " + esc(o.kurum) + " · " + esc(D.konular[o.konu]) + "</div>" + esc(o.baslik);
+        el.style.display = "block"; ipucuKonum(e);
+      }
+      function ipucuKonum(e) {
+        const el = $("ipucu"), g = el.offsetWidth, y = el.offsetHeight;
+        el.style.left = Math.max(8, Math.min(e.clientX + 14, window.innerWidth - g - 8)) + "px";
+        el.style.top = (e.clientY + 18 + y > window.innerHeight ? e.clientY - y - 12 : e.clientY + 18) + "px";
+      }
+      $("lejant").innerHTML = '<span><i style="width:11px;height:11px"></i>Kritik</span><span><i style="width:8px;height:8px;opacity:.85"></i>Önemli</span>' +
+        '<span><i style="width:5px;height:5px;opacity:.45"></i>Bilgi</span>';
+
+      // ── Çizelge ──
+      const vurgula = metin => {
+        let h = esc(metin);
+        if (!S.ara) return h;
+        S.ara.split(/\s+/).filter(p => p.length > 1).forEach(p => {
+          const k = kucuk(h); let i = 0, yeni = "";
+          for (;;) {                                   // etiketlerin içine dokunmadan, Türkçe küçük harf eşleşmesiyle
+            const j = k.indexOf(p, i);
+            if (j < 0) { yeni += h.slice(i); break; }
+            const etiketIci = h.lastIndexOf("<", j) > h.lastIndexOf(">", j);
+            yeni += h.slice(i, j) + (etiketIci ? h.slice(j, j + p.length) : "<mark>" + h.slice(j, j + p.length) + "</mark>");
+            i = j + p.length;
+          }
+          h = yeni;
+        });
+        return h;
+      };
+      function govde(o) {
+        return '<div class="zc-govde" id="g-' + esc(o.id) + '"><p>' + vurgula(o.ozet) + "</p>" +
+          "<ul>" + (o.detay || []).map(d => "<li>" + vurgula(d) + "</li>").join("") + "</ul>" +
+          '<div class="zc-alt">' + (o.yururluk ? "<span>Yürürlük: <b>" + trTarih(o.yururluk) + "</b></span>" : "") +
+          (o.kaynak || []).map(k => '<a href="' + guvenliLink(k.url) + '" target="_blank" rel="noopener">' + esc(k.ad) + " ↗</a>").join("") +
+          '<button type="button" data-kopya="' + esc(o.id) + '">Bağlantıyı kopyala</button>' +
+          (o.otomatik ? '<span title="Bu kayıt duyuru yayımlanınca otomatik hazırlandı; sayıları kaynak metinle otomatik karşılaştırıldı">otomatik özet</span>' : "") +
+          "</div></div>";
+      }
+      function satir(o) {
+        const acik = S.acik.has(o.id);
+        return '<article class="zc-olay k-' + esc(o.kurum) + " o" + o.onem + (acik ? " acik" : "") + '" id="o-' + esc(o.id) + '">' +
+          '<button type="button" class="zc-bas" aria-expanded="' + acik + '" aria-controls="g-' + esc(o.id) + '" data-id="' + esc(o.id) + '">' +
+          '<span class="zc-nokta"></span><span class="zc-gun">' + gunAy(o.tarih) + '</span><span class="zc-kurum">' + esc(o.kurum) +
+          '</span><span class="zc-baslik">' + vurgula(o.baslik) + '</span><span class="zc-konu">' + esc(D.konular[o.konu]) + "</span></button>" +
+          (acik ? govde(o) : "") + "</article>";
+      }
+      function uygula() {
+        const liste = OLAY.filter(uyar);
+        const suzgecli = S.kurum.size || S.konu.size || S.onem > 1 || S.ara;
+        $("sayac").innerHTML = "<b>" + liste.length + "</b> kayıt" + (suzgecli ? " (toplam " + OLAY.length + ') · <button type="button" id="temizle">süzgeci temizle</button>' : "");
+        if (suzgecli) $("temizle").onclick = () => {
+          S.kurum.clear(); S.konu.clear(); S.onem = 1; S.ara = ""; $("ara").value = "";
+          boyaKurum(); boyaKonu(); $("fOnem").querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.v === "1")); uygula();
+        };
+        let h = "", yil = null, ay = null;
+        const yilSay = {};
+        liste.forEach(o => { const y = o.tarih.slice(0, 4); yilSay[y] = (yilSay[y] || 0) + 1; });
+        liste.forEach(o => {
+          const y = o.tarih.slice(0, 4), a = o.tarih.slice(0, 7);
+          if (y !== yil) { h += (ay ? "</div></div>" : "") + (yil ? "</section>" : "") + '<section class="zc-yil" id="yil-' + y + '"><h2>' + y + "<span>" + yilSay[y] + " kayıt</span></h2>"; yil = y; ay = null; }
+          if (a !== ay) { h += (ay ? "</div></div>" : "") + '<div class="zc-ay"><div class="zc-ay-ad">' + AYLAR[+a.slice(5) - 1] + '</div><div class="zc-ray">'; ay = a; }
+          h += satir(o);
+        });
+        h += (ay ? "</div></div>" : "") + (yil ? "</section>" : "");
+        $("cizelge").innerHTML = h || '<div class="zc-bos">Bu süzgeçle eşleşen kayıt yok.</div>';
+        seritSuz();
+      }
+      // tek dinleyici: satır aç/kapat ve bağlantı kopyalama
+      $("cizelge").addEventListener("click", e => {
+        const kopya = e.target.closest("[data-kopya]");
+        if (kopya) {
+          const url = location.origin + location.pathname + "#" + kopya.dataset.kopya;
+          (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(
+            () => { kopya.textContent = "Kopyalandı ✓"; setTimeout(() => { kopya.textContent = "Bağlantıyı kopyala"; }, 1600); },
+            () => { prompt("Bağlantı:", url); });
+          return;
+        }
+        const bas = e.target.closest(".zc-bas");
+        if (bas) ac(bas.dataset.id, false, true);
+      });
+      function ac(id, git, degistir, aninda) {
+        const o = HARITA[id];
+        if (!o) return;
+        if (degistir && S.acik.has(id)) S.acik.delete(id); else S.acik.add(id);
+        if (!uyar(o)) {                              // şeritten ya da bağlantıdan gelen kayıt süzgeçte gizliyse süzgeci aç
+          S.kurum.clear(); S.konu.clear(); S.onem = 1; S.ara = ""; $("ara").value = "";
+          boyaKurum(); boyaKonu(); $("fOnem").querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.v === "1"));
+          uygula();
+        } else {
+          const el = $("o-" + id);
+          if (el) el.outerHTML = satir(o); else uygula();
+          seritSuz();
+        }
+        if (S.acik.has(id)) history.replaceState(null, "", "#" + id);
+        if (git) {
+          const el = $("o-" + id);
+          if (el) {
+            const azalt = aninda || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: azalt ? "auto" : "smooth" });
+            const b = el.querySelector(".zc-bas"); if (b) b.focus({ preventScroll: true });
+          }
+        }
+      }
+      function yilaGit(y) {
+        const el = $("yil-" + y);
+        if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 6, behavior: "smooth" });
+      }
+
+      uygula();
+      seritCiz();
+      let boyutZaman = null;
+      window.addEventListener("resize", () => { clearTimeout(boyutZaman); boyutZaman = setTimeout(seritCiz, 160); });
+      // Paylaşılan bağlantı (#kimlik): kaydı aç ve yanına git. Yazı tipleri yüklenince satır yükseklikleri değiştiği
+      // için konum ondan sonra hesaplanır; yumuşak kaydırma yükleme sırasında yarıda kalabildiğinden anında gidilir.
+      const istenen = decodeURIComponent(location.hash.slice(1));
+      if (HARITA[istenen]) {
+        ac(istenen, true, false, true);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => {
+          const el = $("o-" + istenen);
+          if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: "auto" });
+        });
+      }
+    })().catch(e => {
+      document.getElementById("ozet").textContent = "Çizelge yüklenemedi: " + e.message;
+    });
+  </script>
+</body>
+</html>

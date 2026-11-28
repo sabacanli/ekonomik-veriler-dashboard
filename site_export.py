@@ -1175,6 +1175,53 @@ def build_banka_kar():
     bk.build(DATA / "banka_kar.json")
 
 
+def build_duzenleme():
+    """Düzenleme Zaman Çizelgesi: duzenleme/olaylar/*.json + duzenleme/dizin.json → site/data/duzenleme.json.
+
+    Olay kayıtları elle/Claude ile yazılır (duzenleme/KILAVUZ.md); burada yalnız derlenir: kaynak kimlikleri
+    okura gösterilecek ad + bağlantıya çevrilir, kayıtlar yeniden eskiye sıralanır. `alinti` alanı doğrulama
+    içindir, siteye yazılmaz."""
+    kok = BASE / "duzenleme"
+    if str(kok) not in sys.path:
+        sys.path.insert(0, str(kok))
+    import ortak as DZ
+    dizin = {k["id"]: k for k in DZ.dizin_oku()}
+    olaylar, son_degisim = [], 0
+    for f in DZ.olay_dosyalari():
+        son_degisim = max(son_degisim, f.stat().st_mtime)
+        try:
+            kayitlar = json.loads(f.read_text(encoding="utf-8")).get("olaylar", [])
+        except Exception as e:      # tek bozuk dosya tüm sitenin yayımını durdurmasın; kalan yıllar yayımlanır
+            print(f"  ~ duzenleme: {f.name} okunamadı ({e}) — atlandı")
+            continue
+        for o in kayitlar:
+            try:
+                kay = [{"ad": DZ.kaynak_etiketi(dizin[k]), "url": dizin[k]["url"]} for k in o["kaynak"] if k in dizin]
+                olaylar.append({"id": o["id"], "tarih": o["tarih"], "yururluk": o.get("yururluk") or None,
+                                "kurum": o["kurum"], "konu": o["konu"] if o["konu"] in DZ.KONULAR else "diger",
+                                "onem": min(3, max(1, int(o["onem"]))), "baslik": o["baslik"],
+                                "ozet": o["ozet"], "detay": list(o["detay"]), "kaynak": kay,
+                                **({"otomatik": True} if o.get("otomatik") else {})})
+            except Exception as e:
+                print(f"  ~ duzenleme: {f.name} içinde bozuk kayıt ({o.get('id') if isinstance(o, dict) else '?'}: {e}) — atlandı")
+    if not olaylar:
+        raise RuntimeError("duzenleme/olaylar içinde olay yok")
+    olaylar.sort(key=lambda o: (o["tarih"], o["onem"], o["id"]), reverse=True)
+    say = {k: sum(1 for o in olaylar if o["kurum"] == k) for k in DZ.KURUMLAR}
+    gt = lambda t: f"{t[8:10]}.{t[5:7]}.{t[:4]}"
+    one = [o for o in olaylar if o["onem"] >= 2][:3]
+    ozet = (f"<b>{olaylar[-1]['tarih'][:4]}</b> yılından bugüne TCMB, BDDK ve SPK'nın finansal piyasaları etkileyen "
+            f"<b>{ht(len(olaylar), 0)} kararı</b> tek çizelgede (TCMB {say['TCMB']}, BDDK {say['BDDK']}, SPK {say['SPK']}). "
+            "Son kayıtlar: " + " · ".join(f"<b>{gt(o['tarih'])}</b> {o['kurum']} — {o['baslik']}" for o in one) + ".")
+    dump("duzenleme.json", {
+        "updated": datetime.fromtimestamp(son_degisim).strftime("%d.%m.%Y %H:%M"),
+        "ozet_html": ozet,
+        "kapsam": {"ilk": olaylar[-1]["tarih"], "son": olaylar[0]["tarih"], "belge": len(dizin), "olay": len(olaylar)},
+        "konular": DZ.KONULAR,
+        "olaylar": olaylar,
+    })
+
+
 def build_home():
     cards = []
 
@@ -1438,6 +1485,16 @@ def build_home():
             f"büyümesi (13 hafta, yıllık.) <b>%{ht(k13, 1)}</b>, TL mevduat payı %{ht(pay, 1)}.", "tcmb-faiz.html")
     except Exception:
         pass
+    try:
+        dz = json.loads((DATA / "duzenleme.json").read_text(encoding="utf-8"))
+        son = [o for o in dz["olaylar"] if o["onem"] >= 2][:3]
+        add("⚖️", "Düzenleme Zaman Çizelgesi",
+            f"{dz['kapsam']['ilk'][:4]} yılından bugüne TCMB, BDDK ve SPK'nın <b>{ht(dz['kapsam']['olay'], 0)} kararı</b> tek "
+            "çizelgede, özet ve resmî kaynak bağlantısıyla. Son: " +
+            "; ".join(f"<b>{o['tarih'][8:10]}.{o['tarih'][5:7]}</b> {o['kurum']} — {o['baslik']}" for o in son) + ".",
+            "duzenlemeler.html")
+    except Exception:
+        pass
     dump("home.json", {
         "updated": datetime.now().strftime("%d.%m.%Y %H:%M"),
         "cards": cards,
@@ -1446,7 +1503,7 @@ def build_home():
 
 def build_sitemap():
     """site/sitemap.xml — her export'ta taze lastmod ile yazılır (SEO)."""
-    sayfalar = ["", "gundem.html", "tcmb-faiz.html", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
+    sayfalar = ["", "gundem.html", "duzenlemeler.html", "tcmb-faiz.html", "tcmb-stok.html", "dth.html", "enflasyon.html", "net-rezerv.html",
                 "cari.html", "kredi.html", "mevduat.html", "butce.html", "nakit.html",
                 "bddk.html", "bankacilik.html", "banka-kar.html", "banka-turev.html", "hazine.html", "tcmb-alim.html",
                 "hesap-kredi.html", "hesap-mevduat.html", "hesap-maas.html"]
@@ -1472,7 +1529,7 @@ def ozet_gom():
             "mevduat.html": "mevduat.json", "butce.html": "butce.json",
             "nakit.html": "nakit.json", "bddk.html": "bddk.json", "bankacilik.html": "bankacilik.json", "banka-kar.html": "banka_kar.json", "banka-turev.html": "banka_turev.json",
             "hazine.html": "hazine.json", "tcmb-alim.html": "tcmb_alim.json",
-            "tcmb-faiz.html": "tcmb_faiz.json"}
+            "tcmb-faiz.html": "tcmb_faiz.json", "duzenlemeler.html": "duzenleme.json"}
     for sayfa, js in esle.items():
         try:
             d = json.loads((DATA / js).read_text(encoding="utf-8"))
@@ -1493,7 +1550,7 @@ def ozet_gom():
 def main():
     print("Site verileri dışa aktarılıyor -> site/data/")
     ok, fail = 0, 0
-    for name, fn in [("banka_kar", build_banka_kar), ("home", build_home), ("tcmb_stok", build_tcmb_stok),
+    for name, fn in [("banka_kar", build_banka_kar), ("duzenleme", build_duzenleme), ("home", build_home), ("tcmb_stok", build_tcmb_stok),
                      ("dth", build_dth), ("enflasyon", build_enflasyon),
                      ("butce", build_butce), ("nakit", build_nakit),
                      ("rezerv", build_rezerv), ("kredi", build_kredi),

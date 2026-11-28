@@ -397,6 +397,57 @@ def kontrol_bddk(t0, n):
              "Beş otomatik deneme de tutmamış. Elle: zsh bddk_otomatik.sh (Chrome penceresi açılır). BDDK yayımlamadıysa beklenir.")
 
 
+# ───────────────────────────── Düzenleme Zaman Çizelgesi ─────────────────────────────
+def kontrol_duzenleme(n):
+    """Düzenleme çizelgesi (28.11.2026): bulut koşusu yeni TCMB/BDDK/SPK duyurularını Claude ile özetler.
+    Üç sessiz arıza yolu var: (1) sisteme ait sorun → duzenleme/durum.json; (2) otomatik denetimden geçemeyen
+    özet yayımlanmaz → duzenleme/bekleyen.json; (3) duyuru günlerdir hiç karara bağlanmamış (adım çalışmıyor)."""
+    def depodan(yol):
+        r = git("show", f"origin/main:{yol}")
+        return r.stdout if r.returncode == 0 else None
+    ham = depodan("duzenleme/dizin.json")
+    if ham is None:
+        return                                    # çizelge henüz yayımlanmamış
+    durum = depodan("duzenleme/durum.json")
+    if durum:
+        try:
+            ekle("sorun", "Düzenleme çizelgesi güncellenemiyor", json.loads(durum).get("sorun", "")[:200],
+                 "Bulut koşusu yeni duyuruları işleyemiyor (çoğunlukla API anahtarı ya da model adı). Bu oturumda 'düzenleme çizelgesine bak' denebilir.")
+        except Exception:
+            pass
+    bek = []
+    try:
+        bek = json.loads(depodan("duzenleme/bekleyen.json") or "[]")
+    except Exception:
+        pass
+    if bek:
+        ekle("uyari", f"Düzenleme çizelgesinde {len(bek)} duyuru elle bakılmayı bekliyor (yayımlanmadı)",
+             "; ".join(f"{b.get('tarih')} {b.get('kurum')} — {str(b.get('baslik'))[:60]}" for b in bek[:3]) + (" …" if len(bek) > 3 else ""),
+             "Otomatik özet kaynak metinle tutmadı ya da belge okunamadı. Bu oturumda 'bekleyen düzenlemelere bak' denebilir.")
+    # karara bağlanmamış eski duyuru var mı? (2 günden eski, 45 günden yeni)
+    sys.path.insert(0, str(REPO / "duzenleme"))
+    import ortak as DZ
+    dizin = json.loads(ham)
+    karar = {b.get("id") for b in bek}
+    for yol in git("ls-tree", "--name-only", "origin/main", "duzenleme/olaylar/").stdout.split():
+        try:
+            v = json.loads(depodan(yol) or "{}")
+        except Exception:
+            continue
+        for o in v.get("olaylar", []):
+            karar.update(o.get("kaynak", []))
+        karar.update(e.get("id") for e in v.get("elenen", []))
+    alt, ust = (n - dt.timedelta(days=45)).strftime("%Y-%m-%d"), (n - dt.timedelta(days=2)).strftime("%Y-%m-%d")
+    acik = [k for k in dizin if alt <= (k.get("tarih") or "") <= ust and k["id"] not in karar and not DZ.baslik_eler_mi(k)]
+    if acik:
+        ekle("uyari" if not durum else "bilgi", f"Düzenleme çizelgesinde {len(acik)} duyuru günlerdir işlenmedi",
+             "; ".join(f"{k.get('tarih')} {k['kurum']} — {k['baslik'][:60]}" for k in acik[:3]) + (" …" if len(acik) > 3 else ""),
+             "Veri Güncelleme koşusundaki 'Düzenleme çizelgesini güncelle' adımına bakılmalı.")
+    son = max((k.get("tarih") or "" for k in dizin), default="")
+    if not durum and not bek and not acik:
+        ekle("bilgi", f"Düzenleme çizelgesi güncel (dizindeki son duyuru {son[8:10]}.{son[5:7]}.{son[:4]})")
+
+
 def bilgi_banka():
     try:
         D = json.loads((REPO / "site" / "data" / "banka_kar.json").read_text(encoding="utf-8"))
@@ -453,7 +504,7 @@ def main():
 
     for ad, f in (("GitHub", lambda: kontrol_github(t0, n)), ("site", lambda: kontrol_site(n)), ("depo", lambda: kontrol_depo(n)),
                   ("launchd", kontrol_launchd), ("KAP", lambda: kontrol_kap(t0, n)), ("BDDK", lambda: kontrol_bddk(t0, n)),
-                  ("banka", bilgi_banka)):
+                  ("düzenleme", lambda: kontrol_duzenleme(n)), ("banka", bilgi_banka)):
         try:
             f()
         except Exception as e:   # bir denetimin çökmesi diğerlerini durdurmasın; kendisi de bir bulgudur

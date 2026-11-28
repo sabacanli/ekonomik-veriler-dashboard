@@ -1,0 +1,673 @@
+{
+ "olaylar": [
+  {
+   "id": "bddk-karar-1155",
+   "kaynak": [
+    "bddk-karar-1155"
+   ],
+   "tarih": "2023-01-05",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Cep telefonu kredisinde vade eşiği 5 bin TL'den 12 bin TL'ye çıkarıldı; yenilenmiş ürüne 12 ay kart taksiti",
+   "ozet": "Cep telefonu alımı amacıyla kullandırılan tüketici kredilerinde vade sınırının belirlenmesinde dikkate alınan tutar artırıldı; yenilenmiş ürün niteliğindeki telefonların kredi kartıyla alımında tutar sınırı olmaksızın 12 ay taksit imkânı tanındı.",
+   "detay": [
+    "Cep telefonu kredilerinde vade sınırının belirlenmesinde dikkate alınan tutar: 5 bin TL → 12 bin TL.",
+    "Vade sınırı: fiyatı 12 bin TL ve altında olan cep telefonları için 12 ay; 12 bin TL'nin üzerinde olanlar için 3 ay.",
+    "Kredi kartı taksit süresi: işyerinin 'yenileme merkezi' veya 'yetkili satıcı' olması koşuluyla, Yenilenmiş Ürünlerin Satışı Hakkında Yönetmelik kapsamındaki 'yenilenmiş ürün' niteliğindeki cep telefonlarında tutar sınırı olmaksızın 12 ay."
+   ],
+   "alinti": "fiyatı on iki bin Türk Lirası ve altında olan cep telefonları için on iki ay, fiyatı on iki bin Türk Lirasının üzerinde olan cep telefonları için üç ay"
+  },
+  {
+   "id": "bddk-karar-1157",
+   "kaynak": [
+    "bddk-karar-1157"
+   ],
+   "tarih": "2023-01-31",
+   "yururluk": "2023-01-31",
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Sermaye yeterliliğinde KOBİ ciro sınırı 500 milyon TL, perakende kredi limiti 20 milyon TL oldu",
+   "ozet": "Karar tarihinden itibaren uygulanmak üzere sermaye yeterliliği hesabında KOBİ tanımındaki ciro sınırı ve perakende kredi limiti belirlendi; yabancı para kalemlerinde kullanılan kur tarihi 30.12.2022 olarak güncellendi.",
+   "detay": [
+    "KOBİ tanımına ilişkin ciro sınırı: yurt içi yerleşik KOBİ'ler için 500 milyon TL; yurt dışı yerleşik KOBİ'lerde KOBİ'nin bulunduğu ülkenin bankacılık otoritesinin sermaye yeterliliği hesabında kullandığı KOBİ tanımı.",
+    "Perakende kredi limiti (Sermaye Yeterliliği Yönetmeliği 6. madde ikinci fıkra (c) bendi): 20 milyon TL.",
+    "Kredi riskine esas tutar hesabında parasal ve parasal olmayan varlıklar (tarihi maliyetli YP kalemler hariç) ile özel karşılıklar için kullanılan kur: 31.12.2021 tarihli → 30.12.2022 tarihli TCMB döviz alış kuru; aksi yönde Kurul Kararı alınıncaya kadar."
+   ],
+   "alinti": "ciro sınırının, yurt içi yerleşik KOBİ’ler açısından 500.000.000 TL olarak belirlenmesine"
+  },
+  {
+   "id": "bddk-karar-1159",
+   "kaynak": [
+    "bddk-karar-1159"
+   ],
+   "tarih": "2023-02-07",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Deprem bölgesinde kredi vadesi sınırlardan bağımsız, kart taksit süresi bir kata kadar uzatılabilecek",
+   "ozet": "Adana, Adıyaman, Diyarbakır, Hatay, Gaziantep, Kahramanmaraş, Kilis, Malatya, Osmaniye ve Şanlıurfa'da yerleşik kişiler için 06.02.2023'ten itibaren 6 ay süreyle kredi vadesi ve kredi kartı taksit esneklikleri getirildi.",
+   "detay": [
+    "Bölgede yerleşik kişilere yine o bölgede yeni kullandırılacak veya yeniden yapılandırılacak banka kredilerinin vadesi, Kredi Yönetmeliği 12/A maddesi ve Kurulca belirlenen sürelere tabi olmaksızın, ödemesiz dönemler dahil bankalarca belirlenebilecek.",
+    "Finansal kiralama, faktoring ve finansman şirketlerinin aynı kapsamdaki kredilerinde de vade, ilgili yönetmeliğin 11/A maddesi ve Kurulca belirlenen sürelere tabi olmaksızın şirketlerce belirlenebilecek.",
+    "Bölgede yerleşik üye işyerlerinde kredi kartıyla yapılan mal ve hizmet satımlarında, Kurul kararıyla belirlenen taksitlendirme süreleri bir kata kadar artırılabilecek.",
+    "Uygulama: 06.02.2023 tarihinden itibaren geçerli olmak üzere 6 ay süreyle."
+   ],
+   "alinti": "kredi kartlarında taksitlendirme sürelerinin bir kata kadar arttırılmasına"
+  },
+  {
+   "id": "bddk-karar-1161",
+   "kaynak": [
+    "bddk-karar-1161"
+   ],
+   "tarih": "2023-02-10",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 3,
+   "baslik": "Deprem bölgesi için kart, erteleme, belge ve değerleme kolaylıkları 01.01.2024'e kadar uygulanacak",
+   "ozet": "Deprem/afet bölgesindeki on ilde yerleşik kişi ve müşterilere yönelik kredi kartı, kredi erteleme, derecelendirme ve belge, gayrimenkul değerleme ile kredi kullandırım sınırlaması kolaylıkları 06.02.2023'ten 01.01.2024'e kadar geçerli olacak.",
+   "detay": [
+    "Bölgede yerleşik kişilerin kredi kartlarında asgari tutar, 09.06.2022 tarihli 10222 sayılı kararın 25 bin TL limit sınırına bakılmaksızın dönem borcunun %20'si olacak.",
+    "Kart limiti: gelire bağlı sınırlar bir kata kadar artırılabilecek (aylık ortalama net gelirin ilk yıl 4, sonraki yıllar 8 katını aşmayacak şekilde); kart kapatma/iptal hükümleri uygulanmayabilecek, bankalar ödemesiz dönem tanımlayabilecek.",
+    "Bölgede yerleşik kişiler için Kart Yönetmeliği'nin 22. maddesindeki, 09.07.2020 tarihli 9093 sayılı kararla belirlenen 2.000 TL'lik sınır 5.000 TL'ye çıkarıldı.",
+    "Talep üzerine ertelenen tüketici ve taşıt kredilerinde erteleme süresi vade sınırlarında dikkate alınmayacak; ödeme gücü bozulan müşterilerin kredileri 06.02.2023'ten itibaren talebe bağlı asgari 6 ay ötelenebilecek.",
+    "Derecelendirme notu temini ve 11/A kapsamındaki ilave belgelerin alınması bankaların ihtiyarına bırakıldı; donuk alacak teminatı gayrimenkullerin yeniden değerlemesi ve teminat gayrimenkul değerinin gözden geçirilmesi ertelendi.",
+    "Bölgedeki bağımsız denetime tabi şirketler için 10265 ve 10389 sayılı kararlara ilişkin belge sunma süresi: 2022 son çeyrek kullandırımları için 31.03.2023, 2023 ilk çeyrek için 30.06.2023. 10503 sayılı kararın süresi 01.01.2024'e uzatıldı."
+   ],
+   "alinti": "A, B, C, Ç, D bentlerinde alınan kararların 06.02.2023 tarihinden itibaren geçerli olmak üzere 01.01.2024 tarihine kadar uygulanmasına"
+  },
+  {
+   "id": "bddk-karar-1162",
+   "kaynak": [
+    "bddk-karar-1162"
+   ],
+   "tarih": "2023-02-14",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Deprem bölgesi kredilerinde yüksek risk ağırlıkları 01.01.2024'e kadar uygulanmayacak",
+   "ozet": "06.02.2023'ten sonra deprem/afet bölgesindeki illerde kullandırılan bireysel kredi kartı, ihtiyaç ve ticari nitelikli kredilere yüksek risk ağırlığı uygulanmayacak; halka açık bankaların geri aldığı kendi hisseleri çekirdek sermayeden indirilmeyecek.",
+   "detay": [
+    "01.07.2021 tarihli 9645 sayılı karar kapsamında bireysel kredi kartı ve ihtiyaç kredilerine uygulanan yüksek risk ağırlıkları, 06.02.2023'ten sonra bölgedeki illerde yerleşik gerçek kişilere kullandırılanlar için 01.01.2024'e kadar uygulanmayacak.",
+    "10188 (28.04.2022) ve 10388 (21.10.2022) sayılı kararlar kapsamında ticari nitelikli nakdi kredilere uygulanan yüksek risk ağırlıkları, 06.02.2023'ten sonra afetten etkilenen müşterilere kullandırılanlar için 01.01.2024'e kadar uygulanmayacak.",
+    "Payları Borsa İstanbul Pay Piyasası'nda işlem gören bankaların 06.02.2023'ten sonra geri alım yoluyla edindiği kendi hisseleri 01.01.2024'e kadar çekirdek sermayeden indirim kalemi sayılmayacak; kredi ve piyasa riskine esas tutara da dahil edilmeyecek."
+   ],
+   "alinti": "yüksek risk ağırlıklarının, 6/2/2023 tarihinden sonra deprem/afet bölgesindeki illerde yerleşik gerçek kişilere kullandırılanlar bakımından 1/1/2024 tarihine kadar uygulanmamasına"
+  },
+  {
+   "id": "bddk-karar-1163",
+   "kaynak": [
+    "bddk-karar-1163"
+   ],
+   "tarih": "2023-02-23",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Deprem kolaylıkları, 'Genel Hayata Etkili Afet Bölgesi' ilan edilen diğer yerlere de uygulanacak",
+   "ozet": "On il için sağlanan kredi, kart ve sermaye yeterliliği kolaylıklarından, Kahramanmaraş'taki depremler ve artçıları nedeniyle 'Genel Hayata Etkili Afet Bölgesi' ilan edilen veya edilecek diğer yerler de yararlanacak.",
+   "detay": [
+    "Kapsam: 07.02.2023 tarihli 10503, 10.02.2023 tarihli 10507 ve 14.02.2023 tarihli 10508 sayılı kararlarla Adana, Adıyaman, Diyarbakır, Hatay, Gaziantep, Kahramanmaraş, Kilis, Malatya, Osmaniye ve Şanlıurfa için sağlanan imkânlar.",
+    "Dayanak: Afetlerin Genel Hayata Etkililiğine İlişkin Temel Kurallar Hakkındaki Yönetmelik uyarınca ilan edilen veya edilecek yerler."
+   ],
+   "alinti": "ilinde meydana gelen depremler ve müteakip artçılar nedeniyle “Genel Hayata Etkili Afet Bölgesi” ilan edilen/edilecek diğer yerlerin de yararlandırılmasına"
+  },
+  {
+   "id": "bddk-karar-1164",
+   "kaynak": [
+    "bddk-karar-1164"
+   ],
+   "tarih": "2023-02-24",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Konut kredilerinde azami kredi/değer oranları yeniden belirlendi: birinci elde 5 milyon TL'ye kadar %80–90",
+   "ozet": "Konut edinme kredileri ile taşıt kredileri hariç konut teminatlı kredilerde azami kredi tutarı, birinci el ve ikinci el/konut teminatlı krediler için konut değeri dilimi ve enerji sınıfına göre belirlendi; Yeni Konut Finansmanı Programı kredileri kapsam dışı.",
+   "detay": [
+    "1. el konut alımı, değer 5 milyon TL ve altında: değerin A sınıfı için %90'ı, B için %85'i, diğer sınıflar için %80'i; 5–10 milyon TL arası: %80 / %75 / %70.",
+    "1. el, 10–20 milyon TL arası: %70 / %65 / %60; 20 milyon TL üzeri: %60 / %55 / %50 (A / B / diğer).",
+    "2. el konut alımı ve konut teminatlı krediler, değer 1 milyon TL ve altında: üç sınıf için de %90; 1–2 milyon TL arası: %70 / %65 / %60; 2–5 milyon TL arası: %60 / %55 / %50.",
+    "2. el/konut teminatlı, 5–10 milyon TL arası: azami 3 / 2,75 / 2,5 milyon TL; 10 milyon TL üzeri: %0.",
+    "4749 sayılı Kanunun Geçici 37. maddesindeki Yeni Konut Finansmanı Programı kapsamında kullandırılacak krediler bu belirlemelere tabi değil."
+   ],
+   "alinti": "kredi tutarının teminat olarak alınan konutun değerine oranının aşağıdaki tabloda yer aldığı şekilde belirlenmesine"
+  },
+  {
+   "id": "bddk-karar-1166",
+   "kaynak": [
+    "bddk-karar-1166"
+   ],
+   "tarih": "2023-03-09",
+   "yururluk": "2023-03-09",
+   "kurum": "BDDK",
+   "konu": "doviz",
+   "onem": 2,
+   "baslik": "YP net genel pozisyon/özkaynak standart oranı sınırı mutlak değerce %5'ten %10'a çıkarıldı",
+   "ozet": "Hem konsolide olmayan hem konsolide finansal tablolara göre hesaplanan yabancı para net genel pozisyon/özkaynak standart oranının mutlak değerce azami sınırı, karar tarihinden itibaren uygulanmak üzere yükseltildi.",
+   "detay": [
+    "Yabancı para net genel pozisyon/özkaynak standart oranı (mutlak değer) azami sınırı: %5 → %10.",
+    "Konsolide finansal tablolar esas alınarak hesaplanan oran için de aynı sınır uygulanacak.",
+    "Dayanak: ilgili Yönetmeliğin 4. maddesinin birinci fıkrası ile 5. maddesinin birinci fıkrası."
+   ],
+   "alinti": "mutlak değeri azami yüzde beş olarak belirlenen yabancı para net genel pozisyon/özkaynak standart oranı"
+  },
+  {
+   "id": "bddk-karar-1168",
+   "kaynak": [
+    "bddk-karar-1168"
+   ],
+   "tarih": "2023-03-23",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Asır Yatırım Bankası A.Ş. unvanlı, 600 milyon TL sermayeli yatırım bankası kurulmasına izin verildi",
+   "ozet": "Kurul, beş kurucu ortak tarafından kurulacak yatırım bankasına kuruluş izni verdi; karar 25.03.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Asır Yatırım Bankası A.Ş. (yatırım bankası); kuruluş sermayesi 600 milyon TL.",
+    "Kurucu ortaklar: Hardan Ayyed, Mohammed Noori Ayyed, Noor Ayyed, Vadeea Ayyed ve Vedat Ayyed.",
+    "Karar sayısı 10541."
+   ],
+   "alinti": "600 milyon TL kuruluş sermayeli “Asır Yatırım Bankası A.Ş.” unvanlı bir yatırım bankası kurulmasına izin verilmesine"
+  },
+  {
+   "id": "bddk-karar-1169",
+   "kaynak": [
+    "bddk-karar-1169"
+   ],
+   "tarih": "2023-03-23",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Hayat Finans Katılım Bankası A.Ş.'ye faaliyet izni verildi",
+   "ozet": "Kurulun 21.04.2022 tarihli ve 10165 sayılı Kararı ile kuruluş izni verilen Hayat Finans Katılım Bankası A.Ş.'ye faaliyet izni verildi; karar 25.03.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Hayat Finans Katılım Bankası A.Ş.; 5411 sayılı Bankacılık Kanunu'nun 10. maddesi ve Dijital Bankaların Faaliyet Esasları ile Servis Modeli Bankacılığı Hakkında Yönetmelik kapsamında faaliyet izni verildi.",
+    "Karar sayısı 10543."
+   ],
+   "alinti": "Kurulun 21.04.2022 tarih ve 10165 sayılı Kararı ile kuruluş izni verilen Hayat Finans Katılım Bankası A.Ş.’ye faaliyet izni verilmesine"
+  },
+  {
+   "id": "bddk-karar-1170",
+   "kaynak": [
+    "bddk-karar-1170"
+   ],
+   "tarih": "2023-03-23",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Ziraat Dinamik Banka A.Ş. unvanlı, 2,5 milyar TL sermayeli dijital banka kurulmasına izin verildi",
+   "ozet": "Kurul, T.C. Ziraat Bankası A.Ş. ve dört Ziraat grubu şirketi tarafından kurulacak dijital bankaya kuruluş izni verdi; karar 25.03.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Ziraat Dinamik Banka A.Ş. (dijital banka); kuruluş sermayesi 2,5 milyar TL.",
+    "Kurucu ortaklar: T.C. Ziraat Bankası A.Ş., Ziraat Gayrimenkul Yatırım Ortaklığı A.Ş., Ziraat Girişim Sermayesi Yatırım Ortaklığı A.Ş., Ziraat Yatırım Menkul Değerler A.Ş. ve Ziraat Teknoloji A.Ş.",
+    "Karar sayısı 10542."
+   ],
+   "alinti": "2.500.000.000 TL kuruluş sermayeli \"Ziraat Dinamik Banka A.Ş.” unvanlı bir dijital banka kurulmasına izin verilmesine"
+  },
+  {
+   "id": "bddk-duyuru-1999",
+   "kaynak": [
+    "bddk-duyuru-1999"
+   ],
+   "tarih": "2023-03-27",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "odeme",
+   "onem": 2,
+   "baslik": "Elektronik bankacılıkta kimlik doğrulama ve işlem imzalama kriterlerine ilişkin 2023/1 sayılı Genelge çıktı",
+   "ozet": "23.03.2023 tarihli ve 10546 sayılı Kurul Kararı ile onaylanan ek açıklamalar, bankalar, 6361 sayılı Kanuna tabi kuruluşlar ve arayüz sağlayıcılar için kimlik doğrulama ve işlem imzalamanın nasıl uygulanacağını belirliyor.",
+   "detay": [
+    "Genelge, Bilgi Sistemleri ve Elektronik Bankacılık Hizmetleri Yönetmeliği (34, 35, 38, 39. maddeler) ile uzaktan kimlik tespiti ve dijital banka yönetmeliği hükümlerinin işlem güvenliğinden ödün verilmeden yeknesak uygulanması için ek açıklamalar içeriyor.",
+    "Kimlik doğrulama ve işlem imzalamada müşteriye atanmış şifreleme gizli anahtarıyla imzalanan tek kullanımlık doğrulama kodu kullanılacak; PIN gibi müşterinin bildiği unsur cihazda yerel olarak değil banka nezdinde çevrimiçi doğrulanacak.",
+    "Arayüz sağlayıcıların mobil uygulaması bulunacak; mobil uygulamaya gömülü servis bankası SDK'sı ve servis bankası Güvenlik Sunucusu üzerinden işlem imzalama akışı yürütülmesi zorunlu; yalnızca internet temelli kanallarla hizmet sunulamaz.",
+    "Kimlik doğrulama ve işlem imzalamada kullanılan ürün ve hizmetlerin açıklamalara uygunluğu bilgi sistemleri denetiminde ele alınacak; bu alanda ürün satan veya dış hizmet sağlayanlar, bağımsız denetim raporuyla Kurumdan izin almakla yükümlü.",
+    "Yürürlük tarihi ve uyum süresi, belgenin ortası kesik olduğundan görülen kısımda belirtilmedi."
+   ],
+   "alinti": "hükümlerinin işlem güvenliğinden ödün verilmeksizin yeknesak bir şekilde nasıl uygulanacağı konusuna açıklık getirmek"
+  },
+  {
+   "id": "bddk-karar-1172",
+   "kaynak": [
+    "bddk-karar-1172"
+   ],
+   "tarih": "2023-03-30",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "T.O.M. Katılım Bankası A.Ş.'ye faaliyet izni verildi",
+   "ozet": "Kurulun 04.08.2022 tarihli ve 10282 sayılı Kararı ile kuruluş izni verilen T.O.M. Katılım Bankası A.Ş.'ye faaliyet izni verildi; karar 31.03.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: T.O.M. Katılım Bankası A.Ş.; 5411 sayılı Bankacılık Kanunu'nun 10. maddesi ve dijital banka yönetmeliği kapsamında faaliyet izni verildi.",
+    "Karar sayısı 10561."
+   ],
+   "alinti": "Kurulun 04.08.2022 tarih ve 10282 sayılı Kararı ile kuruluş izni verilen T.O.M. Katılım Bankası A.Ş.’ye faaliyet izni verilmesine"
+  },
+  {
+   "id": "bddk-karar-1173",
+   "kaynak": [
+    "bddk-karar-1173"
+   ],
+   "tarih": "2023-04-07",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Tera Yatırım Bankası A.Ş.'ye faaliyet izni verildi",
+   "ozet": "Kurulun 27.10.2021 tarihli ve 9890 sayılı Kararı ile kuruluş izni verilen Tera Yatırım Bankası A.Ş.'ye faaliyet izni verildi; karar 12.04.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Tera Yatırım Bankası A.Ş.; 5411 sayılı Bankacılık Kanunu'nun 10. maddesi kapsamında faaliyet izni verildi.",
+    "Karar sayısı 10569."
+   ],
+   "alinti": "Kurulun 27.10.2021 tarihli ve 9890 sayılı Kararı ile kuruluş izni verilen Tera Yatırım Bankası A.Ş.’ye faaliyet izni verilmesine"
+  },
+  {
+   "id": "bddk-karar-1175",
+   "kaynak": [
+    "bddk-karar-1175"
+   ],
+   "tarih": "2023-04-27",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Belirli üreticilerin elektrikli taşıtlarında vade sınırı 12–48 ay, kredi/değer oranı %0–70 olarak belirlendi",
+   "ozet": "5520 sayılı Kurumlar Vergisi Kanunu'nun Geçici 12. maddesi kapsamındaki mükellefler tarafından üretilen elektrik motorlu taşıtlar için vade sınırları ve kredi tutarının taşıt değerine oranı, nihai fatura değeri dilimlerine göre belirlendi.",
+   "detay": [
+    "Vade sınırı: nihai fatura değeri 900 bin TL ve altında 48 ay; 900 bin–1,8 milyon TL arasında 36 ay; 1,8–2,2 milyon TL arasında 24 ay; 2,2–2,8 milyon TL arasında 12 ay.",
+    "Kredi tutarı/taşıt değeri oranı (taşıt teminatlı krediler hariç, tüketicilere binek araç): 900 bin TL ve altında en çok %70; 900 bin–1,8 milyon TL arasında %50; 1,8–2,2 milyon TL arasında %30; 2,2–2,8 milyon TL arasında %20; 2,8 milyon TL üzerinde %0.",
+    "Düzenleme yalnızca bu mükellefler tarafından üretilen elektrik motorlu taşıtlar için geçerli; dayanak Kredi Yönetmeliği 12/A ve Finansal Kurumlar Yönetmeliği 11/A maddeleri."
+   ],
+   "alinti": "Nihai fatura değeri dokuz yüz bin Türk Lirası ve altında olan taşıt alımı amacıyla kullandırılan kredilerde kırk sekiz ay"
+  },
+  {
+   "id": "bddk-karar-1176",
+   "kaynak": [
+    "bddk-karar-1176"
+   ],
+   "tarih": "2023-04-27",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "mevduat",
+   "onem": 1,
+   "baslik": "Zamanaşımına uğrayan mevduat için son başvuru tarihi 15.06.2023'ten 15.09.2023'e uzatıldı",
+   "ozet": "Deprem felaketi nedeniyle, 2022 yılı itibarıyla zamanaşımına uğrayan mevduat, katılım fonu, emanet ve alacağı bulunan hak sahipleri veya mirasçıları için son başvuru tarihi ertelendi.",
+   "detay": [
+    "Son başvuru tarihi: 15.06.2023 → 15.09.2023.",
+    "Hak sahibi veya mirasçıları tarafından aranmayan 2022 yılına ilişkin tutarlar, faiz ve kâr payları ile birlikte 30.09.2023'e kadar Tasarruf Mevduatı Sigorta Fonu'nun TCMB'deki veya Fon Kurulu'nca belirlenecek bankalardaki hesaplarına devredilebilecek."
+   ],
+   "alinti": "15.06.2023 olan son başvuru tarihinin, 15.09.2023 olarak uygulanmasına"
+  },
+  {
+   "id": "bddk-karar-1177",
+   "kaynak": [
+    "bddk-karar-1177"
+   ],
+   "tarih": "2023-05-04",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "SLM Yatırım Bankası A.Ş. unvanlı, 1 milyar TL sermayeli yatırım bankası kurulmasına izin verildi",
+   "ozet": "Kurul, beş kurucu ortak tarafından kurulacak yatırım bankasına kuruluş izni verdi; karar 05.05.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: SLM Yatırım Bankası A.Ş. (yatırım bankası); kuruluş sermayesi 1 milyar TL.",
+    "Kurucu ortaklar: İsmail Lepiev, Cemalettin Kitapçı, Köksal Akdeniz, Fadime Öztürk ve Canan Bulut.",
+    "Karar sayısı 10594."
+   ],
+   "alinti": "1 milyar TL kuruluş sermayeli “SLM Yatırım Bankası A.Ş.” unvanlı bir yatırım bankası kurulmasına izin verilmesine"
+  },
+  {
+   "id": "bddk-duyuru-2007",
+   "kaynak": [
+    "bddk-duyuru-2007"
+   ],
+   "tarih": "2023-05-25",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "odeme",
+   "onem": 2,
+   "baslik": "Bankalarda tüzel kişilerin uzaktan müşteri edinimine imkân tanıyan yönetmelik değişikliği yayımlandı",
+   "ozet": "Bankalarca kullanılacak uzaktan kimlik tespiti yönetmeliğinde yapılan değişiklik, tüzel kişilerin uzaktan müşteri edinimi yoluyla müşteri olabilmesi için 25.05.2023 tarihli ve 32201 sayılı Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Yönetmelik, T.C. Kimlik Kartına sahip gerçek kişi ve gerçek kişi tacirler için 01.05.2021'de yürürlüğe giren uzaktan müşteri edinimi düzenlemesini tüzel kişileri de kapsayacak biçimde genişletti.",
+    "Yürürlük tarihi duyuruda belirtilmedi."
+   ],
+   "alinti": "tüzel kişilerin uzaktan müşteri edinimi yoluyla müşteri olabilmesini sağlamak amacıyla hazırlanan"
+  },
+  {
+   "id": "bddk-karar-1183",
+   "kaynak": [
+    "bddk-karar-1183"
+   ],
+   "tarih": "2023-06-01",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Q Yatırım Bankası A.Ş.'ye faaliyet izni verildi",
+   "ozet": "Kurulun 12.10.2022 tarihli ve 10379 sayılı Kararı ile kuruluş izni verilen Q Yatırım Bankası A.Ş.'ye faaliyet izni verildi; karar 03.06.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Q Yatırım Bankası A.Ş.; 5411 sayılı Bankacılık Kanunu'nun 10. maddesi kapsamında faaliyet izni verildi.",
+    "Karar sayısı 10620."
+   ],
+   "alinti": "Kurulun 12.10.2022 tarihli ve 10379 sayılı Kararı ile kuruluş izni verilen Q Yatırım Bankası A.Ş.’ye faaliyet izni verilmesine"
+  },
+  {
+   "id": "bddk-karar-1184",
+   "kaynak": [
+    "bddk-karar-1184",
+    "bddk-duyuru-2016"
+   ],
+   "tarih": "2023-07-31",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Havayolu, seyahat acentesi ve konaklamaya ilişkin yurt dışı harcamalarda kredi kartı taksiti kaldırıldı",
+   "ozet": "Kredi kartlarında uygulanan taksitlendirme süreleri, havayolları, seyahat acenteleri ve konaklama ile ilgili yurt dışına ilişkin harcamalarda uygulanmayacak; bu harcamalarda taksitlendirme yapılmayacak.",
+   "detay": [
+    "Dayanak: Banka Kartları ve Kredi Kartları Hakkında Yönetmeliğin 26. maddesinin yedinci fıkrası; taksitlendirme süreleri 11.01.2019 tarihli ve 8198 sayılı Kurul Kararı ile belirlenmişti.",
+    "Kapsam: havayolları, seyahat acenteleri ve konaklama ile ilgili yurt dışına ilişkin harcamalar.",
+    "Önceki taksit süreleri ve yürürlük tarihi belgede belirtilmedi."
+   ],
+   "alinti": "havayolları, seyahat acenteleri ve konaklama ile ilgili yurt dışına ilişkin harcamalarda uygulanmamasına ve söz konusu harcamalarda taksitlendirme yapılmamasına"
+  },
+  {
+   "id": "bddk-karar-1185",
+   "kaynak": [
+    "bddk-karar-1185",
+    "bddk-duyuru-2016"
+   ],
+   "tarih": "2023-07-31",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 3,
+   "baslik": "İhtiyaç kredisi, bireysel kredi kartı ve taşıt kredilerinde risk ağırlığı %150'ye yükseltildi",
+   "ozet": "Sermaye yeterliliği standart oranlarının hesabında ihtiyaç kredileri, bireysel kredi kartları, tüketicilere binek araç kredileri, taşıt teminatlı krediler ve tüketicilerle yapılan finansal kiralama işlemlerinin risk ağırlığı artırıldı; yeni kullandırımlara uygulanacak.",
+   "detay": [
+    "Standart Yaklaşımda risk ağırlığı %150; içsel derecelendirmeye dayalı yaklaşımlarda, standart yaklaşım ağırlıkları ile %150 karşılaştırılarak hesaplanan artış oranları hesaplanan risk ağırlıklarına uygulanacak.",
+    "Kapsam: ihtiyaç kredileri (kredili mevduat hesapları dahil), bireysel kredi kartları (harcama ve nakit çekim dahil), tüketicilere binek araç edinimi amaçlı taşıt kredileri, taşıt teminatlı krediler ve tüketicilerle yapılan finansal kiralama.",
+    "Bu krediler için kredi riskine esas tutar hesabında kredi riski azaltım teknikleri kullanılmayacak; yüksek ağırlıklar karar tarihinden sonra kullandırılan yeni kredilere uygulanacak.",
+    "01.07.2021 tarihli 9645 ve 21.10.2022 tarihli 10388 sayılı kararların bireysel kredi kartı ve ihtiyaç kredileri risk ağırlıklarına ilişkin hükümleri mülga oldu.",
+    "'Genel Hayata Etkili Afet Bölgesi' ilan edilen yerlerde yerleşik gerçek kişilere kullandırılan kredilerde yüksek ağırlıklar 01.01.2024'e kadar uygulanmayacak."
+   ],
+   "alinti": "Standart Yaklaşımın kullanılması durumunda yüzde yüz elli olarak uygulanmasına"
+  },
+  {
+   "id": "bddk-karar-1187",
+   "kaynak": [
+    "bddk-karar-1187"
+   ],
+   "tarih": "2023-08-03",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Hedef Yatırım Bankası A.Ş.'ye faaliyet izni verildi",
+   "ozet": "Kurulun 28.04.2022 tarihli ve 10189 sayılı Kararı ile kuruluş izni verilen Hedef Yatırım Bankası A.Ş.'ye faaliyet izni verildi; karar 05.08.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Hedef Yatırım Bankası A.Ş.; 5411 sayılı Bankacılık Kanunu'nun 10. maddesi kapsamında faaliyet izni verildi.",
+    "Karar sayısı 10641."
+   ],
+   "alinti": "Kurulun 28.04.2022 tarihli ve 10189 sayılı Kararı ile kuruluş izni verilen Hedef Yatırım Bankası A.Ş.’ye faaliyet izni verilmesine"
+  },
+  {
+   "id": "bddk-karar-1188",
+   "kaynak": [
+    "bddk-karar-1188"
+   ],
+   "tarih": "2023-08-03",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Enpara Bank A.Ş. unvanlı, 300 milyon ABD Doları muadili TL sermayeli mevduat bankası kurulmasına izin verildi",
+   "ozet": "Kurul, Digital-Q-FS Limited ve dört QNB Finans grubu şirketi tarafından kurulacak mevduat bankasına kuruluş izni verdi; karar 05.08.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Enpara Bank A.Ş. (mevduat bankası); kuruluş sermayesi 300 milyon ABD Doları muadili Türk Lirası.",
+    "Kurucu ortaklar: Digital-Q-FS Limited, QNB Finans Faktoring A.Ş., QNB Finans Finansal Kiralama A.Ş., QNB Finans Portföy Yönetim A.Ş. ve Efinans Elektronik Ticaret ve Bilişim Hizmetleri A.Ş.",
+    "Karar sayısı 10640."
+   ],
+   "alinti": "300 milyon ABD Doları muadili Türk Lirası sermayeli “Enpara Bank A.Ş.” unvanlı bir mevduat bankası kurulmasına izin verilmesine"
+  },
+  {
+   "id": "bddk-karar-1189",
+   "kaynak": [
+    "bddk-karar-1189"
+   ],
+   "tarih": "2023-08-03",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Colendi Bank A.Ş. unvanlı, 2 milyar TL sermayeli dijital mevduat bankası kurulmasına izin verildi",
+   "ozet": "Kurul, altı kurucu ortak tarafından kurulacak dijital mevduat bankasına kuruluş izni verdi; karar 05.08.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Colendi Bank A.Ş. (dijital mevduat bankası); kuruluş sermayesi 2 milyar TL.",
+    "Kurucu ortaklar: Bülent Tekmen, Erkan Kilimci, Deniz Devrim Cengiz, Ali Kürşad Bostan, Muhammed Furkan Ünsal ve Murat Öztürk.",
+    "Karar sayısı 10639."
+   ],
+   "alinti": "2 milyar TL kuruluş sermayeli Colendi Bank A.Ş. unvanlı bir (dijital) mevduat bankası kurulmasına izin verilmesine"
+  },
+  {
+   "id": "bddk-karar-1190",
+   "kaynak": [
+    "bddk-karar-1190"
+   ],
+   "tarih": "2023-08-24",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 1,
+   "baslik": "KKTC harcamalarında kredi kartı taksit yasağı uygulanmayacak; taksit süresi 3 ay olarak sürecek",
+   "ozet": "31.07.2023 tarihli ve 10631 sayılı karardaki taksitlendirme yapılmaması hükmü, 31.07.2023'ten geçerli olmak üzere Kuzey Kıbrıs Türk Cumhuriyeti'ne ilişkin harcamalarda uygulanmayacak.",
+   "detay": [
+    "Havayolları, seyahat acenteleri ve konaklama ile ilgili yurt dışı harcamalarda taksitlendirme yapılmamasına ilişkin hüküm, Kuzey Kıbrıs Türk Cumhuriyeti'ne ilişkin harcamalarda uygulanmayacak.",
+    "Bu harcamalarda taksitlendirme süreleri 3 ay olarak uygulanmaya devam edecek.",
+    "Uygulama, 31.07.2023 tarihinden itibaren geçerli olmak üzere."
+   ],
+   "alinti": "Kuzey Kıbrıs Türk Cumhuriyeti’ne ilişkin harcamalarda uygulanmamasına ve söz konusu harcamalarda taksitlendirme sürelerinin 3 ay olarak uygulanmaya devam edilmesine"
+  },
+  {
+   "id": "bddk-karar-1191",
+   "kaynak": [
+    "bddk-karar-1191"
+   ],
+   "tarih": "2023-08-24",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "En az bir konutu olan tüketicilerde konut kredisi azami oranı %75 azaltıldı; köy ve hisseli konutlara istisna",
+   "ozet": "24.02.2023 tarihli ve 10525 sayılı kararda belirlenen azami kredi tutarı/konut değeri oranı, tüketicinin, eşinin veya 18 yaş altındaki çocuklarının en az bir konutu varsa %75 azaltılarak uygulanacak.",
+   "detay": [
+    "Tüketicinin kendisinin, eşinin veya 18 yaş altındaki çocuklarının malik olduğu en az bir konut bulunması halinde 10525 sayılı karardaki azami kredi tutarı/konut değeri oranı %75 azaltılarak uygulanacak.",
+    "Köylerdeki ve 6360 sayılı Kanun kapsamında köy iken mahalleye dönüşen yerlerdeki konutlar dikkate alınmayacak; il özel idaresi ve belediyeden aynı nitelikte olduğuna dair resmi yazı alınırsa bu konutlar da aynı kapsamda değerlendirilecek.",
+    "Herhangi bir konut tapusunda %50 ve daha az hissesi olanlar dikkate alınmayacak; birden fazla konutta hisseli tapu sahibi olanlar hariç."
+   ],
+   "alinti": "en az bir konutunun bulunması halinde yüzde 75 azaltılarak uygulanmasına"
+  },
+  {
+   "id": "bddk-karar-1192",
+   "kaynak": [
+    "bddk-karar-1192"
+   ],
+   "tarih": "2023-08-24",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Konut sahibi tüketicilere verilen konut kredilerinin risk ağırlığı %150'ye yükseltildi",
+   "ozet": "Tüketicinin, eşinin veya 18 yaş altındaki çocuklarının en az bir konutu varsa, konut edinmeleri için kullandırılacak ikamet amaçlı gayrimenkul ipoteği teminatlı kredilerin risk ağırlığı artırıldı; yeni kredilere uygulanacak.",
+   "detay": [
+    "Standart Yaklaşımda risk ağırlığı %150; içsel derecelendirmeye dayalı yaklaşımlarda standart yaklaşım ağırlıkları ile %150 karşılaştırılarak hesaplanan artış oranları hesaplanan risk ağırlıklarına uygulanacak.",
+    "Bu krediler için kredi riskine esas tutar hesabında kredi riski azaltım teknikleri kullanılmayacak; yüksek ağırlıklar karar tarihinden sonra kullandırılan yeni kredilere uygulanacak.",
+    "Konut malikliği değerlendirmesinde köy veya köyden mahalleye dönüşen yerlerdeki konutlar ile tapuda %50 ve daha az hissesi olan konutlar (birden fazla konutta hisseli olanlar hariç) dikkate alınmayacak."
+   ],
+   "alinti": "konut edinmeleri amacıyla kullandırılacak ikamet amaçlı gayrimenkul ipoteği ile teminatlandırılan kredilere ilişkin risk ağırlıklarının"
+  },
+  {
+   "id": "bddk-karar-1193",
+   "kaynak": [
+    "bddk-karar-1193"
+   ],
+   "tarih": "2023-09-04",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Risk Merkezi'ne bildirilen YP varlığı kısıtı aykırılıklarının giderilme usulü belirlendi; yaptırımlar kalkacak",
+   "ozet": "10265 ve 10389 sayılı kararlar kapsamında belge, süre veya eşik aykırılığı nedeniyle Risk Merkezi'ne bildirilen şirketler için, belge sunmaları veya sınırlamalara uyum taahhüdü vermeleri halinde kayıtların güncellenmesi ve yaptırımların kaldırılması imkânı getirildi.",
+   "detay": [
+    "Belgelerin süresi içinde ya da usulüne uygun verilmemesi nedeniyle bildirilen şirketler, onaylı belgeleri kredi ilişkisi olan tüm kuruluşlara iletirse kayıtlar 'Süre ve içerik aykırılıklarının giderilmesi' koduyla güncellenecek, yaptırımlar kaldırılacak.",
+    "Eşik aşımı veya gerçeğe aykırı beyan nedeniyle bildirilenler: 10389 sayılı karardaki sınırlamalara aykırı olmadıklarını belgeleyip sınırlama ortalamalarını sağlayacaklarını beyan ve taahhüt ederse kayıtlar güncellenecek, yaptırımlar kalkacak.",
+    "Taahhüdün doğruluğunu gösteren onaylı belgeler, ilgili üç aylık hesap dönemini izleyen ayın son iş günü akşamına kadar iletilecek.",
+    "Taahhüdün hatalı veya gerçeğe aykırı çıkması halinde yaptırımlar bildirim tarihinden itibaren kesintisiz altı ay uygulanacak; kaldırma talebi ancak bu süre sonrasında yeniden dikkate alınacak.",
+    "Belgeleri sunacakları süre boyunca TL cinsinden yeni nakdi kredi kullanmaları halinde ilave belge vermeleri gerekmeyecek; Risk Merkezi bu kodlarla ilave bilgi toplayıp üyelerle paylaşacak."
+   ],
+   "alinti": "Risk Merkezine iletilen kayıtlarının “Süre ve içerik aykırılıklarının giderilmesi” koduyla güncellenmesine ve uygulanan yaptırımların kaldırılmasına"
+  },
+  {
+   "id": "bddk-karar-1197",
+   "kaynak": [
+    "bddk-karar-1197"
+   ],
+   "tarih": "2023-10-19",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "Kasa Katılım Bankası A.Ş.'nin kuruluş izni iptal edildi",
+   "ozet": "Kurulun 07.07.2022 tarihli ve 10263 sayılı Kararı ile kuruluş izni verilen Kasa Katılım Bankası A.Ş.'nin kuruluş izni, süresinde geçerli faaliyet izni başvurusu yapılmaması nedeniyle iptal edildi; karar 21.10.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "İptal dayanağı: 5411 sayılı Bankacılık Kanunu'nun 11. maddesinin (b) ve (e) bentleri.",
+    "Gerekçe: Kanunun 10. maddesi ve ilgili yönetmeliğin 7. maddesindeki süreler içinde geçerli bir faaliyet izni başvurusu yapılmamış olması.",
+    "Karar sayısı 10677."
+   ],
+   "alinti": "geçerli bir faaliyet izni başvurusu yapılmamış olması nedeniyle kuruluş izninin Kanunun 11 inci maddesinin (b) ve (e) bendi uyarınca iptal edilmesine"
+  },
+  {
+   "id": "bddk-karar-1204",
+   "kaynak": [
+    "bddk-karar-1204"
+   ],
+   "tarih": "2023-11-23",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "Adabank A.Ş.'nin katılım bankasına dönüşümüne izin verildi; mevduat kabulü izni iptal edildi",
+   "ozet": "Mevduat bankası olarak faaliyet gösteren Adabank A.Ş.'ye katılım fonu kabulü ve finansal kiralama işlemleri konularında faaliyet izni verildi, mevduat kabulü izni iptal edildi; karar 28.11.2023 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "5411 sayılı Bankacılık Kanunu'nun 4. maddesinin birinci fıkrasının (b) bendindeki 'katılım fonu kabulü' ve (t) bendindeki 'finansal kiralama işlemleri' konularında faaliyet izni verildi.",
+    "Aynı maddenin ikinci fıkrası kapsamında bankanın 'mevduat kabulü' izni iptal edildi.",
+    "Karar sayısı 10729."
+   ],
+   "alinti": "anılan maddenin ikinci fıkrası kapsamında Bankanın “mevduat kabulü” izninin iptal edilmesine"
+  },
+  {
+   "id": "bddk-karar-1207",
+   "kaynak": [
+    "bddk-karar-1207"
+   ],
+   "tarih": "2023-12-12",
+   "yururluk": "2024-01-01",
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Diğer kapsamlı gelire yansıtılan menkul değerlerin negatif değerleme farkı özkaynakta dikkate alınmayabilecek",
+   "ozet": "01.01.2024 itibarıyla ilgili portföydeki net değerleme farkı negatifse, bu fark sermaye yeterliliği için kullanılacak özkaynak tutarında dikkate alınmayabilecek; kredi riskine esas tutarda kullanılan kur tarihi de 26.06.2023 olarak güncellendi.",
+   "detay": [
+    "01.01.2024 itibarıyla 'Gerçeğe Uygun Değer Farkı Diğer Kapsamlı Gelire Yansıtılan Menkul Değerler' portföyündeki net değerleme farkları negatifse, bu farklar Özkaynaklara İlişkin Yönetmelik uyarınca hesaplanacak özkaynak tutarında dikkate alınmayabilecek.",
+    "01.01.2024'ten sonra edinilen aynı portföydeki menkul değerler için Yönetmeliğin mevcut hükümleri uygulanmaya devam edecek.",
+    "Kredi riskine esas tutarda varlık ve özel karşılık değerlemesi için (tarihi maliyetli YP kalemler hariç) kullanılan kur: 30.12.2022 tarihli → 26.06.2023 tarihli TCMB döviz alış kuru; 01.01.2024'ten itibaren, aksi yönde Kurul Kararı alınıncaya kadar."
+   ],
+   "alinti": "portföyünde yer alanların net değerleme farklarının negatif olması durumunda, bu farkların"
+  },
+  {
+   "id": "bddk-karar-1208",
+   "kaynak": [
+    "bddk-karar-1208"
+   ],
+   "tarih": "2023-12-12",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Bankalar ve finansal kuruluşlar 31.12.2023 tablolarında enflasyon muhasebesine (TMS 29) tabi tutulmayacak",
+   "ozet": "Kamu Gözetimi, Muhasebe ve Denetim Standartları Kurumu'nun 23.11.2023 tarihli duyurusunda tanınan serbestlik çerçevesinde, bankalar ile finansal kiralama, faktoring, finansman, tasarruf finansman ve varlık yönetim şirketlerinin 31.12.2023 tarihli finansal tablolarına enflasyon düzeltmesi uygulanmayacak.",
+   "detay": [
+    "Bankalar ile finansal kiralama, faktoring, finansman, tasarruf finansman ve varlık yönetim şirketlerinin 31.12.2023 tarihli finansal tabloları TMS 29 kapsamında yapılması gereken enflasyon düzeltmesine tabi tutulmayacak.",
+    "Gerekçe: Kamu Gözetimi, Muhasebe ve Denetim Standartları Kurumu'nun 23.11.2023 tarihli enflasyon düzeltmesi duyurusu, kendi alanlarında düzenleme ve denetleme yapan kurumlara farklı geçiş tarihi belirleme serbestliği tanıdı."
+   ],
+   "alinti": "31.12.2023 tarihli finansal tablolarının TMS 29 kapsamında yapılması gereken enflasyon düzeltmesine tabi tutulmamasına"
+  },
+  {
+   "id": "bddk-duyuru-2030",
+   "kaynak": [
+    "bddk-duyuru-2030"
+   ],
+   "tarih": "2023-12-21",
+   "yururluk": "2024-01-01",
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Bir kişi veya risk grubuna kredi sınırı özkaynak ve ana sermayenin %25'i, bankanın risk grubuna %20 oldu",
+   "ozet": "Basel III uyumu kapsamında Risk Gruplarının Belirlenmesine ve Kredi Sınırlarına İlişkin Yönetmelik ile yeniden hazırlanan Bankaların Kredi İşlemlerine İlişkin Yönetmelik 21.12.2023 tarihli Resmî Gazete'de yayımlandı; 01.01.2024'te yürürlüğe girecek.",
+   "detay": [
+    "Kredi sınırı: bir kişi ya da risk grubuna kullandırılan krediler bankaların özkaynak ve ana sermayelerinin %25'i; bankanın dahil olduğu risk grubu bakımından %20'si ile sınırlandı.",
+    "Mevcut mevzuattaki özkaynak sınırına ek olarak krediler ana sermayeyle de sınırlandı; risk gruplarının belirlenmesine ve risk tutarlarının hesaplanmasına ilişkin ilave kurallar getirildi.",
+    "Düzenleme, Basel Bankacılık Denetim Komitesi'nin büyük risk maruziyetlerine ilişkin standardı ve G-20 taahhütleri kapsamında Basel III'e tam uyum amacıyla hazırlandı.",
+    "Risk grubu ve kredi sınırı hükümleri Bankaların Kredi İşlemlerine İlişkin Yönetmelik'ten yeni Yönetmeliğe aktarıldı; kredilerin kullandırım ve izlenmesine ilişkin hükümler gözden geçirilerek Kredi İşlemleri Yönetmeliği yeniden hazırlandı."
+   ],
+   "alinti": "bir kişi ya da risk grubuna kullandırılan krediler; bankaların özkaynak ve ana sermayelerinin %25’i, bankanın dahil olduğu risk grubu bakımından ise %20’si ile sınırlandırılmıştır"
+  },
+  {
+   "id": "bddk-duyuru-2031",
+   "kaynak": [
+    "bddk-duyuru-2031"
+   ],
+   "tarih": "2023-12-29",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Tasarruf finansman şirketleri yönetmeliği değişti: sözleşme sınırı, risk grubu kuralları, tahsisat süresi",
+   "ozet": "Tasarruf Finansman Şirketlerinin Kuruluş ve Faaliyet Esasları Hakkında Yönetmelikte yapılan değişiklik 29.12.2023 tarihli ve 32414 sayılı Resmî Gazete'de yayımlandı; sektörün tamamını bağlayan yeni kurallar getirildi.",
+   "detay": [
+    "Tahsisat ödemelerinin ne zaman yapılacağına yönelik düzenleme getirildi ve bu süreye ilişkin değişiklik yapma yetkisi Kurula verildi.",
+    "Müşteriye, bir defaya mahsus olmak üzere tasarruf finansman sözleşmesinin konusunu değiştirme talebinde bulunma hakkı tanındı.",
+    "Yüksek tutarlı sözleşmeler için alt sınır finansman konusuna göre farklılaştırılarak artırıldı; Kurul farklı oran öngörmedikçe sınır her yıl yıllık üretici fiyat endeksindeki artış oranı kadar artırılacak.",
+    "Finansman sınırlamalarına ilişkin oran artırıldı (duyuruda oran belirtilmedi); Kurula sınırlamaları değiştirme, ilave sınırlama getirme ve şirket bazında artırma ve farklılaştırma yetkisi verildi.",
+    "Hisseleri borsada işlem gören tasarruf finansman şirketlerinin pay edinim ve devirlerinde bankalar için uygulanan usul ve esaslar kıyasen uygulanacak.",
+    "Risk grubu tanımı yapıldı; şirketlerin risk gruplarına ve kendi risk grubu ile mensuplarına sağlayabileceği finansmanlara ilişkin usul ve esaslar belirlendi, yeni sınırlamalara uyum için geçiş süreci tanındı."
+   ],
+   "alinti": "Yüksek tutarlı sözleşmeler için alt sınır finansman konusuna göre farklılaştırılmak suretiyle artırılmış"
+  }
+ ],
+ "elenen": [
+  {
+   "id": "bddk-duyuru-1983",
+   "neden": "AB Sınırda Karbon Düzenleme Mekanizması etki analizi çalışması duyurusu; düzenleme değil"
+  },
+  {
+   "id": "bddk-duyuru-2027",
+   "neden": "dolandırıcılık uyarısı"
+  },
+  {
+   "id": "bddk-karar-1203",
+   "neden": "tek bir bankaya kart sistemi kurma ve kart çıkarma faaliyet genişlemesi izni"
+  }
+ ]
+}

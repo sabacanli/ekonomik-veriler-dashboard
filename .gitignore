@@ -40,3 +40,6 @@ banka kar/banka.db
 
 # Sabah kontrolcüsünün durum kaydı (yerel)
 kontrol/durum.json
+
+# Düzenleme Zaman Çizelgesi: indirilen kurum belgeleri ve metinleri (yeniden üretilebilir; dizin.json ve olaylar/ izlenir)
+duzenleme/onbellek/

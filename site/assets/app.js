@@ -17,6 +17,7 @@ function temaDegistir() {
 const NAV = [
   { href: "index.html", label: "Ana Sayfa" },
   { href: "gundem.html", label: "Finans Gündemi" },
+  { href: "duzenlemeler.html", label: "Düzenleme Çizelgesi" },
   { href: "tcmb-stok.html", label: "TCMB Haftalık Stok" },
   { href: "dth.html", label: "Yabancı Para Hareketi" },
   { href: "enflasyon.html", label: "TÜFE Enflasyon" },

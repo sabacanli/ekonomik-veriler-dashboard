@@ -1,0 +1,444 @@
+{
+ "olaylar": [
+  {
+   "id": "spk-bulten-2021-4",
+   "kaynak": [
+    "spk-bulten-2021-4"
+   ],
+   "tarih": "2021-01-21",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "piyasa",
+   "onem": 1,
+   "baslik": "2021 için kurumsal yönetim grupları duyuruldu: 1. grupta 55, 2. grupta 75 ortaklık",
+   "ozet": "Borsa İstanbul Yıldız, Ana ve Alt Pazar'daki ortaklıklar ile Piyasa Öncesi İşlem Platformu'na alınanlar için II-17.1 sayılı Kurumsal Yönetim Tebliği kapsamındaki 2021 grupları açıklandı.",
+   "detay": [
+    "Gruplar sistemik önem, piyasa değeri ve fiili dolaşımdaki payların piyasa değerine göre belirlendi; listede 1. grup 55, 2. grup 75 ortaklıktan oluşuyor.",
+    "(*) işaretli ortaklıklar 2020 verileriyle yapılan hesaplama sonucunda 2021'den itibaren 1. ya da 2. gruba dahil edildi.",
+    "(**) işaretli ortaklıklar 2020 verilerine göre 2. grup şartlarını sağlamasa da Tebliğ'in 5. maddesinin üçüncü fıkrası uyarınca 2. grupta kalacak.",
+    "3. grup: Yıldız, Ana ve Alt Pazar'da işlem gören ve 1. ya da 2. grupta yer almayan tüm ortaklıklar ile Piyasa Öncesi İşlem Platformu'nda işlem görmeye başlayan 4 ortaklık."
+   ],
+   "alinti": "sistemik önemlerine göre piyasa değerleri ve fiili dolaşımdaki paylarının piyasa değerleri dikkate alınarak 2021 yılı için dahil oldukları gruplar aşağıda yer almaktadır"
+  },
+  {
+   "id": "spk-basin-20210201-8d2e7757",
+   "kaynak": [
+    "spk-basin-20210201-8d2e7757"
+   ],
+   "tarih": "2021-02-01",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "piyasa",
+   "onem": 1,
+   "baslik": "Pay Alım Teklifi Tebliği'nde değişiklik taslağı (II-26.1.ç) görüşe açıldı",
+   "ozet": "Zorunlu pay alım teklifi fiyatı esaslarını sadeleştiren ve muafiyet hallerini genişleten taslak için görüşler 19.02.2021 tarihine kadar alındı.",
+   "detay": [
+    "Zorunlu pay alım teklifinden yararlanabilecek pay sahipleri ve pay tutarlarının belirlenmesine ilişkin esaslar düzenlendi.",
+    "Zorunlu pay alım teklifi fiyatının belirlenmesine ilişkin esaslar sadeleştirildi.",
+    "Pay alım teklifinde bulunma yükümlülüğünün doğmadığı hallere ve muafiyet hallerine eklemeler yapıldı.",
+    "İşlem yasağı, hukuki ihtilaf veya başka hak iddiası bulunan payların teklife katılımı, aracılık sözleşmesine eklenen hususlarla kısıtlanamayacak.",
+    "Bilgi formundaki bilgilerden sorumlu kişiler arasına, adına formun imzalandığı yatırım kuruluşu eklendi.",
+    "Görüş ve öneriler için son tarih: 19.02.2021."
+   ],
+   "alinti": "Zorunlu pay alım teklifi fiyatının belirlenmesine ilişkin esaslarda değişiklikler yapılmak suretiyle sadeleştirilmiştir"
+  },
+  {
+   "id": "spk-bulten-2021-6",
+   "kaynak": [
+    "spk-bulten-2021-6",
+    "spk-basin-20210205-e36dbceb"
+   ],
+   "tarih": "2021-02-04",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "piyasa",
+   "onem": 2,
+   "baslik": "İlk halka arzda Şubat-Mayıs 2021 için satış dönemleri belirlendi; ek süre 15 günden 30 güne çıkarıldı",
+   "ozet": "Halka açık olmayan ortaklıkların Şubat-Mayıs 2021 döneminde ilk defa halka arz edilmesinde izahnamede yer alacak finansal tablolara ilişkin satış dönemleri ve ek süre uygulaması düzenlendi.",
+   "detay": [
+    "1 Ocak - 1 Mart satış dönemi: son üç yıllık ya da içinde bulunulan yıldan önceki üç yıllık finansal tablolar ile dokuz aylık ara dönem finansal tablolar.",
+    "2 Mart - 31 Mayıs satış dönemi: son üç yıllık finansal tablolar.",
+    "İzahname Tebliği md. 11/1-(ç) kapsamında bir sonraki dönemin bağımsız denetimden geçmiş son dönem finansal tablolarının izahnameye eklenmesinde uygulanan ek süre: 15 gün → 30 gün (bu iki satış dönemi için).",
+    "Gerekçe olarak COVID-19 pandemisinin zorlukları ile halka arz işlemlerinin belli bir tarih aralığına sıkışmasının önlenmesi belirtildi."
+   ],
+   "alinti": "hükmündeki ek sürenin de yukarıda belirtilen iki satış dönemi için on beş gün yerine otuz gün olarak dikkate alınmasına"
+  },
+  {
+   "id": "spk-bulten-2021-7",
+   "kaynak": [
+    "spk-bulten-2021-7"
+   ],
+   "tarih": "2021-02-11",
+   "yururluk": "2021-02-12",
+   "kurum": "SPK",
+   "konu": "piyasa",
+   "onem": 2,
+   "baslik": "Açığa satış işlemleri BIST-30'dan BIST-50 Endeksi'ndeki pay piyasalarına genişletildi",
+   "ozet": "30.06.2020 tarihli Kurul Kararı çerçevesinde yalnız BIST-30 Endeksi'nde yapılabilen açığa satış, 12.02.2021'den itibaren BIST-50 Endeksi'ni kapsayacak; diğer pay piyasalarında mevcut uygulama sürüyor.",
+   "detay": [
+    "Açığa satış yapılabilen pay piyasaları: BIST-30 Endeksi → Borsa İstanbul'un ilan ettiği BIST-50 Endeksi (12.02.2021'den itibaren).",
+    "BIST-50 Endeksi dışındaki pay piyasalarında 28.02.2020 tarihli 13/314, 02.03.2020 tarihli 14/315 ve 30.06.2020 tarihli 39/798 sayılı Kurul Kararları çerçevesindeki uygulama devam edecek.",
+    "Açığa satış yasağı kaldırılan pay piyasalarında, gün içinde sahip olunmadan satılıp aynı gün kapatılan pozisyonlar için de açığa satış tuşuna basılması zorunlu (Seri: V, No: 65 md. 24 ve 28); yatırımcılar ve yatırım kuruluşları bu konuda bilgilendirilecek."
+   ],
+   "alinti": "açığa satış işlemlerinin, 12.02.2021 tarihinden itibaren Borsa İstanbul tarafından ilan edilen BIST-50 Endeksinde yer alan pay piyasalarını kapsayacak şekilde genişletilmesine"
+  },
+  {
+   "id": "spk-bulten-2021-17",
+   "kaynak": [
+    "spk-bulten-2021-17"
+   ],
+   "tarih": "2021-04-01",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "fon",
+   "onem": 1,
+   "baslik": "Kitle fonlama platformlarının kendileri ve %20 ve üzeri paylı girişimleri için kampanya yürütemeyeceği belirlendi",
+   "ozet": "III-35/A.1 sayılı Paya Dayalı Kitle Fonlaması Tebliği uyarınca yetkilendirilen platformlar için ilke kararı (i-SPK.35/A.1) alındı.",
+   "detay": [
+    "Platformlar kendi tüzel kişiliklerinin kitle fonlaması yoluyla fonlanmasına yönelik kampanya yürütemez.",
+    "Platformlar, %20 veya daha fazlasını temsil eden paylarına ya da oy haklarına sahip oldukları girişim şirketleri veya projeler için kampanya yürütemez.",
+    "Aynı sınır; ortakların, yönetim kurulu ve yatırım komitesi üyelerinin ve bu kişilerin eşlerinin, alt ve üst soylarının tek başına veya birlikte %20 veya daha fazla paya ya da oy hakkına sahip olduğu girişim şirketleri veya projeler için de geçerli; kontrollerden platformlar sorumlu.",
+    "Girişim sermayesi yatırım fonu kurmak üzere izin alan portföy yönetim şirketlerine ve akredite bireysel katılım yatırımcısı ağlarına iştirak etmek, Tebliğ'in 11. maddesinin birinci fıkrasına aykırılık sayılmayacak."
+   ],
+   "alinti": "Tüzel kişiliğinin kitle fonlaması yoluyla fonlanmasına yönelik kampanya yürütmelerinin mümkün olmadığına"
+  },
+  {
+   "id": "spk-bulten-2021-22",
+   "kaynak": [
+    "spk-bulten-2021-22"
+   ],
+   "tarih": "2021-04-29",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "01.01-31.03.2021 dönemi 3 aylık ara dönem finansal rapor bildirim sürelerine 30 gün eklendi",
+   "ozet": "Portföy yönetim şirketleri, yatırım kuruluşları ve borsada ya da teşkilatlanmış pazarlarda işlem gören işletmeler için henüz açıklanmamış üç aylık raporların bildirim süresi uzatıldı.",
+   "detay": [
+    "Portföy yönetim şirketleri ve yatırım kuruluşları: henüz açıklanmamış 01.01.2021-31.03.2021 ara dönem finansal raporları, mevzuattaki nihai bildirim sürelerine 30 gün eklenerek bildirilebilecek.",
+    "Sermaye piyasası araçları borsada ve/veya teşkilatlanmış diğer pazar yerlerinde işlem gören işletmeler için aynı ek süre geçerli.",
+    "Özel hesap dönemli işletmelerden nihai bildirim süresi 2021 yılının Nisan veya Mayıs ayı olanlar için de mevzuat sürelerine 30 gün eklenebilecek.",
+    "Gerekçe olarak COVID-19 salgını ve ülke genelinde uygulanacak \"tam kapanma\" tedbirlerine uyumun desteklenmesi belirtildi."
+   ],
+   "alinti": "henüz kamuya açıklanmamış 01.01.2021-31.03.2021 üç aylık ara hesap dönemine ait finansal raporlarının bildiriminin, sermaye piyasası mevzuatında belirlenmiş olan nihai bildirim sürelerine 30"
+  },
+  {
+   "id": "spk-bulten-2021-x5851e056",
+   "kaynak": [
+    "spk-bulten-2021-x5851e056"
+   ],
+   "tarih": "2021-06-17",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "fon",
+   "onem": 1,
+   "baslik": "Yatırım ve emeklilik fonu Rehberlerinde portföy vade hesabına ilişkin maddeler değiştirildi",
+   "ozet": "Fon portföyündeki varlıkların vadeye kalan gün sayısı ve portföyün ağırlıklı ortalama vadesinin hesaplanmasına ilişkin Rehber maddeleri güncellendi; değişikliğin içeriği duyuruda belirtilmedi.",
+   "detay": [
+    "Yatırım Fonlarına İlişkin Rehber'in \"Fon Portföyünde Yer Alan Varlıkların Vadesinin Hesaplanması\" başlıklı 4.2.6. numaralı maddesi değiştirildi.",
+    "Emeklilik Yatırım Fonlarına İlişkin Rehber'in aynı başlıklı 3.2.4. numaralı maddesinin birinci fıkrası değiştirildi.",
+    "Rehberlerin güncel halleri Kurul internet sitesinde yayımlandı."
+   ],
+   "alinti": "Yatırım Fonlarına İlişkin Rehber’in “Fon Portföyünde Yer Alan Varlıkların Vadesinin Hesaplanması” başlıklı 4.2.6. nolu maddesi"
+  },
+  {
+   "id": "spk-bulten-2021-x5851e056-b",
+   "kaynak": [
+    "spk-bulten-2021-x5851e056"
+   ],
+   "tarih": "2021-06-17",
+   "yururluk": "2021-06-30",
+   "kurum": "SPK",
+   "konu": "fon",
+   "onem": 2,
+   "baslik": "Bireysel portföy ve kolektif yatırım kuruluşları için performans eşik değer alt sınırları belirlendi",
+   "ozet": "VII-128.5 sayılı Tebliğ'in 8. maddesinin üçüncü fıkrasındaki getiri oranı eşik değerinin alt sınırları belirlendi; uygulama 30.06.2021 tarihli performans döneminden başlıyor.",
+   "detay": [
+    "TL cinsinden eşik değer: bireysel portföyler ve kolektif yatırım kuruluşları için BIST TLREF Endeks Getirisi; katılım esaslı olanlar için BIST-KYD 1 Aylık Kar Payı TL Endeks Getirisi.",
+    "Yabancı para cinsinden eşik değer: BIST-KYD 1 Aylık Mevduat USD/Euro Endeks Getirisi; katılım esaslı olanlar için BIST-KYD 1 Aylık Kar Payı USD/Euro Endeks Getirisi.",
+    "Alt sınırların uygulanmasına 30.06.2021 tarihli performans dönemi itibarıyla başlanacak."
+   ],
+   "alinti": "anılan alt sınırların uygulanmasına 30.06.2021 tarihli performans dönemi itibarıyla başlanmasına karar verilmiştir"
+  },
+  {
+   "id": "spk-bulten-2021-31",
+   "kaynak": [
+    "spk-bulten-2021-31"
+   ],
+   "tarih": "2021-06-24",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "piyasa",
+   "onem": 1,
+   "baslik": "İlk halka arz başvurularında ara dönem tabloyla satışa başlama nihai süresi 14 Temmuz 2021'e uzatıldı",
+   "ozet": "04.02.2021 tarihli ve 6/166 sayılı Kararla tanınan süreler kapsamında Kurul'a yapılmış ilk halka arz başvuruları için satışa başlanabilecek nihai süre uzatıldı.",
+   "detay": [
+    "Kapsam: halka açık olmayan ortaklıkların Kurul'a yapılmış ilk halka arz başvuruları.",
+    "Özel bağımsız denetimden geçirilmiş son üç yıllık finansal tablolar izahnamede yer alacak, özel bağımsız denetimden geçirilmiş üç aylık ara dönem finansal tablolar ise izahnameye ek olarak verilecek.",
+    "Bu şekilde satışa başlanabilecek nihai süre: 14 Temmuz 2021."
+   ],
+   "alinti": "satışa başlanabilecek nihai sürenin 14 Temmuz 2021 tarihine uzatılmasına karar verilmiştir"
+  },
+  {
+   "id": "spk-bulten-2021-32",
+   "kaynak": [
+    "spk-bulten-2021-32"
+   ],
+   "tarih": "2021-07-01",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "piyasa",
+   "onem": 1,
+   "baslik": "Piyasa yapıcılık riskten korunma amaçlı pay geri alımlarında yatırım kuruluşlarına istisna tanındı; sınır %1",
+   "ozet": "Varant, pay ve endeks türev sözleşmelerindeki piyasa yapıcılık pozisyonlarının riskten korunması için yatırım kuruluşlarının kendi veya ana ortaklık paylarında yaptığı alımlara ilişkin i-SPK.22.5 sayılı ilke kararı alındı.",
+   "detay": [
+    "II-22.1 sayılı Geri Alınan Paylar Tebliği'nin geri alım programı hazırlanması ve programa ilişkin yetkilendirme yükümlülüklerinden istisna tanındı.",
+    "Riskten korunma amaçlı geri alınabilecek payların nominal tutarı, kendi paylarında yatırım kuruluşunun, ana ortaklık paylarında ana ortaklığın sermayesinin %1'ini aşamaz.",
+    "Sermayenin %1'ini aşacak geri alımlar Geri Alınan Paylar Tebliği hükümlerine uygun yapılacak."
+   ],
+   "alinti": "Yatırım kuruluşlarının kendi ve/veya ana ortaklık paylarında yaptıkları işlemlerde, II-22.1 sayılı Geri Alınan Paylar Tebliği’nin geri alım programı hazırlanması"
+  },
+  {
+   "id": "spk-bulten-2021-36",
+   "kaynak": [
+    "spk-bulten-2021-36"
+   ],
+   "tarih": "2021-07-14",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "fon",
+   "onem": 1,
+   "baslik": "Kısmi ve geniş yetkili aracı kurumların sızma testi raporları için son gönderim tarihi belirlendi",
+   "ozet": "VII-128.9 sayılı Bilgi Sistemleri Yönetimi Tebliği md. 8/5 kapsamındaki sızma testi raporları için bildirim süresi ilke kararıyla (i-SPK.128.17) netleştirildi.",
+   "detay": [
+    "Raporlar en geç ilgili denetim döneminin bitimini izleyen üçüncü ayın sonuna kadar tamamlanarak Kurul'a gönderilecek.",
+    "Son bildirim günü resmi tatile denk gelirse, tatili takip eden ilk iş günü son bildirim tarihi olacak."
+   ],
+   "alinti": "en geç ilgili denetim döneminin bitimini izleyen üçüncü ayın sonuna kadar tamamlanarak Kurula gönderilmesine"
+  },
+  {
+   "id": "spk-basin-20210717-af71bf0a",
+   "kaynak": [
+    "spk-basin-20210717-af71bf0a"
+   ],
+   "tarih": "2021-07-17",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "fon",
+   "onem": 2,
+   "baslik": "Projeye Dayalı Menkul Kıymetler Tebliği (III-61/B.1) yayımlandı; proje finansmanı fonu ve ihracı düzenlendi",
+   "ozet": "SPKn md. 61/B kapsamında hazırlanan Tebliğ Resmi Gazete'de yayımlanarak yürürlüğe girdi; proje gelirlerine dayalı menkul kıymet ihracı ve proje finansmanı fonu kurulmasına ilişkin esaslar belirlendi.",
+   "detay": [
+    "Proje finansmanı fonu kurulmasına ve projeye dayalı menkul kıymet ihracına ilişkin usul ve esaslar düzenlendi.",
+    "Fon portföyüne dahil edilebilecek varlıkların nitelikleri belirlendi.",
+    "Fonun işleyişi düzenlendi.",
+    "Projeye dayalı menkul kıymet ihracı kapsamında elde edilen gelirlerin kullanım şekli belirlendi."
+   ],
+   "alinti": "Proje finansmanı fonu kurulmasına ve projeye dayalı menkul kıymet ihracına"
+  },
+  {
+   "id": "spk-basin-20210826-3fa1c080",
+   "kaynak": [
+    "spk-basin-20210826-3fa1c080"
+   ],
+   "tarih": "2021-08-26",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "fon",
+   "onem": 1,
+   "baslik": "Paya ve borçlanmaya dayalı kitle fonlaması için Kitle Fonlaması Tebliği taslağı (III-35/A.2) görüşe açıldı",
+   "ozet": "Taslak, borçlanmaya dayalı kitle fonlaması modelini de kapsıyor ve III-35/A.1 sayılı Paya Dayalı Kitle Fonlaması Tebliği'nin yürürlükten kaldırılmasını öngörüyor; görüşler 12.09.2021'e kadar alındı.",
+   "detay": [
+    "Paya ve borçlanmaya dayalı kitle fonlaması, platformların Kurul listesine alınması ve faaliyetleri, platform üyeliği ve kampanya süreci, fon kullanım yerleri ve girişim şirketlerine ilişkin esaslar düzenleniyor.",
+    "Taslağa göre listeye alınacak platformun sermayesi asgari 1.000.000 TL olup tamamen nakden ödenmiş olmalı; ödenmiş sermaye ve özsermaye bu tutardan az olamaz.",
+    "Taslağa göre platformun yönetim kurulu asgari 3 kişiden oluşmalı.",
+    "Ödül veya bağış karşılığında fon toplama faaliyetleri Tebliğ kapsamı dışında.",
+    "Görüş ve öneriler için son tarih: 12.09.2021."
+   ],
+   "alinti": "Ortaklığa dayalı kitle fonlaması modelinin yanı sıra borçlanmaya dayalı kitle fonlaması modelinin sermaye piyasası mevzuatına kazandırılması amacıyla"
+  },
+  {
+   "id": "spk-basin-20211027-1242a055",
+   "kaynak": [
+    "spk-basin-20211027-1242a055"
+   ],
+   "tarih": "2021-10-27",
+   "yururluk": "2021-10-27",
+   "kurum": "SPK",
+   "konu": "fon",
+   "onem": 2,
+   "baslik": "Kitle Fonlaması Tebliği (III-35/A.2) yürürlüğe girdi; borçlanmaya dayalı kitle fonlaması düzenlendi",
+   "ozet": "Tebliğ 27.10.2021 tarih ve 31641 sayılı Resmi Gazete'de yayımlandı ve III-35/A.1 sayılı Paya Dayalı Kitle Fonlaması Tebliği yürürlükten kalktı.",
+   "detay": [
+    "Girişimci tanımı Türkiye'de yerleşik kişiler ile limited veya anonim şirket türündeki tüzel kişileri kapsayacak şekilde güncellendi; girişim şirketi tanımına anonim şirkete dönüşmesi zorunlu limited şirketler eklendi.",
+    "Platformların kuruluşu için anonim ortaklık olma, asgari sermaye ve yönetim kurulunun asgari 3 kişiden oluşması gibi şartlar getirildi; platformlar kuruluş izninden sonra 6 ay içinde listeye alınmak üzere başvuracak, listeye alındıktan sonra 6 ay içinde faaliyete geçmeyenler listeden çıkarılacak.",
+    "Borçlanmaya dayalı kitle fonlamasında girişimcilere kredibilite raporu hazırlama, yatırım komitesine bu raporu değerlendirme, platforma proje için kredi skoru hesaplama yükümlülüğü getirildi.",
+    "Nitelikli yatırımcı olmayan gerçek kişilere yönelik yatırım sınırları artırıldı; tutarlar duyuruda belirtilmedi.",
+    "Bir girişim şirketi veya girişimci herhangi bir 12 aylık dönemde paya dayalı en fazla iki, borçlanmaya dayalı en fazla iki kampanya ile fon toplayabilecek.",
+    "Borçlanmaya dayalı kitle fonlamasında geri ödeme, nakit yerine fonlanan şirketin payı verilerek veya bilgi formunda belirtilen şekilde yerine getirilebilecek."
+   ],
+   "alinti": "Kitle Fonlaması Tebliği (III-35/A.2) (Tebliğ) 27.10.2021 tarih ve 31641 sayılı Resmi Gazete’de yayımlanarak yürürlüğe girmiştir"
+  },
+  {
+   "id": "spk-basin-20211114-0152152e",
+   "kaynak": [
+    "spk-basin-20211114-0152152e",
+    "spk-basin-20211124-09fa0eca"
+   ],
+   "tarih": "2021-11-03",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "piyasa",
+   "onem": 1,
+   "baslik": "Yeşil Borçlanma Aracı ve Yeşil Kira Sertifikası Rehberi taslağı görüşe açıldı",
+   "ozet": "ICMA Yeşil Tahvil İlkeleri esas alınarak hazırlanan taslak 03.11.2021'de kamuoyunun görüşüne açıldı; görüş son tarihi 30 Kasım 2021, İngilizce metin için 03 Aralık 2021 olarak duyuruldu.",
+   "detay": [
+    "Rehber; yeşil borçlanma araçları ve yeşil kira sertifikaları, yeşil proje, çerçeve belgesi ve dış değerlendirme hizmeti veren kuruluşa ilişkin esasları düzenliyor.",
+    "Taslağa göre Rehber kapsamında ihraç edilmeyen araçlar için yeşil borçlanma aracı, yeşil kira sertifikası veya eşdeğer ifadeler yurt içinde kullanılamayacak.",
+    "Dört temel bileşen: ihraçtan elde edilen fonların kullanımı, proje değerlendirme ve seçme süreci, fonların yönetimi, raporlama.",
+    "İhraççı, yeşil borçlanma aracının Rehber ile uyumunu dış değerlendirme kuruluşuna onaylatacak; fon kullanımı ihraç tarihinden itibaren yılda bir kamuya açıklanacak.",
+    "Görüşler yesiltahvilrehberi@spk.gov.tr adresine veya yazılı olarak iletilebilecek."
+   ],
+   "alinti": "Kurulumuz, Sermaye Piyasası Kanunu md. 1 ve md. 128/e hükümleri uyarınca, düzenleyici çerçeve taslağı hazırlamıştır"
+  },
+  {
+   "id": "spk-bulten-2021-57",
+   "kaynak": [
+    "spk-bulten-2021-57"
+   ],
+   "tarih": "2021-11-11",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "piyasa",
+   "onem": 2,
+   "baslik": "İlk halka arzda 100 milyon TL ve altı piyasa değerinde borsada satış yöntemi uygulanacak; analist raporu 2'ye indirildi",
+   "ozet": "Halka açık olmayan ortaklıkların ilk halka arzlarında satış dönemi, ek süre, analist raporu sayısı ve satış yöntemine ilişkin 59/1669 sayılı Kurul Kararı alındı.",
+   "detay": [
+    "16 Ağustos - 1 Aralık satış dönemi (Ağustos-Kasım 2021'de altı aylık ara dönem tabloların kullanıldığı dönem) için izahnamede son üç yıllık ve altı aylık ara dönem finansal tablolar yer alacak.",
+    "İzahname Tebliği md. 11/1-(ç) kapsamındaki ek süre her satış dönemi için 15 gün yerine 30 gün olarak uygulanacak.",
+    "Pay Tebliği md. 29/3 uyarınca hazırlanması gereken analist raporu sayısı asgari 2 olarak dikkate alınacak ve raporlar Pay Tebliği hükümleri çerçevesinde ilan edilecek.",
+    "Halka arz edilen payların piyasa değeri 100.000.000 TL ve altındaysa \"Borsa'da Satış\" yöntemi uygulanacak.",
+    "Analist raporu düzenlemesinin gerekçesi: yatırım kuruluşlarının halka arz süreçlerindeki iş yükünün azaltılması ve maliyetlerinin düşürülmesi."
+   ],
+   "alinti": "halka arz edilen payların piyasa değerinin 100.000.000 TL ve altında olması durumunda “Borsa’da Satış” yönteminin uygulanmasına"
+  },
+  {
+   "id": "spk-bulten-2021-x06ce8893",
+   "kaynak": [
+    "spk-bulten-2021-x06ce8893"
+   ],
+   "tarih": "2021-12-02",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "piyasa",
+   "onem": 1,
+   "baslik": "Onaylı izahnamesiz \"sermaye artırımı\" adıyla toplanan paraların sermaye borcuna mahsup edilemeyeceği duyuruldu",
+   "ozet": "Kurul onaylı izahname veya ihraç belgesi olmadan ortaklık vaadiyle \"sermaye artırımı\" veya \"sermaye avansı\" adı altında toplanan paralara ilişkin duyuru yapıldı.",
+   "detay": [
+    "Bu paraların Kurul onayı bulunmaksızın sermaye koyma borcuna mahsup edilmesi söz konusu değil.",
+    "Kurul onaylı izahname ve/veya ihraç belgesi olmadan şirketlerce sermaye artırımı gerçekleştirilemez."
+   ],
+   "alinti": "bu paraların Kurul onayı bulunmaksızın sermaye koyma borcuna mahsup edilmesi söz konusu değildir"
+  },
+  {
+   "id": "spk-bulten-2021-x8ed19796",
+   "kaynak": [
+    "spk-bulten-2021-x8ed19796"
+   ],
+   "tarih": "2021-12-16",
+   "yururluk": "2022-01-03",
+   "kurum": "SPK",
+   "konu": "fon",
+   "onem": 1,
+   "baslik": "Katılım katkı fonlarının karşılaştırma ölçütü %85 kamu kira sertifikası, %5 kâr payı, %10 Katılım 50 olarak değiştirildi",
+   "ozet": "Emeklilik Yatırım Fonlarına İlişkin Rehber'in 10.5. maddesindeki faiz içermeyen katkı fonlarının karşılaştırma ölçütü 03.01.2022'den itibaren uygulanmak üzere değiştirildi.",
+   "detay": [
+    "Yeni ölçüt: %85 BIST-KYD Kamu Kira Sertifikaları Endeksi + %5 BIST-KYD 1 Aylık Kar Payı (TL) Endeksi + %10 BIST Katılım 50 Getiri Endeksi.",
+    "Değişiklik 03.01.2022 tarihinden itibaren uygulanacak.",
+    "İzahname ve tanıtım formu değişiklikleri için Kurul onayı aranmayacak; kurucular duyuruyu KAP'ta ivedilikle yayımlayacak ve değişiklikleri 03.01.2022'den itibaren ticaret siciline tescil ettirecek.",
+    "Ocak-Aralık 2021 performans sunuş raporlarında ilgili dönemde geçerli olan karşılaştırma ölçütü kullanılacak."
+   ],
+   "alinti": "Faiz içermeyen katkı fonları için (Katılım Katkı Fonları) karşılaştırma ölçütü; %85 BIST-KYD KAMU KİRA SERTİFİKALARI ENDEKSİ + %5 BIST-KYD 1 AYLIK KAR PAYI (TL) ENDEKSİ + %10 BIST KATILIM 50 GETİRİ ENDEKSİ"
+  },
+  {
+   "id": "spk-bulten-2021-x48edeb10",
+   "kaynak": [
+    "spk-bulten-2021-x48edeb10"
+   ],
+   "tarih": "2021-12-30",
+   "yururluk": null,
+   "kurum": "SPK",
+   "konu": "diger",
+   "onem": 1,
+   "baslik": "2022 yılı için yeniden değerlemeye tabi parasal tutarlar güncellendi; yeniden değerleme oranı %36,20",
+   "ozet": "6362 sayılı Kanun, alt düzenlemeler ve yürürlükteki 2499 sayılı Kanun düzenlemelerindeki yeniden değerlemeye tabi tutarlar, 2021 tutarlarına %36,20 uygulanarak 2022 için belirlendi.",
+   "detay": [
+    "İdari para cezası (md. 103/1, 103/6, 103/7): 51.236-640.442 TL → 69.783-872.282 TL; piyasa bozucu eylemler (md. 104): 51.236-1.282.074 TL → 69.783-1.746.185 TL.",
+    "Aracı kurum asgari özsermaye (Seri V, No:34 md. 7/1) dar / kısmi / geniş yetkili: 2.337.307 / 11.686.536 / 29.216.340 TL → 2.506.528 / 12.532.641 / 31.331.603 TL (2021 tutarlarına %36,20'nin %20'si olan %7,24 uygulandı).",
+    "Yatırımcı Tazmin Merkezi azami tazmin tutarı: 237.643 TL → 323.670 TL; giriş aidatı: 103.830 TL → 141.418 TL.",
+    "Portföy yönetim şirketi asgari başlangıç sermayesi (III-55.1 md. 5): 6 milyon TL → 7,5 milyon TL; gayrimenkul yatırım ortaklığı (III-48.1 md. 6): 47,5 milyon TL → 64,5 milyon TL; girişim sermayesi yatırım ortaklığı (III-48.3 md. 5): 22 milyon TL → 29 milyon TL.",
+    "Kitle fonlaması platformu asgari sermayesi (III-35/A.2 md. 5/1): 1.000.000 TL → 1.362.000 TL; paya dayalı fon talep tutarı ile toplanan fon tutarı sınırları: 1.000.000 TL → 1.362.000 TL.",
+    "Portföy yönetim, gayrimenkul ve girişim sermayesi yatırım ortaklıkları ile menkul kıymet yatırım ortaklıklarının tutarlarında %36,20 yerine %20-35 aralığında farklı oranlar kullanıldı; girişim sermayesi ve gayrimenkul yatırım fonlarında %30."
+   ],
+   "alinti": "yeniden değerlemeye tabi tutarlar 2022 yılı için aşağıdaki şekilde tespit edilmiştir"
+  }
+ ],
+ "elenen": [
+  {
+   "id": "spk-basin-20210201-b0f274dd",
+   "neden": "yabancı düzenleyiciyle işbirliği mutabakatı (MoU) duyurusu"
+  },
+  {
+   "id": "spk-basin-20210416-3a681760",
+   "neden": "Cumhurbaşkanlığı kararına bağlantı veren duyuru; kural ya da parametre içermiyor"
+  },
+  {
+   "id": "spk-basin-20210428-b74c17d6",
+   "neden": "yabancı düzenleyiciyle işbirliği mutabakatı (MoU) duyurusu"
+  },
+  {
+   "id": "spk-basin-20210608-3a681760",
+   "neden": "Cumhurbaşkanlığı kararına bağlantı veren duyuru; kural ya da parametre içermiyor"
+  },
+  {
+   "id": "spk-basin-20210708-a0ed03dd",
+   "neden": "kripto varlıklara ilişkin haberleri yalanlayan basın açıklaması"
+  },
+  {
+   "id": "spk-basin-20210903-3b155c32",
+   "neden": "izinsiz kaldıraçlı işlem (foreks) uyarısı"
+  },
+  {
+   "id": "spk-basin-20210910-7d094bd6",
+   "neden": "yabancı düzenleyiciyle teknik destek programı duyurusu"
+  },
+  {
+   "id": "spk-basin-20211004-4fb686f8",
+   "neden": "Dünya Yatırımcı Haftası etkinlik duyurusu"
+  },
+  {
+   "id": "spk-basin-20211016-376133ad",
+   "neden": "metin okunamadı — elle bakılmalı (pakette yalnızca başlık var: II-26.1.ç Pay Alım Teklifi Tebliği değişikliğine ilişkin açıklama)"
+  },
+  {
+   "id": "spk-basin-20211120-ce0abbb5",
+   "neden": "gazete yazısındaki iddiaları yalanlayan basın açıklaması"
+  },
+  {
+   "id": "spk-basin-20211203-cb1189cf",
+   "neden": "Dünya Yatırımcı Haftası etkinlik duyurusu"
+  },
+  {
+   "id": "spk-bulten-2021-11",
+   "neden": "tek bir yatırımcıya ilişkin işlem tedbirinin kaldırılması"
+  },
+  {
+   "id": "spk-bulten-2021-24",
+   "neden": "tek bir şirkete ilişkin inceleme sonucu duyurusu"
+  },
+  {
+   "id": "spk-bulten-2021-9",
+   "neden": "tek bir şirketin pay sahiplerine ilişkin oy hakkı duyurusu"
+  }
+ ]
+}

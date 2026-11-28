@@ -1,0 +1,335 @@
+{
+ "olaylar": [
+  {
+   "id": "bddk-karar-1268",
+   "kaynak": [
+    "bddk-karar-1268"
+   ],
+   "tarih": "2025-02-06",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Kredilerin amacına uygun kullandırılmasına ilişkin 5 Kurul Kararı yürürlükten kaldırıldı",
+   "ozet": "Koordineli makro ihtiyati sadeleşme adımları kapsamında 2022 ve 2023 tarihli beş Kurul Kararı yürürlükten kaldırıldı.",
+   "detay": [
+    "Yürürlükten kaldırılan Kurul Kararları: 24/6/2022 tarihli ve 10250, 7/7/2022 tarihli ve 10265, 28/9/2022 tarihli ve 10348, 21/10/2022 tarihli ve 10389, 4/9/2023 tarihli ve 10659 sayılı kararlar.",
+    "Dayanak: 5411 sayılı Bankacılık Kanunu'nun 93. maddesi; amaç finansal istikrarın güçlendirilmesi ve kredi sisteminin etkin çalışması olarak belirtildi.",
+    "Kararlarda yer alan sınırların içeriği bu duyuruda belirtilmedi."
+   ],
+   "alinti": "koordineli makro ihtiyati sadeleşme adımları kapsamında; 24/6/2022 tarihli ve 10250 sayılı Kurul Kararının, 7/7/2022 tarihli ve 10265 sayılı Kurul Kararının"
+  },
+  {
+   "id": "bddk-karar-1270",
+   "kaynak": [
+    "bddk-karar-1270",
+    "bddk-duyuru-2101"
+   ],
+   "tarih": "2025-02-13",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Tüketici kredilerinde genel vade sınırı 125 bin TL'ye kadar 36, 250 bin TL'ye kadar 24, üzerinde 12 ay oldu",
+   "ozet": "09.06.2022 tarihli ve 10222 sayılı Karar kapsamındaki genel vade sınırlamasının parasal tutarları makro ekonomik veriler dikkate alınarak güncellendi; yeniden yapılandırmalarda da aynı vade sınırları geçerli.",
+   "detay": [
+    "Kredi tutarı 125.000 TL ve altında olan krediler: azami vade 36 ay.",
+    "Kredi tutarı 125.000 TL'nin üzerinde, 250.000 TL'yi aşmayan krediler: azami vade 24 ay.",
+    "Kredi tutarı 250.000 TL'nin üzerinde olan krediler: azami vade 12 ay.",
+    "Karar kapsamındaki kredilerin yeniden yapılandırılmasında da aynı vade sınırları uygulanacak.",
+    "Karar sayısı 11152; duyuruda önceki tutarlar belirtilmedi."
+   ],
+   "alinti": "tüketici kredilerine ilişkin genel vade sınırlamasındaki parasal tutarlar makro ekonomik veriler de dikkate alınarak aşağıdaki şekilde güncellenmiştir"
+  },
+  {
+   "id": "bddk-karar-1278",
+   "kaynak": [
+    "bddk-karar-1278"
+   ],
+   "tarih": "2025-03-06",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Elektrikli taşıt kredilerinde fatura değeri dilimleri güncellendi: vade 12–48 ay, kredi/değer oranı %0–%70",
+   "ozet": "5520 sayılı Kurumlar Vergisi Kanunu'nun Geçici 12. maddesi kapsamındaki mükelleflerin ürettiği elektrik motorlu taşıtlar için vade ve kredi tutarı/taşıt değeri sınırları yeni fatura değeri dilimlerine göre belirlendi.",
+   "detay": [
+    "Vade sınırı: nihai fatura değeri 2,5 milyon TL ve altında 48 ay; 2,5–5 milyon TL arasında 36 ay; 5–6,5 milyon TL arasında 24 ay; 6,5–7,5 milyon TL arasında 12 ay.",
+    "Binek araç kredilerinde (taşıt teminatlı hariç) ve finansal kiralamada kredi/taşıt değeri en çok: 2,5 milyon TL ve altında %70; 2,5–5 milyon TL %50; 5–6,5 milyon TL %30; 6,5–7,5 milyon TL %20.",
+    "Nihai fatura değeri 7,5 milyon TL'nin üzerindeki taşıtlarda kredi tutarı/taşıt değeri oranı %0.",
+    "Yeniden yapılandırmalarda vade sınırları için kredinin kullandırım tarihindeki aynı vadeler uygulanacak."
+   ],
+   "alinti": "Nihai fatura değeri iki milyon beş yüz bin Türk Lirası ve altında olan taşıt alımı amacıyla kullandırılan kredilerde kırk sekiz ay"
+  },
+  {
+   "id": "bddk-karar-1279",
+   "kaynak": [
+    "bddk-karar-1279"
+   ],
+   "tarih": "2025-03-13",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Kalkınma ve yatırım bankaları için kaldıraç oranına bağlı kredi sınırları (%35–%60) belirlendi",
+   "ozet": "İstanbul Takas ve Saklama Bankası ile İller Bankası hariç kalkınma ve yatırım bankalarının bir kişi veya risk grubuna kullandırabileceği kredi tutarı, ana sermayeye oranla kaldıraç oranına göre sınırlandı; aşımların giderilmesi için 2028'e uzanan takvim getirildi.",
+   "detay": [
+    "Kaldıraç oranı %0–%10 arasında: bankanın dahil olduğu risk grubuna %35, bir gerçek/tüzel kişiye veya risk grubuna %40.",
+    "Kaldıraç oranı %10–%20: %40 ve %45; %20–%30: %45 ve %50; %30–%40: %50 ve %55; %40 ve üzeri: %55 ve %60.",
+    "01/01/2020'den sonra kurulan ve konsolide olmayan kaldıraç oranı %10 veya üzeri olan bankalarda, faaliyet izni tarihinden itibaren beş yıl boyunca oranlar 5 puan düşük uygulanacak.",
+    "Bankaların dahil olduğu risk grupları hariç, üç yıldan uzun vadeli proje/yatırım kredileri ile finansman amaçlı edinilen ortaklık payları sınırlara tabi olmayacak.",
+    "Karar tarihindeki aşımlar: 31/12/2025'e kadar %10'u, 31/12/2026'ya kadar %30'u, 31/12/2027'ye kadar %60'ı, 31/12/2028'e kadar %100'ü giderilecek; 5 puan düşük oranlardaki aşımlar bir yıl içinde giderilecek."
+   ],
+   "alinti": "kalkınma ve yatırım bankalarının konsolide ve konsolide olmayan esasta; bir gerçek ya da tüzel kişiye veya risk gruplarına kullandırabilecekleri kredilerin risk tutarı toplamının ana sermaye tutarlarına oranı"
+  },
+  {
+   "id": "bddk-karar-1285",
+   "kaynak": [
+    "bddk-karar-1285"
+   ],
+   "tarih": "2025-03-13",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Bankaların Yeşil Varlık Oranı Hesaplaması Hakkında Tebliğ kabul edildi; uyumlu varlık kriterleri belirlendi",
+   "ozet": "Tebliğin Resmî Gazete'de yayımlanmasına karar verildi; uyumlu varlıkların belirlenmesinde esas alınacak teknik tarama kriterleri, çevreye önemli zarar vermeme kriterleri ve asgari sosyal güvenlik standartları kararın ekinde tanımlandı.",
+   "detay": [
+    "Bankalarca yapılacak raporlama, üçer aylık dönemler itibarıyla yapılacak hesaplamalara dayalı olarak Kuruma iletilecek.",
+    "Konut kredileri ve bina tadilatı/geliştirmeye yönelik ihtiyaç kredileri: Enerji Kimlik Belgesinde 'B' ve üstü, nSEB niteliği veya belirli yeşil bina sertifikalarından birinin bulunması halinde uyumlu varlık sayılacak.",
+    "Taşıt kredileri: 2026 yılı sonuna kadar elektrikli ve hibrit araçlar, 2027'den itibaren sıfır CO2eq egzoz emisyonlu araçlar için verilenler uyumlu varlık sayılacak.",
+    "Ek metnin tamamı özetlenmedi; paketteki metnin orta bölümü kesik."
+   ],
+   "alinti": "“Bankaların Yeşil Varlık Oranı Hesaplaması Hakkında Tebliğ”in müzekkere ekinde yer aldığı şekilde kabul edilmesine ve Resmî Gazete’de yayımlanmasına"
+  },
+  {
+   "id": "bddk-duyuru-2105",
+   "kaynak": [
+    "bddk-duyuru-2105"
+   ],
+   "tarih": "2025-03-17",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "Bankpozitif'te Pay Fix'in %79'luk payına ilişkin temettü dışı ortaklık hakları TMSF tarafından kullanılacak",
+   "ozet": "Bankpozitif Kredi ve Kalkınma Bankası A.Ş.'nin nitelikli ortağı Pay Fix Elektronik Para ve Ödeme Hizmetleri A.Ş. hakkında adli makamlarca yürütülen soruşturma kapsamında Tasarruf Mevduatı Sigorta Fonu ortaklık haklarını kullanacak.",
+   "detay": [
+    "Pay Fix Elektronik Para ve Ödeme Hizmetleri A.Ş. mülkiyetindeki %79 oranındaki hisseye ilişkin temettü dışındaki ortaklık hakları Tasarruf Mevduatı Sigorta Fonu tarafından kullanılacak.",
+    "Dayanak: 5411 sayılı Bankacılık Kanunu'nun 18. maddesinin beşinci fıkrası; Kurul Kararı 11176 sayılı ve 17.03.2025 tarihli."
+   ],
+   "alinti": "temettü dışındaki ortaklık haklarının Tasarruf Mevduatı Sigorta Fonu tarafından kullanılmasına karar verilmiştir"
+  },
+  {
+   "id": "bddk-karar-1280",
+   "kaynak": [
+    "bddk-karar-1280"
+   ],
+   "tarih": "2025-03-25",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Halka açık bankaların geri alınan hisseleri 31.12.2025'e kadar çekirdek sermayeden indirilmeyecek",
+   "ozet": "Borsa İstanbul Pay Piyasası'nda işlem gören bankaların 17/3/2025'ten sonra geri alım yoluyla edindiği kendi hisse senetleri sermaye hesaplamalarında dikkate alınmayacak.",
+   "detay": [
+    "Kapsam: Payları Borsa İstanbul A.Ş. Pay Piyasası'nda işlem gören halka açık bankaların 17/3/2025'ten sonra bu piyasadan geri alım yoluyla edindiği kendi hisse senetleri; süre 31/12/2025'e kadar.",
+    "Bu hisseler, Özkaynaklar Yönetmeliği'nin 9. maddesinin dördüncü fıkrasının (a1) bendi uygulamasında çekirdek sermayeden indirim kalemi olarak dikkate alınmayacak.",
+    "Sermaye yeterliliği hesabında kredi riskine esas tutar ve piyasa riskine esas tutara dâhil edilmeyecek."
+   ],
+   "alinti": "17/3/2025 tarihinden sonra bu piyasadan geri alım yoluyla edindikleri kendi hisse senetlerinin 31/12/2025 tarihine kadar"
+  },
+  {
+   "id": "bddk-karar-1284",
+   "kaynak": [
+    "bddk-karar-1284"
+   ],
+   "tarih": "2025-04-17",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Şirketlerin kredi derecelendirme zorunluluğu risk alt sınırı 500 milyon TL'den 750 milyon TL'ye yükseltildi",
+   "ozet": "Bankalar ve finansal kuruluşlar dışındaki şirketlerin derecelendirme zorunluluğuna esas, Risk Merkezi'ndeki bankacılık sektörü toplam risk alt sınırı güncellendi.",
+   "detay": [
+    "Türkiye Bankalar Birliği Risk Merkezi nezdindeki en güncel bilgilere göre talep edilen kredi dâhil bankacılık sektöründeki toplam risk alt sınırı: 500 milyon TL → 750 milyon TL.",
+    "Önceki sınır 10.09.2020 tarihli ve 9133 sayılı Kurul Kararı ile belirlenmişti."
+   ],
+   "alinti": "kredi dâhil bankacılık sektöründeki toplam riski alt sınırının 750 milyon TL olarak güncellenmesine"
+  },
+  {
+   "id": "bddk-karar-1295",
+   "kaynak": [
+    "bddk-karar-1295"
+   ],
+   "tarih": "2025-05-29",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Aytemiz Yatırım Bankası A.Ş.'ye faaliyet izni verildi",
+   "ozet": "Kurulun 23.05.2024 tarihli ve 10913 sayılı Kararı ile kuruluş izni verilen Aytemiz Yatırım Bankası A.Ş.'ye faaliyet izni verildi; karar 04.06.2025 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Aytemiz Yatırım Bankası A.Ş.; 5411 sayılı Kanunun 10. maddesi kapsamında faaliyet izni verildi.",
+    "Karar sayısı 11220."
+   ],
+   "alinti": "verilen Aytemiz Yatırım Bankası A.Ş.’ye faaliyet izni verilmesine"
+  },
+  {
+   "id": "bddk-karar-1294",
+   "kaynak": [
+    "bddk-karar-1294"
+   ],
+   "tarih": "2025-05-30",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Halk Katılım Bankası A.Ş. unvanlı, 11,5 milyar TL sermayeli katılım bankası kurulmasına izin verildi",
+   "ozet": "Kurul, T. Halk Bankası A.Ş. ve dört iştiraki tarafından kurulacak katılım bankasına kuruluş izni verdi; karar 04.06.2025 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Halk Katılım Bankası A.Ş. (katılım bankası); kuruluş sermayesi 11,5 milyar TL.",
+    "Karar sayısı 11222."
+   ],
+   "alinti": "11.500.000.000 TL kuruluş sermayeli “Halk Katılım Bankası A.Ş.” ünvanlı bir katılım bankası kurulmasına izin verilmesine"
+  },
+  {
+   "id": "bddk-karar-1301",
+   "kaynak": [
+    "bddk-karar-1301",
+    "bddk-duyuru-2122"
+   ],
+   "tarih": "2025-07-10",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Kredi kartı borçları ve ihtiyaç kredileri 3 ay içinde talep halinde 48 aya kadar yapılandırılabilecek",
+   "ozet": "Finansal istikrara yönelik koordineli makro ihtiyati adımlar kapsamında bireysel kredi kartı borçları ile gecikmiş veya yeniden yapılandırılmış ihtiyaç kredileri için yapılandırma imkânı getirildi.",
+   "detay": [
+    "Bireysel kredi kartları (dönem borcu kısmen/tamamen ödenmemiş veya yeniden yapılandırılmış): kart hamilinin 3 ay içindeki talebiyle borç bakiyesi (bekleyen ileri vadeli işlemler dahil) en fazla 48 ay vadeyle yapılandırılabilecek.",
+    "Aylık taksit ilgili ayın asgari ödeme tutarına eklenecek; borcun %50'si ödeninceye kadar kart limitleri artırılmayacak; kart limitini aşan tutar limit aşımı sayılmayacak.",
+    "İhtiyaç kredileri (kredili mevduat hesapları dahil; gecikmiş veya yeniden yapılandırılmış): 3 ay içindeki talep halinde ilave kredi verilmeksizin en fazla 48 ay vadeyle yapılandırılabilecek.",
+    "Karar sayısı 11240."
+   ],
+   "alinti": "en fazla kırk sekiz ay ile sınırlı olmak üzere yeniden yapılandırılabilmesine"
+  },
+  {
+   "id": "bddk-karar-1307",
+   "kaynak": [
+    "bddk-karar-1307"
+   ],
+   "tarih": "2025-08-21",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "QNB Bank ve Enpara Bank'ın olağanüstü genel kurullarındaki bölünme kararlarının tesciline onay verildi",
+   "ozet": "İki bankanın 19.08.2025 tarihli olağanüstü genel kurullarında alınan bölünme kararlarının tescil edilmesi Kurulca uygun görüldü; karar 23.08.2025 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Dayanak: 5411 sayılı Bankacılık Kanunu'nun 19. maddesi ile Bankaların Birleşme, Devir, Bölünme ve Hisse Değişimi Hakkında Yönetmeliğin 18. maddesi.",
+    "Kararda bölünmenin şekli ve tarafları ayrıca belirtilmedi.",
+    "Karar sayısı 11257."
+   ],
+   "alinti": "bölünmeye dair alınan kararların tescil edilmesine onay verilmesi, 5411 sayılı Bankacılık Kanununun 19 uncu maddesi"
+  },
+  {
+   "id": "bddk-karar-1309",
+   "kaynak": [
+    "bddk-karar-1309"
+   ],
+   "tarih": "2025-09-11",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Adil Katılım Bankası A.Ş.'ye faaliyet izni verildi",
+   "ozet": "Kurulun 23.05.2024 tarihli ve 10914 sayılı Kararı ile kuruluş izni verilen dijital katılım bankası Adil Katılım Bankası A.Ş.'ye faaliyet izni verildi; karar 20.09.2025 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Adil Katılım Bankası A.Ş.; değerlendirme Dijital Bankaların Faaliyet Esasları ile Servis Modeli Bankacılığı Hakkında Yönetmelik kapsamında yapıldı.",
+    "Karar sayısı 11267."
+   ],
+   "alinti": "kuruluş izni verilen Adil Katılım Bankası A.Ş.’ye faaliyet izni verilmesine"
+  },
+  {
+   "id": "bddk-karar-1317",
+   "kaynak": [
+    "bddk-karar-1317"
+   ],
+   "tarih": "2025-11-13",
+   "yururluk": "2026-01-01",
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Özkaynak ve kredi riski hesabındaki iki geçici esneklik 1 Ocak 2026'dan itibaren sona erdiriliyor",
+   "ozet": "Menkul değerler portföyünde negatif değerleme farklarının özkaynak hesabında dikkate alınmayabilmesi ile kredi riskinde 28.06.2024 tarihli TCMB döviz alış kurunun kullanılması uygulaması sona erecek.",
+   "detay": [
+    "1/1/2024'ten önce edinilen 'Gerçeğe Uygun Değer Farkı Diğer Kapsamlı Gelire Yansıtılan Menkul Değerler' portföyünde negatif net değerleme farklarının özkaynakta dikkate alınmayabilmesi (10747 sayılı Karar) sona erdi.",
+    "Bu portföy için Özkaynaklar Yönetmeliği'nin mevcut hükümleri uygulanacak.",
+    "Kredi riskine esas tutarda 28/6/2024 tarihli TCMB döviz alış kurunun kullanılması uygulaması (11038 sayılı Karar) sona erdi; Sermaye Yeterliliği Yönetmeliği'nin mevcut hükümleri uygulanacak."
+   ],
+   "alinti": "uygulamaya son verilmesine ve bankaların sahip oldukları “Gerçeğe Uygun Değer Farkı Diğer Kapsamlı Gelire Yansıtılan Menkul Değerler” portföyünde yer alan menkul kıymetlere"
+  },
+  {
+   "id": "bddk-karar-1318",
+   "kaynak": [
+    "bddk-karar-1318"
+   ],
+   "tarih": "2025-11-13",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Sermaye yeterliliğinde KOBİ ciro sınırı 1 milyar TL, perakende kredi limiti 50 milyon TL olarak belirlendi",
+   "ozet": "Sermaye Yeterliliği Yönetmeliği'ndeki KOBİ tanımına ilişkin ciro sınırı ve perakende kredi limiti tutarları Kurul Kararıyla belirlendi.",
+   "detay": [
+    "Yurt içi yerleşik KOBİ'ler için ciro sınırı: 1.000.000.000 TL (Yönetmeliğin 3. maddesi birinci fıkrasının (vv) bendi).",
+    "Yurt dışı yerleşik KOBİ'lerde, KOBİ'nin bulunduğu ülkenin bankacılık otoritesinin sermaye yeterliliği hesaplamasında kullandığı KOBİ tanımı kullanılacak.",
+    "Perakende kredi limiti: 50.000.000 TL (Yönetmeliğin 6. maddesi ikinci fıkrasının (c) bendi).",
+    "Kararda önceki değerler belirtilmedi."
+   ],
+   "alinti": "yurt içi yerleşik KOBİ’ler açısından 1.000.000.000 TL olarak belirlenmesine"
+  },
+  {
+   "id": "bddk-karar-1321",
+   "kaynak": [
+    "bddk-karar-1321"
+   ],
+   "tarih": "2025-12-18",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Enflasyon muhasebesine ilişkin 10825 sayılı Kurul Kararı yürürlükten kaldırıldı; uygulanmayacak",
+   "ozet": "11.01.2024 tarihli karar yürürlükten kalktı; bankalar ile finansal kiralama, faktoring, finansman, tasarruf finansman ve varlık yönetim şirketleri enflasyon muhasebesi uygulamayacak.",
+   "detay": [
+    "11.01.2024 tarihli ve 10825 sayılı Kurul Kararı yürürlükten kaldırıldı.",
+    "Kapsam: bankalar ile finansal kiralama, faktoring, finansman, tasarruf finansman ve varlık yönetim şirketleri; enflasyon muhasebesi uygulanmayacak.",
+    "Karar sayısı 11340."
+   ],
+   "alinti": "bankalar ile finansal kiralama, faktoring, finansman, tasarruf finansman ve varlık yönetim şirketleri tarafından enflasyon muhasebesi uygulanmamasına"
+  }
+ ],
+ "elenen": [
+  {
+   "id": "bddk-duyuru-2097",
+   "neden": "dolandırıcılık uyarısı"
+  },
+  {
+   "id": "bddk-duyuru-2109",
+   "neden": "Basel RCAP değerlendirme raporu bilgilendirmesi — kural değişikliği içermiyor"
+  },
+  {
+   "id": "bddk-duyuru-2138",
+   "neden": "kurum stratejik planı yayımı"
+  },
+  {
+   "id": "bddk-karar-1300",
+   "neden": "tek bir faktoring şirketine faaliyet izni — banka dışı kuruluş"
+  },
+  {
+   "id": "bddk-karar-1304",
+   "neden": "tek bir tasarruf finansman şirketine faaliyet izni — banka dışı kuruluş"
+  }
+ ]
+}

@@ -1,0 +1,438 @@
+{
+ "olaylar": [
+  {
+   "id": "bddk-duyuru-2150",
+   "kaynak": [
+    "bddk-duyuru-2150"
+   ],
+   "tarih": "2026-01-02",
+   "yururluk": "2026-01-15",
+   "kurum": "BDDK",
+   "konu": "odeme",
+   "onem": 1,
+   "baslik": "Temassız ödemelerde şifresiz işlem limiti 1.500 TL'den 2.500 TL'ye çıkarıldı",
+   "ozet": "Kartlar ve mobil cihazlar üzerinden yapılan temassız ödemelerde şifresiz işlem limiti 15 Ocak 2026'dan itibaren uygulanmak üzere artırıldı.",
+   "detay": [
+    "Kart ve mobil cihaz temassız ödemelerinde şifresiz işlem limiti: 1.500 TL → 2.500 TL.",
+    "Uygulama başlangıcı: 15 Ocak 2026."
+   ],
+   "alinti": "şifresiz işlem limiti 1.500 Türk Lirasından 2.500 Türk Lirasına çıkarılmıştır"
+  },
+  {
+   "id": "bddk-karar-1324",
+   "kaynak": [
+    "bddk-karar-1324",
+    "bddk-duyuru-2157"
+   ],
+   "tarih": "2026-01-29",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Bireysel KMH limiti aylık gelirin 2 katıyla sınırlandı; kullanılmayan limite %10 dönüşüm oranı getirildi",
+   "ozet": "Bireysel müşterilere ait kredili mevduat hesabı (KMH) açılışı ve limit artışlarında gelire bağlı üst sınır getirildi; eğitim ödemeleri amaçlı limitler muaf tutuldu.",
+   "detay": [
+    "Bireysel müşteri KMH açılışı ve mevcut limit artışlarında limit, bankalarca ispata elverişli belgelerle tespit edilen aylık ortalama gelirin en çok 2 katı olacak.",
+    "Bankalar ile eğitim kurumları arasındaki sözleşmelere dayanan eğitim ödemeleri amaçlı bireysel KMH limitleri bu sınırdan muaf.",
+    "1/4/2026'dan itibaren sermaye yeterliliği hesabında bireysel KMH limitinin kullanılmayan kısmına, kredi riski yaklaşımından bağımsız olarak asgari %10 kredi dönüşüm oranı uygulanacak; Kurum bu oranı üç katına kadar artırabilecek."
+   ],
+   "alinti": "müşterinin, bankalarca ispata elverişli olarak değerlendirilen belgeler üzerinden tespit edilecek aylık ortalama gelirinin iki katının azami sınır olarak uygulanmasına"
+  },
+  {
+   "id": "bddk-karar-1325",
+   "kaynak": [
+    "bddk-karar-1325",
+    "bddk-duyuru-2157"
+   ],
+   "tarih": "2026-01-29",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Ödenmemiş kredi kartı borçları ve gecikmiş ihtiyaç kredileri 48 aya kadar yapılandırılabilecek",
+   "ozet": "Bireysel kredi kartı borçları ile gecikmiş ihtiyaç kredileri için, karar tarihinden itibaren 3 ay içinde talep edilmesi koşuluyla yeniden yapılandırma imkânı getirildi.",
+   "detay": [
+    "Son ödeme tarihinde dönem borcu kısmen/tamamen ödenmemiş bireysel kredi kartları: kart hamilinin 3 ay içindeki talebiyle borç bakiyesi (bekleyen ileri vadeli işlemler dahil) en fazla 48 ay vadeyle yapılandırılabilecek.",
+    "Aylık taksit ilgili ayın asgari ödeme tutarına eklenecek; borcun %50'si ödeninceye kadar kart limitleri artırılmayacak; kart limitini aşan yapılandırma tutarı limit aşımı sayılmayacak.",
+    "Karar tarihinden önce kullandırılmış, anapara/faiz ödemeleri 30 günden fazla gecikmiş ihtiyaç kredileri (kredili mevduat hesapları dahil): borçlunun 3 ay içindeki talebiyle, ilave kredi kullandırılmaksızın en fazla 48 ay vadeyle yapılandırılabilecek."
+   ],
+   "alinti": "dönem borcu kısmen ya da tamamen ödenmemiş bireysel kredi kartlarının, kart hamilleri tarafından Karar tarihinden itibaren 3 ay içerisinde talep edilmesi durumunda"
+  },
+  {
+   "id": "bddk-karar-1326",
+   "kaynak": [
+    "bddk-karar-1326",
+    "bddk-duyuru-2157",
+    "bddk-duyuru-2158"
+   ],
+   "tarih": "2026-01-29",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 3,
+   "baslik": "Kredi kartı limitleri gelire bağlandı; 400 bin TL üzeri toplam limitler azaltılacak, uyum süresi 1 Ocak 2027",
+   "ozet": "Yeni kart ve limit artışlarında azami limit yalnızca gelire göre belirlenecek; toplam limiti 400 bin TL'nin üzerindeki kart hamillerinin limitleri kullanılabilir limitin en düşük olduğu döneme göre azaltılacak.",
+   "detay": [
+    "Yeni kart çıkarma ve limit artırımında toplam kredi kartı azami limiti yalnızca aylık veya yıllık ortalama gelire göre belirlenecek; gelir yalnızca ispata elverişli belgelerle teyit edilecek.",
+    "Toplam limiti 400.000 TL'nin üzerinde, 750.000 TL'yi aşmayanlarda kullanılabilir limitin en düşük olduğu dönemdeki tutarın %50'si; 750.000 TL'nin üzerinde olanlarda %80'i kadar azaltım yapılacak (Ocak 2025–karar öncesi son hesap kesimi dikkate alınır).",
+    "Limit azaltım işlemleri 15.02.2026'ya kadar yapılacak; azaltımla toplam limiti 400.000 TL ve altına düşenlerin 400.000 TL'ye kadar limit artışlarında gelire dayalı azami limit kuralı uygulanmayacak.",
+    "Tüm kart hamillerinin limitlerinin gelire dayalı azami limitle uyumlu hale getirilmesi 01.01.2027'ye kadar tamamlanacak.",
+    "Limit tahsisinde dikkate alınan gelir tutarı, tahsisin yapıldığı gün bankalarca Türkiye Bankalar Birliği Risk Merkezi'ne raporlanacak.",
+    "Basın açıklamasına göre 400 bin TL limitli kart kullanıcısının limitinde kesinti yapılmayacak; gelirini teyit edenlerin gelirinin 4 katına kadar limit kullanmasının önünde engel bulunmadığı belirtildi."
+   ],
+   "alinti": "yalnızca aylık veya yıllık ortalama gelirin dikkate alınmasına ve aylık veya yıllık ortalama gelir düzeyinin teyidinin yalnızca"
+  },
+  {
+   "id": "bddk-karar-1327",
+   "kaynak": [
+    "bddk-karar-1327",
+    "bddk-duyuru-2157"
+   ],
+   "tarih": "2026-01-29",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Konut kredilerinde azami kredi/değer oranı konut değeri ve enerji sınıfına göre %20–%90 olarak belirlendi",
+   "ozet": "Konut edinme kredileri ve taşıt kredileri hariç konut teminatlı kredilerde azami kredi tutarı, konut değeri dilimi ve enerji kimlik belgesi sınıfına göre tanımlandı; birinci el–ikinci el ayrımı kaldırıldı.",
+   "detay": [
+    "Konut değeri 5 milyon TL ve altında: enerji sınıfı A-B için değerin %90'ı, C için %80'i, diğer sınıflar için %70'i.",
+    "5–7 milyon TL arası: %80 / %70 / %60; 7–10 milyon TL arası: %70 / %60 / %50 (A-B / C / diğer).",
+    "10–20 milyon TL arası: %50 / %40 / %30; 20 milyon TL üzeri: %40 / %30 / %20 (A-B / C / diğer).",
+    "10656 sayılı (24.08.2023) Kurul Kararı kapsamındaki hususlar bu karardaki oranlar üzerinden uygulanmaya devam edecek.",
+    "Basın açıklamasına göre birinci el–ikinci el konut ayrımı kaldırıldı, C enerji sınıfındaki konutlar da avantajlı oran kapsamına alındı."
+   ],
+   "alinti": "Kredi tutarının teminat olarak alınan konutun değerine oranının aşağıdaki tabloda yer aldığı şekilde belirlenmesine"
+  },
+  {
+   "id": "bddk-karar-1329",
+   "kaynak": [
+    "bddk-karar-1329"
+   ],
+   "tarih": "2026-02-26",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "İktisat Katılım Bankası A.Ş.'ye faaliyet izni verildi",
+   "ozet": "Kurulun 12.12.2024 tarihli ve 11037 sayılı Kararı ile kuruluş izni verilen İktisat Katılım Bankası A.Ş.'ye faaliyet izni verildi; karar 04.03.2026 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: İktisat Katılım Bankası A.Ş.; 5411 sayılı Kanunun 10. maddesi kapsamında faaliyet izni verildi.",
+    "Karar sayısı 11424."
+   ],
+   "alinti": "kuruluş izni verilen İktisat Katılım Bankası A.Ş.’ye faaliyet izni verilmesine"
+  },
+  {
+   "id": "bddk-karar-1330",
+   "kaynak": [
+    "bddk-karar-1330"
+   ],
+   "tarih": "2026-03-12",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "SLM Yatırım Bankası A.Ş.'nin kuruluş izni iptal edildi",
+   "ozet": "Kurulun 04.05.2023 tarihli ve 10594 sayılı Kararı ile kuruluş izni verilen SLM Yatırım Bankası A.Ş.'nin kuruluş izni iptal edildi; karar 14.03.2026 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "İptal dayanağı: 5411 sayılı Bankacılık Kanunu'nun 11. maddesinin (d) bendi.",
+    "Karar sayısı 11433."
+   ],
+   "alinti": "SLM Yatırım Bankası A.Ş.’nin kuruluş izninin, 5411 sayılı Bankacılık Kanununun 11 inci maddesinin (d) bendi uyarınca iptal edilmesine"
+  },
+  {
+   "id": "bddk-karar-1331",
+   "kaynak": [
+    "bddk-karar-1331"
+   ],
+   "tarih": "2026-03-12",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "Asır Yatırım Bankası A.Ş.'nin kuruluş izni iptal edildi",
+   "ozet": "Kurulun 23.03.2023 tarihli ve 10541 sayılı Kararı ile kuruluş izni verilen Asır Yatırım Bankası A.Ş.'nin kuruluş izni iptal edildi; karar 14.03.2026 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "İptal dayanağı: 5411 sayılı Bankacılık Kanunu'nun 11. maddesinin (c) bendi; Türk Ticaret Kanunu hükümleri saklı.",
+    "Karar sayısı 11434."
+   ],
+   "alinti": "Yatırım Bankası A.Ş.’nin kuruluş izninin, Türk Ticaret Kanunu hükümleri saklı kalmak kaydıyla, 5411 sayılı Bankacılık Kanununun 11 inci maddesinin (c) bendi uyarınca iptal edilmesine"
+  },
+  {
+   "id": "bddk-karar-1332",
+   "kaynak": [
+    "bddk-karar-1332"
+   ],
+   "tarih": "2026-03-12",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Fuzul Katılım Bankası A.Ş. unvanlı, 13,2 milyar TL sermayeli katılım bankası kurulmasına izin verildi",
+   "ozet": "Kurul, Fuzul Holding A.Ş., Fuzul Yapı Gayrimenkul ve İnşaat A.Ş. ve üç kişi tarafından kurulacak katılım bankasına kuruluş izni verdi; karar 18.03.2026 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Fuzul Katılım Bankası A.Ş. (katılım bankası); kuruluş sermayesi 13,2 milyar TL.",
+    "Karar sayısı 11432."
+   ],
+   "alinti": "13.200.000.000 TL kuruluş sermayeli “Fuzul Katılım Bankası A.Ş.” ünvanlı bir katılım bankası kurulmasına izin verilmesine"
+  },
+  {
+   "id": "bddk-karar-1338",
+   "kaynak": [
+    "bddk-karar-1338"
+   ],
+   "tarih": "2026-06-11",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 1,
+   "baslik": "Dost Katılım Bankası A.Ş. unvanlı, 10 milyar TL sermayeli katılım bankası kurulmasına izin verildi",
+   "ozet": "Kurul, BİM Birleşik Mağazalar A.Ş. ve dört şirket tarafından kurulacak katılım bankasına kuruluş izni verdi; karar 17.06.2026 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Banka: Dost Katılım Bankası A.Ş. (katılım bankası); kuruluş sermayesi 10 milyar TL.",
+    "Karar sayısı 11470."
+   ],
+   "alinti": "10.000.000.000 TL kuruluş sermayeli “Dost Katılım Bankası A.Ş.” ünvanlı bir katılım bankası kurulmasına izin verilmesine"
+  },
+  {
+   "id": "bddk-karar-1343",
+   "kaynak": [
+    "bddk-karar-1343"
+   ],
+   "tarih": "2026-07-30",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Kalkınma ve yatırım bankalarında kredi sınırı ana sermayenin %30'u, risk grubuna %25'i olarak uygulanacak",
+   "ozet": "13.03.2025 tarihli ve 11173 sayılı Kararın 1. ve 2. maddeleri, İstanbul Takas ve Saklama Bankası ile İller Bankası hariç kalkınma ve yatırım bankaları için sabit oranlı sınırlar biçiminde uygulanacak; aşımların giderilmesi için süre verildi.",
+   "detay": [
+    "Bir gerçek/tüzel kişiye veya risk gruplarına kullandırılan kredilerin risk tutarı toplamı: ana sermayenin en çok %30'u.",
+    "Bankanın dahil olduğu risk grubuna kullandırılan kredilerin risk tutarı toplamı: ana sermayenin en çok %25'i.",
+    "Gerçek/tüzel kişi veya risk gruplarına ilişkin sınırdaki aşımlar 01.04.2027'ye kadar giderilecek.",
+    "Bankanın dahil olduğu risk grubuna ilişkin sınırdaki aşımlar 01.10.2026'ya kadar giderilecek."
+   ],
+   "alinti": "yüzde otuzu, bankanın dahil olduğu risk grubuna kullandırabilecekleri kredilerin risk tutarı toplamının ana sermayelerine oranı ise yüzde yirmi beşi aşamaz"
+  },
+  {
+   "id": "bddk-karar-1344",
+   "kaynak": [
+    "bddk-karar-1344"
+   ],
+   "tarih": "2026-07-30",
+   "yururluk": "2026-10-01",
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Tasarruf finansman şirketlerinin fon havuzu kullanımı ve sözleşme tutarı/sayısı sınırları belirlendi",
+   "ozet": "Tasarruf finansman şirketlerinde fon havuzunun değerlendirileceği araçlar sınırlandı; yüksek tutarlı sözleşme payı ile kişi başına sözleşme sayısı ve tutarı için üst sınırlar getirildi. Kararlar 01.10.2026'dan itibaren uygulanacak.",
+   "detay": [
+    "Tasarruf fon havuzu ve şirket hesaplarındaki tutarlar yalnızca katılım bankalarında TL özel cari/katılma hesaplarında, altına dayalı olmayan TL yurt içi Hazine kira sertifikalarında ve risk değeri 1 veya 2 olan TL katılım esaslı fonlarda değerlendirilebilecek.",
+    "Fon havuzu hesaplarında getirisiz tutulan günlük tutar toplamı, önceki ay sonu tasarruf fon havuzunun binde ikisi ile sınırlandı.",
+    "Yüksek tutarlı sözleşme sınırı: taşıt 5.000.000 TL, konut veya çatılı iş yeri 12.500.000 TL; bu sözleşmelerin toplamı dönemdeki sözleşme tutarları toplamının %5'ini aşamayacak.",
+    "01.01.2025'ten sonra kurulan şirketlerde bu oran 30.06.2027'ye kadar %15, 01.07.2027–31.12.2027 arasında %10 uygulanacak.",
+    "Bir kişi veya risk grubuyla en fazla iki sözleşme (taşıt için bir, konut/çatılı iş yeri için bir); taşıt sözleşmesi en çok 6.250.000 TL, konut/çatılı iş yeri sözleşmesi 62.500.000 TL, tüm sözleşmeler toplamı 62.500.000 TL."
+   ],
+   "alinti": "sözleşme sınırının; taşıt sözleşmeleri için 5.000.000 Türk Lirası, konut veya çatılı iş yeri sözleşmeleri için 12.500.000 Türk Lirası olarak uygulanmasına"
+  },
+  {
+   "id": "bddk-duyuru-3301",
+   "kaynak": [
+    "bddk-duyuru-3301"
+   ],
+   "tarih": "2026-09-16",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "Golden Global Yatırım Bankası'nda ortakların temettü dışı ortaklık hakları TMSF'ye devredildi",
+   "ozet": "Golden Global Yatırım Bankası A.Ş.'nin üç pay sahibine ait paylara ilişkin temettü dışındaki ortaklık haklarının Tasarruf Mevduatı Sigorta Fonu tarafından kullanılmasına karar verildi.",
+   "detay": [
+    "Kapsam: %53,98, %32 ve %14 oranındaki paylar (üç ayrı pay sahibine ait).",
+    "Dayanak: 5411 sayılı Bankacılık Kanunu'nun 18. maddesinin beşinci fıkrası; Kurul Kararı 11569 sayılı ve 16.09.2026 tarihli."
+   ],
+   "alinti": "temettü dışındaki ortaklık haklarının Tasarruf Mevduatı Sigorta Fonu tarafından kullanılmasına karar verilmiştir"
+  },
+  {
+   "id": "bddk-karar-1346",
+   "kaynak": [
+    "bddk-karar-1346"
+   ],
+   "tarih": "2026-09-17",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "sermaye",
+   "onem": 2,
+   "baslik": "Halka açık bankaların geri alınan hisseleri 31.12.2026'ya kadar çekirdek sermayeden indirilmeyecek",
+   "ozet": "Borsa İstanbul Pay Piyasası'nda işlem gören bankaların 16.09.2026'dan sonra geri alım yoluyla edindiği kendi hisse senetleri sermaye hesaplamalarında dikkate alınmayacak.",
+   "detay": [
+    "Kapsam: Payları Borsa İstanbul A.Ş. Pay Piyasası'nda işlem gören halka açık bankaların 16.09.2026'dan sonra bu piyasadan geri alım yoluyla edindiği kendi hisse senetleri; süre 31.12.2026'ya kadar.",
+    "Bu hisseler, Özkaynaklar Yönetmeliği'nin 9. maddesinin dördüncü fıkrasının (a1) bendi uygulamasında çekirdek sermayeden indirim kalemi olarak dikkate alınmayacak.",
+    "Sermaye yeterliliği hesabında kredi riskine esas tutar ve piyasa riskine esas tutara dâhil edilmeyecek."
+   ],
+   "alinti": "16.09.2026 tarihinden sonra bu piyasadan geri alım yoluyla edindikleri kendi hisse senetlerinin 31.12.2026 tarihine kadar"
+  },
+  {
+   "id": "bddk-duyuru-3303",
+   "kaynak": [
+    "bddk-duyuru-3303",
+    "bddk-karar-1347"
+   ],
+   "tarih": "2026-09-18",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "Bank Mellat Merkezi Tahran İstanbul Türkiye Merkez Şubesi'nin faaliyet izni kaldırıldı",
+   "ozet": "Kurul, Bank Mellat Merkezi Tahran - İstanbul Türkiye Merkez Şubesi'nin faaliyet iznini kaldırdı; karar 19.09.2026 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Dayanak: 5411 sayılı Bankacılık Kanunu'nun 71. maddesinin birinci fıkrasının (b) bendi.",
+    "Karar sayısı 11572."
+   ],
+   "alinti": "5411 sayılı Bankacılık Kanununun 71 inci maddesinin birinci fıkrasının (b) bendi uyarınca Bank Mellat Merkezi Tahran - İstanbul Türkiye Merkez Şubesi’nin faaliyet izninin kaldırılmasına karar verilmiştir"
+  },
+  {
+   "id": "bddk-duyuru-4306",
+   "kaynak": [
+    "bddk-duyuru-4306"
+   ],
+   "tarih": "2026-09-30",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "Üç yatırım bankasında nitelikli pay sahiplerinin temettü dışı ortaklık hakları TMSF tarafından kullanılacak",
+   "ozet": "Fon Soruşturması bağlantılı gelişmeler kapsamında Destek Yatırım Bankası, Hedef Yatırım Bankası ve Tera Yatırım Bankası ile ilişkili paylarda ortaklık hakları TMSF'ye geçti; iki faktoring şirketindeki paylar için altı aylık devir süresi verildi.",
+   "detay": [
+    "Destek Yatırım Bankası'nın nitelikli pay sahibince kontrol edilen Destek Finans Faktoring A.Ş.'nin %99,99 oranındaki paylarına ilişkin temettü dışı ortaklık hakları TMSF tarafından kullanılacak.",
+    "Hedef Yatırım Bankası'nın nitelikli pay sahiplerine ait %10, %10, %41 ve %30 oranındaki paylara ilişkin temettü dışı ortaklık hakları TMSF tarafından kullanılacak.",
+    "Tera Yatırım Bankası'nın nitelikli pay sahiplerine ait %95 ve %0,01 oranındaki paylara ilişkin temettü dışı ortaklık hakları TMSF tarafından kullanılacak.",
+    "6361 sayılı Kanun uyarınca Destek Holding A.Ş. Destek Finans Faktoring'deki %73,81 payını, iki pay sahibi de Tera Finans Faktoring'deki %53,01 ve %37 paylarını altı ay içinde uygun kişilere devredecek; bu sürede oy hakları TMSF tarafından kullanılacak."
+   ],
+   "alinti": "paylara ilişkin temettü dışındaki ortaklık haklarının Tasarruf Mevduatı Sigorta Fonu (TMSF) tarafından kullanılmasına"
+  },
+  {
+   "id": "bddk-karar-1348",
+   "kaynak": [
+    "bddk-karar-1348"
+   ],
+   "tarih": "2026-10-01",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Cep telefonu kredilerinde vade sınırı 40 bin TL ve altı için 12 ay, üzeri için 3 ay olarak belirlendi",
+   "ozet": "Cep telefonu alımı amacıyla kullandırılan tüketici kredilerinde telefon fiyatına göre vade sınırı belirlendi; yenilenmiş telefonlar için ayrı eşik uygulanacak.",
+   "detay": [
+    "Fiyatı 40 bin TL ve altında olan cep telefonları: vade sınırı 12 ay.",
+    "Fiyatı 40 bin TL'nin üzerinde olan cep telefonları: vade sınırı 3 ay.",
+    "Yenilenmiş Ürünler Hakkında Yönetmelik kapsamında 'yenilenmiş ürün' niteliğindeki telefonlarda (işyeri 'yenileme merkezi' veya 'yetkili satıcı' ise): fiyatı 50 bin TL ve altında 12 ay, 50 bin TL'nin üzerinde 3 ay."
+   ],
+   "alinti": "Fiyatı kırk bin Türk Lirası ve altında olan cep telefonları için vade sınırının on iki ay, fiyatı kırk bin Türk Lirasının üzerinde olan cep telefonları için vade sınırının üç ay"
+  },
+  {
+   "id": "bddk-karar-1349",
+   "kaynak": [
+    "bddk-karar-1349"
+   ],
+   "tarih": "2026-10-01",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Kredi kartı asgari ödeme tutarı limiti 100 bin TL ve altında %20, üzerinde %40 olarak belirlendi",
+   "ozet": "Banka Kartları ve Kredi Kartları Hakkında Yönetmeliğin 22. maddesinin yedinci fıkrası uyarınca asgari ödeme tutarı kart limitine göre kademelendirildi.",
+   "detay": [
+    "Limiti 100 bin TL ve altında olan kredi kartları: asgari ödeme tutarı dönem borcunun %20'si.",
+    "Limiti 100 bin TL'nin üzerinde olan kredi kartları: asgari ödeme tutarı dönem borcunun %40'ı.",
+    "Karar sayısı 11581."
+   ],
+   "alinti": "limiti yüz bin Türk Lirası ve altında olan kredi kartları için dönem borcunun yüzde yirmisi olarak, yüz bin Türk Lirasının üzerinde olan kredi kartları için dönem borcunun yüzde kırkı olarak"
+  },
+  {
+   "id": "bddk-karar-1350",
+   "kaynak": [
+    "bddk-karar-1350"
+   ],
+   "tarih": "2026-11-04",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "Golden Global Yatırım Bankası A.Ş.'nin faaliyet izni kaldırıldı",
+   "ozet": "Kurul, Golden Global Yatırım Bankası A.Ş.'nin faaliyet iznini kaldırdı; karar 06.11.2026 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Dayanak: 5411 sayılı Bankacılık Kanunu'nun 71. maddesinin birinci fıkrasının (c) bendi.",
+    "Karar sayısı 11593."
+   ],
+   "alinti": "Golden Global Yatırım Bankası A.Ş.’nin faaliyet izninin 5411 sayılı Bankacılık Kanununun 71 inci maddesinin birinci fıkrasının (c) bendi çerçevesinde kaldırılmasına"
+  },
+  {
+   "id": "bddk-karar-1351",
+   "kaynak": [
+    "bddk-karar-1351"
+   ],
+   "tarih": "2026-11-17",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kurum",
+   "onem": 2,
+   "baslik": "Adil Katılım Bankası A.Ş.'nin ortaklık hakları ile yönetim ve denetimi TMSF'ye devredildi",
+   "ozet": "Adil Katılım Bankası A.Ş.'nin temettü hariç ortaklık hakları ile yönetim ve denetimi Tasarruf Mevduatı Sigorta Fonuna devredildi; karar 18.11.2026 tarihli Resmî Gazete'de yayımlandı.",
+   "detay": [
+    "Dayanak: 5411 sayılı Bankacılık Kanunu'nun 71. maddesinin birinci fıkrasının (a), (c) ve (d) bentleri.",
+    "Karar sayısı 11601."
+   ],
+   "alinti": "temettü hariç ortaklık hakları ile yönetim ve denetiminin 5411 sayılı Bankacılık Kanununun 71 inci maddesinin birinci fıkrasının (a), (c) ve (d) bendi çerçevesinde Tasarruf Mevduatı Sigorta Fonuna devredilmesine"
+  },
+  {
+   "id": "bddk-karar-1352",
+   "kaynak": [
+    "bddk-karar-1352"
+   ],
+   "tarih": "2026-11-19",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "En az 2 konutu olanlarda konut kredisi azami oranı %75 azaltılacak; hisseli ve yıkılan konutlara istisna",
+   "ozet": "11364 sayılı Kararda belirlenen azami kredi tutarı/konut değeri oranının uygulanmasında konut sahipliği durumuna göre düzenleme yapıldı.",
+   "detay": [
+    "Tüketicinin, eşinin veya 18 yaş altı çocuklarının en az iki konutu bulunması halinde, 29.01.2026 tarihli ve 11364 sayılı Kararda belirlenen azami kredi tutarı/konut değeri oranı %75 azaltılarak uygulanacak.",
+    "Hisseli konut malikliği değerlendirmesinde, herhangi bir tapuda %50 ve daha az hissesi olanların bu konutu dikkate alınmayacak; ikiden fazla konutta hisseli tapu sahibi olanlar hariç.",
+    "6306 sayılı Kanun kapsamında riskli yapı tespiti nedeniyle yıkılmış veya hakkında yıkım kararı alınmış konutlardan yalnızca biri konut malikliği değerlendirmesinde dikkate alınmayacak."
+   ],
+   "alinti": "tüketicinin kendisinin, eşinin veya 18 yaş altındaki çocuklarının malik olduğu en az iki konutunun bulunması halinde yüzde 75 azaltılarak uygulanmasına"
+  },
+  {
+   "id": "bddk-karar-1353",
+   "kaynak": [
+    "bddk-karar-1353"
+   ],
+   "tarih": "2026-11-19",
+   "yururluk": null,
+   "kurum": "BDDK",
+   "konu": "kredi",
+   "onem": 2,
+   "baslik": "Kredi kartı asgari ödeme: 100 bin TL'ye kadar %20, 200 bin TL'ye kadar %30, üzeri %40",
+   "ozet": "Banka Kartları ve Kredi Kartları Hakkında Yönetmeliğin 22. maddesinin yedinci fıkrası uyarınca asgari ödeme tutarı kart limitine göre üç kademeye ayrıldı.",
+   "detay": [
+    "Limiti 100 bin TL ve altında olan kredi kartları: asgari ödeme tutarı dönem borcunun %20'si.",
+    "Limiti 100 bin TL'nin üzerinde olup 200 bin TL'yi aşmayan kartlar: dönem borcunun %30'u.",
+    "Limiti 200 bin TL'nin üzerinde olan kartlar: dönem borcunun %40'ı.",
+    "Karar sayısı 11605."
+   ],
+   "alinti": "limiti yüz bin Türk Lirası ve altında olan kredi kartları için dönem borcunun yüzde yirmisi, yüz bin Türk Lirasının üzerinde olup iki yüz bin Türk Lirasını aşmayan kredi kartları için dönem borcunun yüzde otuzu"
+  }
+ ],
+ "elenen": [
+  {
+   "id": "bddk-duyuru-4313",
+   "neden": "Kurum başkanının komisyon bilgilendirmesi"
+  },
+  {
+   "id": "bddk-duyuru-4319",
+   "neden": "kamuoyunu yanıltıcı paylaşımlara yanıt"
+  }
+ ]
+}
