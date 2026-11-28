@@ -239,9 +239,14 @@ def main():
 
     # 3) belge belge
     for k in sira:
-        if k.get("kr") is None:         # indirilemedi (geçici ağ hatası): bekleyene yazma, sonraki koşu yeniden dener
-            print(f"  ~ {k['id']} henüz indirilemedi ({k.get('not', 'neden bilinmiyor')}) — sonraki koşuda yeniden denenecek")
-            continue
+        # Bulutta önbellek koşudan koşuya taşınmaz: önceki koşuda görülüp işlenememiş belgenin metni burada yoktur → yeniden indir
+        if k.get("kr") is None or not (O.METIN / f"{k['id']}.txt").exists():
+            for d in (T.HAM, T.METIN):
+                d.mkdir(parents=True, exist_ok=True)
+            if T.isle(k, zorla=True) == "hata" or k.get("kr") is None:
+                # geçici ağ hatası: bekleyene yazma, sonraki koşu yeniden dener
+                print(f"  ~ {k['id']} indirilemedi ({k.get('not', 'neden bilinmiyor')}) — sonraki koşuda yeniden denenecek")
+                continue
         govde, kesik = belge_metni(k)
         if len(govde) < 80:
             veri, aciklama = None, "belge metni çıkarılamadı (taranmış PDF olabilir)"
